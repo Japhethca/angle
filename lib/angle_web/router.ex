@@ -1,6 +1,9 @@
 defmodule AngleWeb.Router do
   use AngleWeb, :router
 
+  # Import the auth plugs
+  import AngleWeb.Plugs.Auth
+
   pipeline :graphql do
     plug AshGraphql.Plug
   end
@@ -12,17 +15,29 @@ defmodule AngleWeb.Router do
     plug :put_root_layout, html: {AngleWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    # Add user loading to all browser requests
+    plug :load_current_user
+    plug Inertia.Plug
   end
 
   pipeline :api do
     plug :accepts, ["json"]
   end
 
-  scope "/api/json" do
+  # New authentication pipelines
+  pipeline :require_auth do
+    plug :ensure_authenticated
+  end
+
+  pipeline :api_auth do
+    plug :validate_api_token
+  end
+
+  scope "/api/v1" do
     pipe_through [:api]
 
-    forward "/swaggerui", OpenApiSpex.Plug.SwaggerUI,
-      path: "/api/json/open_api",
+    forward "/docs", OpenApiSpex.Plug.SwaggerUI,
+      path: "/api/v1/open_api",
       default_model_expand_depth: 4
 
     forward "/", AngleWeb.AshJsonApiRouter
@@ -39,10 +54,34 @@ defmodule AngleWeb.Router do
     forward "/", Absinthe.Plug, schema: Module.concat(["AngleWeb.GraphqlSchema"])
   end
 
+  # Public routes
   scope "/", AngleWeb do
     pipe_through :browser
 
     get "/", PageController, :home
+  end
+
+  # Auth routes (guest only)
+  scope "/auth", AngleWeb do
+    pipe_through :browser
+
+    get "/login", AuthController, :login
+    post "/login", AuthController, :do_login
+    get "/register", AuthController, :register
+    post "/register", AuthController, :do_register
+    get "/forgot-password", AuthController, :forgot_password
+    post "/forgot-password", AuthController, :do_forgot_password
+    get "/reset-password/:token", AuthController, :reset_password
+    post "/reset-password", AuthController, :do_reset_password
+    post "/logout", AuthController, :logout
+  end
+
+  # Protected routes
+  scope "/", AngleWeb do
+    pipe_through [:browser, :require_auth]
+
+    get "/dashboard", DashboardController, :index
+    # get "/profile", ProfileController, :show
   end
 
   # Other scopes may use custom stacks.

@@ -3,10 +3,7 @@ config :ash, policies: [show_policy_breakdowns?: true]
 
 # Configure your database
 config :angle, Angle.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  database: "angle_dev",
+  url: System.get_env("DATABASE_URL"),
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10

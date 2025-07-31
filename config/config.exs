@@ -7,6 +7,15 @@
 # General application configuration
 import Config
 
+config :inertia,
+  endpoint: AngleWeb.Endpoint,
+  shared: %{
+    flash: :flash,
+    csrf_token: fn _conn ->
+      Phoenix.HTML.Tag.csrf_token_value()
+    end
+  }
+
 config :ex_cldr, default_backend: Angle.Cldr
 config :ash_oban, pro?: false
 
@@ -84,7 +93,7 @@ config :spark,
 config :angle,
   ecto_repos: [Angle.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [Angle.Accounts]
+  ash_domains: [Angle.Bidding, Angle.Catalog, Angle.Inventory, Angle.Accounts]
 
 # Configures the endpoint
 config :angle, AngleWeb.Endpoint,
@@ -108,12 +117,12 @@ config :angle, Angle.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure esbuild (the version is required)
 config :esbuild,
-  version: "0.25.4",
+  version: "0.21.5",
   angle: [
     args:
-      ~w(js/app.js --bundle --target=es2022 --outdir=../priv/static/assets/js --external:/fonts/* --external:/images/* --alias:@=.),
+      ~w(js/app.jsx --bundle --chunk-names=chunks/[name]-[hash] --splitting --format=esm  --target=es2020 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
     cd: Path.expand("../assets", __DIR__),
-    env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
+    env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]
 
 # Configure tailwind (the version is required)

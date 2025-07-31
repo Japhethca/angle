@@ -8,5 +8,7 @@ defmodule Angle.Accounts do
   resources do
     resource Angle.Accounts.Token
     resource Angle.Accounts.User
+    resource Angle.Accounts.UserRole
+    resource Angle.Accounts.Role
   end
 end
