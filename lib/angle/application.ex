@@ -19,6 +19,9 @@ defmodule Angle.Application do
       {Phoenix.PubSub, name: Angle.PubSub},
       # Start a worker by calling: Angle.Worker.start_link(arg)
       # {Angle.Worker, arg},
+      # Start the SSR process pool
+      # You must specify a `path` option to locate the directory where the `ssr.js` file lives.
+      {Inertia.SSR, path: Path.join([Application.app_dir(:angle), "priv"])},
       # Start to serve requests, typically the last entry
       AngleWeb.Endpoint,
       {Absinthe.Subscription, AngleWeb.Endpoint},

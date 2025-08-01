@@ -24,6 +24,7 @@ config :angle, AngleWeb.Endpoint,
   secret_key_base: "fHR59CxegCaUFYPgnmaJowYDZHBMTQuzKFfyTeYS0E5vKza0t6QRBtY6/1Kb5JLl",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:angle, ~w(--sourcemap=inline --watch)]},
+    ssr: {Esbuild, :install_and_run, [:ssr, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:angle, ~w(--watch)]}
   ]
 

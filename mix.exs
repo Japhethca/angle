@@ -98,10 +98,11 @@ defmodule Angle.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ash.setup --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind angle", "esbuild angle"],
+      "assets.build": ["tailwind angle", "esbuild angle", "esbuild ssr"],
       "assets.deploy": [
         "tailwind angle --minify",
         "esbuild angle --minify",
+        "esbuild ssr",
         "phx.digest"
       ]
     ]
