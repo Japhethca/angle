@@ -73,6 +73,7 @@ defmodule AngleWeb.Router do
     post "/forgot-password", AuthController, :do_forgot_password
     get "/reset-password/:token", AuthController, :reset_password
     post "/reset-password", AuthController, :do_reset_password
+    get "/confirm-new-user/:token", AuthController, :confirm_new_user
     post "/logout", AuthController, :logout
   end
 

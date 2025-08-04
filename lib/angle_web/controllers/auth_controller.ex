@@ -126,6 +126,73 @@ defmodule AngleWeb.AuthController do
     end
   end
 
+  def confirm_new_user(conn, %{"token" => token}) do
+    # Extract user ID from JWT token subject
+    with {:ok, %{"sub" => subject}} <- decode_jwt_payload(token),
+         {:ok, user_id} <- extract_user_id_from_subject(subject),
+         {:ok, user} <- Ash.get(Angle.Accounts.User, user_id, domain: Angle.Accounts),
+         {:ok, confirmed_user} <- Ash.update(user, %{confirm: token}, 
+                                           action: :confirm, 
+                                           domain: Angle.Accounts, 
+                                           authorize?: false) do
+      # Successfully confirmed - log in the user
+      conn
+      |> put_session(:current_user_id, confirmed_user.id)
+      |> put_flash(:info, "Your account has been confirmed successfully! Welcome!")
+      |> redirect(to: ~p"/dashboard")
+    else
+      {:error, :invalid_token} ->
+        render_confirmation_error(conn, "Invalid confirmation link")
+        
+      {:error, :expired_token} ->
+        render_confirmation_error(conn, "Confirmation link has expired")
+        
+      {:error, %Ash.Error.Invalid{}} ->
+        render_confirmation_error(conn, "Invalid or expired confirmation link")
+        
+      {:error, _error} ->
+        render_confirmation_error(conn, "Invalid or expired confirmation link")
+        
+      _ ->
+        render_confirmation_error(conn, "An error occurred during confirmation")
+    end
+  end
+
+  def confirm_new_user(conn, _params) do
+    render_confirmation_error(conn, "Invalid confirmation link")
+  end
+
+  # Helper function to decode JWT token payload
+  defp decode_jwt_payload(token) do
+    case String.split(token, ".") do
+      [_header, payload, _signature] ->
+        try do
+          # Add padding if needed
+          padded_payload = payload <> String.duplicate("=", rem(4 - rem(String.length(payload), 4), 4))
+          decoded = Base.decode64!(padded_payload)
+          {:ok, Jason.decode!(decoded)}
+        rescue
+          _ -> {:error, :invalid_token}
+        end
+      _ ->
+        {:error, :invalid_token}
+    end
+  end
+
+  # Helper function to extract user ID from JWT subject
+  defp extract_user_id_from_subject("user?id=" <> user_id), do: {:ok, user_id}
+  defp extract_user_id_from_subject(_), do: {:error, :invalid_token}
+
+  # Helper function to render confirmation errors
+  defp render_confirmation_error(conn, message) do
+    conn
+    |> put_flash(:error, "#{message}. Please try registering again.")
+    |> render_inertia("auth/confirm-new-user", %{
+      error: true,
+      message: message
+    })
+  end
+
   def logout(conn, _params) do
     conn
     |> clear_session()
