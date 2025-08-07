@@ -2,6 +2,7 @@ defmodule Angle.Inventory.Item do
   use Ash.Resource,
     domain: Angle.Inventory,
     data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer],
     extensions: [AshJsonApi.Resource]
 
   alias Angle.Inventory.Item.ItemStatus
@@ -68,6 +69,9 @@ defmodule Angle.Inventory.Item do
       description "Create a new item in draft status"
 
       accept @draft_fields
+
+      # Auto-assign ownership to current user
+      change set_attribute(:created_by_id, actor(:id))
     end
 
     update :update_draft do
@@ -93,6 +97,84 @@ defmodule Angle.Inventory.Item do
       #   {:ok, query}
       # end
       # prepare build())
+    end
+  end
+
+  policies do
+    # Reading items - published items are public, own items are visible to owner
+    policy action_type(:read) do
+      # Public published items
+      authorize_if expr(publication_status == :published)
+
+      # Own items
+      authorize_if expr(created_by_id == ^actor(:id))
+    end
+
+    # Creating items - requires create_items permission
+    policy action_type([:create]) do
+      authorize_if expr(
+                     exists(
+                       actor.user_roles,
+                       exists(role.role_permissions, permission.name == "create_items")
+                     )
+                   )
+    end
+
+    # Updating items - requires update_own_items permission and ownership
+    policy action_type([:update]) do
+      authorize_if expr(
+                     created_by_id == ^actor(:id) and
+                       exists(
+                         actor.user_roles,
+                         exists(role.role_permissions, permission.name == "update_own_items")
+                       )
+                   )
+
+      # Admins can update all items
+      authorize_if expr(
+                     exists(
+                       actor.user_roles,
+                       exists(role.role_permissions, permission.name == "manage_all_items")
+                     )
+                   )
+    end
+
+    # Destroying items - requires delete_own_items permission and ownership
+    policy action_type([:destroy]) do
+      authorize_if expr(
+                     created_by_id == ^actor(:id) and
+                       exists(
+                         actor.user_roles,
+                         exists(role.role_permissions, permission.name == "delete_own_items")
+                       )
+                   )
+
+      # Admins can delete all items
+      authorize_if expr(
+                     exists(
+                       actor.user_roles,
+                       exists(role.role_permissions, permission.name == "manage_all_items")
+                     )
+                   )
+    end
+
+    # Publishing items - requires publish_items permission and ownership
+    policy action(:publish_item) do
+      authorize_if expr(
+                     created_by_id == ^actor(:id) and
+                       exists(
+                         actor.user_roles,
+                         exists(role.role_permissions, permission.name == "publish_items")
+                       )
+                   )
+
+      # Admins can publish all items
+      authorize_if expr(
+                     exists(
+                       actor.user_roles,
+                       exists(role.role_permissions, permission.name == "manage_all_items")
+                     )
+                   )
     end
   end
 

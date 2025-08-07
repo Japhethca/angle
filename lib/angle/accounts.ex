@@ -10,5 +10,7 @@ defmodule Angle.Accounts do
     resource Angle.Accounts.User
     resource Angle.Accounts.UserRole
     resource Angle.Accounts.Role
+    resource Angle.Accounts.Permission
+    resource Angle.Accounts.RolePermission
   end
 end

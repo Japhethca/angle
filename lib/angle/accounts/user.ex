@@ -1,5 +1,6 @@
 defmodule Angle.Accounts.User do
   require Ash.Resource.Preparation.Builtins
+  require Ash.Query
 
   use Ash.Resource,
     otp_app: :angle,
@@ -63,6 +64,8 @@ defmodule Angle.Accounts.User do
     define :password_reset_with_password
     define :get_by_email
     define :reset_password_with_token
+    define :assign_role
+    define :remove_role
   end
 
   actions do
@@ -240,6 +243,103 @@ defmodule Angle.Accounts.User do
       # Generates an authentication token for the user
       change AshAuthentication.GenerateTokenChange
     end
+
+    update :assign_role do
+      description "Assign a role to the user"
+      accept []
+      require_atomic? false
+
+      argument :role_name, :string do
+        allow_nil? false
+        description "The name of the role to assign"
+      end
+
+      argument :expires_at, :utc_datetime_usec do
+        description "When the role assignment expires (optional)"
+      end
+
+      argument :granted_by_id, :uuid do
+        description "ID of the user granting this role (optional)"
+      end
+
+      change fn changeset, %{arguments: %{role_name: role_name} = args} ->
+        user_id = Ash.Changeset.get_attribute(changeset, :id)
+
+        # Find the role by name
+        case Ash.Query.filter(Angle.Accounts.Role, expr(name == ^role_name))
+             |> Ash.read_one(domain: Angle.Accounts) do
+          {:ok, role} ->
+            # Create UserRole record
+            user_role_attrs = %{
+              user_id: user_id,
+              role_id: role.id,
+              expires_at: Map.get(args, :expires_at),
+              granted_by_id: Map.get(args, :granted_by_id)
+            }
+
+            case Ash.create(Angle.Accounts.UserRole, user_role_attrs, domain: Angle.Accounts) do
+              {:ok, _user_role} ->
+                changeset
+
+              {:error, _} ->
+                Ash.Changeset.add_error(changeset,
+                  field: :role_name,
+                  message: "Role assignment failed"
+                )
+            end
+
+          {:error, _} ->
+            Ash.Changeset.add_error(changeset, field: :role_name, message: "Role not found")
+        end
+      end
+    end
+
+    update :remove_role do
+      description "Remove a role from the user"
+      accept []
+      require_atomic? false
+
+      argument :role_name, :string do
+        allow_nil? false
+        description "The name of the role to remove"
+      end
+
+      change fn changeset, %{arguments: %{role_name: role_name}} ->
+        user_id = Ash.Changeset.get_attribute(changeset, :id)
+
+        case Ash.Query.filter(Angle.Accounts.Role, expr(name == ^role_name))
+             |> Ash.read_one(domain: Angle.Accounts) do
+          {:ok, role} ->
+            # Find and remove existing UserRole
+            case Ash.Query.filter(
+                   Angle.Accounts.UserRole,
+                   expr(user_id == ^user_id and role_id == ^role.id)
+                 )
+                 |> Ash.read_one(domain: Angle.Accounts) do
+              {:ok, user_role} ->
+                case Ash.destroy(user_role, domain: Angle.Accounts) do
+                  :ok ->
+                    changeset
+
+                  {:error, _} ->
+                    Ash.Changeset.add_error(changeset,
+                      field: :role_name,
+                      message: "Role removal failed"
+                    )
+                end
+
+              _ ->
+                Ash.Changeset.add_error(changeset,
+                  field: :role_name,
+                  message: "User does not have this role"
+                )
+            end
+
+          {:error, _} ->
+            Ash.Changeset.add_error(changeset, field: :role_name, message: "Role not found")
+        end
+      end
+    end
   end
 
   policies do
@@ -247,11 +347,7 @@ defmodule Angle.Accounts.User do
       authorize_if always()
     end
 
-    # Allow reading users (for loading current user)
-    policy action(:read) do
-      authorize_if always()
-    end
-
+    # Authentication actions - allow everyone
     policy action(:register_with_password) do
       authorize_if always()
     end
@@ -265,10 +361,6 @@ defmodule Angle.Accounts.User do
     end
 
     policy action(:get_by_subject) do
-      authorize_if always()
-    end
-
-    policy action(:change_password) do
       authorize_if always()
     end
 
@@ -291,6 +383,27 @@ defmodule Angle.Accounts.User do
     policy action(:password_reset_with_password) do
       authorize_if always()
     end
+
+    # User data access - restricted
+    policy action(:read) do
+      # Users can only read themselves
+      authorize_if expr(id == ^actor(:id))
+    end
+
+    policy action_type([:update]) do
+      # Users can only update themselves
+      authorize_if expr(id == ^actor(:id))
+    end
+
+    # Role management - requires manage_users permission
+    policy action([:assign_role, :remove_role]) do
+      authorize_if expr(
+                     exists(
+                       user_roles,
+                       exists(role.role_permissions, permission.name == "manage_users")
+                     )
+                   )
+    end
   end
 
   attributes do
@@ -298,6 +411,139 @@ defmodule Angle.Accounts.User do
     attribute :email, :ci_string, allow_nil?: false, public?: true
     attribute :hashed_password, :string, allow_nil?: false, sensitive?: true
     attribute :confirmed_at, :utc_datetime_usec
+  end
+
+  relationships do
+    has_many :user_roles, Angle.Accounts.UserRole do
+      destination_attribute :user_id
+      public? true
+    end
+
+    many_to_many :roles, Angle.Accounts.Role do
+      through Angle.Accounts.UserRole
+      destination_attribute_on_join_resource :role_id
+      source_attribute_on_join_resource :user_id
+      public? true
+    end
+  end
+
+  calculations do
+    calculate :has_role?, :boolean do
+      description "Check if user has a specific role"
+
+      argument :role_name, :string do
+        allow_nil? false
+      end
+
+      calculation fn records, %{role_name: role_name} ->
+        user_ids = Enum.map(records, & &1.id)
+
+        # Get role by name
+        case Ash.Query.filter(Angle.Accounts.Role, expr(name == ^role_name))
+             |> Ash.read_one(domain: Angle.Accounts) do
+          {:ok, role} ->
+            # Find which users have this role
+            now = DateTime.utc_now()
+
+            user_roles =
+              Ash.Query.filter(
+                Angle.Accounts.UserRole,
+                expr(
+                  user_id in ^user_ids and
+                    role_id == ^role.id and
+                    (is_nil(expires_at) or expires_at > ^now)
+                )
+              )
+              |> Ash.read!(domain: Angle.Accounts)
+
+            users_with_role = MapSet.new(user_roles, & &1.user_id)
+
+            Enum.map(records, fn record ->
+              MapSet.member?(users_with_role, record.id)
+            end)
+
+          {:error, _} ->
+            Enum.map(records, fn _ -> false end)
+        end
+      end
+    end
+
+    calculate :active_roles, {:array, :string} do
+      description "Get list of user's active role names"
+
+      calculation fn records, _context ->
+        user_ids = Enum.map(records, & &1.id)
+
+        # Get active user roles with role names
+        now = DateTime.utc_now()
+
+        user_roles =
+          Ash.Query.filter(
+            Angle.Accounts.UserRole,
+            expr(
+              user_id in ^user_ids and
+                (is_nil(expires_at) or expires_at > ^now)
+            )
+          )
+          |> Ash.Query.load(:role)
+          |> Ash.read!(domain: Angle.Accounts)
+
+        # Group by user_id
+        roles_by_user = Enum.group_by(user_roles, & &1.user_id)
+
+        Enum.map(records, fn record ->
+          case Map.get(roles_by_user, record.id, []) do
+            user_roles when is_list(user_roles) ->
+              Enum.map(user_roles, fn ur -> ur.role.name end)
+
+            _ ->
+              []
+          end
+        end)
+      end
+    end
+
+    calculate :has_permission?, :boolean do
+      description "Check if user has a specific permission"
+
+      argument :permission_name, :string do
+        allow_nil? false
+      end
+
+      calculation fn records, %{permission_name: permission_name} ->
+        user_ids = Enum.map(records, & &1.id)
+
+        # Get user roles with permissions
+        now = DateTime.utc_now()
+
+        user_roles =
+          Ash.Query.filter(
+            Angle.Accounts.UserRole,
+            expr(
+              user_id in ^user_ids and
+                (is_nil(expires_at) or expires_at > ^now)
+            )
+          )
+          |> Ash.Query.load(role: :permissions)
+          |> Ash.read!(domain: Angle.Accounts)
+
+        # Extract all permissions for each user
+        users_with_permission =
+          user_roles
+          |> Enum.group_by(& &1.user_id)
+          |> Enum.filter(fn {_user_id, roles} ->
+            roles
+            |> Enum.flat_map(fn ur -> ur.role.permissions end)
+            |> Enum.any?(fn perm -> perm.name == permission_name end)
+          end)
+          |> Enum.map(fn {user_id, _} -> user_id end)
+          |> MapSet.new()
+
+        Enum.map(records, fn record ->
+          MapSet.member?(users_with_permission, record.id)
+        end)
+      end
+    end
   end
 
   identities do

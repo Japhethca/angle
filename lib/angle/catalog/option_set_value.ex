@@ -2,6 +2,7 @@ defmodule Angle.Catalog.OptionSetValue do
   use Ash.Resource,
     domain: Angle.Catalog,
     data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer],
     extensions: [AshGraphql.Resource, AshJsonApi.Resource]
 
   json_api do
@@ -34,6 +35,18 @@ defmodule Angle.Catalog.OptionSetValue do
 
   actions do
     defaults [:read, :destroy, create: :*, update: :*]
+  end
+
+  policies do
+    # Public read access to catalog data
+    policy action_type(:read) do
+      authorize_if always()
+    end
+
+    # Admin-only write access to catalog management
+    policy action_type([:create, :update, :destroy]) do
+      authorize_if expr(exists(actor.user_roles, role.name == "admin"))
+    end
   end
 
   attributes do

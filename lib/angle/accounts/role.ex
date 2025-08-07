@@ -50,6 +50,27 @@ defmodule Angle.Accounts.Role do
     end
   end
 
+  relationships do
+    has_many :user_roles, Angle.Accounts.UserRole do
+      destination_attribute :role_id
+      public? true
+    end
+
+    many_to_many :users, Angle.Accounts.User do
+      through Angle.Accounts.UserRole
+      destination_attribute_on_join_resource :user_id
+      source_attribute_on_join_resource :role_id
+      public? true
+    end
+
+    many_to_many :permissions, Angle.Accounts.Permission do
+      through Angle.Accounts.RolePermission
+      destination_attribute_on_join_resource :permission_id
+      source_attribute_on_join_resource :role_id
+      public? true
+    end
+  end
+
   identities do
     identity :name_scope_key, [:name, :scope]
   end

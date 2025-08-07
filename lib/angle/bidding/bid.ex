@@ -2,6 +2,7 @@ defmodule Angle.Bidding.Bid do
   use Ash.Resource,
     domain: Angle.Bidding,
     data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer],
     extensions: [AshGraphql.Resource, AshJsonApi.Resource]
 
   require Ash.Resource.Change.Builtins
@@ -42,12 +43,12 @@ defmodule Angle.Bidding.Bid do
     create :make_bid do
       primary? true
       description "Create a new bid for an auction item"
-      accept [:amount, :bid_type, :item_id, :user_id]
+      accept [:amount, :bid_type, :item_id]
 
       validate present([:amount]), message: "Bid amount is required"
-      # validate present([:amount]), message: "Bid amount is required"
-      # validate present([:bid_type]), message: "Bid type is required"
-      # validate present([:item_id]), message: "Item ID is required"
+
+      # Auto-assign the bidder to current user
+      change set_attribute(:user_id, actor(:id))
 
       change {ValidateBidIsHigherThanCurrentPrice, []}
 
@@ -55,6 +56,39 @@ defmodule Angle.Bidding.Bid do
                IO.puts("Validating bid amount against current price...")
                changeset
              end)
+    end
+  end
+
+  policies do
+    # Reading bids - requires view_bids permission
+    policy action_type(:read) do
+      authorize_if expr(
+                     exists(
+                       actor.user_roles,
+                       exists(role.role_permissions, permission.name == "view_bids")
+                     )
+                   )
+    end
+
+    # Creating bids - requires place_bids permission and bidding as yourself
+    policy action(:make_bid) do
+      authorize_if expr(
+                     user_id == ^actor(:id) and
+                       exists(
+                         actor.user_roles,
+                         exists(role.role_permissions, permission.name == "place_bids")
+                       )
+                   )
+    end
+
+    # Managing bids - admin only
+    policy action_type([:update, :destroy]) do
+      authorize_if expr(
+                     exists(
+                       actor.user_roles,
+                       exists(role.role_permissions, permission.name == "manage_bids")
+                     )
+                   )
     end
   end
 

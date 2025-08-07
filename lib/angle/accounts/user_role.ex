@@ -17,6 +17,11 @@ defmodule Angle.Accounts.UserRole do
   end
 
   attributes do
+    attribute :user_id, :uuid do
+      allow_nil? false
+      public? true
+    end
+
     attribute :role_id, :uuid do
       allow_nil? false
       public? true
@@ -46,6 +51,13 @@ defmodule Angle.Accounts.UserRole do
     belongs_to :user, Angle.Accounts.User do
       allow_nil? false
       public? true
+      source_attribute :user_id
+    end
+
+    belongs_to :role, Angle.Accounts.Role do
+      allow_nil? false
+      public? true
+      source_attribute :role_id
     end
 
     belongs_to :granted_by, Angle.Accounts.User do

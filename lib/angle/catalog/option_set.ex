@@ -2,6 +2,7 @@ defmodule Angle.Catalog.OptionSet do
   use Ash.Resource,
     domain: Angle.Catalog,
     data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer],
     extensions: [AshGraphql.Resource, AshJsonApi.Resource, AshAdmin.Resource],
     primary_read_warning?: false
 
@@ -83,6 +84,18 @@ defmodule Angle.Catalog.OptionSet do
       validate present([:name, :slug])
       validate attribute_does_not_equal(:name, "")
       validate attribute_does_not_equal(:slug, "")
+    end
+  end
+
+  policies do
+    # Public read access to catalog data
+    policy action_type(:read) do
+      authorize_if always()
+    end
+
+    # Admin-only write access to catalog management
+    policy action_type([:create, :update, :destroy]) do
+      authorize_if expr(exists(actor.user_roles, role.name == "admin"))
     end
   end
 

@@ -33,18 +33,24 @@ defmodule AngleWeb.Router do
     plug :validate_api_token
   end
 
-  scope "/api/v1" do
+  # Public API endpoints (for catalog browsing, etc.)
+  scope "/api/v1/public" do
     pipe_through [:api]
 
     forward "/docs", OpenApiSpex.Plug.SwaggerUI,
       path: "/api/v1/open_api",
       default_model_expand_depth: 4
+  end
+
+  # Protected API endpoints (require authentication)
+  scope "/api/v1" do
+    pipe_through [:api, :api_auth]
 
     forward "/", AngleWeb.AshJsonApiRouter
   end
 
   scope "/gql" do
-    pipe_through [:graphql]
+    pipe_through [:graphql, :api_auth]
 
     forward "/playground", Absinthe.Plug.GraphiQL,
       schema: Module.concat(["AngleWeb.GraphqlSchema"]),
