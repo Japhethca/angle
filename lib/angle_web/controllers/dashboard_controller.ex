@@ -3,7 +3,7 @@ defmodule AngleWeb.DashboardController do
 
   def index(conn, _params) do
     current_user = conn.assigns.current_user
-    
+
     # Fetch user-specific data
     dashboard_data = %{
       stats: get_user_stats(current_user),

@@ -7,10 +7,11 @@ defmodule AngleWeb.AuthController do
 
   def do_login(conn, %{"email" => email, "password" => password}) do
     require Logger
-    
+
     case Angle.Accounts.User.sign_in_with_password(%{email: email, password: password}) do
       {:ok, %{user: user, metadata: %{token: token}}} ->
         Logger.error("DEBUG AUTH: Login successful with token, user ID: #{inspect(user.id)}")
+
         conn
         |> put_session(:current_user_id, user.id)
         |> put_session(:auth_token, token)
@@ -19,6 +20,7 @@ defmodule AngleWeb.AuthController do
 
       {:ok, user} ->
         Logger.error("DEBUG AUTH: Login successful without token, user ID: #{inspect(user.id)}")
+
         conn
         |> put_session(:current_user_id, user.id)
         |> put_flash(:info, "Successfully signed in!")
@@ -26,6 +28,7 @@ defmodule AngleWeb.AuthController do
 
       {:error, err} ->
         Logger.error("DEBUG AUTH: Login failed: #{inspect(err)}")
+
         conn
         |> put_flash(:error, "Invalid email or password")
         |> redirect(to: ~p"/auth/login")
@@ -127,34 +130,17 @@ defmodule AngleWeb.AuthController do
   end
 
   def confirm_new_user(conn, %{"token" => token}) do
-    # Extract user ID from JWT token subject
-    with {:ok, %{"sub" => subject}} <- decode_jwt_payload(token),
-         {:ok, user_id} <- extract_user_id_from_subject(subject),
-         {:ok, user} <- Ash.get(Angle.Accounts.User, user_id, domain: Angle.Accounts),
-         {:ok, confirmed_user} <- Ash.update(user, %{confirm: token}, 
-                                           action: :confirm, 
-                                           domain: Angle.Accounts, 
-                                           authorize?: false) do
-      # Successfully confirmed - log in the user
-      conn
-      |> put_session(:current_user_id, confirmed_user.id)
-      |> put_flash(:info, "Your account has been confirmed successfully! Welcome!")
-      |> redirect(to: ~p"/dashboard")
-    else
-      {:error, :invalid_token} ->
-        render_confirmation_error(conn, "Invalid confirmation link")
-        
-      {:error, :expired_token} ->
-        render_confirmation_error(conn, "Confirmation link has expired")
-        
-      {:error, %Ash.Error.Invalid{}} ->
-        render_confirmation_error(conn, "Invalid or expired confirmation link")
-        
-      {:error, _error} ->
-        render_confirmation_error(conn, "Invalid or expired confirmation link")
-        
+    # Check if user is already logged in
+    case conn.assigns[:current_user] do
+      %{confirmed_at: confirmed_at} when not is_nil(confirmed_at) ->
+        # User is already logged in and confirmed
+        conn
+        |> put_flash(:info, "Your account is already confirmed!")
+        |> redirect(to: ~p"/dashboard")
+
       _ ->
-        render_confirmation_error(conn, "An error occurred during confirmation")
+        # Proceed with confirmation process
+        confirm_user_with_token(conn, token)
     end
   end
 
@@ -162,26 +148,112 @@ defmodule AngleWeb.AuthController do
     render_confirmation_error(conn, "Invalid confirmation link")
   end
 
-  # Helper function to decode JWT token payload
-  defp decode_jwt_payload(token) do
-    case String.split(token, ".") do
-      [_header, payload, _signature] ->
-        try do
-          # Add padding if needed
-          padded_payload = payload <> String.duplicate("=", rem(4 - rem(String.length(payload), 4), 4))
-          decoded = Base.decode64!(padded_payload)
-          {:ok, Jason.decode!(decoded)}
-        rescue
-          _ -> {:error, :invalid_token}
-        end
+  # Helper function to handle the actual confirmation process
+  defp confirm_user_with_token(conn, token) do
+    with {:ok, claims} <- verify_confirmation_token(token),
+         {:ok, user_id} <- extract_user_id_from_claims(claims),
+         {:ok, user} <- Ash.get(Angle.Accounts.User, user_id, domain: Angle.Accounts),
+         {:ok, confirmed_user} <- confirm_user_account(user, token) do
+      # Successfully confirmed - log in the user and generate new session
+      conn
+      |> put_session(:current_user_id, confirmed_user.id)
+      |> put_flash(:info, "Your account has been confirmed successfully! Welcome!")
+      |> redirect(to: ~p"/dashboard")
+    else
+      {:error, :invalid_token} ->
+        render_confirmation_error(conn, "Invalid confirmation link")
+
+      {:error, :expired_token} ->
+        render_confirmation_error(conn, "Confirmation link has expired")
+
+      {:error, :token_verification_failed} ->
+        render_confirmation_error(conn, "Invalid confirmation link")
+
+      {:error, :token_already_used} ->
+        render_confirmation_error(conn, "This confirmation link has already been used")
+
+      {:error, :confirmation_failed} ->
+        render_confirmation_error(conn, "Account confirmation failed")
+
+      {:error, %Ash.Error.Invalid{}} ->
+        render_confirmation_error(conn, "Invalid or expired confirmation link")
+
+      {:error, %Ash.Error.Query.NotFound{}} ->
+        render_confirmation_error(conn, "User account not found")
+
+      {:error, _error} ->
+        render_confirmation_error(conn, "Invalid or expired confirmation link")
+
       _ ->
-        {:error, :invalid_token}
+        render_confirmation_error(conn, "An error occurred during confirmation")
     end
   end
 
-  # Helper function to extract user ID from JWT subject
-  defp extract_user_id_from_subject("user?id=" <> user_id), do: {:ok, user_id}
-  defp extract_user_id_from_subject(_), do: {:error, :invalid_token}
+  # Helper function to verify confirmation token using AshAuthentication
+  defp verify_confirmation_token(token) do
+    # Use AshAuthentication's verify function for proper signature validation
+    case AshAuthentication.Jwt.verify(token, Angle.Accounts.User) do
+      {:ok, claims} when is_map(claims) ->
+        validate_confirmation_claims(claims)
+
+      {:error, :expired} ->
+        {:error, :expired_token}
+
+      {:error, _reason} ->
+        {:error, :token_verification_failed}
+    end
+  end
+
+  # Helper function to validate that claims are for confirmation
+  defp validate_confirmation_claims(%{"act" => "confirm"} = claims), do: {:ok, claims}
+  defp validate_confirmation_claims(_claims), do: {:error, :invalid_token}
+
+  # Helper function to extract user ID from JWT claims
+  defp extract_user_id_from_claims(%{"sub" => "user?id=" <> user_id}), do: {:ok, user_id}
+  defp extract_user_id_from_claims(_), do: {:error, :invalid_token}
+
+  # Helper function to confirm user account with better error handling
+  defp confirm_user_account(user, token) do
+    case Ash.update(user, %{confirm: token},
+           action: :confirm,
+           domain: Angle.Accounts,
+           authorize?: false
+         ) do
+      {:ok, confirmed_user} ->
+        {:ok, confirmed_user}
+
+      {:error, %Ash.Error.Invalid{errors: errors}} ->
+        # Handle specific validation errors
+        case find_token_error(errors) do
+          :token_already_used -> {:error, :token_already_used}
+          :invalid_token -> {:error, :invalid_token}
+          _ -> {:error, :confirmation_failed}
+        end
+
+      {:error, error} ->
+        {:error, error}
+    end
+  end
+
+  # Helper function to find token-specific errors in Ash errors
+  defp find_token_error(errors) when is_list(errors) do
+    errors
+    |> Enum.find_value(:confirmation_failed, fn error ->
+      case error do
+        %{message: message} when is_binary(message) ->
+          cond do
+            String.contains?(message, "already") -> :token_already_used
+            String.contains?(message, "invalid") -> :invalid_token
+            true -> nil
+          end
+
+        _ ->
+          nil
+      end
+    end)
+  end
+
+  defp find_token_error(_), do: :confirmation_failed
 
   # Helper function to render confirmation errors
   defp render_confirmation_error(conn, message) do

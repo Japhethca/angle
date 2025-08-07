@@ -29,6 +29,12 @@ export function MainNav() {
                 >
                   Profile
                 </Link>
+                <a
+                  href="/dev/dashboard"
+                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md"
+                >
+                  Developer Dashboard
+                </a>
               </div>
             )}
           </div>

@@ -36,3 +36,25 @@ npm-debug.log
 /assets/node_modules/
 .env
 /priv/ssr.js
+
+# Claude Code runtime configuration
+.claude/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Development logs
+*.log
