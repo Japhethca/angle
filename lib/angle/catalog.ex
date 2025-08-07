@@ -7,5 +7,7 @@ defmodule Angle.Catalog do
 
   resources do
     resource Angle.Catalog.Category
+    resource Angle.Catalog.OptionSet
+    resource Angle.Catalog.OptionSetValue
   end
 end
