@@ -278,8 +278,7 @@ defmodule AngleWeb.AuthController do
     |> Ash.Error.to_error_class()
     |> case do
       %Ash.Error.Invalid{errors: errors} ->
-        errors
-        |> Enum.map(fn error ->
+        Enum.map_join(errors, ", ", fn error ->
           case error do
             %Ash.Error.Changes.InvalidAttribute{field: field, message: message} ->
               "#{field}: #{message}"
@@ -291,7 +290,6 @@ defmodule AngleWeb.AuthController do
               Exception.message(error)
           end
         end)
-        |> Enum.join(", ")
 
       error ->
         Exception.message(error)

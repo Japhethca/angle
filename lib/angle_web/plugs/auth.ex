@@ -40,43 +40,41 @@ defmodule AngleWeb.Plugs.Auth do
     auth_token = get_session(conn, :auth_token)
     Logger.error("DEBUG AUTH: auth_token from session = #{inspect(auth_token != nil)}")
 
-    cond do
-      auth_token != nil ->
-        Logger.error("DEBUG AUTH: Attempting to load user with JWT token")
+    if auth_token != nil do
+      Logger.error("DEBUG AUTH: Attempting to load user with JWT token")
 
-        case Accounts.User.get_by_subject(%{subject: auth_token}) do
-          {:ok, user} ->
-            Logger.error("DEBUG AUTH: Successfully loaded user via token: #{user.email}")
+      case Accounts.User.get_by_subject(%{subject: auth_token}) do
+        {:ok, user} ->
+          Logger.error("DEBUG AUTH: Successfully loaded user via token: #{user.email}")
 
-            # Load user with roles and permissions
-            user = user |> Ash.load!([:active_roles, :roles])
-            user_permissions = get_user_permissions(user)
+          # Load user with roles and permissions
+          user = user |> Ash.load!([:active_roles, :roles])
+          user_permissions = get_user_permissions(user)
 
-            conn
-            |> assign(:current_user, user)
-            |> assign_prop(:auth, %{
-              user: %{
-                id: user.id,
-                email: user.email,
-                confirmed_at: user.confirmed_at,
-                roles: user.active_roles || [],
-                permissions: user_permissions
-              },
-              authenticated: true
-            })
+          conn
+          |> assign(:current_user, user)
+          |> assign_prop(:auth, %{
+            user: %{
+              id: user.id,
+              email: user.email,
+              confirmed_at: user.confirmed_at,
+              roles: user.active_roles || [],
+              permissions: user_permissions
+            },
+            authenticated: true
+          })
 
-          {:error, error} ->
-            Logger.error("DEBUG AUTH: Failed to load user via token: #{inspect(error)}")
-            # Token might be expired, clear session and try user ID fallback
-            user_id = get_current_user_id(conn)
-            load_user_by_id(conn, user_id)
-        end
-
-      true ->
-        # Fall back to user ID method
-        user_id = get_current_user_id(conn)
-        Logger.error("DEBUG AUTH: No token, trying user_id = #{inspect(user_id)}")
-        load_user_by_id(conn, user_id)
+        {:error, error} ->
+          Logger.error("DEBUG AUTH: Failed to load user via token: #{inspect(error)}")
+          # Token might be expired, clear session and try user ID fallback
+          user_id = get_current_user_id(conn)
+          load_user_by_id(conn, user_id)
+      end
+    else
+      # Fall back to user ID method
+      user_id = get_current_user_id(conn)
+      Logger.error("DEBUG AUTH: No token, trying user_id = #{inspect(user_id)}")
+      load_user_by_id(conn, user_id)
     end
   end
 

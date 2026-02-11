@@ -13,25 +13,23 @@
 
 
 
-
-
 // Utility Types
 
 // Resource schema constraint
-type TypedSchema = {
-  __type: "Resource" | "TypedStruct" | "TypedMap" | "Union";
+export type TypedSchema = {
+  __type: "Resource" | "TypedMap" | "Union";
   __primitiveFields: string;
 };
 
 // Utility type to convert union to intersection
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
   k: infer I,
 ) => void
   ? I
   : never;
 
 // Helper type to infer union field values, avoiding duplication between array and non-array unions
-type InferUnionFieldValue<
+export type InferUnionFieldValue<
   UnionSchema extends { __type: "Union"; __primitiveFields: any },
   FieldSelection extends any[],
 > = UnionToIntersection<
@@ -43,32 +41,56 @@ type InferUnionFieldValue<
       : FieldSelection[FieldIndex] extends Record<string, any>
         ? {
             [UnionKey in keyof FieldSelection[FieldIndex]]: UnionKey extends keyof UnionSchema
-              ? UnionSchema[UnionKey] extends { __type: "TypedMap"; __primitiveFields: any }
-                ? UnionSchema[UnionKey]
-                : UnionSchema[UnionKey] extends TypedSchema
-                  ? InferResult<UnionSchema[UnionKey], FieldSelection[FieldIndex][UnionKey]>
+              ? NonNullable<UnionSchema[UnionKey]> extends { __array: true; __type: "TypedMap"; __primitiveFields: infer TypedMapFields }
+                ? FieldSelection[FieldIndex][UnionKey] extends any[]
+                  ? Array<
+                      UnionToIntersection<
+                        {
+                          [FieldIdx in keyof FieldSelection[FieldIndex][UnionKey]]: FieldSelection[FieldIndex][UnionKey][FieldIdx] extends TypedMapFields
+                            ? FieldSelection[FieldIndex][UnionKey][FieldIdx] extends keyof NonNullable<UnionSchema[UnionKey]>
+                              ? { [P in FieldSelection[FieldIndex][UnionKey][FieldIdx]]: NonNullable<UnionSchema[UnionKey]>[P] }
+                              : never
+                            : never;
+                        }[number]
+                      >
+                    > | null
                   : never
+                : NonNullable<UnionSchema[UnionKey]> extends { __type: "TypedMap"; __primitiveFields: infer TypedMapFields }
+                  ? FieldSelection[FieldIndex][UnionKey] extends any[]
+                    ? UnionToIntersection<
+                        {
+                          [FieldIdx in keyof FieldSelection[FieldIndex][UnionKey]]: FieldSelection[FieldIndex][UnionKey][FieldIdx] extends TypedMapFields
+                            ? FieldSelection[FieldIndex][UnionKey][FieldIdx] extends keyof NonNullable<UnionSchema[UnionKey]>
+                              ? { [P in FieldSelection[FieldIndex][UnionKey][FieldIdx]]: NonNullable<UnionSchema[UnionKey]>[P] }
+                              : never
+                            : never;
+                        }[number]
+                      > | null
+                    : never
+                  : NonNullable<UnionSchema[UnionKey]> extends TypedSchema
+                    ? InferResult<NonNullable<UnionSchema[UnionKey]>, FieldSelection[FieldIndex][UnionKey]>
+                    : never
               : never;
           }
         : never;
   }[number]
 >;
 
-type HasComplexFields<T extends TypedSchema> = keyof Omit<
+export type HasComplexFields<T extends TypedSchema> = keyof Omit<
   T,
   "__primitiveFields" | "__type" | T["__primitiveFields"]
 > extends never
   ? false
   : true;
 
-type ComplexFieldKeys<T extends TypedSchema> = keyof Omit<
+export type ComplexFieldKeys<T extends TypedSchema> = keyof Omit<
   T,
   "__primitiveFields" | "__type" | T["__primitiveFields"]
 >;
 
-type LeafFieldSelection<T extends TypedSchema> = T["__primitiveFields"];
+export type LeafFieldSelection<T extends TypedSchema> = T["__primitiveFields"];
 
-type ComplexFieldSelection<T extends TypedSchema> = {
+export type ComplexFieldSelection<T extends TypedSchema> = {
   [K in ComplexFieldKeys<T>]?: T[K] extends {
     __type: "Relationship";
     __resource: infer Resource;
@@ -90,34 +112,38 @@ type ComplexFieldSelection<T extends TypedSchema> = {
         : NonNullable<ReturnType> extends TypedSchema
           ? { fields: UnifiedFieldSelection<NonNullable<ReturnType>>[] }
           : never
-      : T[K] extends { __type: "Union"; __primitiveFields: infer PrimitiveFields }
-        ? T[K] extends { __array: true }
-          ? (PrimitiveFields | {
-              [UnionKey in keyof Omit<T[K], "__type" | "__primitiveFields" | "__array">]?: T[K][UnionKey] extends { __type: "TypedMap"; __primitiveFields: any }
-                ? T[K][UnionKey]["__primitiveFields"][]
-                : T[K][UnionKey] extends TypedSchema
-                  ? UnifiedFieldSelection<T[K][UnionKey]>[]
-                  : never;
-            })[]
-          : (PrimitiveFields | {
-              [UnionKey in keyof Omit<T[K], "__type" | "__primitiveFields">]?: T[K][UnionKey] extends { __type: "TypedMap"; __primitiveFields: any }
-                ? T[K][UnionKey]["__primitiveFields"][]
-                : T[K][UnionKey] extends TypedSchema
-                  ? UnifiedFieldSelection<T[K][UnionKey]>[]
-                  : never;
-            })[]
-          : NonNullable<T[K]> extends TypedSchema
-            ? UnifiedFieldSelection<NonNullable<T[K]>>[]
-            : never;
+      : T[K] extends { __type: "TypedMap" }
+        ? NonNullable<T[K]> extends TypedSchema
+          ? UnifiedFieldSelection<NonNullable<T[K]>>[]
+          : never
+        : T[K] extends { __type: "Union"; __primitiveFields: infer PrimitiveFields }
+          ? T[K] extends { __array: true }
+            ? (PrimitiveFields | {
+                [UnionKey in keyof Omit<T[K], "__type" | "__primitiveFields" | "__array">]?: NonNullable<T[K][UnionKey]> extends { __type: "TypedMap"; __primitiveFields: any }
+                  ? NonNullable<T[K][UnionKey]>["__primitiveFields"][]
+                  : NonNullable<T[K][UnionKey]> extends TypedSchema
+                    ? UnifiedFieldSelection<NonNullable<T[K][UnionKey]>>[]
+                    : never;
+              })[]
+            : (PrimitiveFields | {
+                [UnionKey in keyof Omit<T[K], "__type" | "__primitiveFields">]?: NonNullable<T[K][UnionKey]> extends { __type: "TypedMap"; __primitiveFields: any }
+                  ? NonNullable<T[K][UnionKey]>["__primitiveFields"][]
+                  : NonNullable<T[K][UnionKey]> extends TypedSchema
+                    ? UnifiedFieldSelection<NonNullable<T[K][UnionKey]>>[]
+                    : never;
+              })[]
+            : NonNullable<T[K]> extends TypedSchema
+              ? UnifiedFieldSelection<NonNullable<T[K]>>[]
+              : never;
 };
 
 // Main type: Use explicit base case detection to prevent infinite recursion
-type UnifiedFieldSelection<T extends TypedSchema> =
+export type UnifiedFieldSelection<T extends TypedSchema> =
   HasComplexFields<T> extends false
     ? LeafFieldSelection<T> // Base case: only primitives, no recursion
     : LeafFieldSelection<T> | ComplexFieldSelection<T>; // Recursive case
 
-type InferFieldValue<
+export type InferFieldValue<
   T extends TypedSchema,
   Field,
 > = Field extends T["__primitiveFields"]
@@ -147,57 +173,165 @@ type InferFieldValue<
                 ? InferResult<NonNullable<ReturnType>, Field[K]["fields"]> | null
                 : InferResult<NonNullable<ReturnType>, Field[K]["fields"]>
               : ReturnType
-            : T[K] extends { __type: "Union"; __primitiveFields: any }
-              ? T[K] extends { __array: true }
-                ? {
-                    [CurrentK in K]: T[CurrentK] extends { __type: "Union"; __primitiveFields: any }
-                      ? Field[CurrentK] extends any[]
-                        ? Array<InferUnionFieldValue<T[CurrentK], Field[CurrentK]>> | null
-                        : never
-                      : never
-                  }
-                : {
-                    [CurrentK in K]: T[CurrentK] extends { __type: "Union"; __primitiveFields: any }
-                      ? Field[CurrentK] extends any[]
-                        ? InferUnionFieldValue<T[CurrentK], Field[CurrentK]> | null
-                        : never
-                      : never
-                  }
-                : NonNullable<T[K]> extends TypedSchema
+            : NonNullable<T[K]> extends { __type: "TypedMap"; __primitiveFields: infer TypedMapFields }
+              ? NonNullable<T[K]> extends { __array: true }
+                ? Field[K] extends any[]
                   ? null extends T[K]
-                    ? InferResult<NonNullable<T[K]>, Field[K]> | null
-                    : InferResult<NonNullable<T[K]>, Field[K]>
+                    ? Array<
+                        UnionToIntersection<
+                          {
+                            [FieldIndex in keyof Field[K]]: Field[K][FieldIndex] extends infer E
+                              ? E extends TypedMapFields
+                                ? E extends keyof NonNullable<T[K]>
+                                  ? { [P in E]: NonNullable<T[K]>[P] }
+                                  : never
+                                : E extends Record<string, any>
+                                  ? {
+                                      [NestedKey in keyof E]: NestedKey extends keyof NonNullable<T[K]>
+                                        ? NonNullable<NonNullable<T[K]>[NestedKey]> extends TypedSchema
+                                          ? null extends NonNullable<T[K]>[NestedKey]
+                                            ? InferResult<NonNullable<NonNullable<T[K]>[NestedKey]>, E[NestedKey]> | null
+                                            : InferResult<NonNullable<NonNullable<T[K]>[NestedKey]>, E[NestedKey]>
+                                          : never
+                                        : never;
+                                    }
+                                  : E extends keyof NonNullable<T[K]>
+                                    ? { [P in E]: NonNullable<T[K]>[P] }
+                                    : never
+                              : never;
+                          }[number]
+                        >
+                      > | null
+                    : Array<
+                        UnionToIntersection<
+                          {
+                            [FieldIndex in keyof Field[K]]: Field[K][FieldIndex] extends infer E
+                              ? E extends TypedMapFields
+                                ? E extends keyof NonNullable<T[K]>
+                                  ? { [P in E]: NonNullable<T[K]>[P] }
+                                  : never
+                                : E extends Record<string, any>
+                                  ? {
+                                      [NestedKey in keyof E]: NestedKey extends keyof NonNullable<T[K]>
+                                        ? NonNullable<NonNullable<T[K]>[NestedKey]> extends TypedSchema
+                                          ? null extends NonNullable<T[K]>[NestedKey]
+                                            ? InferResult<NonNullable<NonNullable<T[K]>[NestedKey]>, E[NestedKey]> | null
+                                            : InferResult<NonNullable<NonNullable<T[K]>[NestedKey]>, E[NestedKey]>
+                                          : never
+                                        : never;
+                                    }
+                                  : E extends keyof NonNullable<T[K]>
+                                    ? { [P in E]: NonNullable<T[K]>[P] }
+                                    : never
+                              : never;
+                          }[number]
+                        >
+                      >
                   : never
+                : Field[K] extends any[]
+                  ? null extends T[K]
+                    ? UnionToIntersection<
+                        {
+                          [FieldIndex in keyof Field[K]]: Field[K][FieldIndex] extends infer E
+                            ? E extends TypedMapFields
+                              ? E extends keyof NonNullable<T[K]>
+                                ? { [P in E]: NonNullable<T[K]>[P] }
+                                : never
+                              : E extends Record<string, any>
+                                ? {
+                                    [NestedKey in keyof E]: NestedKey extends keyof NonNullable<T[K]>
+                                      ? NonNullable<NonNullable<T[K]>[NestedKey]> extends TypedSchema
+                                        ? null extends NonNullable<T[K]>[NestedKey]
+                                          ? InferResult<NonNullable<NonNullable<T[K]>[NestedKey]>, E[NestedKey]> | null
+                                          : InferResult<NonNullable<NonNullable<T[K]>[NestedKey]>, E[NestedKey]>
+                                        : never
+                                      : never;
+                                  }
+                                : E extends keyof NonNullable<T[K]>
+                                  ? { [P in E]: NonNullable<T[K]>[P] }
+                                  : never
+                            : never;
+                        }[number]
+                      > | null
+                    : UnionToIntersection<
+                        {
+                          [FieldIndex in keyof Field[K]]: Field[K][FieldIndex] extends infer E
+                            ? E extends TypedMapFields
+                              ? E extends keyof T[K]
+                                ? { [P in E]: T[K][P] }
+                                : never
+                              : E extends Record<string, any>
+                                ? {
+                                    [NestedKey in keyof E]: NestedKey extends keyof NonNullable<T[K]>
+                                      ? NonNullable<NonNullable<T[K]>[NestedKey]> extends TypedSchema
+                                        ? null extends NonNullable<T[K]>[NestedKey]
+                                          ? InferResult<NonNullable<NonNullable<T[K]>[NestedKey]>, E[NestedKey]> | null
+                                          : InferResult<NonNullable<NonNullable<T[K]>[NestedKey]>, E[NestedKey]>
+                                        : never
+                                      : never;
+                                  }
+                                : E extends keyof NonNullable<T[K]>
+                                  ? { [P in E]: NonNullable<T[K]>[P] }
+                                  : never
+                            : never;
+                        }[number]
+                      >
+                  : never
+              : T[K] extends { __type: "Union"; __primitiveFields: any }
+                ? T[K] extends { __array: true }
+                  ? Field[K] extends any[]
+                    ? null extends T[K]
+                      ? Array<InferUnionFieldValue<T[K], Field[K]>> | null
+                      : Array<InferUnionFieldValue<T[K], Field[K]>>
+                    : never
+                  : Field[K] extends any[]
+                    ? null extends T[K]
+                      ? InferUnionFieldValue<T[K], Field[K]> | null
+                      : InferUnionFieldValue<T[K], Field[K]>
+                    : never
+                  : NonNullable<T[K]> extends TypedSchema
+                    ? null extends T[K]
+                      ? InferResult<NonNullable<T[K]>, Field[K]> | null
+                      : InferResult<NonNullable<T[K]>, Field[K]>
+                    : never
           : never;
       }
     : never;
 
-type InferResult<
+export type InferResult<
   T extends TypedSchema,
-  SelectedFields extends UnifiedFieldSelection<T>[],
-> = UnionToIntersection<
-  {
-    [K in keyof SelectedFields]: InferFieldValue<T, SelectedFields[K]>;
-  }[number]
->;
+  SelectedFields extends UnifiedFieldSelection<T>[] | undefined,
+> = SelectedFields extends undefined
+  ? {}
+  : SelectedFields extends []
+  ? {}
+  : SelectedFields extends UnifiedFieldSelection<T>[]
+  ? UnionToIntersection<
+      {
+        [K in keyof SelectedFields]: InferFieldValue<T, SelectedFields[K]>;
+      }[number]
+    >
+  : {};
 
 // Pagination conditional types
 // Checks if a page configuration object has any pagination parameters
-type HasPaginationParams<Page> =
+export type HasPaginationParams<Page> =
   Page extends { offset: any } ? true :
   Page extends { after: any } ? true :
   Page extends { before: any } ? true :
   false;
 
 // Infer which pagination type is being used from the page config
-type InferPaginationType<Page> =
+export type InferPaginationType<Page> =
   Page extends { offset: any } ? "offset" :
   Page extends { after: any } | { before: any } ? "keyset" :
   never;
 
 // Returns either non-paginated (array) or paginated result based on page params
 // For single pagination type support (offset-only or keyset-only)
-type ConditionalPaginatedResult<
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export type ConditionalPaginatedResult<
   Page,
   RecordType,
   PaginatedType
@@ -209,7 +343,7 @@ type ConditionalPaginatedResult<
 
 // For actions supporting both offset and keyset pagination
 // Infers the specific pagination type based on which params were passed
-type ConditionalPaginatedResultMixed<
+export type ConditionalPaginatedResultMixed<
   Page,
   RecordType,
   OffsetType,
@@ -236,23 +370,136 @@ export type ErrorData<T extends (...args: any[]) => Promise<any>> = Extract<
 >["errors"];
 
 /**
- * Represents an error from an unsuccessful RPC call
+ * Represents an error from an unsuccessful RPC call.
+ *
+ * This type matches the error structure defined in the AshTypescript.Rpc.Error protocol.
+ *
  * @example
- * const error: AshRpcError = { type: "validation_error", message: "Something went wrong" }
+ * const error: AshRpcError = {
+ *   type: "invalid_changes",
+ *   message: "Invalid value for field %{field}",
+ *   shortMessage: "Invalid changes",
+ *   vars: { field: "email" },
+ *   fields: ["email"],
+ *   path: ["user", "email"],
+ *   details: { suggestion: "Provide a valid email address" }
+ * }
  */
 export type AshRpcError = {
+  /** Machine-readable error type (e.g., "invalid_changes", "not_found") */
   type: string;
+  /** Full error message (may contain template variables like %{key}) */
   message: string;
-  field?: string;
-  fieldPath?: string;
+  /** Concise version of the message */
+  shortMessage: string;
+  /** Variables to interpolate into the message template */
+  vars: Record<string, any>;
+  /** List of affected field names (for field-level errors) */
+  fields: string[];
+  /** Path to the error location in the data structure */
+  path: string[];
+  /** Optional map with extra details (e.g., suggestions, hints) */
   details?: Record<string, any>;
 }
+
+/**
+ * Represents the result of a validation RPC call.
+ *
+ * All validation actions return this same structure, indicating either
+ * successful validation or a list of validation errors.
+ *
+ * @example
+ * // Successful validation
+ * const result: ValidationResult = { success: true };
+ *
+ * // Failed validation
+ * const result: ValidationResult = {
+ *   success: false,
+ *   errors: [
+ *     {
+ *       type: "required",
+ *       message: "is required",
+ *       shortMessage: "Required field",
+ *       vars: { field: "email" },
+ *       fields: ["email"],
+ *       path: []
+ *     }
+ *   ]
+ * };
+ */
+export type ValidationResult =
+  | { success: true }
+  | { success: false; errors: AshRpcError[]; };
 
 
 
 
 
 // Helper Functions
+
+/**
+ * Configuration options for action RPC requests
+ */
+export interface ActionConfig {
+  // Request data
+  input?: Record<string, any>;
+  identity?: any;
+  fields?: Array<string | Record<string, any>>; // Field selection
+  filter?: Record<string, any>; // Filter options (for reads)
+  sort?: string; // Sort options
+  page?:
+    | {
+        // Offset-based pagination
+        limit?: number;
+        offset?: number;
+        count?: boolean;
+      }
+    | {
+        // Keyset pagination
+        limit?: number;
+        after?: string;
+        before?: string;
+      };
+
+  // Metadata
+  metadataFields?: ReadonlyArray<string>;
+
+  // HTTP customization
+  headers?: Record<string, string>; // Custom headers
+  fetchOptions?: RequestInit; // Fetch options (signal, cache, etc.)
+  customFetch?: (
+    input: RequestInfo | URL,
+    init?: RequestInit,
+  ) => Promise<Response>;
+
+  // Multitenancy
+  tenant?: string; // Tenant parameter
+
+  // Hook context
+  hookCtx?: Record<string, any>;
+}
+
+/**
+ * Configuration options for validation RPC requests
+ */
+export interface ValidationConfig {
+  // Request data
+  input?: Record<string, any>;
+
+  // HTTP customization
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (
+    input: RequestInfo | URL,
+    init?: RequestInit,
+  ) => Promise<Response>;
+
+  // Hook context
+  hookCtx?: Record<string, any>;
+}
+
+
+
 
 /**
  * Gets the CSRF token from the page's meta tag
@@ -276,6 +523,111 @@ export function buildCSRFHeaders(headers: Record<string, string> = {}): Record<s
 
   return headers;
 }
+
+/**
+ * Internal helper function for making action RPC requests
+ * Handles hooks, request configuration, fetch execution, and error handling
+ * @param config Configuration matching ActionConfig
+ */
+export async function executeActionRpcRequest<T>(
+  payload: Record<string, any>,
+  config: ActionConfig
+): Promise<T> {
+    const processedConfig = config;
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...processedConfig.headers,
+    ...config.headers,
+  };
+
+  const fetchFunction = config.customFetch || processedConfig.customFetch || fetch;
+  const fetchOptions: RequestInit = {
+    ...processedConfig.fetchOptions,
+    ...config.fetchOptions,
+    method: "POST",
+    headers,
+    body: JSON.stringify(payload),
+  };
+
+  const response = await fetchFunction("/rpc/run", fetchOptions);
+  const result = response.ok ? await response.json() : null;
+
+
+  if (!response.ok) {
+    return {
+      success: false,
+      errors: [
+        {
+          type: "network_error",
+          message: `Network request failed: ${response.statusText}`,
+          shortMessage: "Network error",
+          vars: { statusCode: response.status, statusText: response.statusText },
+          fields: [],
+          path: [],
+          details: { statusCode: response.status }
+        }
+      ],
+    } as T;
+  }
+
+  return result as T;
+}
+
+
+/**
+ * Internal helper function for making validation RPC requests
+ * Handles hooks, request configuration, fetch execution, and error handling
+ * @param config Configuration matching ValidationConfig
+ */
+export async function executeValidationRpcRequest<T>(
+  payload: Record<string, any>,
+  config: ValidationConfig
+): Promise<T> {
+    const processedConfig = config;
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...processedConfig.headers,
+    ...config.headers,
+  };
+
+  const fetchFunction = config.customFetch || processedConfig.customFetch || fetch;
+  const fetchOptions: RequestInit = {
+    ...processedConfig.fetchOptions,
+    ...config.fetchOptions,
+    method: "POST",
+    headers,
+    body: JSON.stringify(payload),
+  };
+
+  const response = await fetchFunction("/rpc/validate", fetchOptions);
+  const result = response.ok ? await response.json() : null;
+
+
+  if (!response.ok) {
+    return {
+      success: false,
+      errors: [
+        {
+          type: "network_error",
+          message: `Network request failed: ${response.statusText}`,
+          shortMessage: "Network error",
+          vars: { statusCode: response.status, statusText: response.statusText },
+          fields: [],
+          path: [],
+          details: { statusCode: response.status }
+        }
+      ],
+    } as T;
+  }
+
+  return result as T;
+}
+
+
+
+
 
 
 

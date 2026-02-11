@@ -2,10 +2,7 @@ defmodule Angle.Bidding.Bid.ValidateBidIsHigherThanCurrentPrice do
   use Ash.Resource.Change
 
   @impl true
-  def change(changeset, opts, context) do
-    dbg(opts)
-    dbg(context)
-    dbg(changeset)
+  def change(changeset, _opts, _context) do
     # item = Ash.get(Item, Ash.Changeset.get_argument(changeset, :item_id))
     # dbg(item)
     # Ash.Changeset.add_error(changeset, amount: "Bid amount validation is not implemented yet")
