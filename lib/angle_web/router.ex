@@ -65,6 +65,8 @@ defmodule AngleWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    post "/rpc/run", AshTypescriptRpcController, :run
+    post "/rpc/validate", AshTypescriptRpcController, :validate
   end
 
   # Auth routes (guest only)

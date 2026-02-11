@@ -7,6 +7,20 @@
 # General application configuration
 import Config
 
+config :ash_typescript,
+  output_file: "assets/js/ash_rpc.ts",
+  run_endpoint: "/rpc/run",
+  validate_endpoint: "/rpc/validate",
+  input_field_formatter: :camel_case,
+  output_field_formatter: :camel_case,
+  require_tenant_parameters: false,
+  generate_zod_schemas: false,
+  generate_phx_channel_rpc_actions: false,
+  generate_validation_functions: true,
+  zod_import_path: "zod",
+  zod_schema_suffix: "ZodSchema",
+  phoenix_import_path: "phoenix"
+
 config :inertia,
   endpoint: AngleWeb.Endpoint,
   ssr: true,
@@ -151,6 +165,26 @@ config :logger, :default_formatter,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+# Configure git hooks
+if Mix.env() == :dev do
+  config :git_hooks,
+    auto_install: true,
+    verbose: true,
+    hooks: [
+      pre_commit: [
+        tasks: [
+          {:cmd, "mix format --check-formatted"},
+          {:cmd, "mix credo"}
+        ]
+      ],
+      pre_push: [
+        tasks: [
+          {:cmd, "mix test --color"}
+        ]
+      ]
+    ]
+end
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

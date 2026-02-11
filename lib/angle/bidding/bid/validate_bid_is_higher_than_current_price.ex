@@ -1,5 +1,4 @@
 defmodule Angle.Bidding.Bid.ValidateBidIsHigherThanCurrentPrice do
-  alias Angle.Inventory.Item
   use Ash.Resource.Change
 
   @impl true

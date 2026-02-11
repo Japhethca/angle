@@ -52,6 +52,18 @@
   "devDependencies": {
     "@types/phoenix": "^1.6.6",
     "@types/react": "^19.1.9",
-    "@types/react-dom": "^19.1.7"
+    "@types/react-dom": "^19.1.7",
+    "@typescript-eslint/eslint-plugin": "^8.24.0",
+    "@typescript-eslint/parser": "^8.24.0",
+    "eslint": "^9.24.0",
+    "eslint-plugin-react": "^7.37.6",
+    "eslint-plugin-react-hooks": "^5.3.0",
+    "prettier": "^3.5.2"
+  },
+  "scripts": {
+    "lint": "eslint js --ext .ts,.tsx --max-warnings 0",
+    "lint:fix": "eslint js --ext .ts,.tsx --fix",
+    "format": "prettier --write \"js/**/*.{ts,tsx,js,jsx,json}\"",
+    "format:check": "prettier --check \"js/**/*.{ts,tsx,js,jsx,json}\""
   }
 }

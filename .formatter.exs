@@ -1,5 +1,6 @@
 [
   import_deps: [
+    :ash_typescript,
     :ash_admin,
     :ash_oban,
     :oban,

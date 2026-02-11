@@ -35,8 +35,11 @@ defmodule Angle.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:ash_typescript, "~> 0.5"},
       {:usage_rules, "~> 0.1", only: [:dev]},
       {:claude, "~> 0.2", only: [:dev], runtime: false},
+      {:git_hooks, "~> 0.7.0", only: [:dev], runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:inertia, "== 2.5.1"},
       {:ex_money_sql, "~> 1.0"},
       {:ex_cldr, "~> 2.0"},
