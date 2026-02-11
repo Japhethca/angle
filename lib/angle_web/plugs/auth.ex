@@ -48,8 +48,22 @@ defmodule AngleWeb.Plugs.Auth do
           {:ok, user} ->
             Logger.error("DEBUG AUTH: Successfully loaded user via token: #{user.email}")
 
+            # Load user with roles and permissions
+            user = user |> Ash.load!([:active_roles, :roles])
+            user_permissions = get_user_permissions(user)
+
             conn
             |> assign(:current_user, user)
+            |> assign_prop(:auth, %{
+              user: %{
+                id: user.id,
+                email: user.email,
+                confirmed_at: user.confirmed_at,
+                roles: user.active_roles || [],
+                permissions: user_permissions
+              },
+              authenticated: true
+            })
 
           {:error, error} ->
             Logger.error("DEBUG AUTH: Failed to load user via token: #{inspect(error)}")
@@ -73,7 +87,13 @@ defmodule AngleWeb.Plugs.Auth do
     case user_id do
       nil ->
         Logger.error("DEBUG AUTH: No user ID in session")
-        assign(conn, :current_user, nil)
+
+        conn
+        |> assign(:current_user, nil)
+        |> assign_prop(:auth, %{
+          user: nil,
+          authenticated: false
+        })
 
       user_id ->
         Logger.error("DEBUG AUTH: Attempting to load user with ID: #{inspect(user_id)}")
@@ -82,10 +102,27 @@ defmodule AngleWeb.Plugs.Auth do
           {:ok, user} ->
             Logger.error("DEBUG AUTH: Successfully loaded user: #{user.email}")
 
+            # Load user with roles and permissions
+            user =
+              case Ash.load(user, [:active_roles, :roles], domain: Accounts) do
+                {:ok, loaded_user} -> loaded_user
+                # Fall back to user without roles if loading fails
+                {:error, _} -> user
+              end
+
+            # Get user's permissions through their roles
+            user_permissions = get_user_permissions(user)
+
             conn
             |> assign(:current_user, user)
             |> assign_prop(:auth, %{
-              user: %{id: user.id, email: user.email, confirmed_at: user.confirmed_at},
+              user: %{
+                id: user.id,
+                email: user.email,
+                confirmed_at: user.confirmed_at,
+                roles: user.active_roles || [],
+                permissions: user_permissions
+              },
               authenticated: true
             })
 
@@ -95,6 +132,10 @@ defmodule AngleWeb.Plugs.Auth do
             conn
             |> clear_session()
             |> assign(:current_user, nil)
+            |> assign_prop(:auth, %{
+              user: nil,
+              authenticated: false
+            })
         end
     end
   end
@@ -118,5 +159,15 @@ defmodule AngleWeb.Plugs.Auth do
   # Private helper
   defp get_current_user_id(conn) do
     get_session(conn, :current_user_id)
+  end
+
+  # Get all permissions for a user through their roles
+  defp get_user_permissions(user) do
+    user
+    |> Ash.load!(roles: :permissions)
+    |> Map.get(:roles, [])
+    |> Enum.flat_map(fn role -> role.permissions end)
+    |> Enum.map(& &1.name)
+    |> Enum.uniq()
   end
 end
