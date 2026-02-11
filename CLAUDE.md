@@ -127,7 +127,7 @@ _The extension for building GraphQL APIs with Ash_
 ## ash_postgres usage
 _The PostgreSQL data layer for Ash Framework_
 
-[ash_postgres usage rules](deps/ash_postgres/usage-rules.md)
+[ash_postgres usage rules](rules/ash_postgres.md)
 <!-- ash_postgres-end -->
 <!-- ash_json_api-start -->
 ## ash_json_api usage
@@ -335,7 +335,7 @@ When `tools` is omitted, subagents inherit ALL tools including dynamically loade
 ## ash usage
 _A declarative, extensible framework for building Elixir applications._
 
-[ash usage rules](deps/ash/usage-rules.md)
+[ash usage rules](rules/ash.md)
 <!-- ash-end -->
 <!-- ash_phoenix-start -->
 ## ash_phoenix usage
