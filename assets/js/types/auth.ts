@@ -1,7 +1,24 @@
+export interface Permission {
+  name: string;
+  resource: string;
+  action: string;
+  scope: string;
+  description: string;
+}
+
+export interface Role {
+  name: string;
+  description: string;
+  scope: string;
+  permissions: Permission[];
+}
+
 export interface User {
   id: string;
   email: string;
   confirmed_at: string | null;
+  roles: string[];
+  permissions: string[];
 }
 
 export interface AuthState {
