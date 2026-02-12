@@ -99,7 +99,11 @@ defmodule AngleWeb.Router do
     pipe_through [:browser, :require_auth]
 
     get "/dashboard", DashboardController, :index
-    # get "/profile", ProfileController, :show
+    get "/bids", BidsController, :index
+    get "/watchlist", WatchlistController, :index
+    get "/items/new", ItemsController, :new
+    get "/profile", ProfileController, :show
+    get "/settings", SettingsController, :index
   end
 
   # Other scopes may use custom stacks.

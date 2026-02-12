@@ -1,13 +1,14 @@
-import { Link, usePage } from "@inertiajs/react";
+import { usePage } from "@inertiajs/react";
 import { Home, Gavel, Heart, Store, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AuthLink } from "@/components/navigation/auth-link";
 
 const tabs = [
-  { label: "Home", href: "/", icon: Home },
-  { label: "Bids", href: "/bids", icon: Gavel },
-  { label: "Watchlist", href: "/watchlist", icon: Heart },
-  { label: "Sell", href: "/items/new", icon: Store },
-  { label: "Settings", href: "/settings", icon: Settings },
+  { label: "Home", href: "/", icon: Home, auth: false },
+  { label: "Bids", href: "/bids", icon: Gavel, auth: true },
+  { label: "Watchlist", href: "/watchlist", icon: Heart, auth: true },
+  { label: "Sell", href: "/items/new", icon: Store, auth: true },
+  { label: "Settings", href: "/settings", icon: Settings, auth: true },
 ];
 
 export function BottomNav() {
@@ -25,9 +26,10 @@ export function BottomNav() {
           const active = isActive(tab.href);
           const Icon = tab.icon;
           return (
-            <Link
+            <AuthLink
               key={tab.href}
               href={tab.href}
+              auth={tab.auth}
               className={cn(
                 "flex flex-col items-center gap-1 px-3 py-2 text-[10px]",
                 active ? "text-primary-600" : "text-neutral-04"
@@ -37,7 +39,7 @@ export function BottomNav() {
               <span className={cn("font-medium", active && "font-semibold")}>
                 {tab.label}
               </span>
-            </Link>
+            </AuthLink>
           );
         })}
       </div>
