@@ -1,8 +1,16 @@
 defmodule Angle.Accounts do
-  use Ash.Domain, otp_app: :angle, extensions: [AshAdmin.Domain]
+  use Ash.Domain,
+    otp_app: :angle,
+    extensions: [AshAdmin.Domain, AshGraphql.Domain, AshTypescript.Rpc]
 
   admin do
     show? true
+  end
+
+  typescript_rpc do
+    resource Angle.Accounts.User do
+      rpc_action :list_users, :read
+    end
   end
 
   resources do

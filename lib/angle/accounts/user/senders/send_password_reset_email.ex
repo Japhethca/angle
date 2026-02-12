@@ -12,9 +12,11 @@ defmodule Angle.Accounts.User.Senders.SendPasswordResetEmail do
 
   @impl true
   def send(user, token, _) do
+    {sender_name, sender_email} =
+      Application.get_env(:angle, :sender_email, {"Angle", "noreply@angle.app"})
+
     new()
-    # TODO: Replace with your email
-    |> from({"noreply", "noreply@example.com"})
+    |> from({sender_name, sender_email})
     |> to(to_string(user.email))
     |> subject("Reset your password")
     |> html_body(body(token: token))

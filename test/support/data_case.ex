@@ -24,6 +24,7 @@ defmodule Angle.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import Angle.DataCase
+      import Angle.Factory
     end
   end
 

@@ -7,7 +7,7 @@ defmodule Angle.Accounts.User do
     domain: Angle.Accounts,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshAuthentication]
+    extensions: [AshAuthentication, AshTypescript.Resource]
 
   authentication do
     add_ons do
@@ -50,6 +50,10 @@ defmodule Angle.Accounts.User do
   postgres do
     table "users"
     repo Angle.Repo
+  end
+
+  typescript do
+    type_name "User"
   end
 
   code_interface do

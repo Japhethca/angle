@@ -3,10 +3,7 @@ defmodule Angle.Inventory.Item do
     domain: Angle.Inventory,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshJsonApi.Resource]
-
-  alias Angle.Inventory.Item.ItemStatus
-  alias Angle.Inventory.Item.PublicationStatus
+    extensions: [AshGraphql.Resource, AshJsonApi.Resource, AshTypescript.Resource]
 
   json_api do
     type "item"
@@ -19,6 +16,45 @@ defmodule Angle.Inventory.Item do
       patch :update_draft, route: "/draft/:id", name: "Update Draft Item"
       patch :publish_item, route: "/publish", name: "Publish Item"
     end
+  end
+
+  graphql do
+    type :item
+
+    queries do
+      get :item, :read
+      list :items, :read
+    end
+
+    mutations do
+      create :create_draft_item, :create_draft
+      update :publish_item, :publish_item
+    end
+  end
+
+  alias Angle.Inventory.Item.ItemStatus
+  alias Angle.Inventory.Item.PublicationStatus
+
+  postgres do
+    table "items"
+    repo Angle.Repo
+
+    custom_indexes do
+      index [:auction_status, :publication_status] do
+        name "items_published_auction_idx"
+
+        where "(((publication_status)::text = 'published'::text) AND ((auction_status)::text = ANY ((ARRAY['scheduled'::character varying, 'active'::character varying, 'ended'::character varying])::text[])))"
+      end
+    end
+
+    check_constraints do
+      check_constraint :id, "valid_auction_status",
+        check:
+          "(((auction_status IS NULL) OR ((auction_status)::text = ANY (ARRAY[('pending'::character varying)::text, ('scheduled'::character varying)::text, ('active'::character varying)::text, ('paused'::character varying)::text, ('ended'::character varying)::text, ('sold'::character varying)::text, ('cancelled'::character varying)::text]))))",
+        message: "is invalid"
+    end
+
+    identity_index_names slug_title: "items_slug_title_index"
   end
 
   @draft_fields [
@@ -40,26 +76,8 @@ defmodule Angle.Inventory.Item do
     :buy_now_price
   ]
 
-  postgres do
-    table "items"
-    repo Angle.Repo
-
-    custom_indexes do
-      index [:auction_status, :publication_status] do
-        name "items_published_auction_idx"
-
-        where "(((publication_status)::text = 'published'::text) AND ((auction_status)::text = ANY ((ARRAY['scheduled'::character varying, 'active'::character varying, 'ended'::character varying])::text[])))"
-      end
-    end
-
-    check_constraints do
-      check_constraint :id, "valid_auction_status",
-        check:
-          "(((auction_status IS NULL) OR ((auction_status)::text = ANY (ARRAY[('scheduled'::character varying)::text, ('active'::character varying)::text, ('paused'::character varying)::text, ('ended'::character varying)::text, ('sold'::character varying)::text, ('cancelled'::character varying)::text]))))",
-        message: "is invalid"
-    end
-
-    identity_index_names slug_title: "items_slug_title_index"
+  typescript do
+    type_name "Item"
   end
 
   actions do
@@ -255,6 +273,7 @@ defmodule Angle.Inventory.Item do
       allow_nil? false
       generated? true
       public? true
+      default %{}
     end
 
     attribute :sale_type, :atom do

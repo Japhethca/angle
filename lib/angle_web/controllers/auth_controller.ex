@@ -6,12 +6,8 @@ defmodule AngleWeb.AuthController do
   end
 
   def do_login(conn, %{"email" => email, "password" => password}) do
-    require Logger
-
     case Angle.Accounts.User.sign_in_with_password(%{email: email, password: password}) do
       {:ok, %{user: user, metadata: %{token: token}}} ->
-        Logger.error("DEBUG AUTH: Login successful with token, user ID: #{inspect(user.id)}")
-
         conn
         |> put_session(:current_user_id, user.id)
         |> put_session(:auth_token, token)
@@ -19,16 +15,12 @@ defmodule AngleWeb.AuthController do
         |> redirect(to: ~p"/")
 
       {:ok, user} ->
-        Logger.error("DEBUG AUTH: Login successful without token, user ID: #{inspect(user.id)}")
-
         conn
         |> put_session(:current_user_id, user.id)
         |> put_flash(:info, "Successfully signed in!")
         |> redirect(to: ~p"/")
 
-      {:error, err} ->
-        Logger.error("DEBUG AUTH: Login failed: #{inspect(err)}")
-
+      {:error, _err} ->
         conn
         |> put_flash(:error, "Invalid email or password")
         |> redirect(to: ~p"/auth/login")
@@ -278,8 +270,7 @@ defmodule AngleWeb.AuthController do
     |> Ash.Error.to_error_class()
     |> case do
       %Ash.Error.Invalid{errors: errors} ->
-        errors
-        |> Enum.map(fn error ->
+        Enum.map_join(errors, ", ", fn error ->
           case error do
             %Ash.Error.Changes.InvalidAttribute{field: field, message: message} ->
               "#{field}: #{message}"
@@ -291,7 +282,6 @@ defmodule AngleWeb.AuthController do
               Exception.message(error)
           end
         end)
-        |> Enum.join(", ")
 
       error ->
         Exception.message(error)

@@ -38,9 +38,10 @@ This is an Elixir Phoenix application using the Ash Framework for domain modelin
 
 ### Core Technologies
 
-- **Phoenix Framework** - Web framework with LiveView support
+- **Phoenix Framework** - Web framework (no LiveView - React handles all UI)
 - **Ash Framework** - Declarative resource modeling with built-in APIs
-- **React + Inertia.js** - Frontend SPA with server-side routing
+- **React 19 + Inertia.js** - Frontend SPA with server-side routing
+- **AshTypescript** - Type-safe RPC between Elixir and TypeScript
 - **PostgreSQL** - Database with Ash Postgres data layer
 - **Oban** - Background job processing
 - **esbuild + Tailwind** - Asset building and CSS framework
@@ -69,29 +70,78 @@ The application is organized into four main Ash domains in `lib/angle/`:
 
 ### API Endpoints
 
+- **AshTypescript HTTP RPC** - `POST /rpc/run` and `POST /rpc/validate` (primary frontend-backend communication)
 - **GraphQL API** - `/gql` with playground at `/gql/playground`
 - **JSON:API** - `/api/v1` with OpenAPI docs at `/api/v1/docs`
 - **Admin Interface** - `/admin` (development only)
 - **Live Dashboard** - `/dev/dashboard` (development only)
 
+### Communication Architecture
+
+- **Page data loading**: Inertia props (loaded in Phoenix controllers, passed to React pages)
+- **Mutations & queries from frontend**: AshTypescript HTTP RPC (`/rpc/run`, `/rpc/validate`) wrapped with TanStack Query
+- **Page navigation**: Inertia.js (`router.visit`, `router.post`)
+- **Real-time updates (future)**: AshTypescript Channel RPC + Phoenix Channel broadcasts (reserved for active auction/bidding pages only)
+
+**Default pattern for every feature:**
+1. Controller loads data from Ash resources, passes as Inertia props
+2. React page renders with those props (SSR-friendly)
+3. User actions (create, update, delete) call AshTypescript generated functions via HTTP RPC
+4. After mutation succeeds, redirect via Inertia or invalidate TanStack Query cache
+
+### UI Stack
+
+- **Component library**: shadcn/ui (components in `assets/js/components/ui/`)
+- **Icons**: Lucide React (`import { IconName } from "lucide-react"`) - never use inline SVGs for icons
+- **Styling**: Tailwind CSS
+- **Forms**: React Hook Form + Zod validation
+- **Data fetching**: TanStack Query wrapping AshTypescript RPC functions via `useAshQuery`/`useAshMutation` hooks
+- Always use `useAshQuery`/`useAshMutation` from `@/hooks/use-ash-query` for RPC calls - never raw `useState` + `useEffect`
+
 ### Frontend Structure
 
-- React components in `assets/js/`
-- Inertia.js for SPA-style navigation
-- JSX support with esbuild compilation
-- Tailwind CSS for styling
-- Shadcn UI components in `assets/js/components/ui/`
-- Custom form components in `assets/js/components/forms`
-- feature components in `assets/js/<feature>/components` or `assets/js/components/<feature component>.tsx`
-- **Naming Conventions**
-  - All react component and pages file names should be in kebab casing
+- React pages in `assets/js/pages/<page-name>.tsx` (kebab-case)
+- React components in `assets/js/components/<feature>/<component-name>.tsx`
+- shadcn/ui components in `assets/js/components/ui/`
+- Custom form components in `assets/js/components/forms/`
+- Hooks in `assets/js/hooks/`
+- Generated RPC functions in `assets/js/ash_rpc.ts` (auto-generated, do not edit manually)
+- **Naming Conventions**: All React component and page file names use kebab-case
+
+### File Conventions
+
+- React pages: `assets/js/pages/<page-name>.tsx` (kebab-case)
+- React components: `assets/js/components/<feature>/<component-name>.tsx`
+- Ash resources: `lib/angle/<domain>/<resource>.ex`
+- Ash resource changes/validations: `lib/angle/<domain>/<resource>/<change_name>.ex`
+- Tests: mirror `lib/` structure under `test/`
+- Test factories: `test/support/factory.ex`
 
 ### Key Configuration
 
 - Ash domains configured in `config/config.exs`
+- AshTypescript RPC configured in `config/config.exs` (lines 10-22)
 - Custom money type support with `AshMoney`
 - Authentication handled by `AshAuthentication`
 - Background jobs via Oban with PostgreSQL notifier
+
+### Testing
+
+- Run: `mix test`
+- Use factory functions from `test/support/factory.ex` to create test data
+- All factory functions bypass authorization with `authorize?: false`
+- Test pattern: create data with factory, exercise action, assert result
+- Factory functions: `create_user/1`, `create_role/1`, `create_item/1`, `create_bid/1`, `create_category/1`
+
+### Adding a New Feature (Checklist)
+
+1. Define or update Ash resource with actions
+2. Regenerate `ash_rpc.ts` (`mix ash_typescript.generate`)
+3. Create Phoenix controller that loads data and renders Inertia page
+4. Add route in `router.ex`
+5. Create React page in `assets/js/pages/`
+6. Use generated AshTypescript functions for mutations (via `useAshQuery`/`useAshMutation`)
+7. Write tests using factory module
 
 ## References and Guidelines
 

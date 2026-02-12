@@ -5,33 +5,478 @@
 
 
 
+export type Decimal = string;
+export type UUID = string;
+export type UtcDateTimeUsec = string;
+
+// Bid Schema
+export type BidResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "amount" | "bidType" | "itemId" | "userId" | "bidTime";
+  id: UUID;
+  amount: Decimal;
+  bidType: "auto" | "proxy" | "manual";
+  itemId: UUID;
+  userId: UUID;
+  bidTime: UtcDateTimeUsec;
+  item: { __type: "Relationship"; __resource: ItemResourceSchema | null; };
+  user: { __type: "Relationship"; __resource: UserResourceSchema | null; };
+};
+
+
+
+export type BidAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "amount" | "bidType" | "itemId" | "userId" | "bidTime";
+  id: UUID;
+  amount: Decimal;
+  bidType: "auto" | "proxy" | "manual";
+  itemId: UUID;
+  userId: UUID;
+  bidTime: UtcDateTimeUsec;
+};
+
+
+// Category Schema
+export type CategoryResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "name" | "description" | "slug" | "attributeSchema" | "formSchema" | "imageUrl" | "parentId";
+  id: UUID;
+  name: string;
+  description: string | null;
+  slug: string | null;
+  attributeSchema: Record<string, any>;
+  formSchema: Record<string, any>;
+  imageUrl: string | null;
+  parentId: UUID | null;
+  category: { __type: "Relationship"; __resource: CategoryResourceSchema | null; };
+  categories: { __type: "Relationship"; __array: true; __resource: CategoryResourceSchema; };
+};
+
+
+
+export type CategoryAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "name" | "description" | "slug" | "attributeSchema" | "formSchema" | "imageUrl" | "parentId";
+  id: UUID;
+  name: string;
+  description: string | null;
+  slug: string | null;
+  attributeSchema: Record<string, any>;
+  formSchema: Record<string, any>;
+  imageUrl: string | null;
+  parentId: UUID | null;
+};
+
+
+// Item Schema
+export type ItemResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "title" | "description" | "startingPrice" | "reservePrice" | "currentPrice" | "bidIncrement" | "slug" | "startTime" | "endTime" | "categoryId" | "lotNumber" | "publicationStatus" | "auctionStatus" | "condition" | "location" | "attributes" | "saleType" | "auctionFormat" | "buyNowPrice" | "viewCount" | "createdById";
+  id: UUID;
+  title: string;
+  description: string | null;
+  startingPrice: Decimal;
+  reservePrice: Decimal | null;
+  currentPrice: Decimal | null;
+  bidIncrement: Decimal | null;
+  slug: string | null;
+  startTime: UtcDateTimeUsec | null;
+  endTime: UtcDateTimeUsec | null;
+  categoryId: UUID | null;
+  lotNumber: string | null;
+  publicationStatus: "draft" | "pending" | "published" | "unpublished" | "archived" | null;
+  auctionStatus: "pending" | "scheduled" | "active" | "paused" | "ended" | "sold" | "cancelled" | null;
+  condition: "new" | "used" | "refurbished" | null;
+  location: string | null;
+  attributes: Record<string, any>;
+  saleType: "auction" | "buy_now" | "hybrid";
+  auctionFormat: "standard" | "reserve" | "live" | "timed" | null;
+  buyNowPrice: Decimal | null;
+  viewCount: number | null;
+  createdById: UUID | null;
+  user: { __type: "Relationship"; __resource: UserResourceSchema | null; };
+  category: { __type: "Relationship"; __resource: CategoryResourceSchema | null; };
+};
+
+
+
+export type ItemAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "title" | "description" | "startingPrice" | "reservePrice" | "currentPrice" | "bidIncrement" | "slug" | "startTime" | "endTime" | "categoryId" | "lotNumber" | "publicationStatus" | "auctionStatus" | "condition" | "location" | "attributes" | "saleType" | "auctionFormat" | "buyNowPrice" | "viewCount" | "createdById";
+  id: UUID;
+  title: string;
+  description: string | null;
+  startingPrice: Decimal;
+  reservePrice: Decimal | null;
+  currentPrice: Decimal | null;
+  bidIncrement: Decimal | null;
+  slug: string | null;
+  startTime: UtcDateTimeUsec | null;
+  endTime: UtcDateTimeUsec | null;
+  categoryId: UUID | null;
+  lotNumber: string | null;
+  publicationStatus: "draft" | "pending" | "published" | "unpublished" | "archived" | null;
+  auctionStatus: "pending" | "scheduled" | "active" | "paused" | "ended" | "sold" | "cancelled" | null;
+  condition: "new" | "used" | "refurbished" | null;
+  location: string | null;
+  attributes: Record<string, any>;
+  saleType: "auction" | "buy_now" | "hybrid";
+  auctionFormat: "standard" | "reserve" | "live" | "timed" | null;
+  buyNowPrice: Decimal | null;
+  viewCount: number | null;
+  createdById: UUID | null;
+};
+
+
+// User Schema
+export type UserResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "email";
+  id: UUID;
+  email: string;
+};
+
+
+
+export type UserAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "email";
+  id: UUID;
+  email: string;
+};
 
 
 
 
+export type BidFilterInput = {
+  and?: Array<BidFilterInput>;
+  or?: Array<BidFilterInput>;
+  not?: Array<BidFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  amount?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  bidType?: {
+    eq?: "auto" | "proxy" | "manual";
+    notEq?: "auto" | "proxy" | "manual";
+    in?: Array<"auto" | "proxy" | "manual">;
+  };
+
+  itemId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  userId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  bidTime?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+
+  item?: ItemFilterInput;
+
+  user?: UserFilterInput;
+
+};
+export type CategoryFilterInput = {
+  and?: Array<CategoryFilterInput>;
+  or?: Array<CategoryFilterInput>;
+  not?: Array<CategoryFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  name?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  description?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  slug?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  attributeSchema?: {
+    eq?: Record<string, any>;
+    notEq?: Record<string, any>;
+    in?: Array<Record<string, any>>;
+  };
+
+  formSchema?: {
+    eq?: Record<string, any>;
+    notEq?: Record<string, any>;
+    in?: Array<Record<string, any>>;
+  };
+
+  imageUrl?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  parentId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+
+  category?: CategoryFilterInput;
+
+  categories?: CategoryFilterInput;
+
+};
+export type ItemFilterInput = {
+  and?: Array<ItemFilterInput>;
+  or?: Array<ItemFilterInput>;
+  not?: Array<ItemFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  title?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  description?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  startingPrice?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  reservePrice?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  currentPrice?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  bidIncrement?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  slug?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  startTime?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+  endTime?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+  categoryId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  lotNumber?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  publicationStatus?: {
+    eq?: "draft" | "pending" | "published" | "unpublished" | "archived";
+    notEq?: "draft" | "pending" | "published" | "unpublished" | "archived";
+    in?: Array<"draft" | "pending" | "published" | "unpublished" | "archived">;
+  };
+
+  auctionStatus?: {
+    eq?: "pending" | "scheduled" | "active" | "paused" | "ended" | "sold" | "cancelled";
+    notEq?: "pending" | "scheduled" | "active" | "paused" | "ended" | "sold" | "cancelled";
+    in?: Array<"pending" | "scheduled" | "active" | "paused" | "ended" | "sold" | "cancelled">;
+  };
+
+  condition?: {
+    eq?: "new" | "used" | "refurbished";
+    notEq?: "new" | "used" | "refurbished";
+    in?: Array<"new" | "used" | "refurbished">;
+  };
+
+  location?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  attributes?: {
+    eq?: Record<string, any>;
+    notEq?: Record<string, any>;
+    in?: Array<Record<string, any>>;
+  };
+
+  saleType?: {
+    eq?: "auction" | "buy_now" | "hybrid";
+    notEq?: "auction" | "buy_now" | "hybrid";
+    in?: Array<"auction" | "buy_now" | "hybrid">;
+  };
+
+  auctionFormat?: {
+    eq?: "standard" | "reserve" | "live" | "timed";
+    notEq?: "standard" | "reserve" | "live" | "timed";
+    in?: Array<"standard" | "reserve" | "live" | "timed">;
+  };
+
+  buyNowPrice?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  viewCount?: {
+    eq?: number;
+    notEq?: number;
+    greaterThan?: number;
+    greaterThanOrEqual?: number;
+    lessThan?: number;
+    lessThanOrEqual?: number;
+    in?: Array<number>;
+  };
+
+  createdById?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+
+  user?: UserFilterInput;
+
+  category?: CategoryFilterInput;
+
+};
+export type UserFilterInput = {
+  and?: Array<UserFilterInput>;
+  or?: Array<UserFilterInput>;
+  not?: Array<UserFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  email?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
 
 
 
-
+};
 
 
 // Utility Types
 
 // Resource schema constraint
-type TypedSchema = {
-  __type: "Resource" | "TypedStruct" | "TypedMap" | "Union";
+export type TypedSchema = {
+  __type: "Resource" | "TypedMap" | "Union";
   __primitiveFields: string;
 };
 
 // Utility type to convert union to intersection
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
   k: infer I,
 ) => void
   ? I
   : never;
 
 // Helper type to infer union field values, avoiding duplication between array and non-array unions
-type InferUnionFieldValue<
+export type InferUnionFieldValue<
   UnionSchema extends { __type: "Union"; __primitiveFields: any },
   FieldSelection extends any[],
 > = UnionToIntersection<
@@ -43,32 +488,56 @@ type InferUnionFieldValue<
       : FieldSelection[FieldIndex] extends Record<string, any>
         ? {
             [UnionKey in keyof FieldSelection[FieldIndex]]: UnionKey extends keyof UnionSchema
-              ? UnionSchema[UnionKey] extends { __type: "TypedMap"; __primitiveFields: any }
-                ? UnionSchema[UnionKey]
-                : UnionSchema[UnionKey] extends TypedSchema
-                  ? InferResult<UnionSchema[UnionKey], FieldSelection[FieldIndex][UnionKey]>
+              ? NonNullable<UnionSchema[UnionKey]> extends { __array: true; __type: "TypedMap"; __primitiveFields: infer TypedMapFields }
+                ? FieldSelection[FieldIndex][UnionKey] extends any[]
+                  ? Array<
+                      UnionToIntersection<
+                        {
+                          [FieldIdx in keyof FieldSelection[FieldIndex][UnionKey]]: FieldSelection[FieldIndex][UnionKey][FieldIdx] extends TypedMapFields
+                            ? FieldSelection[FieldIndex][UnionKey][FieldIdx] extends keyof NonNullable<UnionSchema[UnionKey]>
+                              ? { [P in FieldSelection[FieldIndex][UnionKey][FieldIdx]]: NonNullable<UnionSchema[UnionKey]>[P] }
+                              : never
+                            : never;
+                        }[number]
+                      >
+                    > | null
                   : never
+                : NonNullable<UnionSchema[UnionKey]> extends { __type: "TypedMap"; __primitiveFields: infer TypedMapFields }
+                  ? FieldSelection[FieldIndex][UnionKey] extends any[]
+                    ? UnionToIntersection<
+                        {
+                          [FieldIdx in keyof FieldSelection[FieldIndex][UnionKey]]: FieldSelection[FieldIndex][UnionKey][FieldIdx] extends TypedMapFields
+                            ? FieldSelection[FieldIndex][UnionKey][FieldIdx] extends keyof NonNullable<UnionSchema[UnionKey]>
+                              ? { [P in FieldSelection[FieldIndex][UnionKey][FieldIdx]]: NonNullable<UnionSchema[UnionKey]>[P] }
+                              : never
+                            : never;
+                        }[number]
+                      > | null
+                    : never
+                  : NonNullable<UnionSchema[UnionKey]> extends TypedSchema
+                    ? InferResult<NonNullable<UnionSchema[UnionKey]>, FieldSelection[FieldIndex][UnionKey]>
+                    : never
               : never;
           }
         : never;
   }[number]
 >;
 
-type HasComplexFields<T extends TypedSchema> = keyof Omit<
+export type HasComplexFields<T extends TypedSchema> = keyof Omit<
   T,
   "__primitiveFields" | "__type" | T["__primitiveFields"]
 > extends never
   ? false
   : true;
 
-type ComplexFieldKeys<T extends TypedSchema> = keyof Omit<
+export type ComplexFieldKeys<T extends TypedSchema> = keyof Omit<
   T,
   "__primitiveFields" | "__type" | T["__primitiveFields"]
 >;
 
-type LeafFieldSelection<T extends TypedSchema> = T["__primitiveFields"];
+export type LeafFieldSelection<T extends TypedSchema> = T["__primitiveFields"];
 
-type ComplexFieldSelection<T extends TypedSchema> = {
+export type ComplexFieldSelection<T extends TypedSchema> = {
   [K in ComplexFieldKeys<T>]?: T[K] extends {
     __type: "Relationship";
     __resource: infer Resource;
@@ -90,34 +559,38 @@ type ComplexFieldSelection<T extends TypedSchema> = {
         : NonNullable<ReturnType> extends TypedSchema
           ? { fields: UnifiedFieldSelection<NonNullable<ReturnType>>[] }
           : never
-      : T[K] extends { __type: "Union"; __primitiveFields: infer PrimitiveFields }
-        ? T[K] extends { __array: true }
-          ? (PrimitiveFields | {
-              [UnionKey in keyof Omit<T[K], "__type" | "__primitiveFields" | "__array">]?: T[K][UnionKey] extends { __type: "TypedMap"; __primitiveFields: any }
-                ? T[K][UnionKey]["__primitiveFields"][]
-                : T[K][UnionKey] extends TypedSchema
-                  ? UnifiedFieldSelection<T[K][UnionKey]>[]
-                  : never;
-            })[]
-          : (PrimitiveFields | {
-              [UnionKey in keyof Omit<T[K], "__type" | "__primitiveFields">]?: T[K][UnionKey] extends { __type: "TypedMap"; __primitiveFields: any }
-                ? T[K][UnionKey]["__primitiveFields"][]
-                : T[K][UnionKey] extends TypedSchema
-                  ? UnifiedFieldSelection<T[K][UnionKey]>[]
-                  : never;
-            })[]
-          : NonNullable<T[K]> extends TypedSchema
-            ? UnifiedFieldSelection<NonNullable<T[K]>>[]
-            : never;
+      : T[K] extends { __type: "TypedMap" }
+        ? NonNullable<T[K]> extends TypedSchema
+          ? UnifiedFieldSelection<NonNullable<T[K]>>[]
+          : never
+        : T[K] extends { __type: "Union"; __primitiveFields: infer PrimitiveFields }
+          ? T[K] extends { __array: true }
+            ? (PrimitiveFields | {
+                [UnionKey in keyof Omit<T[K], "__type" | "__primitiveFields" | "__array">]?: NonNullable<T[K][UnionKey]> extends { __type: "TypedMap"; __primitiveFields: any }
+                  ? NonNullable<T[K][UnionKey]>["__primitiveFields"][]
+                  : NonNullable<T[K][UnionKey]> extends TypedSchema
+                    ? UnifiedFieldSelection<NonNullable<T[K][UnionKey]>>[]
+                    : never;
+              })[]
+            : (PrimitiveFields | {
+                [UnionKey in keyof Omit<T[K], "__type" | "__primitiveFields">]?: NonNullable<T[K][UnionKey]> extends { __type: "TypedMap"; __primitiveFields: any }
+                  ? NonNullable<T[K][UnionKey]>["__primitiveFields"][]
+                  : NonNullable<T[K][UnionKey]> extends TypedSchema
+                    ? UnifiedFieldSelection<NonNullable<T[K][UnionKey]>>[]
+                    : never;
+              })[]
+            : NonNullable<T[K]> extends TypedSchema
+              ? UnifiedFieldSelection<NonNullable<T[K]>>[]
+              : never;
 };
 
 // Main type: Use explicit base case detection to prevent infinite recursion
-type UnifiedFieldSelection<T extends TypedSchema> =
+export type UnifiedFieldSelection<T extends TypedSchema> =
   HasComplexFields<T> extends false
     ? LeafFieldSelection<T> // Base case: only primitives, no recursion
     : LeafFieldSelection<T> | ComplexFieldSelection<T>; // Recursive case
 
-type InferFieldValue<
+export type InferFieldValue<
   T extends TypedSchema,
   Field,
 > = Field extends T["__primitiveFields"]
@@ -147,57 +620,165 @@ type InferFieldValue<
                 ? InferResult<NonNullable<ReturnType>, Field[K]["fields"]> | null
                 : InferResult<NonNullable<ReturnType>, Field[K]["fields"]>
               : ReturnType
-            : T[K] extends { __type: "Union"; __primitiveFields: any }
-              ? T[K] extends { __array: true }
-                ? {
-                    [CurrentK in K]: T[CurrentK] extends { __type: "Union"; __primitiveFields: any }
-                      ? Field[CurrentK] extends any[]
-                        ? Array<InferUnionFieldValue<T[CurrentK], Field[CurrentK]>> | null
-                        : never
-                      : never
-                  }
-                : {
-                    [CurrentK in K]: T[CurrentK] extends { __type: "Union"; __primitiveFields: any }
-                      ? Field[CurrentK] extends any[]
-                        ? InferUnionFieldValue<T[CurrentK], Field[CurrentK]> | null
-                        : never
-                      : never
-                  }
-                : NonNullable<T[K]> extends TypedSchema
+            : NonNullable<T[K]> extends { __type: "TypedMap"; __primitiveFields: infer TypedMapFields }
+              ? NonNullable<T[K]> extends { __array: true }
+                ? Field[K] extends any[]
                   ? null extends T[K]
-                    ? InferResult<NonNullable<T[K]>, Field[K]> | null
-                    : InferResult<NonNullable<T[K]>, Field[K]>
+                    ? Array<
+                        UnionToIntersection<
+                          {
+                            [FieldIndex in keyof Field[K]]: Field[K][FieldIndex] extends infer E
+                              ? E extends TypedMapFields
+                                ? E extends keyof NonNullable<T[K]>
+                                  ? { [P in E]: NonNullable<T[K]>[P] }
+                                  : never
+                                : E extends Record<string, any>
+                                  ? {
+                                      [NestedKey in keyof E]: NestedKey extends keyof NonNullable<T[K]>
+                                        ? NonNullable<NonNullable<T[K]>[NestedKey]> extends TypedSchema
+                                          ? null extends NonNullable<T[K]>[NestedKey]
+                                            ? InferResult<NonNullable<NonNullable<T[K]>[NestedKey]>, E[NestedKey]> | null
+                                            : InferResult<NonNullable<NonNullable<T[K]>[NestedKey]>, E[NestedKey]>
+                                          : never
+                                        : never;
+                                    }
+                                  : E extends keyof NonNullable<T[K]>
+                                    ? { [P in E]: NonNullable<T[K]>[P] }
+                                    : never
+                              : never;
+                          }[number]
+                        >
+                      > | null
+                    : Array<
+                        UnionToIntersection<
+                          {
+                            [FieldIndex in keyof Field[K]]: Field[K][FieldIndex] extends infer E
+                              ? E extends TypedMapFields
+                                ? E extends keyof NonNullable<T[K]>
+                                  ? { [P in E]: NonNullable<T[K]>[P] }
+                                  : never
+                                : E extends Record<string, any>
+                                  ? {
+                                      [NestedKey in keyof E]: NestedKey extends keyof NonNullable<T[K]>
+                                        ? NonNullable<NonNullable<T[K]>[NestedKey]> extends TypedSchema
+                                          ? null extends NonNullable<T[K]>[NestedKey]
+                                            ? InferResult<NonNullable<NonNullable<T[K]>[NestedKey]>, E[NestedKey]> | null
+                                            : InferResult<NonNullable<NonNullable<T[K]>[NestedKey]>, E[NestedKey]>
+                                          : never
+                                        : never;
+                                    }
+                                  : E extends keyof NonNullable<T[K]>
+                                    ? { [P in E]: NonNullable<T[K]>[P] }
+                                    : never
+                              : never;
+                          }[number]
+                        >
+                      >
                   : never
+                : Field[K] extends any[]
+                  ? null extends T[K]
+                    ? UnionToIntersection<
+                        {
+                          [FieldIndex in keyof Field[K]]: Field[K][FieldIndex] extends infer E
+                            ? E extends TypedMapFields
+                              ? E extends keyof NonNullable<T[K]>
+                                ? { [P in E]: NonNullable<T[K]>[P] }
+                                : never
+                              : E extends Record<string, any>
+                                ? {
+                                    [NestedKey in keyof E]: NestedKey extends keyof NonNullable<T[K]>
+                                      ? NonNullable<NonNullable<T[K]>[NestedKey]> extends TypedSchema
+                                        ? null extends NonNullable<T[K]>[NestedKey]
+                                          ? InferResult<NonNullable<NonNullable<T[K]>[NestedKey]>, E[NestedKey]> | null
+                                          : InferResult<NonNullable<NonNullable<T[K]>[NestedKey]>, E[NestedKey]>
+                                        : never
+                                      : never;
+                                  }
+                                : E extends keyof NonNullable<T[K]>
+                                  ? { [P in E]: NonNullable<T[K]>[P] }
+                                  : never
+                            : never;
+                        }[number]
+                      > | null
+                    : UnionToIntersection<
+                        {
+                          [FieldIndex in keyof Field[K]]: Field[K][FieldIndex] extends infer E
+                            ? E extends TypedMapFields
+                              ? E extends keyof T[K]
+                                ? { [P in E]: T[K][P] }
+                                : never
+                              : E extends Record<string, any>
+                                ? {
+                                    [NestedKey in keyof E]: NestedKey extends keyof NonNullable<T[K]>
+                                      ? NonNullable<NonNullable<T[K]>[NestedKey]> extends TypedSchema
+                                        ? null extends NonNullable<T[K]>[NestedKey]
+                                          ? InferResult<NonNullable<NonNullable<T[K]>[NestedKey]>, E[NestedKey]> | null
+                                          : InferResult<NonNullable<NonNullable<T[K]>[NestedKey]>, E[NestedKey]>
+                                        : never
+                                      : never;
+                                  }
+                                : E extends keyof NonNullable<T[K]>
+                                  ? { [P in E]: NonNullable<T[K]>[P] }
+                                  : never
+                            : never;
+                        }[number]
+                      >
+                  : never
+              : T[K] extends { __type: "Union"; __primitiveFields: any }
+                ? T[K] extends { __array: true }
+                  ? Field[K] extends any[]
+                    ? null extends T[K]
+                      ? Array<InferUnionFieldValue<T[K], Field[K]>> | null
+                      : Array<InferUnionFieldValue<T[K], Field[K]>>
+                    : never
+                  : Field[K] extends any[]
+                    ? null extends T[K]
+                      ? InferUnionFieldValue<T[K], Field[K]> | null
+                      : InferUnionFieldValue<T[K], Field[K]>
+                    : never
+                  : NonNullable<T[K]> extends TypedSchema
+                    ? null extends T[K]
+                      ? InferResult<NonNullable<T[K]>, Field[K]> | null
+                      : InferResult<NonNullable<T[K]>, Field[K]>
+                    : never
           : never;
       }
     : never;
 
-type InferResult<
+export type InferResult<
   T extends TypedSchema,
-  SelectedFields extends UnifiedFieldSelection<T>[],
-> = UnionToIntersection<
-  {
-    [K in keyof SelectedFields]: InferFieldValue<T, SelectedFields[K]>;
-  }[number]
->;
+  SelectedFields extends UnifiedFieldSelection<T>[] | undefined,
+> = SelectedFields extends undefined
+  ? {}
+  : SelectedFields extends []
+  ? {}
+  : SelectedFields extends UnifiedFieldSelection<T>[]
+  ? UnionToIntersection<
+      {
+        [K in keyof SelectedFields]: InferFieldValue<T, SelectedFields[K]>;
+      }[number]
+    >
+  : {};
 
 // Pagination conditional types
 // Checks if a page configuration object has any pagination parameters
-type HasPaginationParams<Page> =
+export type HasPaginationParams<Page> =
   Page extends { offset: any } ? true :
   Page extends { after: any } ? true :
   Page extends { before: any } ? true :
   false;
 
 // Infer which pagination type is being used from the page config
-type InferPaginationType<Page> =
+export type InferPaginationType<Page> =
   Page extends { offset: any } ? "offset" :
   Page extends { after: any } | { before: any } ? "keyset" :
   never;
 
 // Returns either non-paginated (array) or paginated result based on page params
 // For single pagination type support (offset-only or keyset-only)
-type ConditionalPaginatedResult<
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export type ConditionalPaginatedResult<
   Page,
   RecordType,
   PaginatedType
@@ -209,7 +790,7 @@ type ConditionalPaginatedResult<
 
 // For actions supporting both offset and keyset pagination
 // Infers the specific pagination type based on which params were passed
-type ConditionalPaginatedResultMixed<
+export type ConditionalPaginatedResultMixed<
   Page,
   RecordType,
   OffsetType,
@@ -236,23 +817,136 @@ export type ErrorData<T extends (...args: any[]) => Promise<any>> = Extract<
 >["errors"];
 
 /**
- * Represents an error from an unsuccessful RPC call
+ * Represents an error from an unsuccessful RPC call.
+ *
+ * This type matches the error structure defined in the AshTypescript.Rpc.Error protocol.
+ *
  * @example
- * const error: AshRpcError = { type: "validation_error", message: "Something went wrong" }
+ * const error: AshRpcError = {
+ *   type: "invalid_changes",
+ *   message: "Invalid value for field %{field}",
+ *   shortMessage: "Invalid changes",
+ *   vars: { field: "email" },
+ *   fields: ["email"],
+ *   path: ["user", "email"],
+ *   details: { suggestion: "Provide a valid email address" }
+ * }
  */
 export type AshRpcError = {
+  /** Machine-readable error type (e.g., "invalid_changes", "not_found") */
   type: string;
+  /** Full error message (may contain template variables like %{key}) */
   message: string;
-  field?: string;
-  fieldPath?: string;
+  /** Concise version of the message */
+  shortMessage: string;
+  /** Variables to interpolate into the message template */
+  vars: Record<string, any>;
+  /** List of affected field names (for field-level errors) */
+  fields: string[];
+  /** Path to the error location in the data structure */
+  path: string[];
+  /** Optional map with extra details (e.g., suggestions, hints) */
   details?: Record<string, any>;
 }
+
+/**
+ * Represents the result of a validation RPC call.
+ *
+ * All validation actions return this same structure, indicating either
+ * successful validation or a list of validation errors.
+ *
+ * @example
+ * // Successful validation
+ * const result: ValidationResult = { success: true };
+ *
+ * // Failed validation
+ * const result: ValidationResult = {
+ *   success: false,
+ *   errors: [
+ *     {
+ *       type: "required",
+ *       message: "is required",
+ *       shortMessage: "Required field",
+ *       vars: { field: "email" },
+ *       fields: ["email"],
+ *       path: []
+ *     }
+ *   ]
+ * };
+ */
+export type ValidationResult =
+  | { success: true }
+  | { success: false; errors: AshRpcError[]; };
 
 
 
 
 
 // Helper Functions
+
+/**
+ * Configuration options for action RPC requests
+ */
+export interface ActionConfig {
+  // Request data
+  input?: Record<string, any>;
+  identity?: any;
+  fields?: Array<string | Record<string, any>>; // Field selection
+  filter?: Record<string, any>; // Filter options (for reads)
+  sort?: string; // Sort options
+  page?:
+    | {
+        // Offset-based pagination
+        limit?: number;
+        offset?: number;
+        count?: boolean;
+      }
+    | {
+        // Keyset pagination
+        limit?: number;
+        after?: string;
+        before?: string;
+      };
+
+  // Metadata
+  metadataFields?: ReadonlyArray<string>;
+
+  // HTTP customization
+  headers?: Record<string, string>; // Custom headers
+  fetchOptions?: RequestInit; // Fetch options (signal, cache, etc.)
+  customFetch?: (
+    input: RequestInfo | URL,
+    init?: RequestInit,
+  ) => Promise<Response>;
+
+  // Multitenancy
+  tenant?: string; // Tenant parameter
+
+  // Hook context
+  hookCtx?: Record<string, any>;
+}
+
+/**
+ * Configuration options for validation RPC requests
+ */
+export interface ValidationConfig {
+  // Request data
+  input?: Record<string, any>;
+
+  // HTTP customization
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (
+    input: RequestInfo | URL,
+    init?: RequestInit,
+  ) => Promise<Response>;
+
+  // Hook context
+  hookCtx?: Record<string, any>;
+}
+
+
+
 
 /**
  * Gets the CSRF token from the page's meta tag
@@ -277,9 +971,915 @@ export function buildCSRFHeaders(headers: Record<string, string> = {}): Record<s
   return headers;
 }
 
+/**
+ * Internal helper function for making action RPC requests
+ * Handles hooks, request configuration, fetch execution, and error handling
+ * @param config Configuration matching ActionConfig
+ */
+export async function executeActionRpcRequest<T>(
+  payload: Record<string, any>,
+  config: ActionConfig
+): Promise<T> {
+    const processedConfig = config;
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...processedConfig.headers,
+    ...config.headers,
+  };
+
+  const fetchFunction = config.customFetch || processedConfig.customFetch || fetch;
+  const fetchOptions: RequestInit = {
+    ...processedConfig.fetchOptions,
+    ...config.fetchOptions,
+    method: "POST",
+    headers,
+    body: JSON.stringify(payload),
+  };
+
+  const response = await fetchFunction("/rpc/run", fetchOptions);
+  const result = response.ok ? await response.json() : null;
+
+
+  if (!response.ok) {
+    return {
+      success: false,
+      errors: [
+        {
+          type: "network_error",
+          message: `Network request failed: ${response.statusText}`,
+          shortMessage: "Network error",
+          vars: { statusCode: response.status, statusText: response.statusText },
+          fields: [],
+          path: [],
+          details: { statusCode: response.status }
+        }
+      ],
+    } as T;
+  }
+
+  return result as T;
+}
+
+
+/**
+ * Internal helper function for making validation RPC requests
+ * Handles hooks, request configuration, fetch execution, and error handling
+ * @param config Configuration matching ValidationConfig
+ */
+export async function executeValidationRpcRequest<T>(
+  payload: Record<string, any>,
+  config: ValidationConfig
+): Promise<T> {
+    const processedConfig = config;
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...processedConfig.headers,
+    ...config.headers,
+  };
+
+  const fetchFunction = config.customFetch || processedConfig.customFetch || fetch;
+  const fetchOptions: RequestInit = {
+    ...processedConfig.fetchOptions,
+    ...config.fetchOptions,
+    method: "POST",
+    headers,
+    body: JSON.stringify(payload),
+  };
+
+  const response = await fetchFunction("/rpc/validate", fetchOptions);
+  const result = response.ok ? await response.json() : null;
+
+
+  if (!response.ok) {
+    return {
+      success: false,
+      errors: [
+        {
+          type: "network_error",
+          message: `Network request failed: ${response.statusText}`,
+          shortMessage: "Network error",
+          vars: { statusCode: response.status, statusText: response.statusText },
+          fields: [],
+          path: [],
+          details: { statusCode: response.status }
+        }
+      ],
+    } as T;
+  }
+
+  return result as T;
+}
 
 
 
 
+
+
+
+
+
+export type ListBidsFields = UnifiedFieldSelection<BidResourceSchema>[];
+
+
+export type InferListBidsResult<
+  Fields extends ListBidsFields | undefined,
+  Page extends ListBidsConfig["page"] = undefined
+> = ConditionalPaginatedResultMixed<Page, Array<InferResult<BidResourceSchema, Fields>>, {
+  results: Array<InferResult<BidResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+  count?: number | null;
+  type: "offset";
+}, {
+  results: Array<InferResult<BidResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  after: string | null;
+  before: string | null;
+  previousPage: string;
+  nextPage: string;
+  count?: number | null;
+  type: "keyset";
+}>;
+
+export type ListBidsConfig = {
+  tenant?: string;
+  fields: ListBidsFields;
+  filter?: BidFilterInput;
+  sort?: string;
+  page?: (
+    {
+      limit?: number;
+      offset?: number;
+      count?: boolean;
+    } | {
+      limit?: number;
+      after?: string;
+      before?: string;
+    }
+  );
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
+
+export type ListBidsResult<Fields extends ListBidsFields, Page extends ListBidsConfig["page"] = undefined> = | { success: true; data: InferListBidsResult<Fields, Page>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read Bid records
+ *
+ * @ashActionType :read
+ */
+export async function listBids<Fields extends ListBidsFields, Config extends ListBidsConfig = ListBidsConfig>(
+  config: Config & { fields: Fields }
+): Promise<ListBidsResult<Fields, Config["page"]>> {
+  const payload = {
+    action: "list_bids",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort }),
+    ...(config.page && { page: config.page })
+  };
+
+  return executeActionRpcRequest<ListBidsResult<Fields, Config["page"]>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read Bid records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateListBids(
+  config: {
+  tenant?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "list_bids",
+    ...(config.tenant !== undefined && { tenant: config.tenant })
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type MakeBidInput = {
+  amount: Decimal;
+  bidType: "auto" | "proxy" | "manual";
+  itemId: UUID;
+};
+
+export type MakeBidFields = UnifiedFieldSelection<BidResourceSchema>[];
+
+export type InferMakeBidResult<
+  Fields extends MakeBidFields | undefined,
+> = InferResult<BidResourceSchema, Fields>;
+
+export type MakeBidResult<Fields extends MakeBidFields | undefined = undefined> = | { success: true; data: InferMakeBidResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Create a new Bid
+ *
+ * @ashActionType :create
+ */
+export async function makeBid<Fields extends MakeBidFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  input: MakeBidInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<MakeBidResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "make_bid",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<MakeBidResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Create a new Bid
+ *
+ * @ashActionType :create
+ * @validation true
+ */
+export async function validateMakeBid(
+  config: {
+  tenant?: string;
+  input: MakeBidInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "make_bid",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type ListCategoriesFields = UnifiedFieldSelection<CategoryResourceSchema>[];
+
+
+export type InferListCategoriesResult<
+  Fields extends ListCategoriesFields | undefined,
+  Page extends ListCategoriesConfig["page"] = undefined
+> = ConditionalPaginatedResultMixed<Page, Array<InferResult<CategoryResourceSchema, Fields>>, {
+  results: Array<InferResult<CategoryResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+  count?: number | null;
+  type: "offset";
+}, {
+  results: Array<InferResult<CategoryResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  after: string | null;
+  before: string | null;
+  previousPage: string;
+  nextPage: string;
+  count?: number | null;
+  type: "keyset";
+}>;
+
+export type ListCategoriesConfig = {
+  tenant?: string;
+  fields: ListCategoriesFields;
+  filter?: CategoryFilterInput;
+  sort?: string;
+  page?: (
+    {
+      limit?: number;
+      offset?: number;
+      count?: boolean;
+    } | {
+      limit?: number;
+      after?: string;
+      before?: string;
+    }
+  );
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
+
+export type ListCategoriesResult<Fields extends ListCategoriesFields, Page extends ListCategoriesConfig["page"] = undefined> = | { success: true; data: InferListCategoriesResult<Fields, Page>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read Category records
+ *
+ * @ashActionType :read
+ */
+export async function listCategories<Fields extends ListCategoriesFields, Config extends ListCategoriesConfig = ListCategoriesConfig>(
+  config: Config & { fields: Fields }
+): Promise<ListCategoriesResult<Fields, Config["page"]>> {
+  const payload = {
+    action: "list_categories",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort }),
+    ...(config.page && { page: config.page })
+  };
+
+  return executeActionRpcRequest<ListCategoriesResult<Fields, Config["page"]>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read Category records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateListCategories(
+  config: {
+  tenant?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "list_categories",
+    ...(config.tenant !== undefined && { tenant: config.tenant })
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type CreateCategoryInput = {
+  name: string;
+  description?: string | null;
+  slug?: string | null;
+  attributeSchema?: Record<string, any>;
+  formSchema?: Record<string, any>;
+  imageUrl?: string | null;
+  parentId?: UUID | null;
+};
+
+export type CreateCategoryFields = UnifiedFieldSelection<CategoryResourceSchema>[];
+
+export type InferCreateCategoryResult<
+  Fields extends CreateCategoryFields | undefined,
+> = InferResult<CategoryResourceSchema, Fields>;
+
+export type CreateCategoryResult<Fields extends CreateCategoryFields | undefined = undefined> = | { success: true; data: InferCreateCategoryResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Create a new Category
+ *
+ * @ashActionType :create
+ */
+export async function createCategory<Fields extends CreateCategoryFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  input: CreateCategoryInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<CreateCategoryResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "create_category",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<CreateCategoryResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Create a new Category
+ *
+ * @ashActionType :create
+ * @validation true
+ */
+export async function validateCreateCategory(
+  config: {
+  tenant?: string;
+  input: CreateCategoryInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "create_category",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type ListItemsFields = UnifiedFieldSelection<ItemResourceSchema>[];
+
+
+export type InferListItemsResult<
+  Fields extends ListItemsFields | undefined,
+  Page extends ListItemsConfig["page"] = undefined
+> = ConditionalPaginatedResultMixed<Page, Array<InferResult<ItemResourceSchema, Fields>>, {
+  results: Array<InferResult<ItemResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+  count?: number | null;
+  type: "offset";
+}, {
+  results: Array<InferResult<ItemResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  after: string | null;
+  before: string | null;
+  previousPage: string;
+  nextPage: string;
+  count?: number | null;
+  type: "keyset";
+}>;
+
+export type ListItemsConfig = {
+  tenant?: string;
+  fields: ListItemsFields;
+  filter?: ItemFilterInput;
+  sort?: string;
+  page?: (
+    {
+      limit?: number;
+      offset?: number;
+      count?: boolean;
+    } | {
+      limit?: number;
+      after?: string;
+      before?: string;
+    }
+  );
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
+
+export type ListItemsResult<Fields extends ListItemsFields, Page extends ListItemsConfig["page"] = undefined> = | { success: true; data: InferListItemsResult<Fields, Page>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read Item records
+ *
+ * @ashActionType :read
+ */
+export async function listItems<Fields extends ListItemsFields, Config extends ListItemsConfig = ListItemsConfig>(
+  config: Config & { fields: Fields }
+): Promise<ListItemsResult<Fields, Config["page"]>> {
+  const payload = {
+    action: "list_items",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort }),
+    ...(config.page && { page: config.page })
+  };
+
+  return executeActionRpcRequest<ListItemsResult<Fields, Config["page"]>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read Item records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateListItems(
+  config: {
+  tenant?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "list_items",
+    ...(config.tenant !== undefined && { tenant: config.tenant })
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type CreateDraftItemInput = {
+  title: string;
+  description?: string | null;
+  startingPrice: Decimal;
+  reservePrice?: Decimal | null;
+  bidIncrement?: Decimal | null;
+  slug?: string | null;
+  startTime?: UtcDateTimeUsec | null;
+  endTime?: UtcDateTimeUsec | null;
+  categoryId?: UUID | null;
+  lotNumber?: string | null;
+  condition?: "new" | "used" | "refurbished" | null;
+  location?: string | null;
+  attributes: Record<string, any>;
+  saleType?: "auction" | "buy_now" | "hybrid";
+  auctionFormat?: "standard" | "reserve" | "live" | "timed" | null;
+  buyNowPrice?: Decimal | null;
+};
+
+export type CreateDraftItemFields = UnifiedFieldSelection<ItemResourceSchema>[];
+
+export type InferCreateDraftItemResult<
+  Fields extends CreateDraftItemFields | undefined,
+> = InferResult<ItemResourceSchema, Fields>;
+
+export type CreateDraftItemResult<Fields extends CreateDraftItemFields | undefined = undefined> = | { success: true; data: InferCreateDraftItemResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Create a new Item
+ *
+ * @ashActionType :create
+ */
+export async function createDraftItem<Fields extends CreateDraftItemFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  input: CreateDraftItemInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<CreateDraftItemResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "create_draft_item",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<CreateDraftItemResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Create a new Item
+ *
+ * @ashActionType :create
+ * @validation true
+ */
+export async function validateCreateDraftItem(
+  config: {
+  tenant?: string;
+  input: CreateDraftItemInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "create_draft_item",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type UpdateDraftItemInput = {
+  title?: string;
+  description?: string | null;
+  startingPrice?: Decimal;
+  reservePrice?: Decimal | null;
+  bidIncrement?: Decimal | null;
+  slug?: string | null;
+  startTime?: UtcDateTimeUsec | null;
+  endTime?: UtcDateTimeUsec | null;
+  categoryId?: UUID | null;
+  lotNumber?: string | null;
+  condition?: "new" | "used" | "refurbished" | null;
+  location?: string | null;
+  attributes?: Record<string, any>;
+  saleType?: "auction" | "buy_now" | "hybrid";
+  auctionFormat?: "standard" | "reserve" | "live" | "timed" | null;
+  buyNowPrice?: Decimal | null;
+  id: UUID;
+};
+
+export type UpdateDraftItemFields = UnifiedFieldSelection<ItemResourceSchema>[];
+
+export type InferUpdateDraftItemResult<
+  Fields extends UpdateDraftItemFields | undefined,
+> = InferResult<ItemResourceSchema, Fields>;
+
+export type UpdateDraftItemResult<Fields extends UpdateDraftItemFields | undefined = undefined> = | { success: true; data: InferUpdateDraftItemResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Update an existing Item
+ *
+ * @ashActionType :update
+ */
+export async function updateDraftItem<Fields extends UpdateDraftItemFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  input: UpdateDraftItemInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<UpdateDraftItemResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "update_draft_item",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<UpdateDraftItemResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Update an existing Item
+ *
+ * @ashActionType :update
+ * @validation true
+ */
+export async function validateUpdateDraftItem(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  input: UpdateDraftItemInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "update_draft_item",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type PublishItemFields = UnifiedFieldSelection<ItemResourceSchema>[];
+
+export type InferPublishItemResult<
+  Fields extends PublishItemFields | undefined,
+> = InferResult<ItemResourceSchema, Fields>;
+
+export type PublishItemResult<Fields extends PublishItemFields | undefined = undefined> = | { success: true; data: InferPublishItemResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Update an existing Item
+ *
+ * @ashActionType :update
+ */
+export async function publishItem<Fields extends PublishItemFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<PublishItemResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "publish_item",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<PublishItemResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Update an existing Item
+ *
+ * @ashActionType :update
+ * @validation true
+ */
+export async function validatePublishItem(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "publish_item",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type ListUsersFields = UnifiedFieldSelection<UserResourceSchema>[];
+
+
+export type InferListUsersResult<
+  Fields extends ListUsersFields | undefined,
+  Page extends ListUsersConfig["page"] = undefined
+> = ConditionalPaginatedResultMixed<Page, Array<InferResult<UserResourceSchema, Fields>>, {
+  results: Array<InferResult<UserResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+  count?: number | null;
+  type: "offset";
+}, {
+  results: Array<InferResult<UserResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  after: string | null;
+  before: string | null;
+  previousPage: string;
+  nextPage: string;
+  count?: number | null;
+  type: "keyset";
+}>;
+
+export type ListUsersConfig = {
+  tenant?: string;
+  fields: ListUsersFields;
+  filter?: UserFilterInput;
+  sort?: string;
+  page?: (
+    {
+      limit?: number;
+      offset?: number;
+      count?: boolean;
+    } | {
+      limit?: number;
+      after?: string;
+      before?: string;
+    }
+  );
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
+
+export type ListUsersResult<Fields extends ListUsersFields, Page extends ListUsersConfig["page"] = undefined> = | { success: true; data: InferListUsersResult<Fields, Page>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read User records
+ *
+ * @ashActionType :read
+ */
+export async function listUsers<Fields extends ListUsersFields, Config extends ListUsersConfig = ListUsersConfig>(
+  config: Config & { fields: Fields }
+): Promise<ListUsersResult<Fields, Config["page"]>> {
+  const payload = {
+    action: "list_users",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort }),
+    ...(config.page && { page: config.page })
+  };
+
+  return executeActionRpcRequest<ListUsersResult<Fields, Config["page"]>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read User records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateListUsers(
+  config: {
+  tenant?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "list_users",
+    ...(config.tenant !== undefined && { tenant: config.tenant })
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
 
 

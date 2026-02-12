@@ -3,11 +3,7 @@ defmodule Angle.Bidding.Bid do
     domain: Angle.Bidding,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshGraphql.Resource, AshJsonApi.Resource]
-
-  require Ash.Resource.Change.Builtins
-  alias Angle.Bidding.Bid.BidType
-  alias Angle.Bidding.Bid.ValidateBidIsHigherThanCurrentPrice
+    extensions: [AshGraphql.Resource, AshJsonApi.Resource, AshTypescript.Resource]
 
   json_api do
     type "bid"
@@ -18,6 +14,10 @@ defmodule Angle.Bidding.Bid do
       post :make_bid, route: "/make", name: "Make a Bid"
     end
   end
+
+  require Ash.Resource.Change.Builtins
+  alias Angle.Bidding.Bid.BidType
+  alias Angle.Bidding.Bid.ValidateBidIsHigherThanCurrentPrice
 
   graphql do
     type :bid
@@ -37,6 +37,10 @@ defmodule Angle.Bidding.Bid do
     repo Angle.Repo
   end
 
+  typescript do
+    type_name "Bid"
+  end
+
   actions do
     defaults [:read, :destroy, create: :*, update: :*]
 
@@ -51,11 +55,6 @@ defmodule Angle.Bidding.Bid do
       change set_attribute(:user_id, actor(:id))
 
       change {ValidateBidIsHigherThanCurrentPrice, []}
-
-      change before_action(fn changeset, _opts ->
-               IO.puts("Validating bid amount against current price...")
-               changeset
-             end)
     end
   end
 
