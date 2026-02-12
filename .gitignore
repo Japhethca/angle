@@ -49,12 +49,13 @@ npm-debug.log
 ehthumbs.db
 Thumbs.db
 
-# Editor files
+# Editor / AI tool files
 *.swp
 *.swo
 *~
 .vscode/
 .idea/
+.gemini/
 
 # Development logs
 *.log
