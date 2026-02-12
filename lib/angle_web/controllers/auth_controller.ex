@@ -1,24 +1,45 @@
 defmodule AngleWeb.AuthController do
   use AngleWeb, :controller
 
-  def login(conn, _params) do
+  alias AngleWeb.Plugs.Auth, as: AuthPlug
+
+  def login(conn, params) do
+    # If return_to is passed as a query param (from frontend auth guards),
+    # save it to session so it survives the login POST
+    conn =
+      case params do
+        %{"return_to" => return_to} when is_binary(return_to) ->
+          if AuthPlug.valid_return_to?(return_to) do
+            put_session(conn, :return_to, return_to)
+          else
+            conn
+          end
+
+        _ ->
+          conn
+      end
+
     render_inertia(conn, "auth/login")
   end
 
   def do_login(conn, %{"email" => email, "password" => password}) do
     case Angle.Accounts.User.sign_in_with_password(%{email: email, password: password}) do
       {:ok, %{user: user, metadata: %{token: token}}} ->
+        {conn, redirect_to} = AuthPlug.pop_return_to(conn, ~p"/")
+
         conn
         |> put_session(:current_user_id, user.id)
         |> put_session(:auth_token, token)
         |> put_flash(:info, "Successfully signed in!")
-        |> redirect(to: ~p"/")
+        |> redirect(to: redirect_to)
 
       {:ok, user} ->
+        {conn, redirect_to} = AuthPlug.pop_return_to(conn, ~p"/")
+
         conn
         |> put_session(:current_user_id, user.id)
         |> put_flash(:info, "Successfully signed in!")
-        |> redirect(to: ~p"/")
+        |> redirect(to: redirect_to)
 
       {:error, _err} ->
         conn
@@ -161,10 +182,12 @@ defmodule AngleWeb.AuthController do
          {:ok, user} <- Ash.get(Angle.Accounts.User, user_id, domain: Angle.Accounts),
          {:ok, confirmed_user} <- confirm_user_account(user, token) do
       # Successfully confirmed - log in the user and generate new session
+      {conn, redirect_to} = AuthPlug.pop_return_to(conn, ~p"/dashboard")
+
       conn
       |> put_session(:current_user_id, confirmed_user.id)
       |> put_flash(:info, "Your account has been confirmed successfully! Welcome!")
-      |> redirect(to: ~p"/dashboard")
+      |> redirect(to: redirect_to)
     else
       {:error, :invalid_token} ->
         render_confirmation_error(conn, "Invalid confirmation link")
@@ -301,11 +324,13 @@ defmodule AngleWeb.AuthController do
                domain: Angle.Accounts,
                authorize?: false
              ) do
+        {conn, redirect_to} = AuthPlug.pop_return_to(conn, ~p"/dashboard")
+
         conn
         |> delete_session(:verify_user_id)
         |> delete_session(:verify_email)
         |> put_flash(:success, "Account verified successfully! Welcome to Angle.")
-        |> redirect(to: ~p"/dashboard")
+        |> redirect(to: redirect_to)
       else
         {:error, :invalid_code} ->
           conn

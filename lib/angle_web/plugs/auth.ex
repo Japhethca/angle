@@ -16,17 +16,56 @@ defmodule AngleWeb.Plugs.Auth do
 
   @doc """
   Ensures user is authenticated, redirects to login if not.
+  Saves the requested path to session so the user can be returned after login.
   """
   def ensure_authenticated(conn, _opts) do
     case get_current_user_id(conn) do
       nil ->
+        return_to = return_to_path(conn)
+
         conn
+        |> put_session(:return_to, return_to)
         |> put_flash(:error, "You must be logged in to access this page")
         |> redirect(to: ~p"/auth/login")
         |> halt()
 
       user_id ->
         assign(conn, :current_user_id, user_id)
+    end
+  end
+
+  @doc """
+  Pops the return-to URL from session, returning `{conn, url}`.
+  Falls back to the given `fallback` path if none is stored or the stored path is invalid.
+  """
+  def pop_return_to(conn, fallback) do
+    return_to = get_session(conn, :return_to)
+    conn = delete_session(conn, :return_to)
+
+    url =
+      if is_binary(return_to) and valid_return_to?(return_to) do
+        return_to
+      else
+        fallback
+      end
+
+    {conn, url}
+  end
+
+  @doc """
+  Validates that a return-to path is a safe relative path.
+  Must start with `/` but not `//` (prevents open redirect).
+  """
+  def valid_return_to?("/" <> rest) do
+    not String.starts_with?(rest, "/")
+  end
+
+  def valid_return_to?(_), do: false
+
+  defp return_to_path(conn) do
+    case conn.query_string do
+      "" -> conn.request_path
+      qs -> "#{conn.request_path}?#{qs}"
     end
   end
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
-import { Search, Bell, Menu, User, X } from "lucide-react";
+import { Search, Bell, Menu, User } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +10,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { AuthLink } from "@/components/navigation/auth-link";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -45,9 +46,10 @@ export function MainNav() {
           {/* Desktop nav links */}
           <div className="hidden items-center gap-8 lg:flex">
             {visibleLinks.map((link) => (
-              <Link
+              <AuthLink
                 key={link.href}
                 href={link.href}
+                auth={link.auth}
                 className={
                   isActive(link.href)
                     ? "border-b-2 border-primary-1000 pb-1 text-sm font-medium text-primary-1000"
@@ -55,7 +57,7 @@ export function MainNav() {
                 }
               >
                 {link.label}
-              </Link>
+              </AuthLink>
             ))}
           </div>
         </div>

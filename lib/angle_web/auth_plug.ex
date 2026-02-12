@@ -7,12 +7,17 @@ defmodule AngleWeb.AuthPlug do
   use AshAuthentication.Plug, otp_app: :angle
 
   def handle_success(conn, _activity, user, token) do
+    conn =
+      conn
+      |> store_in_session(user)
+      |> Plug.Conn.put_session(:current_user_id, user.id)
+      |> maybe_store_token(token)
+
+    {conn, redirect_to} = AngleWeb.Plugs.Auth.pop_return_to(conn, "/dashboard")
+
     conn
-    |> store_in_session(user)
-    |> Plug.Conn.put_session(:current_user_id, user.id)
-    |> maybe_store_token(token)
     |> Phoenix.Controller.put_flash(:info, "Successfully signed in!")
-    |> Phoenix.Controller.redirect(to: "/dashboard")
+    |> Phoenix.Controller.redirect(to: redirect_to)
   end
 
   def handle_failure(conn, _activity, _reason) do

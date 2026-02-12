@@ -3,6 +3,8 @@ import { Heart, Clock, Gavel, ArrowRight } from "lucide-react";
 import type { HomepageItemCard } from "@/ash_rpc";
 import { CountdownTimer } from "@/components/shared/countdown-timer";
 import { formatNaira } from "@/lib/format";
+import { useAuthGuard } from "@/hooks/use-auth-guard";
+import { AuthLink } from "@/components/navigation/auth-link";
 
 type ItemCardItem = HomepageItemCard[number];
 
@@ -14,6 +16,7 @@ interface ItemCardProps {
 export function ItemCard({ item, badge }: ItemCardProps) {
   const itemUrl = `/items/${item.slug || item.id}`;
   const price = item.currentPrice || item.startingPrice;
+  const { guard } = useAuthGuard();
 
   return (
     <div className="w-[85vw] shrink-0 sm:w-[320px] lg:w-[432px]">
@@ -31,6 +34,7 @@ export function ItemCard({ item, badge }: ItemCardProps) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              guard(itemUrl);
             }}
           >
             <Heart className="size-4 text-white" />
@@ -81,13 +85,14 @@ export function ItemCard({ item, badge }: ItemCardProps) {
 
         {/* Bid button for ending-soon cards */}
         {badge === "ending-soon" && (
-          <Link
+          <AuthLink
             href={itemUrl}
+            auth
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-600/90"
           >
             Bid
             <ArrowRight className="size-4" />
-          </Link>
+          </AuthLink>
         )}
       </div>
     </div>
