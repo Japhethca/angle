@@ -13,6 +13,25 @@ defmodule Angle.Inventory do
       rpc_action :create_draft_item, :create_draft
       rpc_action :update_draft_item, :update_draft
       rpc_action :publish_item, :publish_item
+
+      typed_query :homepage_item_card, :read do
+        ts_result_type_name "HomepageItemCard"
+        ts_fields_const_name "homepageItemCardFields"
+
+        fields [
+          :id,
+          :title,
+          :slug,
+          :starting_price,
+          :current_price,
+          :end_time,
+          :auction_status,
+          :condition,
+          :sale_type,
+          :view_count,
+          %{category: [:id, :name, :slug]}
+        ]
+      end
     end
   end
 

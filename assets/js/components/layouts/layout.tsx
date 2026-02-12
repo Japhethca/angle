@@ -3,6 +3,7 @@ import { usePage } from "@inertiajs/react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { MainNav } from "../navigation/main-nav";
+import { Footer } from "./footer";
 import { PageProps } from "../../types/auth";
 
 interface LayoutProps {
@@ -25,10 +26,11 @@ export default function Layout({ children }: LayoutProps) {
   }, [flash]);
 
   return (
-    <>
+    <div className="flex min-h-screen flex-col">
       <MainNav />
-      <main>{children}</main>
+      <main className="flex-1">{children}</main>
+      <Footer />
       <Toaster />
-    </>
+    </div>
   );
 }

@@ -11,6 +11,12 @@ defmodule Angle.Catalog do
     resource Angle.Catalog.Category do
       rpc_action :list_categories, :read
       rpc_action :create_category, :create
+
+      typed_query :homepage_category, :read do
+        ts_result_type_name "HomepageCategory"
+        ts_fields_const_name "homepageCategoryFields"
+        fields [:id, :name, :slug, :image_url]
+      end
     end
   end
 
