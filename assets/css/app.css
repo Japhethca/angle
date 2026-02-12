@@ -4,6 +4,7 @@
 @import "tailwindcss" source(none);
 
 @import "tw-animate-css";
+@import "sonner/dist/styles.css";
 @source "../css";
 @source "../js";
 @source "../../lib/angle_web";

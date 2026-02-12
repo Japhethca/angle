@@ -16,6 +16,8 @@ export interface Role {
 export interface User {
   id: string;
   email: string;
+  full_name: string | null;
+  phone_number: string | null;
   confirmed_at: string | null;
   roles: string[];
   permissions: string[];

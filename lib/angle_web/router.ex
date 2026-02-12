@@ -77,12 +77,21 @@ defmodule AngleWeb.Router do
     post "/login", AuthController, :do_login
     get "/register", AuthController, :register
     post "/register", AuthController, :do_register
+    get "/verify-account", AuthController, :verify_account
+    post "/verify-account", AuthController, :do_verify_account
+    post "/resend-otp", AuthController, :resend_otp
     get "/forgot-password", AuthController, :forgot_password
     post "/forgot-password", AuthController, :do_forgot_password
     get "/reset-password/:token", AuthController, :reset_password
     post "/reset-password", AuthController, :do_reset_password
     get "/confirm-new-user/:token", AuthController, :confirm_new_user
     post "/logout", AuthController, :logout
+  end
+
+  # OAuth callback routes (handled by AshAuthentication)
+  scope "/auth" do
+    pipe_through :browser
+    forward "/", AngleWeb.AuthPlug
   end
 
   # Protected routes

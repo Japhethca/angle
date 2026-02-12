@@ -41,7 +41,7 @@ defmodule AngleWeb.Plugs.Auth do
       case Accounts.User.get_by_subject(%{subject: auth_token}) do
         {:ok, user} ->
           # Load user with roles and permissions
-          user = user |> Ash.load!([:active_roles, :roles])
+          user = user |> Ash.load!([:active_roles, :roles], domain: Accounts, authorize?: false)
           user_permissions = get_user_permissions(user)
 
           conn
@@ -82,7 +82,7 @@ defmodule AngleWeb.Plugs.Auth do
         })
 
       user_id ->
-        case Ash.get(Accounts.User, user_id, domain: Accounts) do
+        case Ash.get(Accounts.User, user_id, domain: Accounts, authorize?: false) do
           {:ok, user} ->
             # Load user with roles and permissions
             user =
@@ -145,7 +145,7 @@ defmodule AngleWeb.Plugs.Auth do
   # Get all permissions for a user through their roles
   defp get_user_permissions(user) do
     user
-    |> Ash.load!(roles: :permissions)
+    |> Ash.load!([roles: :permissions], domain: Accounts, authorize?: false)
     |> Map.get(:roles, [])
     |> Enum.flat_map(fn role -> role.permissions end)
     |> Enum.map(& &1.name)

@@ -20,11 +20,14 @@ defmodule Angle.Factory do
   def create_user(attrs \\ %{}) do
     password = Map.get(attrs, :password, "Password123!")
 
-    params = %{
-      email: Map.get(attrs, :email, unique_email()),
-      password: password,
-      password_confirmation: Map.get(attrs, :password_confirmation, password)
-    }
+    params =
+      %{
+        email: Map.get(attrs, :email, unique_email()),
+        password: password,
+        password_confirmation: Map.get(attrs, :password_confirmation, password)
+      }
+      |> maybe_put(:full_name, Map.get(attrs, :full_name))
+      |> maybe_put(:phone_number, Map.get(attrs, :phone_number))
 
     Angle.Accounts.User
     |> Ash.Changeset.for_create(:register_with_password, params, authorize?: false)
