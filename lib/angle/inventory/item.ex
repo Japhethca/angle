@@ -36,7 +36,7 @@ defmodule Angle.Inventory.Item do
     check_constraints do
       check_constraint :id, "valid_auction_status",
         check:
-          "(((auction_status IS NULL) OR ((auction_status)::text = ANY (ARRAY[('scheduled'::character varying)::text, ('active'::character varying)::text, ('paused'::character varying)::text, ('ended'::character varying)::text, ('sold'::character varying)::text, ('cancelled'::character varying)::text]))))",
+          "(((auction_status IS NULL) OR ((auction_status)::text = ANY (ARRAY[('pending'::character varying)::text, ('scheduled'::character varying)::text, ('active'::character varying)::text, ('paused'::character varying)::text, ('ended'::character varying)::text, ('sold'::character varying)::text, ('cancelled'::character varying)::text]))))",
         message: "is invalid"
     end
 
@@ -259,6 +259,7 @@ defmodule Angle.Inventory.Item do
       allow_nil? false
       generated? true
       public? true
+      default %{}
     end
 
     attribute :sale_type, :atom do
