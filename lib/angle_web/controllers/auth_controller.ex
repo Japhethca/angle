@@ -317,32 +317,42 @@ defmodule AngleWeb.AuthController do
       |> put_flash(:error, "Session expired. Please register again.")
       |> redirect(to: ~p"/auth/register")
     else
-      with {:ok, user} <-
-             Ash.get(Angle.Accounts.User, user_id,
-               domain: Angle.Accounts,
-               authorize?: false
-             ) do
-        if is_nil(user.confirmed_at) do
-          strategy = AshAuthentication.Info.strategy!(Angle.Accounts.User, :confirm_new_user)
-          changeset = Ash.Changeset.for_update(user, :confirm, %{}, domain: Angle.Accounts)
+      case Angle.Accounts.OtpHelper.check_throttle(user_id, "confirm_new_user") do
+        :ok ->
+          send_confirmation_otp(user_id)
 
-          case AshAuthentication.AddOn.Confirmation.confirmation_token(
-                 strategy,
-                 changeset,
-                 user
-               ) do
-            {:ok, token} ->
-              Angle.Accounts.User.Senders.SendNewUserConfirmationEmail.send(user, token, [])
+          conn
+          |> put_flash(:info, "A new verification code has been sent to your email.")
+          |> redirect(to: ~p"/auth/verify-account")
 
-            _ ->
-              :ok
-          end
+        {:error, {:throttled, seconds}} ->
+          conn
+          |> put_flash(:error, "Please wait #{seconds} seconds before requesting another code.")
+          |> redirect(to: ~p"/auth/verify-account")
+
+        {:error, :rate_limit_exceeded} ->
+          conn
+          |> put_flash(:error, "Too many attempts. Please try again later.")
+          |> redirect(to: ~p"/auth/verify-account")
+      end
+    end
+  end
+
+  defp send_confirmation_otp(user_id) do
+    with {:ok, user} <-
+           Ash.get(Angle.Accounts.User, user_id, domain: Angle.Accounts, authorize?: false) do
+      if is_nil(user.confirmed_at) do
+        strategy = AshAuthentication.Info.strategy!(Angle.Accounts.User, :confirm_new_user)
+        changeset = Ash.Changeset.for_update(user, :confirm, %{}, domain: Angle.Accounts)
+
+        case AshAuthentication.AddOn.Confirmation.confirmation_token(strategy, changeset, user) do
+          {:ok, token} ->
+            Angle.Accounts.User.Senders.SendNewUserConfirmationEmail.send(user, token, [])
+
+          _ ->
+            :ok
         end
       end
-
-      conn
-      |> put_flash(:info, "A new verification code has been sent to your email.")
-      |> redirect(to: ~p"/auth/verify-account")
     end
   end
 

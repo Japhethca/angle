@@ -43,7 +43,7 @@ defmodule AngleWeb.AuthControllerTest do
   end
 
   describe "POST /auth/resend-otp" do
-    test "redirects to verify-account with flash", %{conn: conn} do
+    test "returns throttle error when called within cooldown period", %{conn: conn} do
       user = Factory.create_user()
 
       conn =
@@ -52,7 +52,7 @@ defmodule AngleWeb.AuthControllerTest do
         |> post("/auth/resend-otp")
 
       assert redirected_to(conn) == "/auth/verify-account"
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "verification code"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "Please wait"
     end
 
     test "redirects to register when no session", %{conn: conn} do

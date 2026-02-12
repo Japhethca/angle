@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Head, usePage, router } from "@inertiajs/react";
 import {
   InputOTP,
@@ -21,6 +21,21 @@ export default function VerifyAccount() {
   const [code, setCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const [cooldownSeconds, setCooldownSeconds] = useState(60);
+
+  useEffect(() => {
+    if (cooldownSeconds <= 0) return;
+
+    const timer = setInterval(() => {
+      setCooldownSeconds((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [cooldownSeconds]);
+
+  const resetCooldown = useCallback(() => {
+    setCooldownSeconds(60);
+  }, []);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,7 +55,11 @@ export default function VerifyAccount() {
       "/auth/resend-otp",
       {},
       {
-        onFinish: () => setIsResending(false),
+        onFinish: () => {
+          setIsResending(false);
+          setCode("");
+          resetCooldown();
+        },
       }
     );
   }
@@ -103,10 +122,14 @@ export default function VerifyAccount() {
           <button
             type="button"
             onClick={handleResend}
-            disabled={isResending}
+            disabled={isResending || cooldownSeconds > 0}
             className="font-medium text-orange-500 hover:text-orange-600 disabled:opacity-50"
           >
-            {isResending ? "Resending..." : "Resend OTP"}
+            {isResending
+              ? "Resending..."
+              : cooldownSeconds > 0
+                ? `Resend OTP (${cooldownSeconds}s)`
+                : "Resend OTP"}
           </button>
         </div>
       </div>

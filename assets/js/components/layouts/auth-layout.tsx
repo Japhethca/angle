@@ -1,4 +1,8 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { usePage } from "@inertiajs/react";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
+import type { PageProps } from "@/types/auth";
 
 const CATEGORY_PILLS = [
   "Vehicles",
@@ -10,39 +14,8 @@ const CATEGORY_PILLS = [
 
 function AngleLogo({ className = "" }: { className?: string }) {
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      <svg
-        width="32"
-        height="32"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L18 2H6Z"
-          stroke="#F97316"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M3 6H21"
-          stroke="#F97316"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10"
-          stroke="#F97316"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      <span className="text-xl font-bold tracking-wide text-gray-900">
-        ANGLE
-      </span>
+    <div className={`flex items-center ${className}`}>
+      <img src="/images/logo.svg" alt="Angle" height="36" />
     </div>
   );
 }
@@ -54,8 +27,22 @@ interface AuthLayoutProps {
 
 export function AuthLayout({
   children,
-  heroImage = "/images/auth-hero.jpg",
+  heroImage = "/images/auth-hero.png",
 }: AuthLayoutProps) {
+  const { flash } = usePage<PageProps>().props;
+
+  useEffect(() => {
+    if (flash.success) {
+      toast.success(flash.success);
+    }
+    if (flash.info) {
+      toast.info(flash.info);
+    }
+    if (flash.error) {
+      toast.error(flash.error);
+    }
+  }, [flash]);
+
   return (
     <div className="flex min-h-screen">
       {/* Hero panel - hidden on mobile, visible on lg+ */}
@@ -70,40 +57,12 @@ export function AuthLayout({
 
         {/* Logo on hero */}
         <div className="relative z-10 p-8">
-          <div className="flex items-center gap-2">
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L18 2H6Z"
-                stroke="#F97316"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M3 6H21"
-                stroke="#F97316"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10"
-                stroke="#F97316"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span className="text-xl font-bold tracking-wide text-white">
-              ANGLE
-            </span>
-          </div>
+          <img
+            src="/images/logo.svg"
+            alt="Angle"
+            height="36"
+            className="brightness-0 invert"
+          />
         </div>
 
         {/* Category pills at bottom of hero */}
@@ -130,6 +89,8 @@ export function AuthLayout({
 
         <div className="w-full max-w-md">{children}</div>
       </div>
+
+      <Toaster />
     </div>
   );
 }

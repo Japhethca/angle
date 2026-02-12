@@ -7,6 +7,9 @@ defmodule Angle.Accounts.OtpHelper do
   import Ash.Expr
 
   @otp_expiry_minutes 10
+  @otp_cooldown_seconds 60
+  @otp_max_resends 5
+  @otp_rate_limit_window_minutes 15
 
   @doc """
   Generates a random 6-digit OTP code string.
@@ -18,8 +21,58 @@ defmodule Angle.Accounts.OtpHelper do
   end
 
   @doc """
+  Checks whether a new OTP can be sent for the given user and purpose.
+  Returns `:ok` if allowed, or `{:error, reason}` if throttled.
+  """
+  def check_throttle(user_id, purpose \\ "confirm_new_user") do
+    now = DateTime.utc_now()
+
+    recent_otp =
+      Angle.Accounts.Otp
+      |> Ash.Query.filter(expr(user_id == ^user_id and purpose == ^purpose))
+      |> Ash.Query.sort(created_at: :desc)
+      |> Ash.Query.limit(1)
+      |> Ash.read!(domain: Angle.Accounts, authorize?: false)
+
+    case recent_otp do
+      [latest] ->
+        seconds_since = DateTime.diff(now, latest.created_at, :second)
+
+        if seconds_since < @otp_cooldown_seconds do
+          {:error, {:throttled, @otp_cooldown_seconds - seconds_since}}
+        else
+          check_rate_limit(user_id, purpose, now)
+        end
+
+      [] ->
+        :ok
+    end
+  end
+
+  defp check_rate_limit(user_id, purpose, now) do
+    window_start = DateTime.add(now, -@otp_rate_limit_window_minutes, :minute)
+
+    count =
+      Angle.Accounts.Otp
+      |> Ash.Query.filter(
+        expr(user_id == ^user_id and purpose == ^purpose and created_at >= ^window_start)
+      )
+      |> Ash.read!(domain: Angle.Accounts, authorize?: false)
+      |> length()
+
+    if count >= @otp_max_resends do
+      {:error, :rate_limit_exceeded}
+    else
+      :ok
+    end
+  end
+
+  @doc """
   Creates an OTP record for a user with the given confirmation token.
   Invalidates any existing unused OTPs for the same user and purpose.
+
+  Note: This function does not enforce throttling. Call `check_throttle/2`
+  before calling this function at the controller level.
   """
   def create_otp(user_id, confirmation_token, purpose \\ "confirm_new_user") do
     invalidate_codes(user_id, purpose)
