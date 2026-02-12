@@ -1,7 +1,7 @@
 defmodule Angle.Catalog do
   use Ash.Domain,
     otp_app: :angle,
-    extensions: [AshAdmin.Domain, AshJsonApi.Domain, AshTypescript.Rpc]
+    extensions: [AshAdmin.Domain, AshGraphql.Domain, AshJsonApi.Domain, AshTypescript.Rpc]
 
   admin do
     show? true

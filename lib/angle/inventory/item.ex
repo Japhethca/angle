@@ -3,7 +3,7 @@ defmodule Angle.Inventory.Item do
     domain: Angle.Inventory,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshJsonApi.Resource, AshTypescript.Resource]
+    extensions: [AshGraphql.Resource, AshJsonApi.Resource, AshTypescript.Resource]
 
   json_api do
     type "item"
@@ -15,6 +15,20 @@ defmodule Angle.Inventory.Item do
       post :create_draft, route: "/draft", name: "Create Draft Item"
       patch :update_draft, route: "/draft/:id", name: "Update Draft Item"
       patch :publish_item, route: "/publish", name: "Publish Item"
+    end
+  end
+
+  graphql do
+    type :item
+
+    queries do
+      get :item, :read
+      list :items, :read
+    end
+
+    mutations do
+      create :create_draft_item, :create_draft
+      update :publish_item, :publish_item
     end
   end
 

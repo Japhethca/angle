@@ -1,5 +1,7 @@
 defmodule Angle.Accounts do
-  use Ash.Domain, otp_app: :angle, extensions: [AshAdmin.Domain, AshTypescript.Rpc]
+  use Ash.Domain,
+    otp_app: :angle,
+    extensions: [AshAdmin.Domain, AshGraphql.Domain, AshTypescript.Rpc]
 
   admin do
     show? true

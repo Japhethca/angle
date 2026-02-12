@@ -2,7 +2,7 @@ defmodule AngleWeb.GraphqlSchema do
   use Absinthe.Schema
 
   use AshGraphql,
-    domains: [Angle.Bidding, Angle.Catalog]
+    domains: [Angle.Accounts, Angle.Bidding, Angle.Catalog, Angle.Inventory]
 
   import_types Absinthe.Plug.Types
 
