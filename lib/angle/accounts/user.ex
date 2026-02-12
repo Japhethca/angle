@@ -44,6 +44,12 @@ defmodule Angle.Accounts.User do
           sender Angle.Accounts.User.Senders.SendPasswordResetEmail
         end
       end
+
+      google do
+        client_id Angle.Secrets
+        redirect_uri Angle.Secrets
+        client_secret Angle.Secrets
+      end
     end
   end
 
@@ -74,6 +80,26 @@ defmodule Angle.Accounts.User do
 
   actions do
     defaults [:read]
+
+    create :register_with_google do
+      argument :user_info, :map, allow_nil?: false
+      argument :oauth_tokens, :map, allow_nil?: false
+      upsert? true
+      upsert_identity :unique_email
+      upsert_fields []
+
+      change AshAuthentication.GenerateTokenChange
+      change AshAuthentication.Strategy.OAuth2.IdentityChange
+
+      change fn changeset, _ctx ->
+        user_info = Ash.Changeset.get_argument(changeset, :user_info)
+
+        changeset
+        |> Ash.Changeset.change_attribute(:email, Map.get(user_info, "email"))
+        |> Ash.Changeset.change_attribute(:full_name, Map.get(user_info, "name"))
+        |> Ash.Changeset.change_attribute(:confirmed_at, DateTime.utc_now())
+      end
+    end
 
     read :get_by_subject do
       description "Get a user by the subject claim in a JWT"
@@ -368,6 +394,10 @@ defmodule Angle.Accounts.User do
       authorize_if always()
     end
 
+    policy action(:register_with_google) do
+      authorize_if always()
+    end
+
     policy action(:sign_in_with_password) do
       authorize_if always()
     end
@@ -425,7 +455,7 @@ defmodule Angle.Accounts.User do
   attributes do
     uuid_primary_key :id
     attribute :email, :ci_string, allow_nil?: false, public?: true
-    attribute :hashed_password, :string, allow_nil?: false, sensitive?: true
+    attribute :hashed_password, :string, allow_nil?: true, sensitive?: true
     attribute :confirmed_at, :utc_datetime_usec
     attribute :full_name, :string, public?: true
     attribute :phone_number, :string, public?: true

@@ -88,6 +88,12 @@ defmodule AngleWeb.Router do
     post "/logout", AuthController, :logout
   end
 
+  # OAuth callback routes (handled by AshAuthentication)
+  scope "/auth" do
+    pipe_through :browser
+    forward "/", AngleWeb.AuthPlug
+  end
+
   # Protected routes
   scope "/", AngleWeb do
     pipe_through [:browser, :require_auth]
