@@ -6,7 +6,7 @@ import { router, Link } from "@inertiajs/react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Alert, AlertDescription } from "../ui/alert";
+
 import { Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
@@ -16,9 +16,6 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-interface LoginFormProps {
-  error?: string;
-}
 
 function GoogleIcon({ className = "" }: { className?: string }) {
   return (
@@ -49,7 +46,7 @@ function GoogleIcon({ className = "" }: { className?: string }) {
   );
 }
 
-export function LoginForm({ error }: LoginFormProps) {
+export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -80,12 +77,6 @@ export function LoginForm({ error }: LoginFormProps) {
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-5"
       >
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input

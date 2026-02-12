@@ -132,18 +132,22 @@ export type ItemAttributesOnlySchema = {
 // User Schema
 export type UserResourceSchema = {
   __type: "Resource";
-  __primitiveFields: "id" | "email";
+  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber";
   id: UUID;
   email: string;
+  fullName: string | null;
+  phoneNumber: string | null;
 };
 
 
 
 export type UserAttributesOnlySchema = {
   __type: "Resource";
-  __primitiveFields: "id" | "email";
+  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber";
   id: UUID;
   email: string;
+  fullName: string | null;
+  phoneNumber: string | null;
 };
 
 
@@ -450,6 +454,18 @@ export type UserFilterInput = {
   };
 
   email?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  fullName?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  phoneNumber?: {
     eq?: string;
     notEq?: string;
     in?: Array<string>;
@@ -1548,7 +1564,7 @@ export type CreateDraftItemInput = {
   lotNumber?: string | null;
   condition?: "new" | "used" | "refurbished" | null;
   location?: string | null;
-  attributes: Record<string, any>;
+  attributes?: Record<string, any>;
   saleType?: "auction" | "buy_now" | "hybrid";
   auctionFormat?: "standard" | "reserve" | "live" | "timed" | null;
   buyNowPrice?: Decimal | null;

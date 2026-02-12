@@ -6,7 +6,7 @@ import { router, Link } from "@inertiajs/react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Alert, AlertDescription } from "../ui/alert";
+
 import { Eye, EyeOff } from "lucide-react";
 
 const emailSchema = z.object({
@@ -28,9 +28,6 @@ type EmailFormData = z.infer<typeof emailSchema>;
 type PhoneFormData = z.infer<typeof phoneSchema>;
 type RegisterMode = "email" | "phone";
 
-interface RegisterFormProps {
-  error?: string;
-}
 
 function GoogleIcon() {
   return (
@@ -96,7 +93,7 @@ function PasswordField({
   );
 }
 
-export function RegisterForm({ error }: RegisterFormProps) {
+export function RegisterForm() {
   const [mode, setMode] = useState<RegisterMode>("email");
   const [showPassword, setShowPassword] = useState(false);
 
@@ -124,6 +121,7 @@ export function RegisterForm({ error }: RegisterFormProps) {
       full_name: data.full_name,
       email: data.email,
       password: data.password,
+      password_confirmation: data.password,
     });
   };
 
@@ -133,6 +131,7 @@ export function RegisterForm({ error }: RegisterFormProps) {
       phone_number: data.phone_number,
       email: `phone_${Date.now()}@placeholder.angle.app`,
       password: data.password,
+      password_confirmation: data.password,
     });
   };
 
@@ -144,12 +143,6 @@ export function RegisterForm({ error }: RegisterFormProps) {
           Join Angle to start bidding on exclusive items
         </p>
       </div>
-
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
 
       {/* Mode toggle */}
       <div className="flex rounded-full border border-gray-200 p-1">
