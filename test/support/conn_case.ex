@@ -28,6 +28,7 @@ defmodule AngleWeb.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import AngleWeb.ConnCase
+      import Angle.Factory
     end
   end
 

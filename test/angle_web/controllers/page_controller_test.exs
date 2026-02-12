@@ -1,8 +1,10 @@
 defmodule AngleWeb.PageControllerTest do
   use AngleWeb.ConnCase
 
-  test "GET /", %{conn: conn} do
+  test "GET / returns an Inertia response", %{conn: conn} do
     conn = get(conn, ~p"/")
-    assert html_response(conn, 200) =~ "Welcome to the Home Page"
+    response = html_response(conn, 200)
+    assert response =~ ~s(id="app")
+    assert response =~ ~s(data-page=)
   end
 end
