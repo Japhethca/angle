@@ -30,9 +30,6 @@ export function useBiddingChannel({ itemId, userId }: UseBiddingChannelOptions =
   const { isConnected, send, on } = usePhoenixChannel({
     topic: itemId ? `item:${itemId}` : 'bidding:lobby',
     params: { user_id: userId },
-    onJoin: () => {
-      console.log('Connected to bidding channel')
-    },
     onError: (error) => {
       console.error('Failed to connect to bidding channel:', error)
     }

@@ -4,15 +4,7 @@ import { LogoutButton } from "../auth/logout-button";
 import { PermissionGuard, AdminOnly, CanCreateItems, CanPlaceBids, CanManageUsers } from "../auth/permission-guard";
 
 export function MainNav() {
-  const { authenticated, user, hasRole, hasPermission } = useAuth();
-  console.log("MainNav Debug:", {
-    authenticated,
-    user,
-    userRoles: user?.roles,
-    userPermissions: user?.permissions,
-    canCreateItems: hasPermission("create_items"),
-    isAdmin: hasRole("admin")
-  });
+  const { authenticated, user } = useAuth();
 
   return (
     <nav className="bg-white shadow">
@@ -103,18 +95,6 @@ export function MainNav() {
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* Debug Auth State */}
-            <div className="text-xs bg-gray-100 p-2 rounded">
-              <div>Auth: {authenticated ? "✅ Logged In" : "❌ Not Logged In"}</div>
-              {user && (
-                <>
-                  <div>Email: {user.email}</div>
-                  <div>Roles: {user.roles?.join(", ") || "None"}</div>
-                  <div>Permissions: {user.permissions?.length || 0}</div>
-                </>
-              )}
-            </div>
-
             {authenticated ? (
               <>
                 <div className="text-sm text-gray-600">

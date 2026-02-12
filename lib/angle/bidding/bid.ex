@@ -55,11 +55,6 @@ defmodule Angle.Bidding.Bid do
       change set_attribute(:user_id, actor(:id))
 
       change {ValidateBidIsHigherThanCurrentPrice, []}
-
-      change before_action(fn changeset, _opts ->
-               IO.puts("Validating bid amount against current price...")
-               changeset
-             end)
     end
   end
 
