@@ -103,18 +103,29 @@ defmodule AngleWeb.AuthController do
         "password" => password,
         "password_confirmation" => password_confirmation
       }) do
-    case Angle.Accounts.User.reset_password_with_token(%{
-           reset_token: token,
-           password: password,
-           password_confirmation: password_confirmation
-         }) do
-      {:ok, %{user: user, metadata: %{token: auth_token}}} ->
-        conn
-        |> put_session(:current_user_id, user.id)
-        |> put_session(:auth_token, auth_token)
-        |> put_flash(:info, "Password reset successfully!")
-        |> redirect(to: ~p"/")
-
+    with {:ok, %{"sub" => "user?id=" <> user_id}, _resource} <-
+           AshAuthentication.Jwt.verify(token, Angle.Accounts.User),
+         {:ok, user} <-
+           Ash.get(Angle.Accounts.User, user_id,
+             domain: Angle.Accounts,
+             authorize?: false
+           ),
+         {:ok, reset_user} <-
+           Angle.Accounts.User.password_reset_with_password(
+             user,
+             %{
+               reset_token: token,
+               password: password,
+               password_confirmation: password_confirmation
+             },
+             authorize?: false
+           ) do
+      conn
+      |> put_session(:current_user_id, reset_user.id)
+      |> put_session(:auth_token, reset_user.__metadata__.token)
+      |> put_flash(:info, "Password reset successfully!")
+      |> redirect(to: ~p"/")
+    else
       {:error, changeset} ->
         errors = format_changeset_errors(changeset)
 
@@ -188,7 +199,7 @@ defmodule AngleWeb.AuthController do
   defp verify_confirmation_token(token) do
     # Use AshAuthentication's verify function for proper signature validation
     case AshAuthentication.Jwt.verify(token, Angle.Accounts.User) do
-      {:ok, claims} when is_map(claims) ->
+      {:ok, claims, _resource} when is_map(claims) ->
         validate_confirmation_claims(claims)
 
       {:error, :expired} ->

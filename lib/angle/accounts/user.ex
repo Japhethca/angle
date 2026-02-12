@@ -22,7 +22,7 @@ defmodule Angle.Accounts.User do
         confirm_on_update? false
         require_interaction? true
         confirmed_at_field :confirmed_at
-        auto_confirm_actions [:sign_in_with_magic_link, :reset_password_with_token]
+        auto_confirm_actions [:sign_in_with_magic_link, :password_reset_with_password]
         sender Angle.Accounts.User.Senders.SendNewUserConfirmationEmail
       end
     end
@@ -73,7 +73,7 @@ defmodule Angle.Accounts.User do
     define :request_password_reset_with_password
     define :password_reset_with_password
     define :get_by_email
-    define :reset_password_with_token
+
     define :assign_role
     define :remove_role
   end
@@ -254,38 +254,6 @@ defmodule Angle.Accounts.User do
       filter expr(email == ^arg(:email))
     end
 
-    update :reset_password_with_token do
-      argument :reset_token, :string do
-        allow_nil? false
-        sensitive? true
-      end
-
-      argument :password, :string do
-        description "The proposed password for the user, in plain text."
-        allow_nil? false
-        constraints min_length: 8
-        sensitive? true
-      end
-
-      argument :password_confirmation, :string do
-        description "The proposed password for the user (again), in plain text."
-        allow_nil? false
-        sensitive? true
-      end
-
-      # validates the provided reset token
-      validate AshAuthentication.Strategy.Password.ResetTokenValidation
-
-      # validates that the password matches the confirmation
-      validate AshAuthentication.Strategy.Password.PasswordConfirmationValidation
-
-      # Hashes the provided password
-      change AshAuthentication.Strategy.Password.HashPasswordChange
-
-      # Generates an authentication token for the user
-      change AshAuthentication.GenerateTokenChange
-    end
-
     update :assign_role do
       description "Assign a role to the user"
       accept []
@@ -415,10 +383,6 @@ defmodule Angle.Accounts.User do
     end
 
     policy action(:get_by_email) do
-      authorize_if always()
-    end
-
-    policy action(:reset_password_with_token) do
       authorize_if always()
     end
 

@@ -1,6 +1,10 @@
-import { Head, usePage } from '@inertiajs/react';
-import { ResetPasswordForm } from '../../components/forms/reset-password-form';
-import { PageProps } from '../../types/auth';
+import React from "react";
+import { Head, usePage } from "@inertiajs/react";
+import { ResetPasswordForm } from "../../components/forms/reset-password-form";
+import { AuthLayout } from "../../components/layouts/auth-layout";
+import { AuthProvider } from "../../contexts/auth-context";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import { PageProps } from "../../types/auth";
 
 interface ResetPasswordPageProps extends PageProps {
   token: string;
@@ -13,16 +17,26 @@ export default function ResetPassword() {
 
   return (
     <>
-      <Head title="Set New Password" />
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900">Angle</h1>
-            <p className="mt-2 text-sm text-gray-600">Set your new password</p>
+      <Head title="Change Password" />
+      <AuthLayout heroImage="/images/auth-hero-recover.png">
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+              Change Password
+            </h1>
           </div>
-          <ResetPasswordForm token={token} error={error} />
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          <ResetPasswordForm token={token} />
         </div>
-      </div>
+      </AuthLayout>
     </>
   );
 }
+
+ResetPassword.layout = (page: React.ReactNode) => (
+  <AuthProvider>{page}</AuthProvider>
+);

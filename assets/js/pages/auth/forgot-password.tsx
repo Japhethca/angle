@@ -1,6 +1,10 @@
-import { Head, usePage } from '@inertiajs/react';
-import { ForgotPasswordForm } from '../../components/forms/forgot-password-form';
-import { PageProps } from '../../types/auth';
+import React from "react";
+import { Head, usePage } from "@inertiajs/react";
+import { ForgotPasswordForm } from "../../components/forms/forgot-password-form";
+import { AuthLayout } from "../../components/layouts/auth-layout";
+import { AuthProvider } from "../../contexts/auth-context";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import { PageProps } from "../../types/auth";
 
 interface ForgotPasswordPageProps extends PageProps {
   error?: string;
@@ -12,16 +16,29 @@ export default function ForgotPassword() {
 
   return (
     <>
-      <Head title="Reset Password" />
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900">Angle</h1>
-            <p className="mt-2 text-sm text-gray-600">Reset your password</p>
+      <Head title="Recover Password" />
+      <AuthLayout heroImage="/images/auth-hero-recover.png">
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+              Recover Password
+            </h1>
+            <p className="mt-2 text-sm text-gray-600">
+              Don't worry, we'll send a reset link to your email
+            </p>
           </div>
-          <ForgotPasswordForm error={error} />
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          <ForgotPasswordForm />
         </div>
-      </div>
+      </AuthLayout>
     </>
   );
 }
+
+ForgotPassword.layout = (page: React.ReactNode) => (
+  <AuthProvider>{page}</AuthProvider>
+);
