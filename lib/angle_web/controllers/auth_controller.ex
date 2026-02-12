@@ -31,34 +31,37 @@ defmodule AngleWeb.AuthController do
     render_inertia(conn, "auth/register")
   end
 
-  def do_register(conn, %{
-        "email" => email,
-        "password" => password,
-        "password_confirmation" => password_confirmation
-      }) do
-    case Angle.Accounts.User.register_with_password(%{
-           email: email,
-           password: password,
-           password_confirmation: password_confirmation
-         }) do
+  def do_register(
+        conn,
+        %{
+          "email" => email,
+          "password" => password,
+          "password_confirmation" => password_confirmation
+        } = params
+      ) do
+    register_params = %{
+      email: email,
+      password: password,
+      password_confirmation: password_confirmation,
+      full_name: Map.get(params, "full_name"),
+      phone_number: Map.get(params, "phone_number")
+    }
+
+    case Angle.Accounts.User.register_with_password(register_params) do
       {:ok, %{user: user, metadata: %{token: token}}} ->
         conn
         |> put_session(:current_user_id, user.id)
         |> put_session(:auth_token, token)
-        |> put_flash(
-          :info,
-          "Account created successfully! Please check your email to confirm your account."
-        )
-        |> redirect(to: ~p"/")
+        |> put_session(:verify_user_id, user.id)
+        |> put_session(:verify_email, to_string(user.email))
+        |> redirect(to: ~p"/auth/verify-account")
 
       {:ok, user} ->
         conn
         |> put_session(:current_user_id, user.id)
-        |> put_flash(
-          :info,
-          "Account created successfully! Please check your email to confirm your account."
-        )
-        |> redirect(to: ~p"/")
+        |> put_session(:verify_user_id, user.id)
+        |> put_session(:verify_email, to_string(user.email))
+        |> redirect(to: ~p"/auth/verify-account")
 
       {:error, changeset} ->
         errors = format_changeset_errors(changeset)
@@ -255,6 +258,92 @@ defmodule AngleWeb.AuthController do
       error: true,
       message: message
     })
+  end
+
+  def verify_account(conn, _params) do
+    email = get_session(conn, :verify_email)
+    user_id = get_session(conn, :verify_user_id)
+
+    if is_nil(user_id) do
+      conn
+      |> put_flash(:error, "Please register first.")
+      |> redirect(to: ~p"/auth/register")
+    else
+      render_inertia(conn, "auth/verify-account", %{email: email})
+    end
+  end
+
+  def do_verify_account(conn, %{"code" => code}) do
+    user_id = get_session(conn, :verify_user_id)
+
+    if is_nil(user_id) do
+      conn
+      |> put_flash(:error, "Session expired. Please register again.")
+      |> redirect(to: ~p"/auth/register")
+    else
+      with {:ok, otp} <- Angle.Accounts.OtpHelper.verify_code(code, user_id),
+           {:ok, user} <-
+             Ash.get(Angle.Accounts.User, user_id, domain: Angle.Accounts, authorize?: false),
+           {:ok, _confirmed_user} <-
+             Ash.update(user, %{confirm: otp.confirmation_token},
+               action: :confirm,
+               domain: Angle.Accounts,
+               authorize?: false
+             ) do
+        conn
+        |> delete_session(:verify_user_id)
+        |> delete_session(:verify_email)
+        |> put_flash(:success, "Account verified successfully! Welcome to Angle.")
+        |> redirect(to: ~p"/dashboard")
+      else
+        {:error, :invalid_code} ->
+          conn
+          |> put_flash(:error, "Invalid verification code. Please try again.")
+          |> redirect(to: ~p"/auth/verify-account")
+
+        {:error, _} ->
+          conn
+          |> put_flash(:error, "Verification failed. Please try again.")
+          |> redirect(to: ~p"/auth/verify-account")
+      end
+    end
+  end
+
+  def resend_otp(conn, _params) do
+    user_id = get_session(conn, :verify_user_id)
+
+    if is_nil(user_id) do
+      conn
+      |> put_flash(:error, "Session expired. Please register again.")
+      |> redirect(to: ~p"/auth/register")
+    else
+      with {:ok, user} <-
+             Ash.get(Angle.Accounts.User, user_id,
+               domain: Angle.Accounts,
+               authorize?: false
+             ) do
+        if is_nil(user.confirmed_at) do
+          strategy = AshAuthentication.Info.strategy!(Angle.Accounts.User, :confirm_new_user)
+          changeset = Ash.Changeset.for_update(user, :confirm, %{}, domain: Angle.Accounts)
+
+          case AshAuthentication.AddOn.Confirmation.confirmation_token(
+                 strategy,
+                 changeset,
+                 user
+               ) do
+            {:ok, token} ->
+              Angle.Accounts.User.Senders.SendNewUserConfirmationEmail.send(user, token, [])
+
+            _ ->
+              :ok
+          end
+        end
+      end
+
+      conn
+      |> put_flash(:info, "A new verification code has been sent to your email.")
+      |> redirect(to: ~p"/auth/verify-account")
+    end
   end
 
   def logout(conn, _params) do
