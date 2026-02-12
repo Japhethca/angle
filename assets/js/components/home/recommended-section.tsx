@@ -23,16 +23,16 @@ export function RecommendedSection({ items }: RecommendedSectionProps) {
     : "Recommended for You";
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
-      <h2 className="mb-6 font-heading text-xl font-semibold text-neutral-01">
+    <section className="py-10 lg:py-12">
+      <h2 className="mb-6 px-4 font-heading text-2xl font-semibold text-neutral-01 lg:px-10 lg:text-[32px]">
         {greeting}
       </h2>
       {items.length === 0 ? (
-        <div className="flex h-48 items-center justify-center rounded-xl bg-neutral-08">
+        <div className="mx-4 flex h-48 items-center justify-center rounded-xl bg-neutral-08 lg:mx-10">
           <p className="text-sm text-neutral-04">No recommendations yet</p>
         </div>
       ) : (
-        <div className="scrollbar-hide flex gap-6 overflow-x-auto pb-4">
+        <div className="scrollbar-hide flex gap-4 overflow-x-auto px-4 pb-4 lg:gap-6 lg:px-10">
           {items.map((item) => (
             <ItemCard key={item.id} item={item} />
           ))}
