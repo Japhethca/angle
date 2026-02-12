@@ -1,49 +1,46 @@
 import { Link } from "@inertiajs/react";
-import { Separator } from "@/components/ui/separator";
 
-const goodsLinks = [
-  { label: "All Categories", href: "/categories" },
-  { label: "Ending Soon", href: "/#ending-soon" },
-  { label: "Hot Items", href: "/#hot-now" },
-  { label: "How It Works", href: "/how-it-works" },
+const categoryLinks = [
+  { label: "Cultural Artifacts", href: "/categories" },
+  { label: "Gadgets", href: "/categories" },
+  { label: "Rare Collectibles", href: "/categories" },
+  { label: "Home Appliances", href: "/categories" },
+  { label: "Vehicles", href: "/categories" },
 ];
 
 const socialLinks = [
-  { label: "Twitter", href: "#" },
+  { label: "X", href: "#" },
   { label: "Instagram", href: "#" },
-  { label: "Facebook", href: "#" },
+  { label: "LinkedIn", href: "#" },
 ];
 
 const legalLinks = [
-  { label: "Terms of Service", href: "/terms" },
-  { label: "Privacy Policy", href: "/privacy" },
-  { label: "Cookie Policy", href: "/cookies" },
+  { label: "Terms", href: "/terms" },
+  { label: "Privacy policy", href: "/privacy" },
 ];
 
 export function Footer() {
   return (
-    <footer className="bg-neutral-01 text-neutral-10">
-      <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+    <footer className="hidden bg-[#060818] text-white lg:block">
+      <div className="px-10 py-12">
+        <div className="grid grid-cols-12 gap-8">
           {/* Branding */}
-          <div className="space-y-3">
-            <h3 className="font-heading text-lg font-semibold text-primary-600">
-              Angle
-            </h3>
+          <div className="col-span-4 space-y-4">
+            <img src="/images/logo.svg" alt="Angle" className="h-10 brightness-0 invert" />
             <p className="text-sm text-neutral-05">
-              Nigeria's premier auction platform. Buy and sell unique items through exciting bidding.
+              Nigeria's First Bidding Marketplace
             </p>
           </div>
 
-          {/* Goods */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-medium text-neutral-06">Explore</h4>
-            <ul className="space-y-2">
-              {goodsLinks.map((link) => (
+          {/* Categories */}
+          <div className="col-span-3 space-y-4">
+            <h4 className="text-sm font-medium text-neutral-05">Categories</h4>
+            <ul className="space-y-2.5">
+              {categoryLinks.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-neutral-05 transition-colors hover:text-neutral-10"
+                    className="text-sm text-neutral-06 transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -52,15 +49,15 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Social */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-medium text-neutral-06">Social</h4>
-            <ul className="space-y-2">
+          {/* Socials */}
+          <div className="col-span-2 space-y-4">
+            <h4 className="text-sm font-medium text-neutral-05">Socials</h4>
+            <ul className="space-y-2.5">
               {socialLinks.map((link) => (
                 <li key={link.label}>
                   <a
                     href={link.href}
-                    className="text-sm text-neutral-05 transition-colors hover:text-neutral-10"
+                    className="text-sm text-neutral-06 transition-colors hover:text-white"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -72,14 +69,14 @@ export function Footer() {
           </div>
 
           {/* Legal */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-medium text-neutral-06">Legal</h4>
-            <ul className="space-y-2">
+          <div className="col-span-3 space-y-4">
+            <h4 className="text-sm font-medium text-neutral-05">Legal</h4>
+            <ul className="space-y-2.5">
               {legalLinks.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-neutral-05 transition-colors hover:text-neutral-10"
+                    className="text-sm text-neutral-06 transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -89,11 +86,12 @@ export function Footer() {
           </div>
         </div>
 
-        <Separator className="my-8 bg-neutral-03" />
-
-        <p className="text-center text-xs text-neutral-05">
-          &copy; {new Date().getFullYear()} Angle. All rights reserved.
-        </p>
+        {/* Copyright */}
+        <div className="mt-12 border-t border-white/10 pt-6">
+          <p className="text-xs text-neutral-05">
+            &copy;{new Date().getFullYear()} Angle. All rights reserved.
+          </p>
+        </div>
       </div>
     </footer>
   );
