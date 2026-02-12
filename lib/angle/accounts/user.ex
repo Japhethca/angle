@@ -176,8 +176,20 @@ defmodule Angle.Accounts.User do
         sensitive? true
       end
 
+      argument :full_name, :string do
+        description "The user's full name."
+      end
+
+      argument :phone_number, :string do
+        description "The user's phone number."
+      end
+
       # Sets the email from the argument
       change set_attribute(:email, arg(:email))
+
+      # Sets optional profile fields
+      change set_attribute(:full_name, arg(:full_name))
+      change set_attribute(:phone_number, arg(:phone_number))
 
       # Hashes the provided password
       change AshAuthentication.Strategy.Password.HashPasswordChange
@@ -415,6 +427,8 @@ defmodule Angle.Accounts.User do
     attribute :email, :ci_string, allow_nil?: false, public?: true
     attribute :hashed_password, :string, allow_nil?: false, sensitive?: true
     attribute :confirmed_at, :utc_datetime_usec
+    attribute :full_name, :string, public?: true
+    attribute :phone_number, :string, public?: true
   end
 
   relationships do
