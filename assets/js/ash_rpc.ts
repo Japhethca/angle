@@ -1094,6 +1094,45 @@ export async function executeValidationRpcRequest<T>(
 
 
 
+// ============================
+// Typed Queries
+// ============================
+// Use these types and field constants for server-side rendering and data fetching.
+// The field constants can be used with the corresponding RPC actions for client-side refetching.
+
+// Category Typed Queries
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
+
+
+
+// Item Typed Queries
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export type HomepageItemCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", { category: ["id", "name", "slug"] }]>>;
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export const homepageItemCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", { category: ["id", "name", "slug"] }] satisfies ListItemsFields;
+
+
 
 
 export type ListBidsFields = UnifiedFieldSelection<BidResourceSchema>[];
