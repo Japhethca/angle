@@ -2,7 +2,7 @@ defmodule Angle.Catalog.Category do
   use Ash.Resource,
     domain: Angle.Catalog,
     data_layer: AshPostgres.DataLayer,
-    extensions: [AshGraphql.Resource, AshJsonApi.Resource]
+    extensions: [AshGraphql.Resource, AshJsonApi.Resource, AshTypescript.Resource]
 
   json_api do
     type "category"
@@ -33,6 +33,10 @@ defmodule Angle.Catalog.Category do
 
     identity_index_names name_parent: "categories_name_parent_index",
                          slug: "categories_slug_index"
+  end
+
+  typescript do
+    type_name "Category"
   end
 
   actions do

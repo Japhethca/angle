@@ -52,6 +52,7 @@ defmodule AngleWeb.Plugs.Auth do
           user_permissions = get_user_permissions(user)
 
           conn
+          |> Ash.PlugHelpers.set_actor(user)
           |> assign(:current_user, user)
           |> assign_prop(:auth, %{
             user: %{
@@ -112,6 +113,7 @@ defmodule AngleWeb.Plugs.Auth do
             user_permissions = get_user_permissions(user)
 
             conn
+            |> Ash.PlugHelpers.set_actor(user)
             |> assign(:current_user, user)
             |> assign_prop(:auth, %{
               user: %{

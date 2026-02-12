@@ -5,12 +5,459 @@
 
 
 
+export type Decimal = string;
+export type UUID = string;
+export type UtcDateTimeUsec = string;
+
+// Bid Schema
+export type BidResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "amount" | "bidType" | "itemId" | "userId" | "bidTime";
+  id: UUID;
+  amount: Decimal;
+  bidType: "auto" | "proxy" | "manual";
+  itemId: UUID;
+  userId: UUID;
+  bidTime: UtcDateTimeUsec;
+  item: { __type: "Relationship"; __resource: ItemResourceSchema | null; };
+  user: { __type: "Relationship"; __resource: UserResourceSchema | null; };
+};
+
+
+
+export type BidAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "amount" | "bidType" | "itemId" | "userId" | "bidTime";
+  id: UUID;
+  amount: Decimal;
+  bidType: "auto" | "proxy" | "manual";
+  itemId: UUID;
+  userId: UUID;
+  bidTime: UtcDateTimeUsec;
+};
+
+
+// Category Schema
+export type CategoryResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "name" | "description" | "slug" | "attributeSchema" | "formSchema" | "imageUrl" | "parentId";
+  id: UUID;
+  name: string;
+  description: string | null;
+  slug: string | null;
+  attributeSchema: Record<string, any>;
+  formSchema: Record<string, any>;
+  imageUrl: string | null;
+  parentId: UUID | null;
+  category: { __type: "Relationship"; __resource: CategoryResourceSchema | null; };
+  categories: { __type: "Relationship"; __array: true; __resource: CategoryResourceSchema; };
+};
+
+
+
+export type CategoryAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "name" | "description" | "slug" | "attributeSchema" | "formSchema" | "imageUrl" | "parentId";
+  id: UUID;
+  name: string;
+  description: string | null;
+  slug: string | null;
+  attributeSchema: Record<string, any>;
+  formSchema: Record<string, any>;
+  imageUrl: string | null;
+  parentId: UUID | null;
+};
+
+
+// Item Schema
+export type ItemResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "title" | "description" | "startingPrice" | "reservePrice" | "currentPrice" | "bidIncrement" | "slug" | "startTime" | "endTime" | "categoryId" | "lotNumber" | "publicationStatus" | "auctionStatus" | "condition" | "location" | "attributes" | "saleType" | "auctionFormat" | "buyNowPrice" | "viewCount" | "createdById";
+  id: UUID;
+  title: string;
+  description: string | null;
+  startingPrice: Decimal;
+  reservePrice: Decimal | null;
+  currentPrice: Decimal | null;
+  bidIncrement: Decimal | null;
+  slug: string | null;
+  startTime: UtcDateTimeUsec | null;
+  endTime: UtcDateTimeUsec | null;
+  categoryId: UUID | null;
+  lotNumber: string | null;
+  publicationStatus: "draft" | "pending" | "published" | "unpublished" | "archived" | null;
+  auctionStatus: "pending" | "scheduled" | "active" | "paused" | "ended" | "sold" | "cancelled" | null;
+  condition: "new" | "used" | "refurbished" | null;
+  location: string | null;
+  attributes: Record<string, any>;
+  saleType: "auction" | "buy_now" | "hybrid";
+  auctionFormat: "standard" | "reserve" | "live" | "timed" | null;
+  buyNowPrice: Decimal | null;
+  viewCount: number | null;
+  createdById: UUID | null;
+  user: { __type: "Relationship"; __resource: UserResourceSchema | null; };
+  category: { __type: "Relationship"; __resource: CategoryResourceSchema | null; };
+};
+
+
+
+export type ItemAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "title" | "description" | "startingPrice" | "reservePrice" | "currentPrice" | "bidIncrement" | "slug" | "startTime" | "endTime" | "categoryId" | "lotNumber" | "publicationStatus" | "auctionStatus" | "condition" | "location" | "attributes" | "saleType" | "auctionFormat" | "buyNowPrice" | "viewCount" | "createdById";
+  id: UUID;
+  title: string;
+  description: string | null;
+  startingPrice: Decimal;
+  reservePrice: Decimal | null;
+  currentPrice: Decimal | null;
+  bidIncrement: Decimal | null;
+  slug: string | null;
+  startTime: UtcDateTimeUsec | null;
+  endTime: UtcDateTimeUsec | null;
+  categoryId: UUID | null;
+  lotNumber: string | null;
+  publicationStatus: "draft" | "pending" | "published" | "unpublished" | "archived" | null;
+  auctionStatus: "pending" | "scheduled" | "active" | "paused" | "ended" | "sold" | "cancelled" | null;
+  condition: "new" | "used" | "refurbished" | null;
+  location: string | null;
+  attributes: Record<string, any>;
+  saleType: "auction" | "buy_now" | "hybrid";
+  auctionFormat: "standard" | "reserve" | "live" | "timed" | null;
+  buyNowPrice: Decimal | null;
+  viewCount: number | null;
+  createdById: UUID | null;
+};
+
+
+// User Schema
+export type UserResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "email";
+  id: UUID;
+  email: string;
+};
+
+
+
+export type UserAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "email";
+  id: UUID;
+  email: string;
+};
 
 
 
 
+export type BidFilterInput = {
+  and?: Array<BidFilterInput>;
+  or?: Array<BidFilterInput>;
+  not?: Array<BidFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  amount?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  bidType?: {
+    eq?: "auto" | "proxy" | "manual";
+    notEq?: "auto" | "proxy" | "manual";
+    in?: Array<"auto" | "proxy" | "manual">;
+  };
+
+  itemId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  userId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  bidTime?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
 
 
+  item?: ItemFilterInput;
+
+  user?: UserFilterInput;
+
+};
+export type CategoryFilterInput = {
+  and?: Array<CategoryFilterInput>;
+  or?: Array<CategoryFilterInput>;
+  not?: Array<CategoryFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  name?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  description?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  slug?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  attributeSchema?: {
+    eq?: Record<string, any>;
+    notEq?: Record<string, any>;
+    in?: Array<Record<string, any>>;
+  };
+
+  formSchema?: {
+    eq?: Record<string, any>;
+    notEq?: Record<string, any>;
+    in?: Array<Record<string, any>>;
+  };
+
+  imageUrl?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  parentId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+
+  category?: CategoryFilterInput;
+
+  categories?: CategoryFilterInput;
+
+};
+export type ItemFilterInput = {
+  and?: Array<ItemFilterInput>;
+  or?: Array<ItemFilterInput>;
+  not?: Array<ItemFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  title?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  description?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  startingPrice?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  reservePrice?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  currentPrice?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  bidIncrement?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  slug?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  startTime?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+  endTime?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+  categoryId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  lotNumber?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  publicationStatus?: {
+    eq?: "draft" | "pending" | "published" | "unpublished" | "archived";
+    notEq?: "draft" | "pending" | "published" | "unpublished" | "archived";
+    in?: Array<"draft" | "pending" | "published" | "unpublished" | "archived">;
+  };
+
+  auctionStatus?: {
+    eq?: "pending" | "scheduled" | "active" | "paused" | "ended" | "sold" | "cancelled";
+    notEq?: "pending" | "scheduled" | "active" | "paused" | "ended" | "sold" | "cancelled";
+    in?: Array<"pending" | "scheduled" | "active" | "paused" | "ended" | "sold" | "cancelled">;
+  };
+
+  condition?: {
+    eq?: "new" | "used" | "refurbished";
+    notEq?: "new" | "used" | "refurbished";
+    in?: Array<"new" | "used" | "refurbished">;
+  };
+
+  location?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  attributes?: {
+    eq?: Record<string, any>;
+    notEq?: Record<string, any>;
+    in?: Array<Record<string, any>>;
+  };
+
+  saleType?: {
+    eq?: "auction" | "buy_now" | "hybrid";
+    notEq?: "auction" | "buy_now" | "hybrid";
+    in?: Array<"auction" | "buy_now" | "hybrid">;
+  };
+
+  auctionFormat?: {
+    eq?: "standard" | "reserve" | "live" | "timed";
+    notEq?: "standard" | "reserve" | "live" | "timed";
+    in?: Array<"standard" | "reserve" | "live" | "timed">;
+  };
+
+  buyNowPrice?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  viewCount?: {
+    eq?: number;
+    notEq?: number;
+    greaterThan?: number;
+    greaterThanOrEqual?: number;
+    lessThan?: number;
+    lessThanOrEqual?: number;
+    in?: Array<number>;
+  };
+
+  createdById?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+
+  user?: UserFilterInput;
+
+  category?: CategoryFilterInput;
+
+};
+export type UserFilterInput = {
+  and?: Array<UserFilterInput>;
+  or?: Array<UserFilterInput>;
+  not?: Array<UserFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  email?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+
+
+};
 
 
 // Utility Types
@@ -633,5 +1080,806 @@ export async function executeValidationRpcRequest<T>(
 
 
 
+export type ListBidsFields = UnifiedFieldSelection<BidResourceSchema>[];
+
+
+export type InferListBidsResult<
+  Fields extends ListBidsFields | undefined,
+  Page extends ListBidsConfig["page"] = undefined
+> = ConditionalPaginatedResultMixed<Page, Array<InferResult<BidResourceSchema, Fields>>, {
+  results: Array<InferResult<BidResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+  count?: number | null;
+  type: "offset";
+}, {
+  results: Array<InferResult<BidResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  after: string | null;
+  before: string | null;
+  previousPage: string;
+  nextPage: string;
+  count?: number | null;
+  type: "keyset";
+}>;
+
+export type ListBidsConfig = {
+  tenant?: string;
+  fields: ListBidsFields;
+  filter?: BidFilterInput;
+  sort?: string;
+  page?: (
+    {
+      limit?: number;
+      offset?: number;
+      count?: boolean;
+    } | {
+      limit?: number;
+      after?: string;
+      before?: string;
+    }
+  );
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
+
+export type ListBidsResult<Fields extends ListBidsFields, Page extends ListBidsConfig["page"] = undefined> = | { success: true; data: InferListBidsResult<Fields, Page>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read Bid records
+ *
+ * @ashActionType :read
+ */
+export async function listBids<Fields extends ListBidsFields, Config extends ListBidsConfig = ListBidsConfig>(
+  config: Config & { fields: Fields }
+): Promise<ListBidsResult<Fields, Config["page"]>> {
+  const payload = {
+    action: "list_bids",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort }),
+    ...(config.page && { page: config.page })
+  };
+
+  return executeActionRpcRequest<ListBidsResult<Fields, Config["page"]>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read Bid records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateListBids(
+  config: {
+  tenant?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "list_bids",
+    ...(config.tenant !== undefined && { tenant: config.tenant })
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type MakeBidInput = {
+  amount: Decimal;
+  bidType: "auto" | "proxy" | "manual";
+  itemId: UUID;
+};
+
+export type MakeBidFields = UnifiedFieldSelection<BidResourceSchema>[];
+
+export type InferMakeBidResult<
+  Fields extends MakeBidFields | undefined,
+> = InferResult<BidResourceSchema, Fields>;
+
+export type MakeBidResult<Fields extends MakeBidFields | undefined = undefined> = | { success: true; data: InferMakeBidResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Create a new Bid
+ *
+ * @ashActionType :create
+ */
+export async function makeBid<Fields extends MakeBidFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  input: MakeBidInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<MakeBidResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "make_bid",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<MakeBidResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Create a new Bid
+ *
+ * @ashActionType :create
+ * @validation true
+ */
+export async function validateMakeBid(
+  config: {
+  tenant?: string;
+  input: MakeBidInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "make_bid",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type ListCategoriesFields = UnifiedFieldSelection<CategoryResourceSchema>[];
+
+
+export type InferListCategoriesResult<
+  Fields extends ListCategoriesFields | undefined,
+  Page extends ListCategoriesConfig["page"] = undefined
+> = ConditionalPaginatedResultMixed<Page, Array<InferResult<CategoryResourceSchema, Fields>>, {
+  results: Array<InferResult<CategoryResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+  count?: number | null;
+  type: "offset";
+}, {
+  results: Array<InferResult<CategoryResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  after: string | null;
+  before: string | null;
+  previousPage: string;
+  nextPage: string;
+  count?: number | null;
+  type: "keyset";
+}>;
+
+export type ListCategoriesConfig = {
+  tenant?: string;
+  fields: ListCategoriesFields;
+  filter?: CategoryFilterInput;
+  sort?: string;
+  page?: (
+    {
+      limit?: number;
+      offset?: number;
+      count?: boolean;
+    } | {
+      limit?: number;
+      after?: string;
+      before?: string;
+    }
+  );
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
+
+export type ListCategoriesResult<Fields extends ListCategoriesFields, Page extends ListCategoriesConfig["page"] = undefined> = | { success: true; data: InferListCategoriesResult<Fields, Page>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read Category records
+ *
+ * @ashActionType :read
+ */
+export async function listCategories<Fields extends ListCategoriesFields, Config extends ListCategoriesConfig = ListCategoriesConfig>(
+  config: Config & { fields: Fields }
+): Promise<ListCategoriesResult<Fields, Config["page"]>> {
+  const payload = {
+    action: "list_categories",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort }),
+    ...(config.page && { page: config.page })
+  };
+
+  return executeActionRpcRequest<ListCategoriesResult<Fields, Config["page"]>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read Category records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateListCategories(
+  config: {
+  tenant?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "list_categories",
+    ...(config.tenant !== undefined && { tenant: config.tenant })
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type CreateCategoryInput = {
+  name: string;
+  description?: string | null;
+  slug?: string | null;
+  attributeSchema?: Record<string, any>;
+  formSchema?: Record<string, any>;
+  imageUrl?: string | null;
+  parentId?: UUID | null;
+};
+
+export type CreateCategoryFields = UnifiedFieldSelection<CategoryResourceSchema>[];
+
+export type InferCreateCategoryResult<
+  Fields extends CreateCategoryFields | undefined,
+> = InferResult<CategoryResourceSchema, Fields>;
+
+export type CreateCategoryResult<Fields extends CreateCategoryFields | undefined = undefined> = | { success: true; data: InferCreateCategoryResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Create a new Category
+ *
+ * @ashActionType :create
+ */
+export async function createCategory<Fields extends CreateCategoryFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  input: CreateCategoryInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<CreateCategoryResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "create_category",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<CreateCategoryResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Create a new Category
+ *
+ * @ashActionType :create
+ * @validation true
+ */
+export async function validateCreateCategory(
+  config: {
+  tenant?: string;
+  input: CreateCategoryInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "create_category",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type ListItemsFields = UnifiedFieldSelection<ItemResourceSchema>[];
+
+
+export type InferListItemsResult<
+  Fields extends ListItemsFields | undefined,
+  Page extends ListItemsConfig["page"] = undefined
+> = ConditionalPaginatedResultMixed<Page, Array<InferResult<ItemResourceSchema, Fields>>, {
+  results: Array<InferResult<ItemResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+  count?: number | null;
+  type: "offset";
+}, {
+  results: Array<InferResult<ItemResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  after: string | null;
+  before: string | null;
+  previousPage: string;
+  nextPage: string;
+  count?: number | null;
+  type: "keyset";
+}>;
+
+export type ListItemsConfig = {
+  tenant?: string;
+  fields: ListItemsFields;
+  filter?: ItemFilterInput;
+  sort?: string;
+  page?: (
+    {
+      limit?: number;
+      offset?: number;
+      count?: boolean;
+    } | {
+      limit?: number;
+      after?: string;
+      before?: string;
+    }
+  );
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
+
+export type ListItemsResult<Fields extends ListItemsFields, Page extends ListItemsConfig["page"] = undefined> = | { success: true; data: InferListItemsResult<Fields, Page>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read Item records
+ *
+ * @ashActionType :read
+ */
+export async function listItems<Fields extends ListItemsFields, Config extends ListItemsConfig = ListItemsConfig>(
+  config: Config & { fields: Fields }
+): Promise<ListItemsResult<Fields, Config["page"]>> {
+  const payload = {
+    action: "list_items",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort }),
+    ...(config.page && { page: config.page })
+  };
+
+  return executeActionRpcRequest<ListItemsResult<Fields, Config["page"]>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read Item records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateListItems(
+  config: {
+  tenant?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "list_items",
+    ...(config.tenant !== undefined && { tenant: config.tenant })
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type CreateDraftItemInput = {
+  title: string;
+  description?: string | null;
+  startingPrice: Decimal;
+  reservePrice?: Decimal | null;
+  bidIncrement?: Decimal | null;
+  slug?: string | null;
+  startTime?: UtcDateTimeUsec | null;
+  endTime?: UtcDateTimeUsec | null;
+  categoryId?: UUID | null;
+  lotNumber?: string | null;
+  condition?: "new" | "used" | "refurbished" | null;
+  location?: string | null;
+  attributes: Record<string, any>;
+  saleType?: "auction" | "buy_now" | "hybrid";
+  auctionFormat?: "standard" | "reserve" | "live" | "timed" | null;
+  buyNowPrice?: Decimal | null;
+};
+
+export type CreateDraftItemFields = UnifiedFieldSelection<ItemResourceSchema>[];
+
+export type InferCreateDraftItemResult<
+  Fields extends CreateDraftItemFields | undefined,
+> = InferResult<ItemResourceSchema, Fields>;
+
+export type CreateDraftItemResult<Fields extends CreateDraftItemFields | undefined = undefined> = | { success: true; data: InferCreateDraftItemResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Create a new Item
+ *
+ * @ashActionType :create
+ */
+export async function createDraftItem<Fields extends CreateDraftItemFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  input: CreateDraftItemInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<CreateDraftItemResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "create_draft_item",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<CreateDraftItemResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Create a new Item
+ *
+ * @ashActionType :create
+ * @validation true
+ */
+export async function validateCreateDraftItem(
+  config: {
+  tenant?: string;
+  input: CreateDraftItemInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "create_draft_item",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type UpdateDraftItemInput = {
+  title?: string;
+  description?: string | null;
+  startingPrice?: Decimal;
+  reservePrice?: Decimal | null;
+  bidIncrement?: Decimal | null;
+  slug?: string | null;
+  startTime?: UtcDateTimeUsec | null;
+  endTime?: UtcDateTimeUsec | null;
+  categoryId?: UUID | null;
+  lotNumber?: string | null;
+  condition?: "new" | "used" | "refurbished" | null;
+  location?: string | null;
+  attributes?: Record<string, any>;
+  saleType?: "auction" | "buy_now" | "hybrid";
+  auctionFormat?: "standard" | "reserve" | "live" | "timed" | null;
+  buyNowPrice?: Decimal | null;
+  id: UUID;
+};
+
+export type UpdateDraftItemFields = UnifiedFieldSelection<ItemResourceSchema>[];
+
+export type InferUpdateDraftItemResult<
+  Fields extends UpdateDraftItemFields | undefined,
+> = InferResult<ItemResourceSchema, Fields>;
+
+export type UpdateDraftItemResult<Fields extends UpdateDraftItemFields | undefined = undefined> = | { success: true; data: InferUpdateDraftItemResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Update an existing Item
+ *
+ * @ashActionType :update
+ */
+export async function updateDraftItem<Fields extends UpdateDraftItemFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  input: UpdateDraftItemInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<UpdateDraftItemResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "update_draft_item",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<UpdateDraftItemResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Update an existing Item
+ *
+ * @ashActionType :update
+ * @validation true
+ */
+export async function validateUpdateDraftItem(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  input: UpdateDraftItemInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "update_draft_item",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type PublishItemFields = UnifiedFieldSelection<ItemResourceSchema>[];
+
+export type InferPublishItemResult<
+  Fields extends PublishItemFields | undefined,
+> = InferResult<ItemResourceSchema, Fields>;
+
+export type PublishItemResult<Fields extends PublishItemFields | undefined = undefined> = | { success: true; data: InferPublishItemResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Update an existing Item
+ *
+ * @ashActionType :update
+ */
+export async function publishItem<Fields extends PublishItemFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<PublishItemResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "publish_item",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<PublishItemResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Update an existing Item
+ *
+ * @ashActionType :update
+ * @validation true
+ */
+export async function validatePublishItem(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "publish_item",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type ListUsersFields = UnifiedFieldSelection<UserResourceSchema>[];
+
+
+export type InferListUsersResult<
+  Fields extends ListUsersFields | undefined,
+  Page extends ListUsersConfig["page"] = undefined
+> = ConditionalPaginatedResultMixed<Page, Array<InferResult<UserResourceSchema, Fields>>, {
+  results: Array<InferResult<UserResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+  count?: number | null;
+  type: "offset";
+}, {
+  results: Array<InferResult<UserResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  after: string | null;
+  before: string | null;
+  previousPage: string;
+  nextPage: string;
+  count?: number | null;
+  type: "keyset";
+}>;
+
+export type ListUsersConfig = {
+  tenant?: string;
+  fields: ListUsersFields;
+  filter?: UserFilterInput;
+  sort?: string;
+  page?: (
+    {
+      limit?: number;
+      offset?: number;
+      count?: boolean;
+    } | {
+      limit?: number;
+      after?: string;
+      before?: string;
+    }
+  );
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
+
+export type ListUsersResult<Fields extends ListUsersFields, Page extends ListUsersConfig["page"] = undefined> = | { success: true; data: InferListUsersResult<Fields, Page>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read User records
+ *
+ * @ashActionType :read
+ */
+export async function listUsers<Fields extends ListUsersFields, Config extends ListUsersConfig = ListUsersConfig>(
+  config: Config & { fields: Fields }
+): Promise<ListUsersResult<Fields, Config["page"]>> {
+  const payload = {
+    action: "list_users",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort }),
+    ...(config.page && { page: config.page })
+  };
+
+  return executeActionRpcRequest<ListUsersResult<Fields, Config["page"]>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read User records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateListUsers(
+  config: {
+  tenant?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "list_users",
+    ...(config.tenant !== undefined && { tenant: config.tenant })
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
 
 

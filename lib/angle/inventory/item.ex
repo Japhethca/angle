@@ -3,10 +3,7 @@ defmodule Angle.Inventory.Item do
     domain: Angle.Inventory,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshJsonApi.Resource]
-
-  alias Angle.Inventory.Item.ItemStatus
-  alias Angle.Inventory.Item.PublicationStatus
+    extensions: [AshJsonApi.Resource, AshTypescript.Resource]
 
   json_api do
     type "item"
@@ -21,24 +18,8 @@ defmodule Angle.Inventory.Item do
     end
   end
 
-  @draft_fields [
-    :title,
-    :description,
-    :starting_price,
-    :reserve_price,
-    :bid_increment,
-    :slug,
-    :start_time,
-    :end_time,
-    :category_id,
-    :lot_number,
-    :condition,
-    :location,
-    :attributes,
-    :sale_type,
-    :auction_format,
-    :buy_now_price
-  ]
+  alias Angle.Inventory.Item.ItemStatus
+  alias Angle.Inventory.Item.PublicationStatus
 
   postgres do
     table "items"
@@ -60,6 +41,29 @@ defmodule Angle.Inventory.Item do
     end
 
     identity_index_names slug_title: "items_slug_title_index"
+  end
+
+  @draft_fields [
+    :title,
+    :description,
+    :starting_price,
+    :reserve_price,
+    :bid_increment,
+    :slug,
+    :start_time,
+    :end_time,
+    :category_id,
+    :lot_number,
+    :condition,
+    :location,
+    :attributes,
+    :sale_type,
+    :auction_format,
+    :buy_now_price
+  ]
+
+  typescript do
+    type_name "Item"
   end
 
   actions do
