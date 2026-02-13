@@ -1,8 +1,7 @@
 import React from "react";
 import { Head } from "@inertiajs/react";
-import { LoginForm } from "../../components/forms/login-form";
-import { AuthLayout } from "../../components/layouts/auth-layout";
-import { AuthProvider } from "../../contexts/auth-context";
+import { LoginForm, AuthProvider } from "@/features/auth";
+import { AuthLayout } from "@/layouts/auth-layout";
 
 export default function Login() {
   return (

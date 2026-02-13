@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { PageProps } from '../../types/auth';
+import type { PageProps } from '@/features/auth';
 
 interface ConfirmNewUserProps extends PageProps {
   error?: boolean;

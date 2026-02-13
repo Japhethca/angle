@@ -5,12 +5,12 @@ import {
   InputOTPGroup,
   InputOTPSlot,
   InputOTPSeparator,
-} from "../../components/ui/input-otp";
-import { AuthLayout } from "../../components/layouts/auth-layout";
-import { AuthProvider } from "../../contexts/auth-context";
-import { Button } from "../../components/ui/button";
-import { Alert, AlertDescription } from "../../components/ui/alert";
-import { PageProps } from "../../types/auth";
+} from "@/components/ui/input-otp";
+import { AuthProvider } from "@/features/auth";
+import type { PageProps } from "@/features/auth";
+import { AuthLayout } from "@/layouts/auth-layout";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface VerifyAccountPageProps extends PageProps {
   email?: string;

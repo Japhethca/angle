@@ -3,8 +3,8 @@ import axios from "axios";
 import { createInertiaApp } from "@inertiajs/react";
 import { hydrateRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Layout from "@/components/layouts/layout";
-import { AuthProvider } from "@/contexts/auth-context";
+import Layout from "@/layouts/layout";
+import { AuthProvider } from "@/features/auth";
 
 axios.defaults.xsrfHeaderName = "x-csrf-token";
 

@@ -1,9 +1,11 @@
 import type { HomepageItemCard, HomepageCategory } from "@/ash_rpc";
-import { FeaturedItemCarousel } from "@/components/home/featured-item-carousel";
-import { RecommendedSection } from "@/components/home/recommended-section";
-import { EndingSoonSection } from "@/components/home/ending-soon-section";
-import { HotNowSection } from "@/components/home/hot-now-section";
-import { BrowseCategoriesSection } from "@/components/home/browse-categories-section";
+import {
+  FeaturedItemCarousel,
+  RecommendedSection,
+  EndingSoonSection,
+  HotNowSection,
+  BrowseCategoriesSection,
+} from "@/features/home";
 
 interface HomeProps {
   featured_items: HomepageItemCard;

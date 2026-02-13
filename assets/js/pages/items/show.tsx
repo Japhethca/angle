@@ -8,13 +8,15 @@ import {
 } from "lucide-react";
 import type { ItemDetail, HomepageItemCard } from "@/ash_rpc";
 import { formatNaira } from "@/lib/format";
-import { CountdownTimer } from "@/components/shared/countdown-timer";
-import { ConditionBadge } from "@/components/items/condition-badge";
-import { ItemImageGallery } from "@/components/items/item-image-gallery";
-import { BidSection } from "@/components/items/bid-section";
-import { ItemDetailTabs } from "@/components/items/item-detail-tabs";
-import { SellerCard } from "@/components/items/seller-card";
-import { SimilarItems } from "@/components/items/similar-items";
+import { CountdownTimer } from "@/shared/components/countdown-timer";
+import {
+  ConditionBadge,
+  ItemImageGallery,
+  ItemDetailTabs,
+  SellerCard,
+  SimilarItems,
+} from "@/features/items";
+import { BidSection } from "@/features/bidding";
 
 interface ShowProps {
   item: ItemDetail[number];

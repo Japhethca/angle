@@ -4,8 +4,8 @@ import React from "react";
 import ReactDOMServer from "react-dom/server";
 import { createInertiaApp } from "@inertiajs/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Layout from "./components/layouts/layout";
-import { AuthProvider } from "./contexts/auth-context";
+import Layout from "./layouts/layout";
+import { AuthProvider } from "./features/auth";
 
 axios.defaults.xsrfHeaderName = "x-csrf-token";
 
