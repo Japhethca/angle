@@ -99,6 +99,16 @@ defmodule Angle.Accounts.User do
         |> Ash.Changeset.change_attribute(:full_name, Map.get(user_info, "name"))
         |> Ash.Changeset.change_attribute(:confirmed_at, DateTime.utc_now())
       end
+
+      # Auto-assign default "bidder" role after registration
+      change after_action(fn _changeset, user, _context ->
+               case Angle.Accounts.User.assign_role(user, %{role_name: "bidder"},
+                      authorize?: false
+                    ) do
+                 {:ok, _} -> {:ok, user}
+                 {:error, _} -> {:ok, user}
+               end
+             end)
     end
 
     read :get_by_subject do
@@ -226,6 +236,16 @@ defmodule Angle.Accounts.User do
       # validates that the password matches the confirmation
       validate AshAuthentication.Strategy.Password.PasswordConfirmationValidation
 
+      # Auto-assign default "bidder" role after registration
+      change after_action(fn _changeset, user, _context ->
+               case Angle.Accounts.User.assign_role(user, %{role_name: "bidder"},
+                      authorize?: false
+                    ) do
+                 {:ok, _} -> {:ok, user}
+                 {:error, _} -> {:ok, user}
+               end
+             end)
+
       metadata :token, :string do
         description "A JWT that can be used to authenticate the user."
         allow_nil? false
@@ -272,19 +292,23 @@ defmodule Angle.Accounts.User do
         description "ID of the user granting this role (optional)"
       end
 
-      change fn changeset, %{arguments: %{role_name: role_name} = args} ->
+      change fn changeset, _context ->
+        role_name = Ash.Changeset.get_argument(changeset, :role_name)
         user_id = Ash.Changeset.get_attribute(changeset, :id)
 
         # Find the role by name
         case Ash.Query.filter(Angle.Accounts.Role, expr(name == ^role_name))
              |> Ash.read_one(domain: Angle.Accounts) do
+          {:ok, nil} ->
+            Ash.Changeset.add_error(changeset, field: :role_name, message: "Role not found")
+
           {:ok, role} ->
             # Create UserRole record
             user_role_attrs = %{
               user_id: user_id,
               role_id: role.id,
-              expires_at: Map.get(args, :expires_at),
-              granted_by_id: Map.get(args, :granted_by_id)
+              expires_at: Ash.Changeset.get_argument(changeset, :expires_at),
+              granted_by_id: Ash.Changeset.get_argument(changeset, :granted_by_id)
             }
 
             case Ash.create(Angle.Accounts.UserRole, user_role_attrs, domain: Angle.Accounts) do
@@ -314,35 +338,34 @@ defmodule Angle.Accounts.User do
         description "The name of the role to remove"
       end
 
-      change fn changeset, %{arguments: %{role_name: role_name}} ->
+      change fn changeset, _context ->
+        role_name = Ash.Changeset.get_argument(changeset, :role_name)
         user_id = Ash.Changeset.get_attribute(changeset, :id)
 
         case Ash.Query.filter(Angle.Accounts.Role, expr(name == ^role_name))
              |> Ash.read_one(domain: Angle.Accounts) do
+          {:ok, nil} ->
+            Ash.Changeset.add_error(changeset, field: :role_name, message: "Role not found")
+
           {:ok, role} ->
-            # Find and remove existing UserRole
-            case Ash.Query.filter(
-                   Angle.Accounts.UserRole,
-                   expr(user_id == ^user_id and role_id == ^role.id)
-                 )
-                 |> Ash.read_one(domain: Angle.Accounts) do
-              {:ok, user_role} ->
-                case Ash.destroy(user_role, domain: Angle.Accounts) do
-                  :ok ->
-                    changeset
+            # Delete UserRole directly via Ecto (no primary key on UserRole)
+            import Ecto.Query
 
-                  {:error, _} ->
-                    Ash.Changeset.add_error(changeset,
-                      field: :role_name,
-                      message: "Role removal failed"
-                    )
-                end
-
-              _ ->
-                Ash.Changeset.add_error(changeset,
-                  field: :role_name,
-                  message: "User does not have this role"
+            {deleted, _} =
+              Angle.Repo.delete_all(
+                from(ur in "user_roles",
+                  where: ur.user_id == type(^user_id, :binary_id),
+                  where: ur.role_id == type(^role.id, :binary_id)
                 )
+              )
+
+            if deleted > 0 do
+              changeset
+            else
+              Ash.Changeset.add_error(changeset,
+                field: :role_name,
+                message: "User does not have this role"
+              )
             end
 
           {:error, _} ->
@@ -407,12 +430,7 @@ defmodule Angle.Accounts.User do
 
     # Role management - requires manage_users permission
     policy action([:assign_role, :remove_role]) do
-      authorize_if expr(
-                     exists(
-                       user_roles,
-                       exists(role.role_permissions, permission.name == "manage_users")
-                     )
-                   )
+      authorize_if {Angle.Accounts.Checks.HasPermission, permission: "manage_users"}
     end
   end
 

@@ -128,71 +128,32 @@ defmodule Angle.Inventory.Item do
       authorize_if expr(created_by_id == ^actor(:id))
     end
 
+    # Admin bypass for all item modifications
+    bypass action_type([:create, :update, :destroy]) do
+      authorize_if {Angle.Accounts.Checks.HasPermission, permission: "manage_all_items"}
+    end
+
     # Creating items - requires create_items permission
     policy action_type([:create]) do
-      authorize_if expr(
-                     exists(
-                       actor.user_roles,
-                       exists(role.role_permissions, permission.name == "create_items")
-                     )
-                   )
+      authorize_if {Angle.Accounts.Checks.HasPermission, permission: "create_items"}
     end
 
     # Updating items - requires update_own_items permission and ownership
-    policy action_type([:update]) do
-      authorize_if expr(
-                     created_by_id == ^actor(:id) and
-                       exists(
-                         actor.user_roles,
-                         exists(role.role_permissions, permission.name == "update_own_items")
-                       )
-                   )
-
-      # Admins can update all items
-      authorize_if expr(
-                     exists(
-                       actor.user_roles,
-                       exists(role.role_permissions, permission.name == "manage_all_items")
-                     )
-                   )
+    policy action([:update, :update_draft]) do
+      forbid_unless expr(created_by_id == ^actor(:id))
+      authorize_if {Angle.Accounts.Checks.HasPermission, permission: "update_own_items"}
     end
 
     # Destroying items - requires delete_own_items permission and ownership
     policy action_type([:destroy]) do
-      authorize_if expr(
-                     created_by_id == ^actor(:id) and
-                       exists(
-                         actor.user_roles,
-                         exists(role.role_permissions, permission.name == "delete_own_items")
-                       )
-                   )
-
-      # Admins can delete all items
-      authorize_if expr(
-                     exists(
-                       actor.user_roles,
-                       exists(role.role_permissions, permission.name == "manage_all_items")
-                     )
-                   )
+      forbid_unless expr(created_by_id == ^actor(:id))
+      authorize_if {Angle.Accounts.Checks.HasPermission, permission: "delete_own_items"}
     end
 
     # Publishing items - requires publish_items permission and ownership
     policy action(:publish_item) do
-      authorize_if expr(
-                     created_by_id == ^actor(:id) and
-                       exists(
-                         actor.user_roles,
-                         exists(role.role_permissions, permission.name == "publish_items")
-                       )
-                   )
-
-      # Admins can publish all items
-      authorize_if expr(
-                     exists(
-                       actor.user_roles,
-                       exists(role.role_permissions, permission.name == "manage_all_items")
-                     )
-                   )
+      forbid_unless expr(created_by_id == ^actor(:id))
+      authorize_if {Angle.Accounts.Checks.HasPermission, permission: "publish_items"}
     end
   end
 
@@ -317,6 +278,16 @@ defmodule Angle.Inventory.Item do
 
     belongs_to :category, Angle.Catalog.Category do
       source_attribute :category_id
+      public? true
+    end
+
+    has_many :bids, Angle.Bidding.Bid do
+      destination_attribute :item_id
+    end
+  end
+
+  aggregates do
+    count :bid_count, :bids do
       public? true
     end
   end
