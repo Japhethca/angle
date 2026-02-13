@@ -72,7 +72,7 @@ export type CategoryAttributesOnlySchema = {
 // Item Schema
 export type ItemResourceSchema = {
   __type: "Resource";
-  __primitiveFields: "id" | "title" | "description" | "startingPrice" | "reservePrice" | "currentPrice" | "bidIncrement" | "slug" | "startTime" | "endTime" | "categoryId" | "lotNumber" | "publicationStatus" | "auctionStatus" | "condition" | "location" | "attributes" | "saleType" | "auctionFormat" | "buyNowPrice" | "viewCount" | "createdById";
+  __primitiveFields: "id" | "title" | "description" | "startingPrice" | "reservePrice" | "currentPrice" | "bidIncrement" | "slug" | "startTime" | "endTime" | "categoryId" | "lotNumber" | "publicationStatus" | "auctionStatus" | "condition" | "location" | "attributes" | "saleType" | "auctionFormat" | "buyNowPrice" | "viewCount" | "createdById" | "bidCount";
   id: UUID;
   title: string;
   description: string | null;
@@ -95,6 +95,7 @@ export type ItemResourceSchema = {
   buyNowPrice: Decimal | null;
   viewCount: number | null;
   createdById: UUID | null;
+  bidCount: number;
   user: { __type: "Relationship"; __resource: UserResourceSchema | null; };
   category: { __type: "Relationship"; __resource: CategoryResourceSchema | null; };
 };
@@ -436,6 +437,15 @@ export type ItemFilterInput = {
     in?: Array<UUID>;
   };
 
+  bidCount?: {
+    eq?: number;
+    notEq?: number;
+    greaterThan?: number;
+    greaterThanOrEqual?: number;
+    lessThan?: number;
+    lessThanOrEqual?: number;
+    in?: Array<number>;
+  };
 
   user?: UserFilterInput;
 
@@ -1100,23 +1110,6 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
-// Category Typed Queries
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
-
-
-
 // Item Typed Queries
 /**
  * Typed query for Item
@@ -1131,6 +1124,38 @@ export type HomepageItemCard = Array<InferResult<ItemResourceSchema, ["id", "tit
  * @typedQuery true
  */
 export const homepageItemCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", { category: ["id", "name", "slug"] }] satisfies ListItemsFields;
+
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export type ItemDetail = Array<InferResult<ItemResourceSchema, ["id", "title", "description", "slug", "startingPrice", "currentPrice", "reservePrice", "bidIncrement", "buyNowPrice", "endTime", "startTime", "auctionStatus", "publicationStatus", "condition", "saleType", "auctionFormat", "viewCount", "location", "attributes", "lotNumber", "createdById", "bidCount", { category: ["id", "name", "slug"] }, { user: ["id", "email", "fullName"] }]>>;
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export const itemDetailFields = ["id", "title", "description", "slug", "startingPrice", "currentPrice", "reservePrice", "bidIncrement", "buyNowPrice", "endTime", "startTime", "auctionStatus", "publicationStatus", "condition", "saleType", "auctionFormat", "viewCount", "location", "attributes", "lotNumber", "createdById", "bidCount", { category: ["id", "name", "slug"] }, { user: ["id", "email", "fullName"] }] satisfies ListItemsFields;
+
+
+
+// Category Typed Queries
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
 
 
 

@@ -32,6 +32,38 @@ defmodule Angle.Inventory do
           %{category: [:id, :name, :slug]}
         ]
       end
+
+      typed_query :item_detail, :read do
+        ts_result_type_name "ItemDetail"
+        ts_fields_const_name "itemDetailFields"
+
+        fields [
+          :id,
+          :title,
+          :description,
+          :slug,
+          :starting_price,
+          :current_price,
+          :reserve_price,
+          :bid_increment,
+          :buy_now_price,
+          :end_time,
+          :start_time,
+          :auction_status,
+          :publication_status,
+          :condition,
+          :sale_type,
+          :auction_format,
+          :view_count,
+          :location,
+          :attributes,
+          :lot_number,
+          :created_by_id,
+          :bid_count,
+          %{category: [:id, :name, :slug]},
+          %{user: [:id, :email, :full_name]}
+        ]
+      end
     end
   end
 

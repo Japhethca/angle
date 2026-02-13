@@ -65,6 +65,7 @@ defmodule AngleWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    get "/items/:slug", ItemsController, :show
     post "/rpc/run", AshTypescriptRpcController, :run
     post "/rpc/validate", AshTypescriptRpcController, :validate
   end

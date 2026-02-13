@@ -1,7 +1,83 @@
 defmodule AngleWeb.ItemsController do
   use AngleWeb, :controller
 
+  @published_filter %{publication_status: "published"}
+
   def new(conn, _params) do
     render_inertia(conn, "items/new")
+  end
+
+  def show(conn, %{"slug" => slug_or_id}) do
+    filter = build_item_filter(slug_or_id)
+
+    case run_item_detail_query(conn, filter) do
+      {:ok, item} ->
+        similar_items =
+          load_similar_items(conn, item["id"], item["category"] && item["category"]["id"])
+
+        conn
+        |> assign_prop(:item, item)
+        |> assign_prop(:similar_items, similar_items)
+        |> render_inertia("items/show")
+
+      :not_found ->
+        conn
+        |> put_flash(:error, "Item not found")
+        |> redirect(to: "/")
+    end
+  end
+
+  defp build_item_filter(slug_or_id) do
+    base = @published_filter
+
+    if uuid?(slug_or_id) do
+      Map.put(base, :id, slug_or_id)
+    else
+      Map.put(base, :slug, slug_or_id)
+    end
+  end
+
+  defp run_item_detail_query(conn, filter) do
+    params = %{filter: filter, page: %{limit: 1}}
+
+    case AshTypescript.Rpc.run_typed_query(:angle, :item_detail, params, conn) do
+      %{"success" => true, "data" => data} ->
+        case extract_results(data) do
+          [item | _] -> {:ok, item}
+          _ -> :not_found
+        end
+
+      _ ->
+        :not_found
+    end
+  end
+
+  defp load_similar_items(conn, current_item_id, category_id)
+       when is_binary(current_item_id) and is_binary(category_id) do
+    filter =
+      Map.merge(@published_filter, %{
+        category_id: %{eq: category_id},
+        id: %{notEq: current_item_id}
+      })
+
+    params = %{filter: filter, page: %{limit: 6}}
+
+    case AshTypescript.Rpc.run_typed_query(:angle, :homepage_item_card, params, conn) do
+      %{"success" => true, "data" => data} -> extract_results(data)
+      _ -> []
+    end
+  end
+
+  defp load_similar_items(_conn, _current_item_id, _category_id), do: []
+
+  defp extract_results(data) when is_list(data), do: data
+  defp extract_results(%{"results" => results}) when is_list(results), do: results
+  defp extract_results(_), do: []
+
+  defp uuid?(string) do
+    case Ecto.UUID.cast(string) do
+      {:ok, _} -> true
+      :error -> false
+    end
   end
 end

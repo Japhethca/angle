@@ -61,33 +61,18 @@ defmodule Angle.Bidding.Bid do
   policies do
     # Reading bids - requires view_bids permission
     policy action_type(:read) do
-      authorize_if expr(
-                     exists(
-                       actor.user_roles,
-                       exists(role.role_permissions, permission.name == "view_bids")
-                     )
-                   )
+      authorize_if {Angle.Accounts.Checks.HasPermission, permission: "view_bids"}
     end
 
-    # Creating bids - requires place_bids permission and bidding as yourself
+    # Creating bids - requires place_bids permission
+    # Ownership is enforced by the action's set_attribute(:user_id, actor(:id))
     policy action(:make_bid) do
-      authorize_if expr(
-                     user_id == ^actor(:id) and
-                       exists(
-                         actor.user_roles,
-                         exists(role.role_permissions, permission.name == "place_bids")
-                       )
-                   )
+      authorize_if {Angle.Accounts.Checks.HasPermission, permission: "place_bids"}
     end
 
     # Managing bids - admin only
     policy action_type([:update, :destroy]) do
-      authorize_if expr(
-                     exists(
-                       actor.user_roles,
-                       exists(role.role_permissions, permission.name == "manage_bids")
-                     )
-                   )
+      authorize_if {Angle.Accounts.Checks.HasPermission, permission: "manage_bids"}
     end
   end
 
