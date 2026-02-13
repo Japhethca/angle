@@ -22,11 +22,12 @@
     "paths": {
       "@/*": ["./js/*"],
       "@/components/*": ["js/components/*"],
+      "@/features/*": ["js/features/*"],
+      "@/shared/*": ["js/shared/*"],
       "@/hooks/*": ["js/hooks/*"],
-      "@/types/*": ["js/types/*"],
-      "@/contexts/*": ["js/contexts/*"],
       "@/pages/*": ["js/pages/*"],
       "@/layouts/*": ["js/layouts/*"],
+      "@/navigation/*": ["js/navigation/*"],
       "@/lib/*": ["js/lib/*"],
       "@/ui/*": ["js/components/ui/*"]
     }

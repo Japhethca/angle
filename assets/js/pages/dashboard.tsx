@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
-import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
-import { PageProps } from '../types/auth';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import type { PageProps } from '@/features/auth';
 
 interface DashboardProps extends PageProps {
   stats: {

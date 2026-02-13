@@ -1,10 +1,9 @@
 import React from "react";
 import { Head, usePage } from "@inertiajs/react";
-import { ForgotPasswordForm } from "../../components/forms/forgot-password-form";
-import { AuthLayout } from "../../components/layouts/auth-layout";
-import { AuthProvider } from "../../contexts/auth-context";
-import { Alert, AlertDescription } from "../../components/ui/alert";
-import { PageProps } from "../../types/auth";
+import { ForgotPasswordForm, AuthProvider } from "@/features/auth";
+import type { PageProps } from "@/features/auth";
+import { AuthLayout } from "@/layouts/auth-layout";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ForgotPasswordPageProps extends PageProps {
   error?: string;

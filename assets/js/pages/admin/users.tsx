@@ -1,9 +1,7 @@
 import { Head } from "@inertiajs/react";
-import { ProtectedRoute } from "../../components/auth/protected-route";
-import { CanManageUsers } from "../../components/auth/permission-guard";
-import { usePermissions } from "../../hooks/use-permissions";
-import { Button } from "../../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import { ProtectedRoute, CanManageUsers, usePermissions } from "@/features/auth";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface User {
   id: string;

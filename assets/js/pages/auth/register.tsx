@@ -1,8 +1,7 @@
 import React from "react";
 import { Head } from "@inertiajs/react";
-import { RegisterForm } from "../../components/forms/register-form";
-import { AuthLayout } from "../../components/layouts/auth-layout";
-import { AuthProvider } from "../../contexts/auth-context";
+import { RegisterForm, AuthProvider } from "@/features/auth";
+import { AuthLayout } from "@/layouts/auth-layout";
 
 export default function Register() {
   return (
