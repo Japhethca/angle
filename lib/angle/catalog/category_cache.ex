@@ -44,7 +44,7 @@ defmodule Angle.Catalog.CategoryCache do
   # Private
 
   defp fetch_and_cache do
-    case AshTypescript.Rpc.run_typed_query(:angle, :nav_category, %{}, nil) do
+    case AshTypescript.Rpc.run_typed_query(:angle, :nav_category, %{}, %Plug.Conn{}) do
       %{"success" => true, "data" => data} ->
         results = extract_results(data)
         :ets.insert(@table, {:nav_categories, results, System.monotonic_time(:millisecond)})
