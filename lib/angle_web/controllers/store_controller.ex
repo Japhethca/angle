@@ -62,6 +62,9 @@ defmodule AngleWeb.StoreController do
     end
   end
 
+  # NOTE: Fetches up to 200 items for category grouping. For sellers with
+  # more than 200 published items, counts may be approximate. Consider
+  # replacing with a dedicated aggregate query in a future iteration.
   defp build_category_summary(conn, seller_id) do
     params = %{
       input: %{seller_id: seller_id},

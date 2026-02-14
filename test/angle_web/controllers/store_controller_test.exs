@@ -3,11 +3,7 @@ defmodule AngleWeb.StoreControllerTest do
 
   describe "GET /store/:identifier" do
     test "renders store/show page for a valid seller by username", %{conn: conn} do
-      user = create_user(%{full_name: "Test Seller"})
-
-      user
-      |> Ecto.Changeset.change(%{username: "test-seller"})
-      |> Angle.Repo.update!()
+      user = create_user(%{full_name: "Test Seller", username: "test-seller"})
 
       item =
         create_item(%{

@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Link } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
 import {
   ChevronLeft,
   User,
@@ -84,6 +84,7 @@ export default function StoreShow({
   const [historyItems, setHistoryItems] = useState<SellerItem[]>([]);
   const [historyHasMore, setHistoryHasMore] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [isLoadingMoreHistory, setIsLoadingMoreHistory] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
 
   const handleViewModeChange = (mode: ViewMode) => {
@@ -160,9 +161,12 @@ export default function StoreShow({
     }
   }, [seller.id, isLoadingHistory]);
 
+  // NOTE: Uses listItems with inline filters for client-side load-more.
+  // The server-side initial load uses the by_seller typed query via the controller.
+  // If the by_seller filter logic changes, these filters must be updated to match.
   const loadMoreHistory = useCallback(async () => {
-    if (isLoadingHistory) return;
-    setIsLoadingHistory(true);
+    if (isLoadingMoreHistory) return;
+    setIsLoadingMoreHistory(true);
     try {
       const fields = sellerItemCardFields as ListItemsFields;
       const result = await listItems({
@@ -185,9 +189,9 @@ export default function StoreShow({
         setHistoryHasMore(data.hasMore);
       }
     } finally {
-      setIsLoadingHistory(false);
+      setIsLoadingMoreHistory(false);
     }
-  }, [seller.id, historyItems.length, isLoadingHistory]);
+  }, [seller.id, historyItems.length, isLoadingMoreHistory]);
 
   const handleTabChange = (tab: TabKey) => {
     setActiveTab(tab);
@@ -202,7 +206,7 @@ export default function StoreShow({
   const currentHasMore =
     activeTab === "auctions" ? auctionHasMore : historyHasMore;
   const currentIsLoading =
-    activeTab === "auctions" ? isLoadingMoreAuctions : isLoadingHistory;
+    activeTab === "auctions" ? isLoadingMoreAuctions : isLoadingMoreHistory;
   const currentLoadMore =
     activeTab === "auctions" ? loadMoreAuctions : loadMoreHistory;
 
@@ -213,6 +217,8 @@ export default function StoreShow({
   ];
 
   return (
+    <>
+      <Head title={`${displayName} - Store Profile`} />
     <div className="pb-8">
       {/* Mobile header */}
       <div className="flex items-center gap-3 px-4 py-4 lg:hidden">
@@ -462,5 +468,6 @@ export default function StoreShow({
         )}
       </div>
     </div>
+    </>
   );
 }
