@@ -1216,6 +1216,23 @@ export const itemDetailFields = ["id", "title", "description", "slug", "starting
 
 
 
+// User Typed Queries
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "storeName", "location", "phoneNumber", "whatsappNumber", "createdAt"]>>;
+
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export const sellerProfileFields = ["id", "username", "fullName", "storeName", "location", "phoneNumber", "whatsappNumber", "createdAt"];
+
+
+
 // Category Typed Queries
 /**
  * Typed query for Category
@@ -1245,23 +1262,6 @@ export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name
  * @typedQuery true
  */
 export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
-
-
-
-// User Typed Queries
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "storeName", "location", "phoneNumber", "whatsappNumber", "createdAt"]>>;
-
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export const sellerProfileFields = ["id", "username", "fullName", "storeName", "location", "phoneNumber", "whatsappNumber", "createdAt"];
 
 
 
