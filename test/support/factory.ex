@@ -74,6 +74,7 @@ defmodule Angle.Factory do
         description: Map.get(attrs, :description, "Test category"),
         slug: Map.get(attrs, :slug, "cat-#{System.unique_integer([:positive])}")
       }
+      |> maybe_put(:parent_id, Map.get(attrs, :parent_id))
 
     Ash.create!(Angle.Catalog.Category, params, authorize?: false)
   end

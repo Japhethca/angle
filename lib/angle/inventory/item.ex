@@ -121,6 +121,8 @@ defmodule Angle.Inventory.Item do
       argument :category_ids, {:array, :uuid}, allow_nil?: false
 
       filter expr(category_id in ^arg(:category_ids) and publication_status == :published)
+
+      pagination offset?: true, required?: false
     end
   end
 
