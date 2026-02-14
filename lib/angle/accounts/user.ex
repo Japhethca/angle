@@ -482,6 +482,11 @@ defmodule Angle.Accounts.User do
       source_attribute_on_join_resource :user_id
       public? true
     end
+
+    has_many :items, Angle.Inventory.Item do
+      destination_attribute :created_by_id
+      public? true
+    end
   end
 
   calculations do
@@ -600,6 +605,13 @@ defmodule Angle.Accounts.User do
           MapSet.member?(users_with_permission, record.id)
         end)
       end
+    end
+  end
+
+  aggregates do
+    count :published_item_count, :items do
+      filter expr(publication_status == :published)
+      public? true
     end
   end
 

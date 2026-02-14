@@ -1,4 +1,4 @@
-defmodule Angle.Repo.Migrations.MigrateResources1 do
+defmodule Angle.Repo.Migrations.AddItemsRelationshipToUsers do
   @moduledoc """
   Updates resources based on their most recent snapshots.
 
@@ -13,6 +13,10 @@ defmodule Angle.Repo.Migrations.MigrateResources1 do
       add :store_name, :text
       add :location, :text
       add :whatsapp_number, :text
+
+      add :created_at, :utc_datetime_usec,
+        null: false,
+        default: fragment("(now() AT TIME ZONE 'utc')")
     end
 
     create unique_index(:users, [:username], name: "users_unique_username_index")
@@ -22,6 +26,7 @@ defmodule Angle.Repo.Migrations.MigrateResources1 do
     drop_if_exists unique_index(:users, [:username], name: "users_unique_username_index")
 
     alter table(:users) do
+      remove :created_at
       remove :whatsapp_number
       remove :location
       remove :store_name

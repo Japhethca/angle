@@ -110,8 +110,8 @@ defmodule AngleWeb.StoreControllerTest do
 
     test "includes category summary for published items only", %{conn: conn} do
       user = create_user()
-      cat_a = create_category(%{name: "Electronics", slug: "electronics"})
-      cat_b = create_category(%{name: "Art", slug: "art"})
+      cat_a = create_category(%{name: "Electronics"})
+      cat_b = create_category(%{name: "Art"})
 
       # Two published items in Electronics
       for _ <- 1..2 do

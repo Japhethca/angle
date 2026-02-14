@@ -100,8 +100,7 @@ defmodule Angle.Inventory do
           :lot_number,
           :created_by_id,
           :bid_count,
-          %{category: [:id, :name, :slug]},
-          %{user: [:id, :email, :full_name, :username]}
+          %{category: [:id, :name, :slug]}
         ]
       end
     end

@@ -51,6 +51,7 @@ export type CategoryResourceSchema = {
   parentId: UUID | null;
   category: { __type: "Relationship"; __resource: CategoryResourceSchema | null; };
   categories: { __type: "Relationship"; __array: true; __resource: CategoryResourceSchema; };
+  items: { __type: "Relationship"; __array: true; __resource: ItemResourceSchema; };
 };
 
 
@@ -133,7 +134,7 @@ export type ItemAttributesOnlySchema = {
 // User Schema
 export type UserResourceSchema = {
   __type: "Resource";
-  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber" | "username" | "storeName" | "location" | "whatsappNumber" | "createdAt";
+  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber" | "username" | "storeName" | "location" | "whatsappNumber" | "createdAt" | "publishedItemCount";
   id: UUID;
   email: string;
   fullName: string | null;
@@ -143,6 +144,8 @@ export type UserResourceSchema = {
   location: string | null;
   whatsappNumber: string | null;
   createdAt: UtcDateTimeUsec;
+  publishedItemCount: number;
+  items: { __type: "Relationship"; __array: true; __resource: ItemResourceSchema; };
 };
 
 
@@ -276,6 +279,8 @@ export type CategoryFilterInput = {
   category?: CategoryFilterInput;
 
   categories?: CategoryFilterInput;
+
+  items?: ItemFilterInput;
 
 };
 export type ItemFilterInput = {
@@ -525,7 +530,17 @@ export type UserFilterInput = {
     in?: Array<UtcDateTimeUsec>;
   };
 
+  publishedItemCount?: {
+    eq?: number;
+    notEq?: number;
+    greaterThan?: number;
+    greaterThanOrEqual?: number;
+    lessThan?: number;
+    lessThanOrEqual?: number;
+    in?: Array<number>;
+  };
 
+  items?: ItemFilterInput;
 
 };
 
@@ -1205,14 +1220,14 @@ export const sellerItemCardFields = ["id", "title", "slug", "startingPrice", "cu
  *
  * @typedQuery true
  */
-export type ItemDetail = Array<InferResult<ItemResourceSchema, ["id", "title", "description", "slug", "startingPrice", "currentPrice", "reservePrice", "bidIncrement", "buyNowPrice", "endTime", "startTime", "auctionStatus", "publicationStatus", "condition", "saleType", "auctionFormat", "viewCount", "location", "attributes", "lotNumber", "createdById", "bidCount", { category: ["id", "name", "slug"] }, { user: ["id", "email", "fullName", "username"] }]>>;
+export type ItemDetail = Array<InferResult<ItemResourceSchema, ["id", "title", "description", "slug", "startingPrice", "currentPrice", "reservePrice", "bidIncrement", "buyNowPrice", "endTime", "startTime", "auctionStatus", "publicationStatus", "condition", "saleType", "auctionFormat", "viewCount", "location", "attributes", "lotNumber", "createdById", "bidCount", { category: ["id", "name", "slug"] }]>>;
 
 /**
  * Typed query for Item
  *
  * @typedQuery true
  */
-export const itemDetailFields = ["id", "title", "description", "slug", "startingPrice", "currentPrice", "reservePrice", "bidIncrement", "buyNowPrice", "endTime", "startTime", "auctionStatus", "publicationStatus", "condition", "saleType", "auctionFormat", "viewCount", "location", "attributes", "lotNumber", "createdById", "bidCount", { category: ["id", "name", "slug"] }, { user: ["id", "email", "fullName", "username"] }] satisfies ListItemsFields;
+export const itemDetailFields = ["id", "title", "description", "slug", "startingPrice", "currentPrice", "reservePrice", "bidIncrement", "buyNowPrice", "endTime", "startTime", "auctionStatus", "publicationStatus", "condition", "saleType", "auctionFormat", "viewCount", "location", "attributes", "lotNumber", "createdById", "bidCount", { category: ["id", "name", "slug"] }] satisfies ListItemsFields;
 
 
 
@@ -1222,14 +1237,14 @@ export const itemDetailFields = ["id", "title", "description", "slug", "starting
  *
  * @typedQuery true
  */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "storeName", "location", "phoneNumber", "whatsappNumber", "createdAt"]>>;
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "storeName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount"]>>;
 
 /**
  * Typed query for User
  *
  * @typedQuery true
  */
-export const sellerProfileFields = ["id", "username", "fullName", "storeName", "location", "phoneNumber", "whatsappNumber", "createdAt"];
+export const sellerProfileFields = ["id", "username", "fullName", "storeName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount"];
 
 
 

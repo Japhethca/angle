@@ -23,7 +23,8 @@ defmodule Angle.Accounts do
           :location,
           :phone_number,
           :whatsapp_number,
-          :created_at
+          :created_at,
+          :published_item_count
         ]
       end
     end
