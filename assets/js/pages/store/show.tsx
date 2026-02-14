@@ -39,7 +39,7 @@ interface StoreShowProps {
   items: SellerItem[];
   has_more: boolean;
   category_summary: CategorySummary[];
-  active_tab: string;
+  active_tab: TabKey;
 }
 
 const ITEMS_PER_PAGE = 20;
@@ -69,25 +69,25 @@ export default function StoreShow({
   const displayName = seller.storeName || seller.fullName || "Store";
   const storeUrl = `/store/${seller.username || seller.id}`;
 
-  const [activeTab, setActiveTab] = useState<TabKey>(
-    initialActiveTab as TabKey,
-  );
+  const [activeTab, setActiveTab] = useState<TabKey>(initialActiveTab);
   const [viewMode, setViewMode] = useState<ViewMode>(getInitialViewMode);
 
-  const isHistoryTab = initialActiveTab === "history";
+  // Route server-loaded items to the correct tab state
+  const auctionTabActive = initialActiveTab === "auctions";
+  const historyTabActive = initialActiveTab === "history";
 
   // Auctions tab state (server-loaded when active_tab is auctions)
   const [auctionItems, setAuctionItems] =
-    useState<SellerItem[]>(isHistoryTab ? [] : initialItems);
-  const [auctionHasMore, setAuctionHasMore] = useState(isHistoryTab ? false : initialHasMore);
+    useState<SellerItem[]>(auctionTabActive ? initialItems : []);
+  const [auctionHasMore, setAuctionHasMore] = useState(auctionTabActive ? initialHasMore : false);
   const [isLoadingMoreAuctions, setIsLoadingMoreAuctions] = useState(false);
 
   // History tab state (server-loaded when active_tab is history, otherwise client-loaded on demand)
-  const [historyItems, setHistoryItems] = useState<SellerItem[]>(isHistoryTab ? initialItems : []);
-  const [historyHasMore, setHistoryHasMore] = useState(isHistoryTab ? initialHasMore : false);
+  const [historyItems, setHistoryItems] = useState<SellerItem[]>(historyTabActive ? initialItems : []);
+  const [historyHasMore, setHistoryHasMore] = useState(historyTabActive ? initialHasMore : false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isLoadingMoreHistory, setIsLoadingMoreHistory] = useState(false);
-  const [historyLoaded, setHistoryLoaded] = useState(isHistoryTab);
+  const [historyLoaded, setHistoryLoaded] = useState(historyTabActive);
 
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
@@ -95,10 +95,12 @@ export default function StoreShow({
   };
 
   const handleShareStore = async () => {
-    const tabParam = activeTab !== "auctions" ? `?tab=${activeTab}` : "";
-    const url = `${window.location.origin}${storeUrl}${tabParam}`;
+    const url = new URL(storeUrl, window.location.origin);
+    if (activeTab !== "auctions") {
+      url.searchParams.set("tab", activeTab);
+    }
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(url.toString());
       toast.success("Store link copied to clipboard");
     } catch {
       toast.error("Failed to copy link");

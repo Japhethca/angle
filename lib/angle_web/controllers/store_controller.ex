@@ -14,8 +14,14 @@ defmodule AngleWeb.StoreController do
 
       seller ->
         tab = validate_tab(params["tab"])
-        status_filter = if tab == "history", do: :history, else: :active
-        {items, has_more} = load_seller_items(conn, seller["id"], status_filter)
+
+        {items, has_more} =
+          case tab do
+            "reviews" -> {[], false}
+            "history" -> load_seller_items(conn, seller["id"], :history)
+            _ -> load_seller_items(conn, seller["id"], :active)
+          end
+
         category_summary = build_category_summary(conn, seller["id"])
 
         conn
