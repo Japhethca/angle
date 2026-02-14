@@ -116,6 +116,12 @@ defmodule Angle.Inventory.Item do
       # end
       # prepare build())
     end
+
+    read :by_category do
+      argument :category_ids, {:array, :uuid}, allow_nil?: false
+
+      filter expr(category_id in ^arg(:category_ids) and publication_status == :published)
+    end
   end
 
   policies do
