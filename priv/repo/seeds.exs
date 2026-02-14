@@ -260,3 +260,116 @@ Enum.each(role_permission_mappings, fn {role_name, permission_names} ->
 end)
 
 IO.puts("\n🎉 Permission system seeding completed!")
+
+# Seed categories and subcategories
+alias Angle.Catalog.Category
+
+IO.puts("\n📂 Creating categories...")
+
+categories_with_subcategories = [
+  {"Electronics", "electronics",
+   [
+     {"Smartphones", "smartphones"},
+     {"Laptops", "laptops"},
+     {"Audio & Headphones", "audio-headphones"},
+     {"Gaming", "gaming"},
+     {"Cameras", "cameras"}
+   ]},
+  {"Fashion", "fashion",
+   [
+     {"Men's Clothing", "mens-clothing"},
+     {"Women's Clothing", "womens-clothing"},
+     {"Shoes", "shoes"},
+     {"Bags & Accessories", "bags-accessories"},
+     {"Watches", "watches"}
+   ]},
+  {"Art", "art",
+   [
+     {"Paintings", "paintings"},
+     {"Sculptures", "sculptures"},
+     {"Photography", "photography"},
+     {"Digital Art", "digital-art"}
+   ]},
+  {"Vehicles", "vehicles",
+   [
+     {"Cars", "cars"},
+     {"Motorcycles", "motorcycles"},
+     {"Boats", "boats"},
+     {"Parts & Accessories", "parts-accessories"}
+   ]},
+  {"Collectibles", "collectibles",
+   [
+     {"Coins & Currency", "coins-currency"},
+     {"Trading Cards", "trading-cards"},
+     {"Stamps", "stamps"},
+     {"Memorabilia", "memorabilia"},
+     {"Antiques", "antiques"}
+   ]},
+  {"Jewelry", "jewelry",
+   [
+     {"Rings", "rings"},
+     {"Necklaces", "necklaces"},
+     {"Bracelets", "bracelets"},
+     {"Earrings", "earrings"}
+   ]},
+  {"Furniture", "furniture",
+   [
+     {"Living Room", "living-room"},
+     {"Bedroom", "bedroom"},
+     {"Office", "office"},
+     {"Outdoor", "outdoor"}
+   ]},
+  {"Sports", "sports",
+   [
+     {"Fitness Equipment", "fitness-equipment"},
+     {"Outdoor Sports", "outdoor-sports"},
+     {"Team Sports", "team-sports"},
+     {"Cycling", "cycling"}
+   ]}
+]
+
+Enum.each(categories_with_subcategories, fn {name, slug, subcategories} ->
+  parent =
+    case Ash.get(Category, %{slug: slug}, domain: Angle.Catalog, authorize?: false) do
+      {:ok, existing} ->
+        IO.puts("Category '#{name}' already exists, skipping...")
+        existing
+
+      {:error, _} ->
+        case Ash.create(Category, %{name: name, slug: slug},
+               domain: Angle.Catalog,
+               authorize?: false
+             ) do
+          {:ok, category} ->
+            IO.puts("✅ Created category: #{name}")
+            category
+
+          {:error, error} ->
+            IO.puts("❌ Failed to create category '#{name}': #{inspect(error)}")
+            nil
+        end
+    end
+
+  if parent do
+    Enum.each(subcategories, fn {sub_name, sub_slug} ->
+      case Ash.get(Category, %{slug: sub_slug}, domain: Angle.Catalog, authorize?: false) do
+        {:ok, _existing} ->
+          IO.puts("  Subcategory '#{sub_name}' already exists, skipping...")
+
+        {:error, _} ->
+          case Ash.create(Category, %{name: sub_name, slug: sub_slug, parent_id: parent.id},
+                 domain: Angle.Catalog,
+                 authorize?: false
+               ) do
+            {:ok, _} ->
+              IO.puts("  ✅ Created subcategory: #{sub_name}")
+
+            {:error, error} ->
+              IO.puts("  ❌ Failed to create subcategory '#{sub_name}': #{inspect(error)}")
+          end
+      end
+    end)
+  end
+end)
+
+IO.puts("\n🎉 Category seeding completed!")
