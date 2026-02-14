@@ -18,8 +18,15 @@ import {
 } from "@/features/items";
 import { BidSection } from "@/features/bidding";
 
+interface Seller {
+  id: string;
+  fullName: string | null;
+  username?: string | null;
+  publishedItemCount?: number | null;
+}
+
 interface ShowProps {
-  item: ItemDetail[number];
+  item: ItemDetail[number] & { user: Seller | null };
   similar_items: HomepageItemCard;
 }
 

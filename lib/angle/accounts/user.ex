@@ -373,6 +373,20 @@ defmodule Angle.Accounts.User do
         end
       end
     end
+
+    read :read_public_profile do
+      description "Public read action for seller/store profiles"
+
+      argument :username, :string
+      argument :user_id, :uuid
+
+      filter expr(
+               (not is_nil(^arg(:username)) and username == ^arg(:username)) or
+                 (not is_nil(^arg(:user_id)) and id == ^arg(:user_id))
+             )
+
+      pagination offset?: true, required?: false
+    end
   end
 
   policies do
@@ -423,6 +437,10 @@ defmodule Angle.Accounts.User do
       authorize_if expr(id == ^actor(:id))
     end
 
+    policy action(:read_public_profile) do
+      authorize_if always()
+    end
+
     policy action_type([:update]) do
       # Users can only update themselves
       authorize_if expr(id == ^actor(:id))
@@ -441,6 +459,15 @@ defmodule Angle.Accounts.User do
     attribute :confirmed_at, :utc_datetime_usec
     attribute :full_name, :string, public?: true
     attribute :phone_number, :string, public?: true
+    attribute :username, :string, public?: true
+    attribute :store_name, :string, public?: true
+    attribute :location, :string, public?: true
+    attribute :whatsapp_number, :string, public?: true
+
+    create_timestamp :created_at do
+      allow_nil? false
+      public? true
+    end
   end
 
   relationships do
@@ -453,6 +480,11 @@ defmodule Angle.Accounts.User do
       through Angle.Accounts.UserRole
       destination_attribute_on_join_resource :role_id
       source_attribute_on_join_resource :user_id
+      public? true
+    end
+
+    has_many :items, Angle.Inventory.Item do
+      destination_attribute :created_by_id
       public? true
     end
   end
@@ -576,7 +608,15 @@ defmodule Angle.Accounts.User do
     end
   end
 
+  aggregates do
+    count :published_item_count, :items do
+      filter expr(publication_status == :published)
+      public? true
+    end
+  end
+
   identities do
     identity :unique_email, [:email]
+    identity :unique_username, [:username]
   end
 end

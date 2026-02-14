@@ -10,6 +10,23 @@ defmodule Angle.Accounts do
   typescript_rpc do
     resource Angle.Accounts.User do
       rpc_action :list_users, :read
+
+      typed_query :seller_profile, :read_public_profile do
+        ts_result_type_name "SellerProfile"
+        ts_fields_const_name "sellerProfileFields"
+
+        fields [
+          :id,
+          :username,
+          :full_name,
+          :store_name,
+          :location,
+          :phone_number,
+          :whatsapp_number,
+          :created_at,
+          :published_item_count
+        ]
+      end
     end
   end
 

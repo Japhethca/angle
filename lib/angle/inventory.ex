@@ -53,6 +53,26 @@ defmodule Angle.Inventory do
         ]
       end
 
+      typed_query :seller_item_card, :by_seller do
+        ts_result_type_name "SellerItemCard"
+        ts_fields_const_name "sellerItemCardFields"
+
+        fields [
+          :id,
+          :title,
+          :slug,
+          :starting_price,
+          :current_price,
+          :end_time,
+          :auction_status,
+          :condition,
+          :sale_type,
+          :view_count,
+          :bid_count,
+          %{category: [:id, :name, :slug]}
+        ]
+      end
+
       typed_query :item_detail, :read do
         ts_result_type_name "ItemDetail"
         ts_fields_const_name "itemDetailFields"
@@ -80,8 +100,7 @@ defmodule Angle.Inventory do
           :lot_number,
           :created_by_id,
           :bid_count,
-          %{category: [:id, :name, :slug]},
-          %{user: [:id, :email, :full_name]}
+          %{category: [:id, :name, :slug]}
         ]
       end
     end

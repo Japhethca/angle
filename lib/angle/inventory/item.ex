@@ -129,6 +129,26 @@ defmodule Angle.Inventory.Item do
 
       pagination offset?: true, required?: false
     end
+
+    read :by_seller do
+      argument :seller_id, :uuid, allow_nil?: false
+
+      argument :status_filter, :atom do
+        default :active
+        constraints one_of: [:active, :history]
+      end
+
+      filter expr(
+               created_by_id == ^arg(:seller_id) and
+                 publication_status == :published and
+                 ((^arg(:status_filter) == :active and
+                     auction_status in [:pending, :scheduled, :active]) or
+                    (^arg(:status_filter) == :history and
+                       auction_status in [:ended, :sold]))
+             )
+
+      pagination offset?: true, required?: false
+    end
   end
 
   policies do

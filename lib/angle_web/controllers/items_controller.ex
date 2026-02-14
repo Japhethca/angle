@@ -15,6 +15,9 @@ defmodule AngleWeb.ItemsController do
         similar_items =
           load_similar_items(conn, item["id"], item["category"] && item["category"]["id"])
 
+        seller = load_seller(conn, item["createdById"])
+        item = Map.put(item, "user", seller)
+
         conn
         |> assign_prop(:item, item)
         |> assign_prop(:similar_items, similar_items)
@@ -51,6 +54,23 @@ defmodule AngleWeb.ItemsController do
         :not_found
     end
   end
+
+  defp load_seller(conn, user_id) when is_binary(user_id) do
+    params = %{input: %{user_id: user_id}, page: %{limit: 1}}
+
+    case AshTypescript.Rpc.run_typed_query(:angle, :seller_profile, params, conn) do
+      %{"success" => true, "data" => data} ->
+        case extract_results(data) do
+          [seller | _] -> seller
+          _ -> nil
+        end
+
+      _ ->
+        nil
+    end
+  end
+
+  defp load_seller(_conn, _user_id), do: nil
 
   defp load_similar_items(conn, current_item_id, category_id)
        when is_binary(current_item_id) and is_binary(category_id) do
