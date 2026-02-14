@@ -1,3 +1,4 @@
+import { Link } from "@inertiajs/react";
 import { User, ChevronRight, BadgeCheck } from "lucide-react";
 
 interface SellerCardProps {
@@ -5,6 +6,7 @@ interface SellerCardProps {
     id: string;
     email: string;
     fullName: string | null;
+    username?: string | null;
   } | null;
 }
 
@@ -12,6 +14,7 @@ export function SellerCard({ seller }: SellerCardProps) {
   if (!seller) return null;
 
   const displayName = seller.fullName || seller.email;
+  const storeUrl = `/store/${seller.username || seller.id}`;
 
   return (
     <div className="rounded-2xl bg-neutral-08 p-4 lg:p-5">
@@ -32,10 +35,13 @@ export function SellerCard({ seller }: SellerCardProps) {
           </div>
         </div>
 
-        {/* Visit seller button */}
-        <button className="flex size-9 items-center justify-center rounded-full border border-neutral-06 transition-colors hover:bg-neutral-07">
+        {/* Visit seller store */}
+        <Link
+          href={storeUrl}
+          className="flex size-9 items-center justify-center rounded-full border border-neutral-06 transition-colors hover:bg-neutral-07"
+        >
           <ChevronRight className="size-4 text-neutral-03" />
-        </button>
+        </Link>
       </div>
     </div>
   );
