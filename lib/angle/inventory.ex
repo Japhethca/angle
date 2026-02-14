@@ -33,6 +33,26 @@ defmodule Angle.Inventory do
         ]
       end
 
+      typed_query :category_item_card, :by_category do
+        ts_result_type_name "CategoryItemCard"
+        ts_fields_const_name "categoryItemCardFields"
+
+        fields [
+          :id,
+          :title,
+          :slug,
+          :starting_price,
+          :current_price,
+          :end_time,
+          :auction_status,
+          :condition,
+          :sale_type,
+          :view_count,
+          :bid_count,
+          %{category: [:id, :name, :slug]}
+        ]
+      end
+
       typed_query :item_detail, :read do
         ts_result_type_name "ItemDetail"
         ts_fields_const_name "itemDetailFields"

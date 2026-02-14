@@ -67,6 +67,9 @@ defmodule AngleWeb.Router do
 
     get "/", PageController, :home
     get "/items/:slug", ItemsController, :show
+    get "/categories", CategoriesController, :index
+    get "/categories/:slug", CategoriesController, :show
+    get "/categories/:slug/:sub_slug", CategoriesController, :show_subcategory
     post "/rpc/run", AshTypescriptRpcController, :run
     post "/rpc/validate", AshTypescriptRpcController, :validate
   end

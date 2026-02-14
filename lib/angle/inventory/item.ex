@@ -81,7 +81,12 @@ defmodule Angle.Inventory.Item do
   end
 
   actions do
-    defaults [:read, :destroy, create: :*, update: :*]
+    defaults [:destroy, create: :*, update: :*]
+
+    read :read do
+      primary? true
+      pagination offset?: true, required?: false
+    end
 
     create :create_draft do
       description "Create a new item in draft status"
@@ -115,6 +120,14 @@ defmodule Angle.Inventory.Item do
       #   {:ok, query}
       # end
       # prepare build())
+    end
+
+    read :by_category do
+      argument :category_ids, {:array, :uuid}, allow_nil?: false
+
+      filter expr(category_id in ^arg(:category_ids) and publication_status == :published)
+
+      pagination offset?: true, required?: false
     end
   end
 

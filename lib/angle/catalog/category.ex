@@ -44,6 +44,8 @@ defmodule Angle.Catalog.Category do
 
     read :top_level do
       filter expr(is_nil(parent_id))
+
+      pagination offset?: true, required?: false
     end
   end
 
