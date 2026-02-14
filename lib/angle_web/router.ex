@@ -18,6 +18,7 @@ defmodule AngleWeb.Router do
     # Add user loading to all browser requests
     plug :load_current_user
     plug Inertia.Plug
+    plug AngleWeb.Plugs.NavCategories
   end
 
   pipeline :api do
