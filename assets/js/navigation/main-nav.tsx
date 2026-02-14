@@ -1,37 +1,49 @@
-import { useState } from "react";
-import { Link, usePage } from "@inertiajs/react";
-import { Search, Bell, Menu, User } from "lucide-react";
-import { useAuth, AuthLink } from "@/features/auth";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Link, usePage } from '@inertiajs/react';
+import { Search, Bell, Menu, User } from 'lucide-react';
+import { useAuth, AuthLink } from '@/features/auth';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import {
-  Sheet,
-  SheetTrigger,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuTrigger,
+  NavigationMenuContent,
+} from '@/components/ui/navigation-menu';
+import { CategoryMegaMenu } from './category-mega-menu';
+
+interface NavCategory {
+  id: string;
+  name: string;
+  slug: string;
+  categories: Array<{ id: string; name: string; slug: string }>;
+}
+
+interface MainNavProps {
+  navCategories: NavCategory[];
+}
 
 const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "Categories", href: "/categories" },
-  { label: "My Bids", href: "/bids", auth: true },
-  { label: "Sell Item", href: "/items/new", auth: true },
-  { label: "Watchlist", href: "/watchlist", auth: true },
+  { label: 'Home', href: '/' },
+  { label: 'My Bids', href: '/bids', auth: true },
+  { label: 'List Item', href: '/items/new', auth: true },
+  { label: 'Watchlist', href: '/watchlist', auth: true },
 ];
 
-export function MainNav() {
+export function MainNav({ navCategories }: MainNavProps) {
   const { authenticated } = useAuth();
   const { url } = usePage();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const visibleLinks = navLinks.filter(
-    (link) => !link.auth || authenticated
-  );
+  const visibleLinks = navLinks.filter(link => !link.auth || authenticated);
 
   const isActive = (href: string) => {
-    if (href === "/") return url === "/";
+    if (href === '/') return url === '/';
     return url.startsWith(href);
   };
+
+  const isCategoriesActive = url.startsWith('/categories');
 
   return (
     <nav className="sticky top-0 z-40 border-b border-neutral-07 bg-white">
@@ -44,15 +56,48 @@ export function MainNav() {
 
           {/* Desktop nav links */}
           <div className="hidden items-center gap-8 lg:flex">
-            {visibleLinks.map((link) => (
+            {/* Home link */}
+            <AuthLink
+              href="/"
+              className={
+                isActive('/')
+                  ? 'border-b-2 border-primary-1000 pb-1 text-sm font-medium text-primary-1000'
+                  : 'text-sm text-neutral-03 transition-colors hover:text-neutral-01'
+              }
+            >
+              Home
+            </AuthLink>
+
+            {/* Categories mega-menu */}
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger
+                    className={
+                      isCategoriesActive
+                        ? 'h-auto rounded-none border-b-2 border-primary-1000 bg-transparent p-0 pb-1 text-sm font-medium text-primary-1000 shadow-none hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent'
+                        : 'h-auto rounded-none bg-transparent p-0 text-sm font-normal text-neutral-03 shadow-none transition-colors hover:bg-transparent hover:text-neutral-01 focus:bg-transparent data-[state=open]:bg-transparent'
+                    }
+                  >
+                    Categories
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent className="p-0">
+                    <CategoryMegaMenu categories={navCategories} />
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+
+            {/* Remaining nav links */}
+            {visibleLinks.filter(link => link.href !== '/').map(link => (
               <AuthLink
                 key={link.href}
                 href={link.href}
                 auth={link.auth}
                 className={
                   isActive(link.href)
-                    ? "border-b-2 border-primary-1000 pb-1 text-sm font-medium text-primary-1000"
-                    : "text-sm text-neutral-03 transition-colors hover:text-neutral-01"
+                    ? 'border-b-2 border-primary-1000 pb-1 text-sm font-medium text-primary-1000'
+                    : 'text-sm text-neutral-03 transition-colors hover:text-neutral-01'
                 }
               >
                 {link.label}
@@ -100,7 +145,7 @@ export function MainNav() {
           )}
         </div>
 
-        {/* Mobile right section */}
+        {/* Mobile right section — unchanged */}
         <div className="flex items-center gap-2 lg:hidden">
           <button className="flex size-9 items-center justify-center rounded-lg bg-neutral-08 text-neutral-03">
             <Search className="size-[18px]" />
@@ -139,10 +184,7 @@ export function MainNav() {
                         Sign In
                       </Link>
                     </Button>
-                    <Button
-                      className="bg-primary-600 text-white hover:bg-primary-600/90"
-                      asChild
-                    >
+                    <Button className="bg-primary-600 text-white hover:bg-primary-600/90" asChild>
                       <Link href="/auth/register" onClick={() => setMobileOpen(false)}>
                         Sign Up
                       </Link>
