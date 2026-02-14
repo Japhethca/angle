@@ -1110,38 +1110,6 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
-// Item Typed Queries
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export type HomepageItemCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", { category: ["id", "name", "slug"] }]>>;
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export const homepageItemCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", { category: ["id", "name", "slug"] }] satisfies ListItemsFields;
-
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export type ItemDetail = Array<InferResult<ItemResourceSchema, ["id", "title", "description", "slug", "startingPrice", "currentPrice", "reservePrice", "bidIncrement", "buyNowPrice", "endTime", "startTime", "auctionStatus", "publicationStatus", "condition", "saleType", "auctionFormat", "viewCount", "location", "attributes", "lotNumber", "createdById", "bidCount", { category: ["id", "name", "slug"] }, { user: ["id", "email", "fullName"] }]>>;
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export const itemDetailFields = ["id", "title", "description", "slug", "startingPrice", "currentPrice", "reservePrice", "bidIncrement", "buyNowPrice", "endTime", "startTime", "auctionStatus", "publicationStatus", "condition", "saleType", "auctionFormat", "viewCount", "location", "attributes", "lotNumber", "createdById", "bidCount", { category: ["id", "name", "slug"] }, { user: ["id", "email", "fullName"] }] satisfies ListItemsFields;
-
-
-
 // Category Typed Queries
 /**
  * Typed query for Category
@@ -1171,6 +1139,53 @@ export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name
  * @typedQuery true
  */
 export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
+
+
+
+// Item Typed Queries
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export type HomepageItemCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", { category: ["id", "name", "slug"] }]>>;
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export const homepageItemCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", { category: ["id", "name", "slug"] }] satisfies ListItemsFields;
+
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export type CategoryItemCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", "bidCount", { category: ["id", "name", "slug"] }]>>;
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export const categoryItemCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", "bidCount", { category: ["id", "name", "slug"] }];
+
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export type ItemDetail = Array<InferResult<ItemResourceSchema, ["id", "title", "description", "slug", "startingPrice", "currentPrice", "reservePrice", "bidIncrement", "buyNowPrice", "endTime", "startTime", "auctionStatus", "publicationStatus", "condition", "saleType", "auctionFormat", "viewCount", "location", "attributes", "lotNumber", "createdById", "bidCount", { category: ["id", "name", "slug"] }, { user: ["id", "email", "fullName"] }]>>;
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export const itemDetailFields = ["id", "title", "description", "slug", "startingPrice", "currentPrice", "reservePrice", "bidIncrement", "buyNowPrice", "endTime", "startTime", "auctionStatus", "publicationStatus", "condition", "saleType", "auctionFormat", "viewCount", "location", "attributes", "lotNumber", "createdById", "bidCount", { category: ["id", "name", "slug"] }, { user: ["id", "email", "fullName"] }] satisfies ListItemsFields;
 
 
 
