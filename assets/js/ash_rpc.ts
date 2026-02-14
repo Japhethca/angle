@@ -133,7 +133,7 @@ export type ItemAttributesOnlySchema = {
 // User Schema
 export type UserResourceSchema = {
   __type: "Resource";
-  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber" | "username" | "storeName" | "location" | "whatsappNumber";
+  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber" | "username" | "storeName" | "location" | "whatsappNumber" | "createdAt";
   id: UUID;
   email: string;
   fullName: string | null;
@@ -142,13 +142,14 @@ export type UserResourceSchema = {
   storeName: string | null;
   location: string | null;
   whatsappNumber: string | null;
+  createdAt: UtcDateTimeUsec;
 };
 
 
 
 export type UserAttributesOnlySchema = {
   __type: "Resource";
-  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber" | "username" | "storeName" | "location" | "whatsappNumber";
+  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber" | "username" | "storeName" | "location" | "whatsappNumber" | "createdAt";
   id: UUID;
   email: string;
   fullName: string | null;
@@ -157,6 +158,7 @@ export type UserAttributesOnlySchema = {
   storeName: string | null;
   location: string | null;
   whatsappNumber: string | null;
+  createdAt: UtcDateTimeUsec;
 };
 
 
@@ -511,6 +513,16 @@ export type UserFilterInput = {
     eq?: string;
     notEq?: string;
     in?: Array<string>;
+  };
+
+  createdAt?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
   };
 
 
@@ -1142,6 +1154,23 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
+// User Typed Queries
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "storeName", "location", "phoneNumber", "whatsappNumber", "createdAt"]>>;
+
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export const sellerProfileFields = ["id", "username", "fullName", "storeName", "location", "phoneNumber", "whatsappNumber", "createdAt"];
+
+
+
 // Category Typed Queries
 /**
  * Typed query for Category
@@ -1203,6 +1232,21 @@ export type CategoryItemCard = Array<InferResult<ItemResourceSchema, ["id", "tit
  * @typedQuery true
  */
 export const categoryItemCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", "bidCount", { category: ["id", "name", "slug"] }];
+
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export type SellerItemCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", "bidCount", { category: ["id", "name", "slug"] }]>>;
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export const sellerItemCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", "bidCount", { category: ["id", "name", "slug"] }];
 
 
 /**
