@@ -69,7 +69,7 @@ export function MainNav({ navCategories }: MainNavProps) {
             </AuthLink>
 
             {/* Categories mega-menu */}
-            <NavigationMenu>
+            <NavigationMenu viewport={false}>
               <NavigationMenuList>
                 <NavigationMenuItem>
                   <NavigationMenuTrigger
@@ -81,7 +81,7 @@ export function MainNav({ navCategories }: MainNavProps) {
                   >
                     Categories
                   </NavigationMenuTrigger>
-                  <NavigationMenuContent className="p-0">
+                  <NavigationMenuContent className="rounded-b-xl border-0 bg-white p-0 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.08)]">
                     <CategoryMegaMenu categories={navCategories} />
                   </NavigationMenuContent>
                 </NavigationMenuItem>
