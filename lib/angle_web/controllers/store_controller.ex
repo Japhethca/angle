@@ -1,5 +1,6 @@
 defmodule AngleWeb.StoreController do
   use AngleWeb, :controller
+  require Ash.Query
 
   @items_per_page 20
 
@@ -22,7 +23,7 @@ defmodule AngleWeb.StoreController do
             _ -> load_seller_items(conn, seller["id"], :active)
           end
 
-        category_summary = build_category_summary(conn, seller["id"])
+        category_summary = build_category_summary(seller["id"])
 
         conn
         |> assign_prop(:seller, seller)
@@ -75,34 +76,24 @@ defmodule AngleWeb.StoreController do
     end
   end
 
-  # NOTE: Fetches up to 200 items for category grouping. For sellers with
-  # more than 200 published items, counts may be approximate. Consider
-  # replacing with a dedicated aggregate query in a future iteration.
-  defp build_category_summary(conn, seller_id) do
-    params = %{
-      input: %{seller_id: seller_id},
-      page: %{limit: 200, offset: 0, count: false}
-    }
+  defp build_category_summary(seller_id) do
+    item_query =
+      Angle.Inventory.Item
+      |> Ash.Query.filter(created_by_id == ^seller_id and publication_status == :published)
 
-    items =
-      case AshTypescript.Rpc.run_typed_query(:angle, :seller_item_card, params, conn) do
-        %{"success" => true, "data" => %{"results" => results}} -> results
-        %{"success" => true, "data" => data} when is_list(data) -> data
-        _ -> []
-      end
-
-    items
-    |> Enum.group_by(fn item -> item["category"] end)
-    |> Enum.map(fn {category, items} ->
+    Angle.Catalog.Category
+    |> Ash.Query.aggregate(:item_count, :count, :items, query: item_query)
+    |> Ash.read!(authorize?: false)
+    |> Enum.filter(fn cat -> cat.aggregates[:item_count] > 0 end)
+    |> Enum.sort_by(fn cat -> -cat.aggregates[:item_count] end)
+    |> Enum.map(fn cat ->
       %{
-        "id" => category && category["id"],
-        "name" => category && category["name"],
-        "slug" => category && category["slug"],
-        "count" => length(items)
+        "id" => cat.id,
+        "name" => cat.name,
+        "slug" => cat.slug,
+        "count" => cat.aggregates[:item_count]
       }
     end)
-    |> Enum.reject(fn cat -> is_nil(cat["id"]) end)
-    |> Enum.sort_by(fn cat -> -cat["count"] end)
   end
 
   defp extract_results(data) when is_list(data), do: data

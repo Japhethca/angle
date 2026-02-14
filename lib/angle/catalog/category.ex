@@ -97,6 +97,11 @@ defmodule Angle.Catalog.Category do
       destination_attribute :parent_id
       public? true
     end
+
+    has_many :items, Angle.Inventory.Item do
+      destination_attribute :category_id
+      public? true
+    end
   end
 
   identities do
