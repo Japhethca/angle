@@ -17,6 +17,12 @@ defmodule Angle.Catalog do
         ts_fields_const_name "homepageCategoryFields"
         fields [:id, :name, :slug, :image_url]
       end
+
+      typed_query :nav_category, :top_level do
+        ts_result_type_name "NavCategory"
+        ts_fields_const_name "navCategoryFields"
+        fields [:id, :name, :slug, categories: [:id, :name, :slug]]
+      end
     end
   end
 

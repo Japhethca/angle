@@ -41,6 +41,10 @@ defmodule Angle.Catalog.Category do
 
   actions do
     defaults [:read, :destroy, create: :*, update: :*]
+
+    read :top_level do
+      filter expr(is_nil(parent_id))
+    end
   end
 
   attributes do
