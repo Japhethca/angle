@@ -463,6 +463,11 @@ defmodule Angle.Accounts.User do
     attribute :store_name, :string, public?: true
     attribute :location, :string, public?: true
     attribute :whatsapp_number, :string, public?: true
+
+    create_timestamp :created_at do
+      allow_nil? false
+      public? true
+    end
   end
 
   relationships do
