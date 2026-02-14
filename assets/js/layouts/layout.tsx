@@ -12,7 +12,7 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const { flash } = usePage<PageProps>().props;
+  const { flash, nav_categories } = usePage<PageProps>().props;
 
   useEffect(() => {
     if (flash.success) {
@@ -28,7 +28,7 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <MainNav />
+      <MainNav navCategories={nav_categories ?? []} />
       <main className="flex-1 pb-[72px] lg:pb-0">{children}</main>
       <Footer />
       <BottomNav />
