@@ -441,6 +441,10 @@ defmodule Angle.Accounts.User do
     attribute :confirmed_at, :utc_datetime_usec
     attribute :full_name, :string, public?: true
     attribute :phone_number, :string, public?: true
+    attribute :username, :string, public?: true
+    attribute :store_name, :string, public?: true
+    attribute :location, :string, public?: true
+    attribute :whatsapp_number, :string, public?: true
   end
 
   relationships do
@@ -578,5 +582,6 @@ defmodule Angle.Accounts.User do
 
   identities do
     identity :unique_email, [:email]
+    identity :unique_username, [:username]
   end
 end
