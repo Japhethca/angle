@@ -373,6 +373,20 @@ defmodule Angle.Accounts.User do
         end
       end
     end
+
+    read :read_public_profile do
+      description "Public read action for seller/store profiles"
+
+      argument :username, :string
+      argument :user_id, :uuid
+
+      filter expr(
+               (not is_nil(^arg(:username)) and username == ^arg(:username)) or
+                 (not is_nil(^arg(:user_id)) and id == ^arg(:user_id))
+             )
+
+      pagination offset?: true, required?: false
+    end
   end
 
   policies do
@@ -421,6 +435,10 @@ defmodule Angle.Accounts.User do
     policy action(:read) do
       # Users can only read themselves
       authorize_if expr(id == ^actor(:id))
+    end
+
+    policy action(:read_public_profile) do
+      authorize_if always()
     end
 
     policy action_type([:update]) do
