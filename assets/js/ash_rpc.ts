@@ -1550,23 +1550,13 @@ export type ListItemsFields = UnifiedFieldSelection<ItemResourceSchema>[];
 export type InferListItemsResult<
   Fields extends ListItemsFields | undefined,
   Page extends ListItemsConfig["page"] = undefined
-> = ConditionalPaginatedResultMixed<Page, Array<InferResult<ItemResourceSchema, Fields>>, {
+> = ConditionalPaginatedResult<Page, Array<InferResult<ItemResourceSchema, Fields>>, {
   results: Array<InferResult<ItemResourceSchema, Fields>>;
   hasMore: boolean;
   limit: number;
   offset: number;
   count?: number | null;
   type: "offset";
-}, {
-  results: Array<InferResult<ItemResourceSchema, Fields>>;
-  hasMore: boolean;
-  limit: number;
-  after: string | null;
-  before: string | null;
-  previousPage: string;
-  nextPage: string;
-  count?: number | null;
-  type: "keyset";
 }>;
 
 export type ListItemsConfig = {
@@ -1574,17 +1564,13 @@ export type ListItemsConfig = {
   fields: ListItemsFields;
   filter?: ItemFilterInput;
   sort?: string;
-  page?: (
-    {
-      limit?: number;
-      offset?: number;
-      count?: boolean;
-    } | {
-      limit?: number;
-      after?: string;
-      before?: string;
-    }
-  );
+  page?: {
+    limit?: number;
+    offset?: number;
+    after?: never;
+    before?: never;
+    count?: boolean;
+  };
   headers?: Record<string, string>;
   fetchOptions?: RequestInit;
   customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;

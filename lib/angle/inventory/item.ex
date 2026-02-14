@@ -81,7 +81,12 @@ defmodule Angle.Inventory.Item do
   end
 
   actions do
-    defaults [:read, :destroy, create: :*, update: :*]
+    defaults [:destroy, create: :*, update: :*]
+
+    read :read do
+      primary? true
+      pagination offset?: true, required?: false
+    end
 
     create :create_draft do
       description "Create a new item in draft status"

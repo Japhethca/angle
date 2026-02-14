@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Link } from "@inertiajs/react";
 import { ChevronLeft, Search, LayoutGrid, List, Loader2 } from "lucide-react";
 import type { NavCategory, CategoryItemCard as CategoryItemCardType } from "@/ash_rpc";
@@ -43,9 +43,13 @@ export default function CategoryShow({
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   // Build the category IDs for load-more filtering
-  const categoryIds = active_subcategory
-    ? ([subcategories.find((s) => s.slug === active_subcategory)?.id].filter(Boolean) as string[])
-    : [category.id, ...subcategories.map((s) => s.id)];
+  const categoryIds = useMemo(
+    () =>
+      active_subcategory
+        ? ([subcategories.find((s) => s.slug === active_subcategory)?.id].filter(Boolean) as string[])
+        : [category.id, ...subcategories.map((s) => s.id)],
+    [active_subcategory, category.id, subcategories],
+  );
 
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
@@ -53,6 +57,7 @@ export default function CategoryShow({
   };
 
   const loadMore = useCallback(async () => {
+    if (isLoadingMore) return;
     setIsLoadingMore(true);
     try {
       const fields = categoryItemCardFields as ListItemsFields;
@@ -74,7 +79,7 @@ export default function CategoryShow({
     } finally {
       setIsLoadingMore(false);
     }
-  }, [categoryIds, items.length]);
+  }, [categoryIds, items.length, isLoadingMore]);
 
   return (
     <div className="pb-8">
@@ -98,7 +103,17 @@ export default function CategoryShow({
           <span className="mx-2">/</span>
           <Link href="/categories" className="hover:text-neutral-01">Categories</Link>
           <span className="mx-2">/</span>
-          <span className="text-neutral-01">{category.name}</span>
+          {active_subcategory ? (
+            <>
+              <Link href={`/categories/${parentSlug}`} className="hover:text-neutral-01">{category.name}</Link>
+              <span className="mx-2">/</span>
+              <span className="text-neutral-01">
+                {subcategories.find((s) => s.slug === active_subcategory)?.name}
+              </span>
+            </>
+          ) : (
+            <span className="text-neutral-01">{category.name}</span>
+          )}
         </nav>
         <h1 className="text-2xl font-semibold text-neutral-01">{category.name}</h1>
       </div>
@@ -138,6 +153,7 @@ export default function CategoryShow({
         <div className="flex shrink-0 items-center gap-1">
           <button
             onClick={() => handleViewModeChange("grid")}
+            aria-label="Grid view"
             className={`flex size-8 items-center justify-center rounded transition-colors ${
               viewMode === "grid" ? "text-primary-600" : "text-neutral-05 hover:text-neutral-03"
             }`}
@@ -146,6 +162,7 @@ export default function CategoryShow({
           </button>
           <button
             onClick={() => handleViewModeChange("list")}
+            aria-label="List view"
             className={`flex size-8 items-center justify-center rounded transition-colors ${
               viewMode === "list" ? "text-primary-600" : "text-neutral-05 hover:text-neutral-03"
             }`}
