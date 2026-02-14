@@ -28,6 +28,7 @@ defmodule Angle.Factory do
       }
       |> maybe_put(:full_name, Map.get(attrs, :full_name))
       |> maybe_put(:phone_number, Map.get(attrs, :phone_number))
+      |> maybe_put(:username, Map.get(attrs, :username))
 
     Angle.Accounts.User
     |> Ash.Changeset.for_create(:register_with_password, params, authorize?: false)
