@@ -3,7 +3,9 @@ defmodule AngleWeb.StoreController do
 
   @items_per_page 20
 
-  def show(conn, %{"identifier" => identifier}) do
+  @valid_tabs ~w(auctions history reviews)
+
+  def show(conn, %{"identifier" => identifier} = params) do
     case load_seller(conn, identifier) do
       nil ->
         conn
@@ -11,7 +13,9 @@ defmodule AngleWeb.StoreController do
         |> redirect(to: "/")
 
       seller ->
-        {items, has_more} = load_seller_items(conn, seller["id"], :active)
+        tab = validate_tab(params["tab"])
+        status_filter = if tab == "history", do: :history, else: :active
+        {items, has_more} = load_seller_items(conn, seller["id"], status_filter)
         category_summary = build_category_summary(conn, seller["id"])
 
         conn
@@ -19,10 +23,13 @@ defmodule AngleWeb.StoreController do
         |> assign_prop(:items, items)
         |> assign_prop(:has_more, has_more)
         |> assign_prop(:category_summary, category_summary)
-        |> assign_prop(:active_tab, "auctions")
+        |> assign_prop(:active_tab, tab)
         |> render_inertia("store/show")
     end
   end
+
+  defp validate_tab(tab) when tab in @valid_tabs, do: tab
+  defp validate_tab(_), do: "auctions"
 
   defp load_seller(conn, identifier) do
     params =

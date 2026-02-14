@@ -74,18 +74,20 @@ export default function StoreShow({
   );
   const [viewMode, setViewMode] = useState<ViewMode>(getInitialViewMode);
 
-  // Auctions tab state (server-loaded initially)
+  const isHistoryTab = initialActiveTab === "history";
+
+  // Auctions tab state (server-loaded when active_tab is auctions)
   const [auctionItems, setAuctionItems] =
-    useState<SellerItem[]>(initialItems);
-  const [auctionHasMore, setAuctionHasMore] = useState(initialHasMore);
+    useState<SellerItem[]>(isHistoryTab ? [] : initialItems);
+  const [auctionHasMore, setAuctionHasMore] = useState(isHistoryTab ? false : initialHasMore);
   const [isLoadingMoreAuctions, setIsLoadingMoreAuctions] = useState(false);
 
-  // History tab state (client-loaded on demand)
-  const [historyItems, setHistoryItems] = useState<SellerItem[]>([]);
-  const [historyHasMore, setHistoryHasMore] = useState(false);
+  // History tab state (server-loaded when active_tab is history, otherwise client-loaded on demand)
+  const [historyItems, setHistoryItems] = useState<SellerItem[]>(isHistoryTab ? initialItems : []);
+  const [historyHasMore, setHistoryHasMore] = useState(isHistoryTab ? initialHasMore : false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isLoadingMoreHistory, setIsLoadingMoreHistory] = useState(false);
-  const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(isHistoryTab);
 
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
@@ -93,7 +95,8 @@ export default function StoreShow({
   };
 
   const handleShareStore = async () => {
-    const url = `${window.location.origin}${storeUrl}`;
+    const tabParam = activeTab !== "auctions" ? `?tab=${activeTab}` : "";
+    const url = `${window.location.origin}${storeUrl}${tabParam}`;
     try {
       await navigator.clipboard.writeText(url);
       toast.success("Store link copied to clipboard");
@@ -198,6 +201,15 @@ export default function StoreShow({
     if (tab === "history" && !historyLoaded) {
       loadHistory();
     }
+
+    // Update URL to reflect the active tab
+    const url = new URL(window.location.href);
+    if (tab === "auctions") {
+      url.searchParams.delete("tab");
+    } else {
+      url.searchParams.set("tab", tab);
+    }
+    window.history.replaceState({}, "", url.toString());
   };
 
   // Determine which items and load-more to show for the current tab

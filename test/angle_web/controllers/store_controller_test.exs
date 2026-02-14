@@ -75,6 +75,39 @@ defmodule AngleWeb.StoreControllerTest do
       refute response =~ "Draft Secret Item"
     end
 
+    test "respects ?tab=history query parameter", %{conn: conn} do
+      user = create_user(%{full_name: "Tab Seller"})
+
+      item =
+        create_item(%{
+          title: "Tab Item",
+          created_by_id: user.id
+        })
+
+      Ash.update!(item, %{}, action: :publish_item, authorize?: false)
+
+      conn = get(conn, ~p"/store/#{user.id}?tab=history")
+      response = html_response(conn, 200)
+      assert response =~ "store/show"
+      assert response =~ "&quot;active_tab&quot;:&quot;history&quot;"
+    end
+
+    test "defaults to auctions for invalid tab parameter", %{conn: conn} do
+      user = create_user(%{full_name: "Invalid Tab Seller"})
+
+      item =
+        create_item(%{
+          title: "Default Tab Item",
+          created_by_id: user.id
+        })
+
+      Ash.update!(item, %{}, action: :publish_item, authorize?: false)
+
+      conn = get(conn, ~p"/store/#{user.id}?tab=invalid")
+      response = html_response(conn, 200)
+      assert response =~ "&quot;active_tab&quot;:&quot;auctions&quot;"
+    end
+
     test "redirects to / when seller not found", %{conn: conn} do
       conn = get(conn, ~p"/store/nonexistent-seller")
       assert redirected_to(conn) == "/"
