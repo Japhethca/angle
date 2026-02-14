@@ -1,12 +1,12 @@
 import { Link } from '@inertiajs/react';
 
-interface NavSubcategory {
+export interface NavSubcategory {
   id: string;
   name: string;
   slug: string;
 }
 
-interface NavCategory {
+export interface NavCategory {
   id: string;
   name: string;
   slug: string;

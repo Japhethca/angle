@@ -11,14 +11,7 @@ import {
   NavigationMenuTrigger,
   NavigationMenuContent,
 } from '@/components/ui/navigation-menu';
-import { CategoryMegaMenu } from './category-mega-menu';
-
-interface NavCategory {
-  id: string;
-  name: string;
-  slug: string;
-  categories: Array<{ id: string; name: string; slug: string }>;
-}
+import { CategoryMegaMenu, type NavCategory } from './category-mega-menu';
 
 interface MainNavProps {
   navCategories: NavCategory[];

@@ -43,6 +43,9 @@ defmodule Angle.Catalog.CategoryCache do
 
   # Private
 
+  # Uses a bare %Plug.Conn{} because run_typed_query requires a conn struct
+  # to extract actor/tenant. An empty conn means no actor (unauthenticated).
+  # This is safe because the Category :top_level action has no authorization policies.
   defp fetch_and_cache do
     case AshTypescript.Rpc.run_typed_query(:angle, :nav_category, %{}, %Plug.Conn{}) do
       %{"success" => true, "data" => data} ->

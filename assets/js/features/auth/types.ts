@@ -36,15 +36,6 @@ export interface PageProps {
     success?: string;
   };
   csrf_token: string;
-  nav_categories: Array<{
-    id: string;
-    name: string;
-    slug: string;
-    categories: Array<{
-      id: string;
-      name: string;
-      slug: string;
-    }>;
-  }>;
+  nav_categories: import('@/navigation/category-mega-menu').NavCategory[];
   [key: string]: any;
 }
