@@ -82,7 +82,7 @@ defmodule AngleWeb.StoreController do
       |> Ash.Query.filter(created_by_id == ^seller_id and publication_status == :published)
 
     Angle.Catalog.Category
-    |> Ash.Query.aggregate(:item_count, :count, :items, query: item_query)
+    |> Ash.Query.aggregate(:item_count, :count, :items, query: item_query, default: 0)
     |> Ash.read!(authorize?: false)
     |> Enum.filter(fn cat -> cat.aggregates[:item_count] > 0 end)
     |> Enum.sort_by(fn cat -> -cat.aggregates[:item_count] end)

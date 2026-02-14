@@ -108,6 +108,43 @@ defmodule AngleWeb.StoreControllerTest do
       assert response =~ "&quot;active_tab&quot;:&quot;auctions&quot;"
     end
 
+    test "includes category summary for published items only", %{conn: conn} do
+      user = create_user()
+      cat_a = create_category(%{name: "Electronics", slug: "electronics"})
+      cat_b = create_category(%{name: "Art", slug: "art"})
+
+      # Two published items in Electronics
+      for _ <- 1..2 do
+        item = create_item(%{created_by_id: user.id, category_id: cat_a.id})
+        Ash.update!(item, %{}, action: :publish_item, authorize?: false)
+      end
+
+      # One published item in Art
+      art_item = create_item(%{created_by_id: user.id, category_id: cat_b.id})
+      Ash.update!(art_item, %{}, action: :publish_item, authorize?: false)
+
+      # One draft item in Art (should not count)
+      _draft = create_item(%{created_by_id: user.id, category_id: cat_b.id})
+
+      conn = get(conn, ~p"/store/#{user.id}")
+      response = html_response(conn, 200)
+      assert response =~ "Electronics"
+      assert response =~ "Art"
+    end
+
+    test "excludes categories with no published items from summary", %{conn: conn} do
+      user = create_user()
+      _empty_cat = create_category(%{name: "Empty Category", slug: "empty-cat"})
+
+      # Need at least one published item for the store page to render
+      item = create_item(%{created_by_id: user.id})
+      Ash.update!(item, %{}, action: :publish_item, authorize?: false)
+
+      conn = get(conn, ~p"/store/#{user.id}")
+      response = html_response(conn, 200)
+      refute response =~ "Empty Category"
+    end
+
     test "redirects to / when seller not found", %{conn: conn} do
       conn = get(conn, ~p"/store/nonexistent-seller")
       assert redirected_to(conn) == "/"
