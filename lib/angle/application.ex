@@ -17,6 +17,7 @@ defmodule Angle.Application do
          Application.fetch_env!(:angle, Oban)
        )},
       {Phoenix.PubSub, name: Angle.PubSub},
+      Angle.Catalog.CategoryCache,
       # Start a worker by calling: Angle.Worker.start_link(arg)
       # {Angle.Worker, arg},
       # Start the SSR process pool

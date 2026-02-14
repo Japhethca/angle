@@ -1158,6 +1158,21 @@ export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", 
 export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
 
 
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { categories: ["id", "name", "slug"] }]>>;
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
+
+
 
 
 export type ListBidsFields = UnifiedFieldSelection<BidResourceSchema>[];
