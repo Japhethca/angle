@@ -17,7 +17,7 @@ Add a Preferences settings page with Language selection and Theme (Light/Dark) s
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
 | Persistence | Frontend only (localStorage) | No backend changes needed. |
-| Theme implementation | Functional dark mode | Tailwind `dark:` class strategy. CSS variables already defined in app.css. |
+| Theme implementation | Functional dark mode | Semantic CSS variable tokens that auto-switch between light/dark. |
 | Language | Store preference only | Dropdown saves to localStorage. No i18n framework yet. |
 | Dark mode scope | Full app | All pages and custom components get `dark:` variants. |
 
@@ -57,59 +57,32 @@ Enable the "Preferences" link in `settingsMenuItems` in `settings-layout.tsx`:
 { label: "Preferences", href: "/settings/preferences", icon: SlidersHorizontal }
 ```
 
-### Dark Mode — Full App Coverage
+### Dark Mode — Semantic Token Approach
 
-The app already has dark mode CSS infrastructure in place:
-- `@custom-variant dark (.dark&, .dark &)` in app.css (line 62)
-- `.dark` CSS variable overrides for all shadcn tokens (app.css lines 107-139)
-- `body` uses `var(--background)` / `var(--foreground)` which auto-switch
-- All shadcn/ui components use CSS variables and auto-switch
+Instead of adding `dark:` prefixes to every hardcoded color class, we use **semantic CSS variable tokens** that auto-switch between light and dark values. This ensures new components automatically support dark mode without manual `dark:` classes.
 
-What needs `dark:` variants: every custom component using hardcoded Tailwind color classes.
+**How it works:**
+1. Define CSS variables in `:root` (light) and `.dark` (dark) blocks in `app.css`
+2. Register them as Tailwind theme colors so they're available as `bg-surface`, `text-content`, etc.
+3. Replace all hardcoded neutral color classes with semantic equivalents
+4. shadcn/ui components already use CSS variables and auto-switch — no changes needed
 
-**Dark mode color mapping (neutral scale):**
+**Key token groups:**
 
-| Light | Dark |
-|-------|------|
-| `bg-white` | `dark:bg-neutral-01` |
-| `bg-neutral-08` | `dark:bg-neutral-03` |
-| `bg-neutral-09` | `dark:bg-neutral-03` |
-| `text-neutral-01` | `dark:text-neutral-10` |
-| `text-neutral-02` | `dark:text-neutral-09` |
-| `text-neutral-03` | `dark:text-neutral-06` |
-| `text-neutral-04` | `dark:text-neutral-05` |
-| `text-neutral-05` | `dark:text-neutral-05` (stays) |
-| `border-neutral-06` | `dark:border-neutral-04` |
-| `border-neutral-07` | `dark:border-neutral-03` |
-| `hover:bg-neutral-08` | `dark:hover:bg-neutral-03` |
-| `hover:text-neutral-01` | `dark:hover:text-neutral-10` |
-| `bg-primary-600/10` | stays (orange tint works on dark) |
+| Category | Examples | Replaces |
+|----------|----------|----------|
+| Surface (backgrounds) | `bg-surface`, `bg-surface-secondary`, `bg-surface-muted` | `bg-white`, `bg-neutral-09`, `bg-neutral-08` |
+| Content (text) | `text-content`, `text-content-secondary`, `text-content-tertiary` | `text-neutral-01`, `text-neutral-03`, `text-neutral-04` |
+| Border | `border-subtle`, `border-strong` | `border-neutral-07`, `border-neutral-06` |
+| Feedback | `text-feedback-success`, `bg-feedback-error-muted` | `text-green-700`, `bg-red-50` |
 
-**Files requiring changes (~300+ occurrences across 47 files):**
+**Files requiring migration (~300+ occurrences across 47 files):**
+- Navigation (3 files) — nav backgrounds, link colors, hover states
+- Layouts (2 files) — footer, auth layout
+- Pages (12 files) — headings, cards, breadcrumbs, metadata
+- Feature components (30 files) — item cards, forms, bid sections, settings
 
-**Navigation (3 files, ~20 occurrences):**
-- `main-nav.tsx` — nav bg, link colors, search input, button hover states, mobile sheet
-- `bottom-nav.tsx` — nav bg, active/inactive icon colors
-- `category-mega-menu.tsx` — link and subcategory text colors
-
-**Layouts (2 files, ~10 occurrences):**
-- `footer.tsx` — already dark (`bg-[#060818]`), minor text adjustments
-- `auth-layout.tsx` — badge styling
-
-**Pages (12 files, ~95 occurrences):**
-- `home.tsx`, `dashboard.tsx`, `bids.tsx`, `watchlist.tsx`, `profile.tsx` — headings/subheadings
-- `settings/index.tsx` — mobile menu card backgrounds, text colors
-- `categories/index.tsx`, `categories/show.tsx` — card bgs, filter buttons, empty states
-- `items/new.tsx`, `items/show.tsx` — breadcrumbs, metadata, header
-- `store/show.tsx` — store profile, tabs, reviews section
-- `admin/users.tsx` — table styling, badges
-
-**Features (30 files, ~175 occurrences):**
-- `home/components/*` — section backgrounds, empty states, carousel
-- `items/components/*` — item cards, image gallery, seller card, tabs
-- `bidding/components/*` — bid section, confirm dialog
-- `settings/components/*` — forms, profile sections, layout
-- `auth/components/*` — login/register forms, alert backgrounds
+Full token definitions and migration details in the implementation plan (`2026-02-15-preferences-page-plan.md`).
 
 ### Not In Scope
 
