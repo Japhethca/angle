@@ -58,6 +58,11 @@ defmodule AngleWeb.SettingsController do
     |> render_inertia("settings/legal")
   end
 
+  def support(conn, _params) do
+    conn
+    |> render_inertia("settings/support")
+  end
+
   def store(conn, _params) do
     user = conn.assigns.current_user
 

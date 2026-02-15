@@ -119,6 +119,7 @@ defmodule AngleWeb.Router do
     get "/settings/notifications", SettingsController, :notifications
     get "/settings/preferences", SettingsController, :preferences
     get "/settings/legal", SettingsController, :legal
+    get "/settings/support", SettingsController, :support
   end
 
   # Payments API endpoints (same-origin, session-authenticated with CSRF)
