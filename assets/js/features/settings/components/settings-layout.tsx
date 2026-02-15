@@ -23,7 +23,7 @@ const settingsMenuItems = [
   { label: "Notifications", href: "/settings/notifications", icon: Bell },
   { label: "Preferences", href: "/settings/preferences", icon: SlidersHorizontal },
   { label: "Legal", href: "/settings/legal", icon: Scale },
-  { label: "Support", href: "#", disabled: true, icon: HelpCircle },
+  { label: "Support", href: "/settings/support", icon: HelpCircle },
 ];
 
 interface SettingsLayoutProps {

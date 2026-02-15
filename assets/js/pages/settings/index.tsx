@@ -15,7 +15,7 @@ const menuItems = [
   { label: "Notifications", icon: Bell, href: "/settings/notifications" },
   { label: "Preferences", icon: SlidersHorizontal, href: "/settings/preferences" },
   { label: "Legal", icon: Scale, href: "/settings/legal" },
-  { label: "Support", icon: HelpCircle, disabled: true },
+  { label: "Support", icon: HelpCircle, href: "/settings/support" },
 ];
 
 export default function SettingsIndex({ user }: SettingsIndexProps) {
