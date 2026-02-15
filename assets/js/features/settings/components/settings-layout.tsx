@@ -1,17 +1,29 @@
 import { Link, usePage } from "@inertiajs/react";
 import { router } from "@inertiajs/react";
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronRight,
+  User,
+  Store,
+  Shield,
+  CreditCard,
+  Bell,
+  SlidersHorizontal,
+  Scale,
+  HelpCircle,
+  LogOut,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const settingsMenuItems = [
-  { label: "Account", href: "/settings/account" },
-  { label: "Store", href: "#", disabled: true },
-  { label: "Security", href: "#", disabled: true },
-  { label: "Payments", href: "#", disabled: true },
-  { label: "Notifications", href: "#", disabled: true },
-  { label: "Preferences", href: "#", disabled: true },
-  { label: "Legal", href: "#", disabled: true },
-  { label: "Support", href: "#", disabled: true },
+  { label: "Account", href: "/settings/account", icon: User },
+  { label: "Store", href: "#", disabled: true, icon: Store },
+  { label: "Security", href: "#", disabled: true, icon: Shield },
+  { label: "Payments", href: "#", disabled: true, icon: CreditCard },
+  { label: "Notifications", href: "#", disabled: true, icon: Bell },
+  { label: "Preferences", href: "#", disabled: true, icon: SlidersHorizontal },
+  { label: "Legal", href: "#", disabled: true, icon: Scale },
+  { label: "Support", href: "#", disabled: true, icon: HelpCircle },
 ];
 
 interface SettingsLayoutProps {
@@ -51,16 +63,17 @@ export function SettingsLayout({ title, children }: SettingsLayoutProps) {
                   key={item.label}
                   href={item.disabled ? "#" : item.href}
                   className={cn(
-                    "block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-neutral-08 text-neutral-01"
+                      ? "bg-primary-600/10 text-primary-600"
                       : "text-neutral-04 hover:text-neutral-02",
-                    item.disabled && "cursor-not-allowed opacity-50"
+                    item.disabled && "cursor-not-allowed"
                   )}
                   onClick={(e) => {
                     if (item.disabled) e.preventDefault();
                   }}
                 >
+                  <item.icon className="size-5" />
                   {item.label}
                 </Link>
               );
@@ -69,14 +82,15 @@ export function SettingsLayout({ title, children }: SettingsLayoutProps) {
 
           <button
             onClick={handleLogout}
-            className="mt-6 block w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-500 transition-colors hover:bg-red-50"
+            className="mt-6 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 transition-colors hover:bg-red-50"
           >
+            <LogOut className="size-5" />
             Log Out
           </button>
         </aside>
 
         {/* Content area */}
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 max-w-2xl flex-1">
           {/* Breadcrumb */}
           <nav className="mb-6 flex items-center gap-1.5 text-xs text-neutral-04">
             <span>Settings</span>

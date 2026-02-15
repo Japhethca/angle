@@ -69,7 +69,7 @@ export default function SettingsIndex({ user }: SettingsIndexProps) {
           {menuItems.map((item) => (
             <div
               key={item.label}
-              className="flex items-center justify-between rounded-lg px-3 py-3 text-neutral-04 opacity-50"
+              className="flex items-center justify-between rounded-lg px-3 py-3 text-neutral-04"
             >
               <div className="flex items-center gap-3">
                 <item.icon className="size-5" />

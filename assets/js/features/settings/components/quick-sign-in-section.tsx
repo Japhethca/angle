@@ -8,7 +8,7 @@ export function QuickSignInSection() {
         <h3 className="text-sm font-semibold text-neutral-01">Quick Sign In</h3>
         <div className="flex items-center justify-between rounded-xl bg-neutral-08 p-4">
           <div className="flex items-center gap-3">
-            <svg className="size-5" viewBox="0 0 24 24">
+            <svg className="size-5 shrink-0" viewBox="0 0 24 24">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
                 fill="#4285F4"
@@ -26,9 +26,20 @@ export function QuickSignInSection() {
                 fill="#EA4335"
               />
             </svg>
-            <span className="text-sm font-medium text-neutral-02">Google</span>
+            <div>
+              <p className="text-sm font-medium text-neutral-01">Google</p>
+              <p className="text-xs text-neutral-04">
+                user@example.com{" "}
+                <span className="text-green-600">&middot; connected</span>
+              </p>
+            </div>
           </div>
-          <span className="text-xs font-medium text-green-600">Connected</span>
+          <button
+            type="button"
+            className="text-xs font-medium text-primary-600 hover:underline"
+          >
+            Disconnect
+          </button>
         </div>
       </div>
     </div>

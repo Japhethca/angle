@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { router } from "@inertiajs/react";
 import { toast } from "sonner";
+import { ChevronDown } from "lucide-react";
 import { useAshMutation } from "@/hooks/use-ash-query";
 import { updateProfile, buildCSRFHeaders } from "@/ash_rpc";
 import { Input } from "@/components/ui/input";
@@ -106,8 +107,10 @@ export function AccountForm({ user }: AccountFormProps) {
         <div className="space-y-2">
           <Label htmlFor="phone_number">Phone Number</Label>
           <div className="flex gap-2">
-            <div className="flex h-10 w-16 shrink-0 items-center justify-center rounded-md border border-input bg-neutral-08 text-sm text-neutral-04">
-              234
+            <div className="flex h-10 shrink-0 items-center gap-1 rounded-md border border-input bg-neutral-08 px-2 text-sm text-neutral-04">
+              <span className="text-xs leading-none">🇳🇬</span>
+              <span>234</span>
+              <ChevronDown className="size-3" />
             </div>
             <Input
               id="phone_number"
@@ -146,7 +149,7 @@ export function AccountForm({ user }: AccountFormProps) {
       <Button
         type="submit"
         disabled={isPending || !isDirty}
-        className="w-full rounded-full"
+        className="w-full rounded-full bg-primary-600 text-white hover:bg-primary-600/90"
       >
         {isPending ? "Saving..." : "Save Changes"}
       </Button>
