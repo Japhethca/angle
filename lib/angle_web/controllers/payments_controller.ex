@@ -179,9 +179,7 @@ defmodule AngleWeb.PaymentsController do
   end
 
   defp error_message(%Ash.Error.Invalid{errors: errors}) do
-    errors
-    |> Enum.map(& &1.message)
-    |> Enum.join(", ")
+    Enum.map_join(errors, ", ", & &1.message)
   end
 
   defp error_message(_), do: "An error occurred"
