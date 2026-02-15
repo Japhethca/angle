@@ -1,4 +1,4 @@
-import { Head, Link } from "@inertiajs/react";
+import { Head } from "@inertiajs/react";
 import { ArrowLeft } from "lucide-react";
 
 export default function Terms() {
@@ -6,13 +6,13 @@ export default function Terms() {
     <>
       <Head title="Terms of Service" />
       <div className="mx-auto max-w-3xl px-4 py-8 lg:py-12">
-        <Link
-          href="/settings/legal"
+        <button
+          onClick={() => window.history.back()}
           className="mb-6 inline-flex items-center gap-2 text-sm text-content-tertiary hover:text-content"
         >
           <ArrowLeft className="size-4" />
-          Back to Legal
-        </Link>
+          Back
+        </button>
 
         <h1 className="mb-6 text-2xl font-bold text-content">Terms of Service</h1>
         <p className="mb-4 text-sm text-content-tertiary">
