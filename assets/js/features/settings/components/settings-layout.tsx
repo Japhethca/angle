@@ -23,7 +23,7 @@ const settingsMenuItems = [
   { label: "Notifications", href: "/settings/notifications", icon: Bell },
   { label: "Preferences", href: "/settings/preferences", icon: SlidersHorizontal },
   { label: "Legal", href: "/settings/legal", icon: Scale },
-  { label: "Support", href: "#", disabled: true, icon: HelpCircle },
+  { label: "Support", href: "/settings/support", icon: HelpCircle },
 ];
 
 interface SettingsLayoutProps {
@@ -58,21 +58,17 @@ export function SettingsLayout({ title, breadcrumbSuffix, children }: SettingsLa
         <aside className="w-[240px] shrink-0">
           <nav className="space-y-1">
             {settingsMenuItems.map((item) => {
-              const isActive = url.startsWith(item.href) && !item.disabled;
+              const isActive = url.startsWith(item.href);
               return (
                 <Link
                   key={item.label}
-                  href={item.disabled ? "#" : item.href}
+                  href={item.href}
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                     isActive
                       ? "bg-primary-600/10 text-primary-600"
                       : "text-content-tertiary hover:text-content",
-                    item.disabled && "cursor-not-allowed"
                   )}
-                  onClick={(e) => {
-                    if (item.disabled) e.preventDefault();
-                  }}
                 >
                   <item.icon className="size-5" />
                   {item.label}
