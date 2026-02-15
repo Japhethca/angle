@@ -155,6 +155,37 @@ defmodule Angle.Factory do
     Ash.create!(Angle.Bidding.Bid, params, authorize?: false)
   end
 
+  @doc """
+  Creates a store profile for a user.
+
+  ## Options
+
+    * `:store_name` - defaults to a unique generated store name
+    * `:contact_phone` - optional
+    * `:whatsapp_link` - optional
+    * `:location` - optional
+    * `:address` - optional
+    * `:delivery_preference` - defaults to "you_arrange"
+    * `:user_id` - the UUID of the user (creates one if not provided)
+
+  """
+  def create_store_profile(attrs \\ %{}) do
+    user_id = Map.get_lazy(attrs, :user_id, fn -> create_user().id end)
+
+    params =
+      %{
+        store_name: Map.get(attrs, :store_name, "Store #{System.unique_integer([:positive])}"),
+        user_id: user_id,
+        delivery_preference: Map.get(attrs, :delivery_preference, "you_arrange")
+      }
+      |> maybe_put(:contact_phone, Map.get(attrs, :contact_phone))
+      |> maybe_put(:whatsapp_link, Map.get(attrs, :whatsapp_link))
+      |> maybe_put(:location, Map.get(attrs, :location))
+      |> maybe_put(:address, Map.get(attrs, :address))
+
+    Ash.create!(Angle.Accounts.StoreProfile, params, action: :upsert, authorize?: false)
+  end
+
   # Helpers
 
   defp unique_email do
