@@ -3,3 +3,11 @@ export { AccountForm } from "./components/account-form";
 export { ProfileImageSection } from "./components/profile-image-section";
 export { VerificationSection } from "./components/verification-section";
 export { QuickSignInSection } from "./components/quick-sign-in-section";
+
+export interface SettingsUser {
+  id: string;
+  email: string;
+  full_name: string | null;
+  phone_number: string | null;
+  location: string | null;
+}

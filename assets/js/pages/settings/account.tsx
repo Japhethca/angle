@@ -1,13 +1,6 @@
 import { Head } from "@inertiajs/react";
 import { SettingsLayout, AccountForm } from "@/features/settings";
-
-interface SettingsUser {
-  id: string;
-  email: string;
-  full_name: string | null;
-  phone_number: string | null;
-  location: string | null;
-}
+import type { SettingsUser } from "@/features/settings";
 
 interface SettingsAccountProps {
   user: SettingsUser;

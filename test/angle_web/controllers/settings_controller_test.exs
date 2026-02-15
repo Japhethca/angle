@@ -28,13 +28,9 @@ defmodule AngleWeb.SettingsControllerTest do
         create_user(%{
           full_name: "Account User",
           email: "account@example.com",
-          phone_number: "08012345678"
+          phone_number: "08012345678",
+          location: "Lagos, Nigeria"
         })
-
-      # Set location directly since factory doesn't support it
-      user
-      |> Ecto.Changeset.change(%{location: "Lagos, Nigeria"})
-      |> Angle.Repo.update!()
 
       conn =
         conn

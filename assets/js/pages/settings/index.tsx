@@ -2,14 +2,7 @@ import { useEffect } from "react";
 import { Head, Link, router } from "@inertiajs/react";
 import { User, ChevronRight, Shield, CreditCard, Bell, SlidersHorizontal, Scale, HelpCircle, LogOut } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
-
-interface SettingsUser {
-  id: string;
-  email: string;
-  full_name: string | null;
-  phone_number: string | null;
-  location: string | null;
-}
+import type { SettingsUser } from "@/features/settings";
 
 interface SettingsIndexProps {
   user: SettingsUser;
@@ -69,7 +62,7 @@ export default function SettingsIndex({ user }: SettingsIndexProps) {
           {menuItems.map((item) => (
             <div
               key={item.label}
-              className="flex items-center justify-between rounded-lg px-3 py-3 text-neutral-04"
+              className="flex cursor-not-allowed items-center justify-between rounded-lg px-3 py-3 text-neutral-04"
             >
               <div className="flex items-center gap-3">
                 <item.icon className="size-5" />
