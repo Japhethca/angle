@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +15,11 @@ import { ThemeCard } from "./theme-card";
 export function PreferencesForm() {
   const { theme, setTheme } = useTheme();
   const [selectedTheme, setSelectedTheme] = useState(theme);
+
+  // Sync selectedTheme when ThemeProvider corrects after hydration
+  useEffect(() => {
+    setSelectedTheme(theme);
+  }, [theme]);
   const [language, setLanguage] = useState(
     () => (typeof window !== "undefined" ? localStorage.getItem("language") : null) || "en"
   );

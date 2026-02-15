@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useState } from "react";
 
 type Theme = "light" | "dark";
 
@@ -9,11 +9,18 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
+// Always start with "light" for SSR. Corrected after hydration via useLayoutEffect.
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === "undefined") return "light";
-    return (localStorage.getItem("theme") as Theme) || "light";
-  });
+  const [theme, setTheme] = useState<Theme>("light");
+
+  // Correct theme from localStorage after hydration, before browser paints.
+  // Using useLayoutEffect ensures no visible flash of wrong selection state.
+  useLayoutEffect(() => {
+    const stored = (localStorage.getItem("theme") as Theme) || "light";
+    if (stored !== theme) {
+      setTheme(stored);
+    }
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
