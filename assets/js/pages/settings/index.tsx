@@ -10,7 +10,7 @@ interface SettingsIndexProps {
 
 const menuItems = [
   { label: "Store", icon: Store, href: "/settings/store" },
-  { label: "Security", icon: Shield, disabled: true },
+  { label: "Security", icon: Shield, href: "/settings/security" },
   { label: "Payments", icon: CreditCard, disabled: true },
   { label: "Notifications", icon: Bell, disabled: true },
   { label: "Preferences", icon: SlidersHorizontal, disabled: true },

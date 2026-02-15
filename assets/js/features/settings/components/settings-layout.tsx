@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 const settingsMenuItems = [
   { label: "Account", href: "/settings/account", icon: User },
   { label: "Store", href: "/settings/store", icon: Store },
-  { label: "Security", href: "#", disabled: true, icon: Shield },
+  { label: "Security", href: "/settings/security", icon: Shield },
   { label: "Payments", href: "#", disabled: true, icon: CreditCard },
   { label: "Notifications", href: "#", disabled: true, icon: Bell },
   { label: "Preferences", href: "#", disabled: true, icon: SlidersHorizontal },

@@ -6,6 +6,8 @@ export { QuickSignInSection } from "./components/quick-sign-in-section";
 export { StoreForm } from "./components/store-form";
 export { StoreLogoSection } from "./components/store-logo-section";
 export { StoreVerificationSection } from "./components/store-verification-section";
+export { ChangePasswordForm } from "./components/change-password-form";
+export { TwoFactorSection } from "./components/two-factor-section";
 
 export interface SettingsUser {
   id: string;
