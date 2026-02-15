@@ -134,7 +134,7 @@ export type ItemAttributesOnlySchema = {
 // User Schema
 export type UserResourceSchema = {
   __type: "Resource";
-  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber" | "username" | "location" | "whatsappNumber" | "createdAt" | "publishedItemCount";
+  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber" | "username" | "location" | "whatsappNumber" | "autoCharge" | "createdAt" | "publishedItemCount";
   id: UUID;
   email: string;
   fullName: string | null;
@@ -142,6 +142,7 @@ export type UserResourceSchema = {
   username: string | null;
   location: string | null;
   whatsappNumber: string | null;
+  autoCharge: boolean | null;
   createdAt: UtcDateTimeUsec;
   publishedItemCount: number;
   storeProfile: { __type: "Relationship"; __resource: StoreProfileResourceSchema | null; };
@@ -152,7 +153,7 @@ export type UserResourceSchema = {
 
 export type UserAttributesOnlySchema = {
   __type: "Resource";
-  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber" | "username" | "location" | "whatsappNumber" | "createdAt";
+  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber" | "username" | "location" | "whatsappNumber" | "autoCharge" | "createdAt";
   id: UUID;
   email: string;
   fullName: string | null;
@@ -160,6 +161,7 @@ export type UserAttributesOnlySchema = {
   username: string | null;
   location: string | null;
   whatsappNumber: string | null;
+  autoCharge: boolean | null;
   createdAt: UtcDateTimeUsec;
 };
 
@@ -542,6 +544,11 @@ export type UserFilterInput = {
     eq?: string;
     notEq?: string;
     in?: Array<string>;
+  };
+
+  autoCharge?: {
+    eq?: boolean;
+    notEq?: boolean;
   };
 
   createdAt?: {
@@ -1252,6 +1259,23 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
+// User Typed Queries
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
+
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
+
+
+
 // Item Typed Queries
 /**
  * Typed query for Item
@@ -1343,23 +1367,6 @@ export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name
  * @typedQuery true
  */
 export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
-
-
-
-// User Typed Queries
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
-
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
 
 
 
@@ -2219,6 +2226,82 @@ export async function validateUpdateProfile(
 ): Promise<ValidationResult> {
   const payload = {
     action: "update_profile",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type UpdateAutoChargeInput = {
+  autoCharge?: boolean | null;
+};
+
+export type UpdateAutoChargeFields = UnifiedFieldSelection<UserResourceSchema>[];
+
+export type InferUpdateAutoChargeResult<
+  Fields extends UpdateAutoChargeFields | undefined,
+> = InferResult<UserResourceSchema, Fields>;
+
+export type UpdateAutoChargeResult<Fields extends UpdateAutoChargeFields | undefined = undefined> = | { success: true; data: InferUpdateAutoChargeResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Update an existing User
+ *
+ * @ashActionType :update
+ */
+export async function updateAutoCharge<Fields extends UpdateAutoChargeFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  input?: UpdateAutoChargeInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<UpdateAutoChargeResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "update_auto_charge",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<UpdateAutoChargeResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Update an existing User
+ *
+ * @ashActionType :update
+ * @validation true
+ */
+export async function validateUpdateAutoCharge(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  input?: UpdateAutoChargeInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "update_auto_charge",
     ...(config.tenant !== undefined && { tenant: config.tenant }),
     identity: config.identity,
     input: config.input

@@ -21,6 +21,26 @@ defmodule AngleWeb.SettingsController do
     |> render_inertia("settings/security")
   end
 
+  def payments(conn, _params) do
+    user = conn.assigns.current_user
+
+    payment_methods =
+      Angle.Payments.PaymentMethod
+      |> Ash.read!(action: :list_by_user, actor: user)
+      |> Enum.map(&payment_method_data/1)
+
+    payout_methods =
+      Angle.Payments.PayoutMethod
+      |> Ash.read!(action: :list_by_user, actor: user)
+      |> Enum.map(&payout_method_data/1)
+
+    conn
+    |> assign_prop(:user, user_payments_data(conn))
+    |> assign_prop(:payment_methods, payment_methods)
+    |> assign_prop(:payout_methods, payout_methods)
+    |> render_inertia("settings/payments")
+  end
+
   def store(conn, _params) do
     user = conn.assigns.current_user
 
@@ -60,4 +80,50 @@ defmodule AngleWeb.SettingsController do
       location: user.location
     }
   end
+
+  defp user_payments_data(conn) do
+    user = conn.assigns.current_user
+
+    %{
+      id: user.id,
+      email: to_string(user.email),
+      auto_charge: user.auto_charge
+    }
+  end
+
+  defp payment_method_data(method) do
+    %{
+      id: method.id,
+      card_type: method.card_type,
+      last_four: method.last_four,
+      exp_month: method.exp_month,
+      exp_year: method.exp_year,
+      bank: method.bank,
+      is_default: method.is_default,
+      inserted_at: method.inserted_at
+    }
+
+    # NOTE: authorization_code and paystack_reference are NOT included (security)
+  end
+
+  defp payout_method_data(method) do
+    %{
+      id: method.id,
+      bank_name: method.bank_name,
+      account_number: mask_account_number(method.account_number),
+      account_name: method.account_name,
+      is_default: method.is_default,
+      inserted_at: method.inserted_at
+    }
+
+    # NOTE: recipient_code and bank_code are NOT included (security)
+  end
+
+  defp mask_account_number(number) when is_binary(number) and byte_size(number) > 6 do
+    visible = String.slice(number, 0, 6)
+    masked = String.duplicate("*", String.length(number) - 6)
+    visible <> masked
+  end
+
+  defp mask_account_number(number), do: number
 end

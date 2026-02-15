@@ -114,4 +114,53 @@ defmodule AngleWeb.SettingsControllerTest do
       assert redirected_to(conn) == ~p"/auth/login"
     end
   end
+
+  describe "GET /settings/payments" do
+    test "renders payments page for authenticated user", %{conn: conn} do
+      user = create_user(%{email: "payments@example.com"})
+
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/settings/payments")
+
+      response = html_response(conn, 200)
+      assert response =~ "settings/payments"
+    end
+
+    test "renders payments page with existing payment and payout methods", %{conn: conn} do
+      user = create_user(%{email: "payments_data@example.com"})
+      create_payment_method(%{user: user, card_type: "visa", last_four: "9876", bank: "GTBank"})
+      create_payout_method(%{user: user, bank_name: "Kuda Bank", account_name: "Payments User"})
+
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/settings/payments")
+
+      response = html_response(conn, 200)
+      assert response =~ "settings/payments"
+      assert response =~ "9876"
+      assert response =~ "GTBank"
+      assert response =~ "Kuda Bank"
+      assert response =~ "Payments User"
+    end
+
+    test "renders payments page with empty payment methods", %{conn: conn} do
+      user = create_user(%{email: "empty_payments@example.com"})
+
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/settings/payments")
+
+      response = html_response(conn, 200)
+      assert response =~ "settings/payments"
+    end
+
+    test "redirects to login when not authenticated", %{conn: conn} do
+      conn = get(conn, ~p"/settings/payments")
+      assert redirected_to(conn) == ~p"/auth/login"
+    end
+  end
 end

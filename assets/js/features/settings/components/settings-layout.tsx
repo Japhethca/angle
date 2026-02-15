@@ -19,7 +19,7 @@ const settingsMenuItems = [
   { label: "Account", href: "/settings/account", icon: User },
   { label: "Store", href: "/settings/store", icon: Store },
   { label: "Security", href: "/settings/security", icon: Shield },
-  { label: "Payments", href: "#", disabled: true, icon: CreditCard },
+  { label: "Payments", href: "/settings/payments", icon: CreditCard },
   { label: "Notifications", href: "#", disabled: true, icon: Bell },
   { label: "Preferences", href: "#", disabled: true, icon: SlidersHorizontal },
   { label: "Legal", href: "#", disabled: true, icon: Scale },

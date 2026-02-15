@@ -8,6 +8,9 @@ export { StoreLogoSection } from "./components/store-logo-section";
 export { StoreVerificationSection } from "./components/store-verification-section";
 export { ChangePasswordForm } from "./components/change-password-form";
 export { TwoFactorSection } from "./components/two-factor-section";
+export { AutoChargeSection } from "./components/auto-charge-section";
+export { PaymentMethodsSection } from "./components/payment-methods-section";
+export { PayoutMethodsSection } from "./components/payout-methods-section";
 
 export interface SettingsUser {
   id: string;

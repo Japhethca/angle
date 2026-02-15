@@ -30,6 +30,10 @@ config :angle, Angle.Mailer, adapter: Swoosh.Adapters.Test
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false
 
+# Paystack: use mock client in tests
+config :angle, :paystack_secret_key, "sk_test_fake_key_for_testing"
+config :angle, :paystack_client, Angle.Payments.PaystackMock
+
 # Print only warnings and errors during test
 config :logger, level: :warning
 
