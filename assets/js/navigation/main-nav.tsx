@@ -44,7 +44,7 @@ export function MainNav({ navCategories }: MainNavProps) {
         {/* Left: Logo + Desktop nav links */}
         <div className="flex items-center gap-10">
           <Link href="/">
-            <img src="/images/logo.svg" alt="Angle" className="h-8" />
+            <img src="/images/logo.svg" alt="Angle" className="h-8 dark:brightness-0 dark:invert" />
           </Link>
 
           {/* Desktop nav links */}
@@ -157,7 +157,7 @@ export function MainNav({ navCategories }: MainNavProps) {
             <SheetContent side="right" className="w-full bg-surface sm:w-[300px]">
               <SheetHeader>
                 <SheetTitle>
-                  <img src="/images/logo.svg" alt="Angle" className="h-8" />
+                  <img src="/images/logo.svg" alt="Angle" className="h-8 dark:brightness-0 dark:invert" />
                 </SheetTitle>
               </SheetHeader>
 
