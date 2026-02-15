@@ -36,7 +36,7 @@ export function LegalContent() {
       <AccordionItem value="privacy">
         <AccordionTrigger className="hover:no-underline">
           <div>
-            <p className="text-sm font-semibold text-content">Privacy Policy</p>
+            <p className="text-sm font-semibold text-content">Privacy Service</p>
             <p className="text-sm font-normal text-content-tertiary">
               See how we collect, use, and protect your data.
             </p>
