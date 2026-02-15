@@ -56,7 +56,7 @@ defmodule Angle.Accounts.StoreProfile do
     end
 
     policy action(:upsert) do
-      authorize_if always()
+      authorize_if expr(^arg(:user_id) == ^actor(:id))
     end
   end
 
