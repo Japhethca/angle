@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useAshMutation } from "@/hooks/use-ash-query";
@@ -10,18 +11,28 @@ interface AutoChargeSectionProps {
 }
 
 export function AutoChargeSection({ userId, autoCharge }: AutoChargeSectionProps) {
+  const [checked, setChecked] = useState(autoCharge);
+
   const { mutate, isPending } = useAshMutation(
-    (checked: boolean) =>
+    (value: boolean) =>
       updateAutoCharge({
         identity: userId,
-        input: { autoCharge: checked },
+        input: { autoCharge: value },
         headers: buildCSRFHeaders(),
       }),
     {
       onSuccess: () => toast.success("Auto-charge preference updated"),
-      onError: () => toast.error("Failed to update auto-charge preference"),
+      onError: () => {
+        setChecked((prev) => !prev);
+        toast.error("Failed to update auto-charge preference");
+      },
     }
   );
+
+  const handleToggle = (value: boolean) => {
+    setChecked(value);
+    mutate(value);
+  };
 
   return (
     <div>
@@ -35,8 +46,8 @@ export function AutoChargeSection({ userId, autoCharge }: AutoChargeSectionProps
           </p>
         </div>
         <Switch
-          checked={autoCharge}
-          onCheckedChange={(checked) => mutate(checked)}
+          checked={checked}
+          onCheckedChange={handleToggle}
           disabled={isPending}
         />
       </div>
