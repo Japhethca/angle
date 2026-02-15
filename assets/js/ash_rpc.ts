@@ -145,6 +145,7 @@ export type UserResourceSchema = {
   autoCharge: boolean | null;
   createdAt: UtcDateTimeUsec;
   publishedItemCount: number;
+  notificationPreferences: { __type: "Relationship"; __resource: AngleAccountsNotificationPreferencesResourceSchema | null; };
   storeProfile: { __type: "Relationship"; __resource: StoreProfileResourceSchema | null; };
   items: { __type: "Relationship"; __array: true; __resource: ItemResourceSchema; };
 };
@@ -163,6 +164,7 @@ export type UserAttributesOnlySchema = {
   whatsappNumber: string | null;
   autoCharge: boolean | null;
   createdAt: UtcDateTimeUsec;
+  notificationPreferences: { __type: "Relationship"; __resource: AngleAccountsNotificationPreferencesAttributesOnlySchema | null; };
 };
 
 
@@ -194,6 +196,51 @@ export type StoreProfileAttributesOnlySchema = {
   address: string | null;
   deliveryPreference: string | null;
   userId: UUID;
+};
+
+
+// AngleAccountsNotificationPreferences Schema
+export type AngleAccountsNotificationPreferencesResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "pushBidding" | "pushWatchlist" | "pushPayments" | "pushCommunication" | "emailCommunication" | "emailMarketing" | "emailSecurity" | "smsCommunication" | "smsSecurity";
+  pushBidding: boolean;
+  pushWatchlist: boolean;
+  pushPayments: boolean;
+  pushCommunication: boolean;
+  emailCommunication: boolean;
+  emailMarketing: boolean;
+  emailSecurity: boolean;
+  smsCommunication: boolean;
+  smsSecurity: boolean;
+};
+
+
+
+export type AngleAccountsNotificationPreferencesAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "pushBidding" | "pushWatchlist" | "pushPayments" | "pushCommunication" | "emailCommunication" | "emailMarketing" | "emailSecurity" | "smsCommunication" | "smsSecurity";
+  pushBidding: boolean;
+  pushWatchlist: boolean;
+  pushPayments: boolean;
+  pushCommunication: boolean;
+  emailCommunication: boolean;
+  emailMarketing: boolean;
+  emailSecurity: boolean;
+  smsCommunication: boolean;
+  smsSecurity: boolean;
+};
+
+
+export type AngleAccountsNotificationPreferencesInputSchema = {
+  pushBidding?: boolean;
+  pushWatchlist?: boolean;
+  pushPayments?: boolean;
+  pushCommunication?: boolean;
+  emailCommunication?: boolean;
+  emailMarketing?: boolean;
+  emailSecurity?: boolean;
+  smsCommunication?: boolean;
+  smsSecurity?: boolean;
 };
 
 
@@ -551,6 +598,12 @@ export type UserFilterInput = {
     notEq?: boolean;
   };
 
+  notificationPreferences?: {
+    eq?: AngleAccountsNotificationPreferencesResourceSchema;
+    notEq?: AngleAccountsNotificationPreferencesResourceSchema;
+    in?: Array<AngleAccountsNotificationPreferencesResourceSchema>;
+  };
+
   createdAt?: {
     eq?: UtcDateTimeUsec;
     notEq?: UtcDateTimeUsec;
@@ -631,6 +684,59 @@ export type StoreProfileFilterInput = {
 
 
   user?: UserFilterInput;
+
+};
+export type AngleAccountsNotificationPreferencesFilterInput = {
+  and?: Array<AngleAccountsNotificationPreferencesFilterInput>;
+  or?: Array<AngleAccountsNotificationPreferencesFilterInput>;
+  not?: Array<AngleAccountsNotificationPreferencesFilterInput>;
+
+  pushBidding?: {
+    eq?: boolean;
+    notEq?: boolean;
+  };
+
+  pushWatchlist?: {
+    eq?: boolean;
+    notEq?: boolean;
+  };
+
+  pushPayments?: {
+    eq?: boolean;
+    notEq?: boolean;
+  };
+
+  pushCommunication?: {
+    eq?: boolean;
+    notEq?: boolean;
+  };
+
+  emailCommunication?: {
+    eq?: boolean;
+    notEq?: boolean;
+  };
+
+  emailMarketing?: {
+    eq?: boolean;
+    notEq?: boolean;
+  };
+
+  emailSecurity?: {
+    eq?: boolean;
+    notEq?: boolean;
+  };
+
+  smsCommunication?: {
+    eq?: boolean;
+    notEq?: boolean;
+  };
+
+  smsSecurity?: {
+    eq?: boolean;
+    notEq?: boolean;
+  };
+
+
 
 };
 
@@ -1276,6 +1382,38 @@ export const sellerProfileFields = ["id", "username", "fullName", "location", "p
 
 
 
+// Category Typed Queries
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
+
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { categories: ["id", "name", "slug"] }]>>;
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
+
+
+
 // Item Typed Queries
 /**
  * Typed query for Item
@@ -1335,38 +1473,6 @@ export type ItemDetail = Array<InferResult<ItemResourceSchema, ["id", "title", "
  * @typedQuery true
  */
 export const itemDetailFields = ["id", "title", "description", "slug", "startingPrice", "currentPrice", "reservePrice", "bidIncrement", "buyNowPrice", "endTime", "startTime", "auctionStatus", "publicationStatus", "condition", "saleType", "auctionFormat", "viewCount", "location", "attributes", "lotNumber", "createdById", "bidCount", { category: ["id", "name", "slug"] }] satisfies ListItemsFields;
-
-
-
-// Category Typed Queries
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
-
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { categories: ["id", "name", "slug"] }]>>;
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
 
 
 
@@ -2302,6 +2408,82 @@ export async function validateUpdateAutoCharge(
 ): Promise<ValidationResult> {
   const payload = {
     action: "update_auto_charge",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type UpdateNotificationPreferencesInput = {
+  notificationPreferences?: AngleAccountsNotificationPreferencesInputSchema | null;
+};
+
+export type UpdateNotificationPreferencesFields = UnifiedFieldSelection<UserResourceSchema>[];
+
+export type InferUpdateNotificationPreferencesResult<
+  Fields extends UpdateNotificationPreferencesFields | undefined,
+> = InferResult<UserResourceSchema, Fields>;
+
+export type UpdateNotificationPreferencesResult<Fields extends UpdateNotificationPreferencesFields | undefined = undefined> = | { success: true; data: InferUpdateNotificationPreferencesResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Update an existing User
+ *
+ * @ashActionType :update
+ */
+export async function updateNotificationPreferences<Fields extends UpdateNotificationPreferencesFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  input?: UpdateNotificationPreferencesInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<UpdateNotificationPreferencesResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "update_notification_preferences",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<UpdateNotificationPreferencesResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Update an existing User
+ *
+ * @ashActionType :update
+ * @validation true
+ */
+export async function validateUpdateNotificationPreferences(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  input?: UpdateNotificationPreferencesInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "update_notification_preferences",
     ...(config.tenant !== undefined && { tenant: config.tenant }),
     identity: config.identity,
     input: config.input
