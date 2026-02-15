@@ -133,27 +133,27 @@ export function PaymentMethodsSection({ methods, userEmail: _userEmail }: Paymen
 
   return (
     <div>
-      <h2 className="mb-4 text-base font-semibold text-neutral-01">Payment Methods</h2>
+      <h2 className="mb-4 text-base font-semibold text-content">Payment Methods</h2>
 
       {methods.length === 0 && (
-        <p className="mb-3 text-sm text-neutral-04">No payment methods added yet.</p>
+        <p className="mb-3 text-sm text-content-tertiary">No payment methods added yet.</p>
       )}
 
       <div className="space-y-3">
         {methods.map((method) => (
           <div
             key={method.id}
-            className="flex items-center justify-between rounded-xl border border-neutral-07 p-4"
+            className="flex items-center justify-between rounded-xl border border-subtle p-4"
           >
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-full bg-neutral-08">
-                <CreditCard className="size-5 text-neutral-04" />
+              <div className="flex size-10 items-center justify-center rounded-full bg-surface-muted">
+                <CreditCard className="size-5 text-content-tertiary" />
               </div>
               <div>
-                <p className="text-sm font-medium text-neutral-01">
+                <p className="text-sm font-medium text-content">
                   {getCardLabel(method.card_type)} ••••{method.last_four}
                 </p>
-                <p className="text-xs text-neutral-04">
+                <p className="text-xs text-content-tertiary">
                   {method.exp_month}/{method.exp_year}
                 </p>
               </div>
@@ -162,7 +162,7 @@ export function PaymentMethodsSection({ methods, userEmail: _userEmail }: Paymen
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="size-8">
-                  <MoreVertical className="size-4 text-neutral-04" />
+                  <MoreVertical className="size-4 text-content-tertiary" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">

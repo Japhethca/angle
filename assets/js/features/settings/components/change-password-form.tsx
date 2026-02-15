@@ -68,7 +68,7 @@ export function ChangePasswordForm({ userId }: ChangePasswordFormProps) {
 
   return (
     <div>
-      <h2 className="mb-5 text-base font-semibold text-neutral-01">
+      <h2 className="mb-5 text-base font-semibold text-content">
         Change Password
       </h2>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -80,7 +80,7 @@ export function ChangePasswordForm({ userId }: ChangePasswordFormProps) {
             {...register("current_password")}
           />
           {errors.current_password && (
-            <p className="text-xs text-red-500">
+            <p className="text-xs text-feedback-error">
               {errors.current_password.message}
             </p>
           )}
@@ -94,7 +94,7 @@ export function ChangePasswordForm({ userId }: ChangePasswordFormProps) {
             {...register("new_password")}
           />
           {errors.new_password && (
-            <p className="text-xs text-red-500">
+            <p className="text-xs text-feedback-error">
               {errors.new_password.message}
             </p>
           )}
@@ -108,7 +108,7 @@ export function ChangePasswordForm({ userId }: ChangePasswordFormProps) {
             {...register("confirm_password")}
           />
           {errors.confirm_password && (
-            <p className="text-xs text-red-500">
+            <p className="text-xs text-feedback-error">
               {errors.confirm_password.message}
             </p>
           )}

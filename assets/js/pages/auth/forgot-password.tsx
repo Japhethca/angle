@@ -19,10 +19,10 @@ export default function ForgotPassword() {
       <AuthLayout heroImage="/images/auth-hero-recover.png">
         <div className="space-y-6">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-2xl font-bold tracking-tight text-content">
               Recover Password
             </h1>
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-content-secondary">
               Don't worry, we'll send a reset link to your email
             </p>
           </div>

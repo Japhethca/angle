@@ -5,6 +5,7 @@ import { hydrateRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Layout from "@/layouts/layout";
 import { AuthProvider } from "@/features/auth";
+import { ThemeProvider } from "@/hooks/use-theme";
 
 axios.defaults.xsrfHeaderName = "x-csrf-token";
 
@@ -33,7 +34,9 @@ createInertiaApp({
     hydrateRoot(
       el,
       <QueryClientProvider client={queryClient}>
-        <App {...props} />
+        <ThemeProvider>
+          <App {...props} />
+        </ThemeProvider>
       </QueryClientProvider>
     );
   },

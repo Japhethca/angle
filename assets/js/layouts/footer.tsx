@@ -21,7 +21,7 @@ const legalLinks = [
 
 export function Footer() {
   return (
-    <footer className="hidden bg-[#060818] text-white lg:block">
+    <footer className="hidden bg-[#060818] text-white dark:bg-surface-muted lg:block">
       <div className="px-10 py-12">
         <div className="grid grid-cols-12 gap-8">
           {/* Branding */}

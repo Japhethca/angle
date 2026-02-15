@@ -87,35 +87,35 @@ export default function CategoryShow({
       <div className="flex items-center justify-between px-4 py-4 lg:hidden">
         <div className="flex items-center gap-3">
           <Link href="/categories" className="flex size-9 items-center justify-center">
-            <ChevronLeft className="size-5 text-neutral-01" />
+            <ChevronLeft className="size-5 text-content" />
           </Link>
-          <h1 className="text-xl font-medium text-neutral-01">{category.name}</h1>
+          <h1 className="text-xl font-medium text-content">{category.name}</h1>
         </div>
-        <button className="flex size-9 items-center justify-center rounded-lg text-neutral-03">
+        <button className="flex size-9 items-center justify-center rounded-lg text-content-secondary">
           <Search className="size-5" />
         </button>
       </div>
 
       {/* Desktop header */}
       <div className="hidden px-10 pt-8 lg:block">
-        <nav className="mb-2 text-sm text-neutral-04">
-          <Link href="/" className="hover:text-neutral-01">Home</Link>
+        <nav className="mb-2 text-sm text-content-tertiary">
+          <Link href="/" className="hover:text-content">Home</Link>
           <span className="mx-2">/</span>
-          <Link href="/categories" className="hover:text-neutral-01">Categories</Link>
+          <Link href="/categories" className="hover:text-content">Categories</Link>
           <span className="mx-2">/</span>
           {active_subcategory ? (
             <>
-              <Link href={`/categories/${parentSlug}`} className="hover:text-neutral-01">{category.name}</Link>
+              <Link href={`/categories/${parentSlug}`} className="hover:text-content">{category.name}</Link>
               <span className="mx-2">/</span>
-              <span className="text-neutral-01">
+              <span className="text-content">
                 {subcategories.find((s) => s.slug === active_subcategory)?.name}
               </span>
             </>
           ) : (
-            <span className="text-neutral-01">{category.name}</span>
+            <span className="text-content">{category.name}</span>
           )}
         </nav>
-        <h1 className="text-2xl font-semibold text-neutral-01">{category.name}</h1>
+        <h1 className="text-2xl font-semibold text-content">{category.name}</h1>
       </div>
 
       {/* Subcategory chips + view toggle */}
@@ -128,7 +128,7 @@ export default function CategoryShow({
               className={`shrink-0 rounded-lg px-4 py-1 text-xs transition-colors ${
                 active_subcategory === null
                   ? "bg-primary-600 text-white"
-                  : "border border-neutral-08 bg-neutral-09 text-neutral-03 hover:bg-neutral-08"
+                  : "border border-surface-muted bg-surface-secondary text-content-secondary hover:bg-surface-muted"
               }`}
             >
               All
@@ -140,7 +140,7 @@ export default function CategoryShow({
                 className={`shrink-0 rounded-lg px-4 py-1 text-xs transition-colors ${
                   active_subcategory === sub.slug
                     ? "bg-primary-600 text-white"
-                    : "border border-neutral-08 bg-neutral-09 text-neutral-03 hover:bg-neutral-08"
+                    : "border border-surface-muted bg-surface-secondary text-content-secondary hover:bg-surface-muted"
                 }`}
               >
                 {sub.name}
@@ -155,7 +155,7 @@ export default function CategoryShow({
             onClick={() => handleViewModeChange("grid")}
             aria-label="Grid view"
             className={`flex size-8 items-center justify-center rounded transition-colors ${
-              viewMode === "grid" ? "text-primary-600" : "text-neutral-05 hover:text-neutral-03"
+              viewMode === "grid" ? "text-primary-600" : "text-content-placeholder hover:text-content-secondary"
             }`}
           >
             <LayoutGrid className="size-4" />
@@ -164,7 +164,7 @@ export default function CategoryShow({
             onClick={() => handleViewModeChange("list")}
             aria-label="List view"
             className={`flex size-8 items-center justify-center rounded transition-colors ${
-              viewMode === "list" ? "text-primary-600" : "text-neutral-05 hover:text-neutral-03"
+              viewMode === "list" ? "text-primary-600" : "text-content-placeholder hover:text-content-secondary"
             }`}
           >
             <List className="size-4" />
@@ -195,7 +195,7 @@ export default function CategoryShow({
               <button
                 onClick={loadMore}
                 disabled={isLoadingMore}
-                className="flex items-center gap-2 rounded-full border border-neutral-06 px-8 py-3 text-sm font-medium text-neutral-03 transition-colors hover:bg-neutral-09 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-full border border-strong px-8 py-3 text-sm font-medium text-content-secondary transition-colors hover:bg-surface-secondary disabled:opacity-50"
               >
                 {isLoadingMore ? (
                   <>
@@ -211,8 +211,8 @@ export default function CategoryShow({
         </>
       ) : (
         <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
-          <p className="text-lg text-neutral-04">No items in this category yet</p>
-          <p className="mt-1 text-sm text-neutral-05">Check back later for new listings</p>
+          <p className="text-lg text-content-tertiary">No items in this category yet</p>
+          <p className="mt-1 text-sm text-content-placeholder">Check back later for new listings</p>
         </div>
       )}
     </div>

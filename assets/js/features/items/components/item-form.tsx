@@ -73,7 +73,7 @@ export function ItemForm({ item }: ItemFormProps) {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="title" className="block text-sm font-medium text-content-secondary">
               Title
             </label>
             <Input
@@ -88,7 +88,7 @@ export function ItemForm({ item }: ItemFormProps) {
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="description" className="block text-sm font-medium text-content-secondary">
               Description
             </label>
             <Textarea
@@ -102,7 +102,7 @@ export function ItemForm({ item }: ItemFormProps) {
           </div>
 
           <div>
-            <label htmlFor="starting_price" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="starting_price" className="block text-sm font-medium text-content-secondary">
               Starting Price ($)
             </label>
             <Input
@@ -119,17 +119,17 @@ export function ItemForm({ item }: ItemFormProps) {
           </div>
 
           {item && (
-            <div className="bg-gray-50 p-4 rounded-md">
-              <h4 className="text-sm font-medium text-gray-900">Current Status</h4>
-              <p className="text-sm text-gray-600 mt-1">
+            <div className="bg-surface-muted p-4 rounded-md">
+              <h4 className="text-sm font-medium text-content">Current Status</h4>
+              <p className="text-sm text-content-secondary mt-1">
                 Status: <span className="font-medium">{item.publication_status}</span>
               </p>
             </div>
           )}
 
           {!canEdit && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-              <p className="text-sm text-yellow-800">
+            <div className="bg-feedback-warning-muted border border-yellow-200 rounded-md p-4">
+              <p className="text-sm text-feedback-warning">
                 You don't have permission to edit this item.
               </p>
             </div>
@@ -168,8 +168,8 @@ export function ItemForm({ item }: ItemFormProps) {
 
         {/* Admin-only actions */}
         <PermissionGuard permission="manage_all_items">
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <h4 className="text-sm font-medium text-gray-900 mb-4">Admin Actions</h4>
+          <div className="mt-8 pt-6 border-t border-subtle">
+            <h4 className="text-sm font-medium text-content mb-4">Admin Actions</h4>
             <div className="flex space-x-3">
               <Button variant="destructive" size="sm">
                 Force Delete

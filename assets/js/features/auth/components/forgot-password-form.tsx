@@ -36,7 +36,7 @@ export function ForgotPasswordForm() {
           {...register("email")}
         />
         {errors.email && (
-          <p className="text-sm text-red-600">{errors.email.message}</p>
+          <p className="text-sm text-feedback-error">{errors.email.message}</p>
         )}
       </div>
 
@@ -48,7 +48,7 @@ export function ForgotPasswordForm() {
         {isSubmitting ? "Sending..." : "Reset Password"}
       </Button>
 
-      <p className="text-center text-sm text-gray-600">
+      <p className="text-center text-sm text-content-secondary">
         Remember your password?{" "}
         <Link
           href="/auth/login"

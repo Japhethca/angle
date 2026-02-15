@@ -21,9 +21,9 @@ export function ItemCard({ item, badge }: ItemCardProps) {
     <div className="w-[85vw] shrink-0 sm:w-[320px] lg:w-[432px]">
       <Link href={itemUrl} className="block">
         {/* Image area */}
-        <div className="relative aspect-[9/10] overflow-hidden rounded-2xl bg-neutral-08 lg:aspect-[9/10]">
+        <div className="relative aspect-[9/10] overflow-hidden rounded-2xl bg-surface-muted lg:aspect-[9/10]">
           {/* Placeholder */}
-          <div className="flex h-full items-center justify-center text-neutral-05">
+          <div className="flex h-full items-center justify-center text-content-placeholder">
             <Gavel className="size-12 lg:size-16" />
           </div>
 
@@ -58,26 +58,26 @@ export function ItemCard({ item, badge }: ItemCardProps) {
       <div className="mt-3 space-y-2">
         <div className="flex items-start justify-between gap-2">
           <Link href={itemUrl} className="min-w-0 flex-1">
-            <h3 className="line-clamp-1 text-sm text-neutral-04">
+            <h3 className="line-clamp-1 text-sm text-content-tertiary">
               {item.title}
             </h3>
           </Link>
-          <p className="shrink-0 text-sm font-bold text-neutral-01">
+          <p className="shrink-0 text-sm font-bold text-content">
             {formatNaira(price)}
           </p>
         </div>
 
         <div className="flex items-center gap-2 text-xs">
           {item.endTime && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#f7f2f5] px-2.5 py-1 font-medium text-feedback-error">
+            <span className="inline-flex items-center gap-1 rounded-full bg-feedback-error-muted px-2.5 py-1 font-medium text-feedback-error">
               <Clock className="size-3" />
               <CountdownTimer endTime={item.endTime} className="text-feedback-error" />
             </span>
           )}
           {item.viewCount > 0 && (
             <>
-              <span className="text-neutral-05">·</span>
-              <span className="text-neutral-04">{item.viewCount} views</span>
+              <span className="text-content-placeholder">·</span>
+              <span className="text-content-tertiary">{item.viewCount} views</span>
             </>
           )}
         </div>

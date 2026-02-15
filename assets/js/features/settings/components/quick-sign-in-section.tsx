@@ -5,8 +5,8 @@ export function QuickSignInSection() {
     <div>
       <Separator className="mb-5" />
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-neutral-01">Quick Sign In</h3>
-        <div className="flex items-center justify-between rounded-xl bg-neutral-08 p-4">
+        <h3 className="text-sm font-semibold text-content">Quick Sign In</h3>
+        <div className="flex items-center justify-between rounded-xl bg-surface-muted p-4">
           <div className="flex items-center gap-3">
             <svg className="size-5 shrink-0" viewBox="0 0 24 24">
               <path
@@ -27,10 +27,10 @@ export function QuickSignInSection() {
               />
             </svg>
             <div>
-              <p className="text-sm font-medium text-neutral-01">Google</p>
-              <p className="text-xs text-neutral-04">
+              <p className="text-sm font-medium text-content">Google</p>
+              <p className="text-xs text-content-tertiary">
                 user@example.com{" "}
-                <span className="text-green-600">&middot; connected</span>
+                <span className="text-feedback-success">&middot; connected</span>
               </p>
             </div>
           </div>

@@ -39,9 +39,9 @@ function ItemPreview({
 }) {
   return (
     <div className="space-y-2">
-      <p className={`${titleSize} text-neutral-01`}>{itemTitle}</p>
-      <p className={`${labelSize} tracking-wider text-neutral-04`}>Your Bid</p>
-      <p className={`${amountSize} font-bold text-neutral-01`}>{bidAmount}</p>
+      <p className={`${titleSize} text-content`}>{itemTitle}</p>
+      <p className={`${labelSize} tracking-wider text-content-tertiary`}>Your Bid</p>
+      <p className={`${amountSize} font-bold text-content`}>{bidAmount}</p>
     </div>
   );
 }
@@ -77,7 +77,7 @@ function DesktopDialog({
       <DialogContent
         showCloseButton={false}
         overlayClassName="bg-[#2B2B2F]/40 backdrop-blur-[1px]"
-        className="max-w-[736px] rounded-xl bg-white border-none px-10 py-20 shadow-[0px_4px_16px_0px_rgba(0,0,1,0.08)]"
+        className="max-w-[736px] rounded-xl bg-surface border-none px-10 py-20 shadow-[0px_4px_16px_0px_rgba(0,0,1,0.08)]"
       >
         <DialogTitle className="sr-only">Confirm your bid</DialogTitle>
         <DialogDescription className="sr-only">
@@ -85,14 +85,14 @@ function DesktopDialog({
         </DialogDescription>
 
         <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100">
-          <X className="size-5 text-neutral-03" />
+          <X className="size-5 text-content-secondary" />
           <span className="sr-only">Close</span>
         </DialogClose>
 
         <div className="flex gap-8">
           {/* Image placeholder */}
-          <div className="flex flex-1 items-center justify-center rounded-lg bg-neutral-08">
-            <Gavel className="size-16 text-neutral-05" />
+          <div className="flex flex-1 items-center justify-center rounded-lg bg-surface-muted">
+            <Gavel className="size-16 text-content-placeholder" />
           </div>
 
           {/* Details */}
@@ -125,7 +125,7 @@ function MobileDrawer({
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent
         overlayClassName="bg-[#0A0A0A]/40"
-        className="rounded-t-3xl border-none px-4 bg-white pb-6 shadow-[0px_4px_8px_3px_rgba(3,38,38,0.08),0px_16px_24px_0px_rgba(3,38,38,0.24)]"
+        className="rounded-t-3xl border-none px-4 bg-surface pb-6 shadow-[0px_4px_8px_3px_rgba(3,38,38,0.08),0px_16px_24px_0px_rgba(3,38,38,0.24)]"
       >
         <DrawerDescription className="sr-only">
           Review and confirm your bid details
@@ -137,14 +137,14 @@ function MobileDrawer({
             Bid
           </DrawerTitle>
           <DrawerClose className="rounded-sm opacity-70 transition-opacity hover:opacity-100">
-            <X className="size-5 text-neutral-03" />
+            <X className="size-5 text-content-secondary" />
             <span className="sr-only">Close</span>
           </DrawerClose>
         </div>
 
         {/* Image placeholder */}
-        <div className="flex aspect-[4/3] w-full items-center justify-center rounded-xl bg-neutral-08">
-          <Gavel className="size-12 text-neutral-05" />
+        <div className="flex aspect-[4/3] w-full items-center justify-center rounded-xl bg-surface-muted">
+          <Gavel className="size-12 text-content-placeholder" />
         </div>
 
         <div className="mt-4">

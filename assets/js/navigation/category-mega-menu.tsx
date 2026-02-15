@@ -24,7 +24,7 @@ export function CategoryMegaMenu({ categories }: CategoryMegaMenuProps) {
         <div key={category.id} className="flex flex-col gap-2">
           <Link
             href={`/categories/${category.slug}`}
-            className="text-base font-medium text-neutral-01 hover:underline"
+            className="text-base font-medium text-content hover:underline"
           >
             {category.name}
           </Link>
@@ -34,7 +34,7 @@ export function CategoryMegaMenu({ categories }: CategoryMegaMenuProps) {
                 <Link
                   key={sub.id}
                   href={`/categories/${category.slug}/${sub.slug}`}
-                  className="text-sm text-neutral-03 transition-colors hover:text-neutral-01"
+                  className="text-sm text-content-secondary transition-colors hover:text-content"
                 >
                   {sub.name}
                 </Link>

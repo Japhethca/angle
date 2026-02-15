@@ -88,7 +88,7 @@ export function AccountForm({ user }: AccountFormProps) {
             {...register("full_name")}
           />
           {errors.full_name && (
-            <p className="text-xs text-red-500">{errors.full_name.message}</p>
+            <p className="text-xs text-feedback-error">{errors.full_name.message}</p>
           )}
         </div>
 
@@ -99,7 +99,7 @@ export function AccountForm({ user }: AccountFormProps) {
             id="email"
             value={user.email}
             disabled
-            className="bg-neutral-08 text-neutral-04"
+            className="bg-surface-muted text-content-tertiary"
           />
         </div>
 
@@ -107,7 +107,7 @@ export function AccountForm({ user }: AccountFormProps) {
         <div className="space-y-2">
           <Label htmlFor="phone_number">Phone Number</Label>
           <div className="flex gap-2">
-            <div className="flex h-10 shrink-0 items-center gap-1 rounded-md border border-input bg-neutral-08 px-2 text-sm text-neutral-04">
+            <div className="flex h-10 shrink-0 items-center gap-1 rounded-md border border-input bg-surface-muted px-2 text-sm text-content-tertiary">
               <span className="text-xs leading-none">🇳🇬</span>
               <span>234</span>
               <ChevronDown className="size-3" />
@@ -119,7 +119,7 @@ export function AccountForm({ user }: AccountFormProps) {
             />
           </div>
           {errors.phone_number && (
-            <p className="text-xs text-red-500">
+            <p className="text-xs text-feedback-error">
               {errors.phone_number.message}
             </p>
           )}
@@ -134,7 +134,7 @@ export function AccountForm({ user }: AccountFormProps) {
             {...register("location")}
           />
           {errors.location && (
-            <p className="text-xs text-red-500">{errors.location.message}</p>
+            <p className="text-xs text-feedback-error">{errors.location.message}</p>
           )}
         </div>
       </div>

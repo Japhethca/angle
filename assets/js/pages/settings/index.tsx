@@ -13,7 +13,7 @@ const menuItems = [
   { label: "Security", icon: Shield, href: "/settings/security" },
   { label: "Payments", icon: CreditCard, href: "/settings/payments" },
   { label: "Notifications", icon: Bell, disabled: true },
-  { label: "Preferences", icon: SlidersHorizontal, disabled: true },
+  { label: "Preferences", icon: SlidersHorizontal, href: "/settings/preferences" },
   { label: "Legal", icon: Scale, disabled: true },
   { label: "Support", icon: HelpCircle, disabled: true },
 ];
@@ -37,24 +37,24 @@ export default function SettingsIndex({ user }: SettingsIndexProps) {
       <Head title="Settings" />
 
       <div className="px-4 py-4 lg:hidden">
-        <h1 className="mb-4 text-lg font-semibold text-neutral-01">Settings</h1>
+        <h1 className="mb-4 text-lg font-semibold text-content">Settings</h1>
 
         {/* Profile card */}
         <Link
           href="/settings/account"
-          className="mb-4 flex items-center gap-3 rounded-2xl bg-neutral-08 p-4"
+          className="mb-4 flex items-center gap-3 rounded-2xl bg-surface-muted p-4"
         >
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-neutral-06">
-            <User className="size-6 text-neutral-04" />
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-surface-emphasis">
+            <User className="size-6 text-content-tertiary" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1">
-              <p className="truncate text-sm font-medium text-neutral-01">
+              <p className="truncate text-sm font-medium text-content">
                 {user.full_name || "Set up your profile"}
               </p>
-              <ChevronRight className="size-4 shrink-0 text-neutral-04" />
+              <ChevronRight className="size-4 shrink-0 text-content-tertiary" />
             </div>
-            <p className="truncate text-xs text-neutral-04">{user.email}</p>
+            <p className="truncate text-xs text-content-tertiary">{user.email}</p>
           </div>
         </Link>
 
@@ -66,20 +66,20 @@ export default function SettingsIndex({ user }: SettingsIndexProps) {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="flex items-center justify-between rounded-lg px-3 py-3 text-neutral-01"
+                  className="flex items-center justify-between rounded-lg px-3 py-3 text-content"
                 >
                   <div className="flex items-center gap-3">
                     <item.icon className="size-5" />
                     <span className="text-sm font-medium">{item.label}</span>
                   </div>
-                  <ChevronRight className="size-4 text-neutral-04" />
+                  <ChevronRight className="size-4 text-content-tertiary" />
                 </Link>
               );
             }
             return (
               <div
                 key={item.label}
-                className="flex cursor-not-allowed items-center justify-between rounded-lg px-3 py-3 text-neutral-04"
+                className="flex cursor-not-allowed items-center justify-between rounded-lg px-3 py-3 text-content-tertiary"
               >
                 <div className="flex items-center gap-3">
                   <item.icon className="size-5" />
@@ -94,7 +94,7 @@ export default function SettingsIndex({ user }: SettingsIndexProps) {
         {/* Log Out */}
         <button
           onClick={handleLogout}
-          className="mt-6 flex w-full items-center gap-3 rounded-lg px-3 py-3 text-red-500"
+          className="mt-6 flex w-full items-center gap-3 rounded-lg px-3 py-3 text-feedback-error"
         >
           <LogOut className="size-5" />
           <span className="text-sm font-medium">Log Out</span>

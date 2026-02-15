@@ -19,7 +19,7 @@ export default function UsersPage({ users }: UsersPageProps) {
 
   return (
     <ProtectedRoute permission="manage_users" fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-surface-muted flex items-center justify-center">
         <Card className="w-96">
           <CardHeader>
             <CardTitle>Access Denied</CardTitle>
@@ -30,16 +30,16 @@ export default function UsersPage({ users }: UsersPageProps) {
         </Card>
       </div>
     }>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-surface-muted">
         <Head title="User Management" />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="md:flex md:items-center md:justify-between">
             <div className="flex-1 min-w-0">
-              <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+              <h2 className="text-2xl font-bold leading-7 text-content sm:text-3xl sm:truncate">
                 User Management
               </h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-content-tertiary">
                 Manage user accounts and role assignments
               </p>
             </div>
@@ -63,39 +63,39 @@ export default function UsersPage({ users }: UsersPageProps) {
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-subtle">
+                    <thead className="bg-surface-muted">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider">
                           User
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider">
                           Status
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider">
                           Roles
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-surface divide-y divide-subtle">
                       {users?.map((user) => (
                         <tr key={user.id}>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-content">
                               {user.email}
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-content-tertiary">
                               ID: {user.id}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                               user.confirmed_at
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-yellow-100 text-yellow-800'
+                                ? 'bg-feedback-success-muted text-feedback-success'
+                                : 'bg-feedback-warning-muted text-feedback-warning'
                             }`}>
                               {user.confirmed_at ? 'Active' : 'Pending'}
                             </span>
@@ -105,12 +105,12 @@ export default function UsersPage({ users }: UsersPageProps) {
                               {user.roles?.map((role) => (
                                 <span
                                   key={role}
-                                  className="inline-flex px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-800"
+                                  className="inline-flex px-2 py-1 text-xs font-medium rounded bg-feedback-info-muted text-feedback-info"
                                 >
                                   {role}
                                 </span>
                               )) || (
-                                <span className="text-sm text-gray-400">No roles</span>
+                                <span className="text-sm text-content-placeholder">No roles</span>
                               )}
                             </div>
                           </td>
@@ -132,7 +132,7 @@ export default function UsersPage({ users }: UsersPageProps) {
                       ))}
                       {(!users || users.length === 0) && (
                         <tr>
-                          <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                          <td colSpan={4} className="px-6 py-4 text-center text-content-tertiary">
                             No users found
                           </td>
                         </tr>

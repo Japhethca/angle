@@ -141,28 +141,28 @@ export function PayoutMethodsSection({ methods }: PayoutMethodsSectionProps) {
   return (
     <div>
       <Separator className="mb-5" />
-      <h2 className="mb-4 text-base font-semibold text-neutral-01">Payouts</h2>
+      <h2 className="mb-4 text-base font-semibold text-content">Payouts</h2>
 
       {methods.length === 0 && (
-        <p className="mb-3 text-sm text-neutral-04">No payout methods added yet.</p>
+        <p className="mb-3 text-sm text-content-tertiary">No payout methods added yet.</p>
       )}
 
       <div className="space-y-3">
         {methods.map((method) => (
           <div
             key={method.id}
-            className="flex items-center justify-between rounded-xl border border-neutral-07 p-4"
+            className="flex items-center justify-between rounded-xl border border-subtle p-4"
           >
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-full bg-neutral-08">
-                <Building2 className="size-5 text-neutral-04" />
+              <div className="flex size-10 items-center justify-center rounded-full bg-surface-muted">
+                <Building2 className="size-5 text-content-tertiary" />
               </div>
               <div>
-                <p className="text-sm font-medium text-neutral-01">{method.bank_name}</p>
-                <p className="text-xs text-neutral-04">
+                <p className="text-sm font-medium text-content">{method.bank_name}</p>
+                <p className="text-xs text-content-tertiary">
                   {method.account_number}
                   {method.is_default && (
-                    <span className="text-green-600"> · default</span>
+                    <span className="text-feedback-success"> · default</span>
                   )}
                 </p>
               </div>

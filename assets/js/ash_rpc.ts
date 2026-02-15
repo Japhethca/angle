@@ -1259,23 +1259,6 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
-// User Typed Queries
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
-
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
-
-
-
 // Item Typed Queries
 /**
  * Typed query for Item
@@ -1367,6 +1350,23 @@ export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name
  * @typedQuery true
  */
 export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
+
+
+
+// User Typed Queries
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
+
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
 
 
 

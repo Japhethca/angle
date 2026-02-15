@@ -122,7 +122,7 @@ export function StoreForm({ userId, storeProfile }: StoreFormProps) {
             {...register("store_name")}
           />
           {errors.store_name && (
-            <p className="text-xs text-red-500">{errors.store_name.message}</p>
+            <p className="text-xs text-feedback-error">{errors.store_name.message}</p>
           )}
         </div>
 
@@ -130,7 +130,7 @@ export function StoreForm({ userId, storeProfile }: StoreFormProps) {
         <div className="space-y-2">
           <Label htmlFor="contact_phone">Contact</Label>
           <div className="flex gap-2">
-            <div className="flex h-10 shrink-0 items-center gap-1 rounded-md border border-input bg-neutral-08 px-2 text-sm text-neutral-04">
+            <div className="flex h-10 shrink-0 items-center gap-1 rounded-md border border-input bg-surface-muted px-2 text-sm text-content-tertiary">
               <span className="text-xs leading-none">🇳🇬</span>
               <span>234</span>
               <ChevronDown className="size-3" />
@@ -142,7 +142,7 @@ export function StoreForm({ userId, storeProfile }: StoreFormProps) {
             />
           </div>
           {errors.contact_phone && (
-            <p className="text-xs text-red-500">{errors.contact_phone.message}</p>
+            <p className="text-xs text-feedback-error">{errors.contact_phone.message}</p>
           )}
         </div>
 
@@ -150,7 +150,7 @@ export function StoreForm({ userId, storeProfile }: StoreFormProps) {
         <div className="space-y-2">
           <Label htmlFor="whatsapp_link">Whatsapp Link</Label>
           <div className="flex gap-2">
-            <div className="flex h-10 shrink-0 items-center rounded-md border border-input bg-neutral-08 px-3 text-sm text-neutral-04">
+            <div className="flex h-10 shrink-0 items-center rounded-md border border-input bg-surface-muted px-3 text-sm text-content-tertiary">
               http://
             </div>
             <Input
@@ -160,7 +160,7 @@ export function StoreForm({ userId, storeProfile }: StoreFormProps) {
             />
           </div>
           {errors.whatsapp_link && (
-            <p className="text-xs text-red-500">{errors.whatsapp_link.message}</p>
+            <p className="text-xs text-feedback-error">{errors.whatsapp_link.message}</p>
           )}
         </div>
 
@@ -186,7 +186,7 @@ export function StoreForm({ userId, storeProfile }: StoreFormProps) {
             )}
           />
           {errors.location && (
-            <p className="text-xs text-red-500">{errors.location.message}</p>
+            <p className="text-xs text-feedback-error">{errors.location.message}</p>
           )}
         </div>
 
@@ -199,7 +199,7 @@ export function StoreForm({ userId, storeProfile }: StoreFormProps) {
             {...register("address")}
           />
           {errors.address && (
-            <p className="text-xs text-red-500">{errors.address.message}</p>
+            <p className="text-xs text-feedback-error">{errors.address.message}</p>
           )}
         </div>
       </div>
@@ -211,7 +211,7 @@ export function StoreForm({ userId, storeProfile }: StoreFormProps) {
       <div>
         <Separator className="mb-5" />
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-neutral-01">Preferences</h3>
+          <h3 className="text-sm font-semibold text-content">Preferences</h3>
           <div className="space-y-2">
             <Label>Delivery</Label>
             <Controller

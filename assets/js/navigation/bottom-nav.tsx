@@ -20,7 +20,7 @@ export function BottomNav() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-neutral-07 bg-white lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-subtle bg-surface lg:hidden">
       <div className="flex h-[72px] items-center justify-around px-4">
         {tabs.map((tab) => {
           const active = isActive(tab.href);
@@ -32,7 +32,7 @@ export function BottomNav() {
               auth={tab.auth}
               className={cn(
                 "flex flex-col items-center gap-1 px-3 py-2 text-[10px]",
-                active ? "text-primary-600" : "text-neutral-04"
+                active ? "text-primary-600" : "text-content-tertiary"
               )}
             >
               <Icon className="size-5" strokeWidth={active ? 2.5 : 2} />
