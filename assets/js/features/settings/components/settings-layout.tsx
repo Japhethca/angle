@@ -45,11 +45,11 @@ export function SettingsLayout({ title, breadcrumbSuffix, children }: SettingsLa
       <div className="flex items-center gap-3 px-4 py-3 lg:hidden">
         <Link
           href="/settings"
-          className="flex size-9 items-center justify-center rounded-full border border-neutral-06"
+          className="flex size-9 items-center justify-center rounded-full border border-strong"
         >
-          <ArrowLeft className="size-4 text-neutral-02" />
+          <ArrowLeft className="size-4 text-content" />
         </Link>
-        <h1 className="text-base font-semibold text-neutral-01">{title}</h1>
+        <h1 className="text-base font-semibold text-content">{title}</h1>
       </div>
 
       {/* Desktop: sidebar + content */}
@@ -67,7 +67,7 @@ export function SettingsLayout({ title, breadcrumbSuffix, children }: SettingsLa
                     "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                     isActive
                       ? "bg-primary-600/10 text-primary-600"
-                      : "text-neutral-04 hover:text-neutral-02",
+                      : "text-content-tertiary hover:text-content",
                     item.disabled && "cursor-not-allowed"
                   )}
                   onClick={(e) => {
@@ -83,7 +83,7 @@ export function SettingsLayout({ title, breadcrumbSuffix, children }: SettingsLa
 
           <button
             onClick={handleLogout}
-            className="mt-6 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 transition-colors hover:bg-red-50"
+            className="mt-6 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-feedback-error transition-colors hover:bg-feedback-error-muted"
           >
             <LogOut className="size-5" />
             Log Out
@@ -93,14 +93,14 @@ export function SettingsLayout({ title, breadcrumbSuffix, children }: SettingsLa
         {/* Content area */}
         <div className="min-w-0 max-w-2xl flex-1">
           {/* Breadcrumb */}
-          <nav className="mb-6 flex items-center gap-1.5 text-xs text-neutral-04">
+          <nav className="mb-6 flex items-center gap-1.5 text-xs text-content-tertiary">
             <span>Settings</span>
             <ChevronRight className="size-3" />
-            <span className={breadcrumbSuffix ? "" : "text-neutral-02"}>{title}</span>
+            <span className={breadcrumbSuffix ? "" : "text-content"}>{title}</span>
             {breadcrumbSuffix && (
               <>
                 <ChevronRight className="size-3" />
-                <span className="text-neutral-02">{breadcrumbSuffix}</span>
+                <span className="text-content">{breadcrumbSuffix}</span>
               </>
             )}
           </nav>
