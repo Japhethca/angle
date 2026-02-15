@@ -465,7 +465,6 @@ defmodule Angle.Accounts.User do
     attribute :full_name, :string, public?: true
     attribute :phone_number, :string, public?: true
     attribute :username, :string, public?: true
-    attribute :store_name, :string, public?: true
     attribute :location, :string, public?: true
     attribute :whatsapp_number, :string, public?: true
 
@@ -485,6 +484,11 @@ defmodule Angle.Accounts.User do
       through Angle.Accounts.UserRole
       destination_attribute_on_join_resource :role_id
       source_attribute_on_join_resource :user_id
+      public? true
+    end
+
+    has_one :store_profile, Angle.Accounts.StoreProfile do
+      destination_attribute :user_id
       public? true
     end
 

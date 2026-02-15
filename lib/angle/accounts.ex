@@ -20,14 +20,24 @@ defmodule Angle.Accounts do
           :id,
           :username,
           :full_name,
-          :store_name,
           :location,
           :phone_number,
           :whatsapp_number,
           :created_at,
-          :published_item_count
+          :published_item_count,
+          store_profile: [
+            :store_name,
+            :location,
+            :contact_phone,
+            :whatsapp_link,
+            :delivery_preference
+          ]
         ]
       end
+    end
+
+    resource Angle.Accounts.StoreProfile do
+      rpc_action :upsert_store_profile, :upsert
     end
   end
 
@@ -39,5 +49,6 @@ defmodule Angle.Accounts do
     resource Angle.Accounts.Permission
     resource Angle.Accounts.RolePermission
     resource Angle.Accounts.Otp
+    resource Angle.Accounts.StoreProfile
   end
 end

@@ -66,7 +66,7 @@ export default function StoreShow({
   category_summary: categorySummary = [],
   active_tab: initialActiveTab = "auctions",
 }: StoreShowProps) {
-  const displayName = seller.storeName || seller.fullName || "Store";
+  const displayName = seller.storeProfile?.storeName || seller.fullName || "Store";
   const storeUrl = `/store/${seller.username || seller.id}`;
 
   const [activeTab, setActiveTab] = useState<TabKey>(initialActiveTab);
@@ -295,22 +295,22 @@ export default function StoreShow({
 
               {/* Contact info */}
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral-04">
-                {seller.location && (
+                {(seller.storeProfile?.location || seller.location) && (
                   <span className="flex items-center gap-1.5">
                     <MapPin className="size-4 text-neutral-05" />
-                    {seller.location}
+                    {seller.storeProfile?.location || seller.location}
                   </span>
                 )}
-                {seller.phoneNumber && (
+                {(seller.storeProfile?.contactPhone || seller.phoneNumber) && (
                   <span className="flex items-center gap-1.5">
                     <Phone className="size-4 text-neutral-05" />
-                    {seller.phoneNumber}
+                    {seller.storeProfile?.contactPhone || seller.phoneNumber}
                   </span>
                 )}
-                {seller.whatsappNumber && (
+                {(seller.storeProfile?.whatsappLink || seller.whatsappNumber) && (
                   <span className="flex items-center gap-1.5">
                     <MessageCircle className="size-4 text-neutral-05" />
-                    {seller.whatsappNumber}
+                    {seller.storeProfile?.whatsappLink || seller.whatsappNumber}
                   </span>
                 )}
               </div>

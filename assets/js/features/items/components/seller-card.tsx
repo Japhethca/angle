@@ -7,13 +7,16 @@ interface SellerCardProps {
     fullName: string | null;
     username?: string | null;
     publishedItemCount?: number | null;
+    storeProfile?: {
+      storeName?: string | null;
+    } | null;
   } | null;
 }
 
 export function SellerCard({ seller }: SellerCardProps) {
   if (!seller) return null;
 
-  const displayName = seller.fullName || seller.username || "Seller";
+  const displayName = seller.storeProfile?.storeName || seller.fullName || seller.username || "Seller";
   const storeUrl = `/store/${seller.username || seller.id}`;
   const itemCount = seller.publishedItemCount;
 

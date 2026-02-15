@@ -134,17 +134,17 @@ export type ItemAttributesOnlySchema = {
 // User Schema
 export type UserResourceSchema = {
   __type: "Resource";
-  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber" | "username" | "storeName" | "location" | "whatsappNumber" | "createdAt" | "publishedItemCount";
+  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber" | "username" | "location" | "whatsappNumber" | "createdAt" | "publishedItemCount";
   id: UUID;
   email: string;
   fullName: string | null;
   phoneNumber: string | null;
   username: string | null;
-  storeName: string | null;
   location: string | null;
   whatsappNumber: string | null;
   createdAt: UtcDateTimeUsec;
   publishedItemCount: number;
+  storeProfile: { __type: "Relationship"; __resource: StoreProfileResourceSchema | null; };
   items: { __type: "Relationship"; __array: true; __resource: ItemResourceSchema; };
 };
 
@@ -152,16 +152,46 @@ export type UserResourceSchema = {
 
 export type UserAttributesOnlySchema = {
   __type: "Resource";
-  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber" | "username" | "storeName" | "location" | "whatsappNumber" | "createdAt";
+  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber" | "username" | "location" | "whatsappNumber" | "createdAt";
   id: UUID;
   email: string;
   fullName: string | null;
   phoneNumber: string | null;
   username: string | null;
-  storeName: string | null;
   location: string | null;
   whatsappNumber: string | null;
   createdAt: UtcDateTimeUsec;
+};
+
+
+// StoreProfile Schema
+export type StoreProfileResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "storeName" | "contactPhone" | "whatsappLink" | "location" | "address" | "deliveryPreference" | "userId";
+  id: UUID;
+  storeName: string;
+  contactPhone: string | null;
+  whatsappLink: string | null;
+  location: string | null;
+  address: string | null;
+  deliveryPreference: string | null;
+  userId: UUID;
+  user: { __type: "Relationship"; __resource: UserResourceSchema; };
+};
+
+
+
+export type StoreProfileAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "storeName" | "contactPhone" | "whatsappLink" | "location" | "address" | "deliveryPreference" | "userId";
+  id: UUID;
+  storeName: string;
+  contactPhone: string | null;
+  whatsappLink: string | null;
+  location: string | null;
+  address: string | null;
+  deliveryPreference: string | null;
+  userId: UUID;
 };
 
 
@@ -502,12 +532,6 @@ export type UserFilterInput = {
     in?: Array<string>;
   };
 
-  storeName?: {
-    eq?: string;
-    notEq?: string;
-    in?: Array<string>;
-  };
-
   location?: {
     eq?: string;
     notEq?: string;
@@ -540,7 +564,66 @@ export type UserFilterInput = {
     in?: Array<number>;
   };
 
+  storeProfile?: StoreProfileFilterInput;
+
   items?: ItemFilterInput;
+
+};
+export type StoreProfileFilterInput = {
+  and?: Array<StoreProfileFilterInput>;
+  or?: Array<StoreProfileFilterInput>;
+  not?: Array<StoreProfileFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  storeName?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  contactPhone?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  whatsappLink?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  location?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  address?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  deliveryPreference?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  userId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+
+  user?: UserFilterInput;
 
 };
 
@@ -1237,14 +1320,14 @@ export const itemDetailFields = ["id", "title", "description", "slug", "starting
  *
  * @typedQuery true
  */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "storeName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount"]>>;
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
 
 /**
  * Typed query for User
  *
  * @typedQuery true
  */
-export const sellerProfileFields = ["id", "username", "fullName", "storeName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount"];
+export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
 
 
 
@@ -2138,6 +2221,84 @@ export async function validateUpdateProfile(
     action: "update_profile",
     ...(config.tenant !== undefined && { tenant: config.tenant }),
     identity: config.identity,
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type UpsertStoreProfileInput = {
+  storeName: string;
+  contactPhone?: string | null;
+  whatsappLink?: string | null;
+  location?: string | null;
+  address?: string | null;
+  deliveryPreference?: string | null;
+  userId: UUID;
+};
+
+export type UpsertStoreProfileFields = UnifiedFieldSelection<StoreProfileResourceSchema>[];
+
+export type InferUpsertStoreProfileResult<
+  Fields extends UpsertStoreProfileFields | undefined,
+> = InferResult<StoreProfileResourceSchema, Fields>;
+
+export type UpsertStoreProfileResult<Fields extends UpsertStoreProfileFields | undefined = undefined> = | { success: true; data: InferUpsertStoreProfileResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Create a new StoreProfile
+ *
+ * @ashActionType :create
+ */
+export async function upsertStoreProfile<Fields extends UpsertStoreProfileFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  input: UpsertStoreProfileInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<UpsertStoreProfileResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "upsert_store_profile",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<UpsertStoreProfileResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Create a new StoreProfile
+ *
+ * @ashActionType :create
+ * @validation true
+ */
+export async function validateUpsertStoreProfile(
+  config: {
+  tenant?: string;
+  input: UpsertStoreProfileInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "upsert_store_profile",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
     input: config.input
   };
 

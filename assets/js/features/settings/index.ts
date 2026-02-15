@@ -3,6 +3,9 @@ export { AccountForm } from "./components/account-form";
 export { ProfileImageSection } from "./components/profile-image-section";
 export { VerificationSection } from "./components/verification-section";
 export { QuickSignInSection } from "./components/quick-sign-in-section";
+export { StoreForm } from "./components/store-form";
+export { StoreLogoSection } from "./components/store-logo-section";
+export { StoreVerificationSection } from "./components/store-verification-section";
 
 export interface SettingsUser {
   id: string;
@@ -10,4 +13,14 @@ export interface SettingsUser {
   full_name: string | null;
   phone_number: string | null;
   location: string | null;
+}
+
+export interface StoreProfileData {
+  id: string;
+  store_name: string;
+  contact_phone: string | null;
+  whatsapp_link: string | null;
+  location: string | null;
+  address: string | null;
+  delivery_preference: string | null;
 }
