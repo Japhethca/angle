@@ -25,4 +25,52 @@ defmodule Angle.Accounts.UserTest do
       assert user.email
     end
   end
+
+  describe "update_profile" do
+    test "updates profile fields for the acting user" do
+      user = create_user(%{full_name: "Original Name"})
+
+      updated =
+        user
+        |> Ash.Changeset.for_update(:update_profile, %{
+          full_name: "New Name",
+          phone_number: "08012345678",
+          location: "Lagos, Nigeria"
+        })
+        |> Ash.update!(actor: user)
+
+      assert updated.full_name == "New Name"
+      assert updated.phone_number == "08012345678"
+      assert updated.location == "Lagos, Nigeria"
+    end
+
+    test "does not allow updating email via update_profile" do
+      user = create_user(%{email: "original@example.com"})
+
+      # Ash rejects `email` because it's not in the accept list for update_profile
+      assert_raise Ash.Error.Invalid, ~r/No such input `email`/, fn ->
+        user
+        |> Ash.Changeset.for_update(:update_profile, %{
+          full_name: "New Name",
+          email: "hacked@example.com"
+        })
+        |> Ash.update!(actor: user)
+      end
+
+      # Verify the original email is unchanged
+      reloaded = Ash.get!(Angle.Accounts.User, user.id, authorize?: false)
+      assert to_string(reloaded.email) == "original@example.com"
+    end
+
+    test "rejects update_profile from a different user" do
+      user = create_user()
+      other_user = create_user()
+
+      assert_raise Ash.Error.Forbidden, fn ->
+        user
+        |> Ash.Changeset.for_update(:update_profile, %{full_name: "Hacked"})
+        |> Ash.update!(actor: other_user)
+      end
+    end
+  end
 end

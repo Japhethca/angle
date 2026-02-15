@@ -116,7 +116,7 @@ export function MainNav({ navCategories }: MainNavProps) {
                 <Bell className="size-5" />
               </button>
               <Link
-                href="/profile"
+                href="/settings/account"
                 className="flex size-10 items-center justify-center rounded-lg text-neutral-03 transition-colors hover:bg-neutral-08"
               >
                 <User className="size-5" />
@@ -164,7 +164,7 @@ export function MainNav({ navCategories }: MainNavProps) {
               <div className="flex flex-col gap-6 px-4 pt-4">
                 {authenticated ? (
                   <Link
-                    href="/profile"
+                    href="/settings/account"
                     className="text-sm font-medium text-neutral-01"
                     onClick={() => setMobileOpen(false)}
                   >

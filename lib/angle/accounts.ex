@@ -10,6 +10,7 @@ defmodule Angle.Accounts do
   typescript_rpc do
     resource Angle.Accounts.User do
       rpc_action :list_users, :read
+      rpc_action :update_profile, :update_profile
 
       typed_query :seller_profile, :read_public_profile do
         ts_result_type_name "SellerProfile"

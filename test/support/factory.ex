@@ -35,14 +35,17 @@ defmodule Angle.Factory do
       |> Ash.create!(authorize?: false)
 
     # Set profile fields not accepted by register_with_password
-    username = Map.get(attrs, :username)
+    profile_fields =
+      %{}
+      |> maybe_put(:username, Map.get(attrs, :username))
+      |> maybe_put(:location, Map.get(attrs, :location))
 
-    if username do
+    if profile_fields == %{} do
       user
-      |> Ecto.Changeset.change(%{username: username})
-      |> Angle.Repo.update!()
     else
       user
+      |> Ecto.Changeset.change(profile_fields)
+      |> Angle.Repo.update!()
     end
   end
 

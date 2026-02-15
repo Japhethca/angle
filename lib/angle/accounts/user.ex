@@ -374,6 +374,11 @@ defmodule Angle.Accounts.User do
       end
     end
 
+    update :update_profile do
+      description "Update the user's profile information"
+      accept [:full_name, :phone_number, :location]
+    end
+
     read :read_public_profile do
       description "Public read action for seller/store profiles"
 
