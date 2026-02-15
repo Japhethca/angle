@@ -11,7 +11,7 @@ export default function SettingsStore({ user, store_profile }: SettingsStoreProp
   return (
     <>
       <Head title="Store Settings" />
-      <SettingsLayout title="Store" breadcrumbSuffix="Store Profile">
+      <SettingsLayout title="Store">
         <StoreForm userId={user.id} storeProfile={store_profile} />
       </SettingsLayout>
     </>
