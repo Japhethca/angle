@@ -86,5 +86,7 @@ config :phoenix_live_view,
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
 
-# Paystack API key for development (placeholder)
-config :angle, :paystack_secret_key, "sk_test_xxx"
+# Paystack API key for development — set PAYSTACK_SECRET_KEY in .env
+config :angle,
+       :paystack_secret_key,
+       System.get_env("PAYSTACK_SECRET_KEY") || "sk_test_your_paystack_secret_key"
