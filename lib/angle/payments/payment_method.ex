@@ -3,7 +3,8 @@ defmodule Angle.Payments.PaymentMethod do
     otp_app: :angle,
     domain: Angle.Payments,
     data_layer: AshPostgres.DataLayer,
-    authorizers: [Ash.Policy.Authorizer]
+    authorizers: [Ash.Policy.Authorizer],
+    primary_read_warning?: false
 
   postgres do
     table "payment_methods"
@@ -42,6 +43,11 @@ defmodule Angle.Payments.PaymentMethod do
       change set_attribute(:user_id, arg(:user_id))
     end
 
+    read :read do
+      primary? true
+      filter expr(user_id == ^actor(:id))
+    end
+
     read :list_by_user do
       filter expr(user_id == ^actor(:id))
     end
@@ -56,11 +62,16 @@ defmodule Angle.Payments.PaymentMethod do
       authorize_if expr(^arg(:user_id) == ^actor(:id))
     end
 
+    policy action(:read) do
+      authorize_if always()
+    end
+
     policy action(:list_by_user) do
       authorize_if always()
     end
 
     policy action(:destroy) do
+      access_type :runtime
       authorize_if expr(user_id == ^actor(:id))
     end
   end

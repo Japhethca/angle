@@ -186,10 +186,88 @@ defmodule Angle.Factory do
     Ash.create!(Angle.Accounts.StoreProfile, params, action: :upsert, authorize?: false)
   end
 
+  @doc """
+  Creates a payment method with the given attributes.
+
+  Requires a user. If `:user` is not provided, a new user will be created.
+
+  ## Options
+
+    * `:card_type` - defaults to "visa"
+    * `:last_four` - defaults to "5409"
+    * `:exp_month` - defaults to "04"
+    * `:exp_year` - defaults to "2025"
+    * `:authorization_code` - defaults to a unique generated code
+    * `:bank` - defaults to "TEST BANK"
+    * `:paystack_reference` - defaults to a unique generated reference
+    * `:is_default` - defaults to false
+    * `:user` - the user record (creates one if not provided)
+
+  """
+  def create_payment_method(attrs \\ %{}) do
+    user = attrs[:user] || create_user()
+
+    params =
+      %{
+        card_type: Map.get(attrs, :card_type, "visa"),
+        last_four: Map.get(attrs, :last_four, "5409"),
+        exp_month: Map.get(attrs, :exp_month, "04"),
+        exp_year: Map.get(attrs, :exp_year, "2025"),
+        authorization_code: Map.get(attrs, :authorization_code, "AUTH_test_" <> random_string()),
+        bank: Map.get(attrs, :bank, "TEST BANK"),
+        paystack_reference: Map.get(attrs, :paystack_reference, "angle_test_" <> random_string()),
+        is_default: Map.get(attrs, :is_default, false),
+        user_id: user.id
+      }
+
+    Angle.Payments.PaymentMethod
+    |> Ash.Changeset.for_create(:create, params, authorize?: false)
+    |> Ash.create!(authorize?: false)
+  end
+
+  @doc """
+  Creates a payout method with the given attributes.
+
+  Requires a user. If `:user` is not provided, a new user will be created.
+
+  ## Options
+
+    * `:bank_name` - defaults to "Kuda Bank"
+    * `:bank_code` - defaults to "090267"
+    * `:account_number` - defaults to "2009568002"
+    * `:account_name` - defaults to "Test User"
+    * `:recipient_code` - defaults to a unique generated code
+    * `:is_default` - defaults to false
+    * `:user` - the user record (creates one if not provided)
+
+  """
+  def create_payout_method(attrs \\ %{}) do
+    user = attrs[:user] || create_user()
+
+    params =
+      %{
+        bank_name: Map.get(attrs, :bank_name, "Kuda Bank"),
+        bank_code: Map.get(attrs, :bank_code, "090267"),
+        account_number: Map.get(attrs, :account_number, "2009568002"),
+        account_name: Map.get(attrs, :account_name, "Test User"),
+        recipient_code: Map.get(attrs, :recipient_code, "RCP_test_" <> random_string()),
+        is_default: Map.get(attrs, :is_default, false),
+        user_id: user.id
+      }
+
+    Angle.Payments.PayoutMethod
+    |> Ash.Changeset.for_create(:create, params, authorize?: false)
+    |> Ash.create!(authorize?: false)
+  end
+
   # Helpers
 
   defp unique_email do
     "user_#{System.unique_integer([:positive])}@example.com"
+  end
+
+  defp random_string do
+    Base.encode16(:crypto.strong_rand_bytes(8), case: :lower)
   end
 
   defp maybe_put(map, _key, nil), do: map
