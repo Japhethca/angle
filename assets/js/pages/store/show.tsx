@@ -66,7 +66,7 @@ export default function StoreShow({
   category_summary: categorySummary = [],
   active_tab: initialActiveTab = "auctions",
 }: StoreShowProps) {
-  const displayName = seller.storeName || seller.fullName || "Store";
+  const displayName = seller.storeProfile?.storeName || seller.fullName || "Store";
   const storeUrl = `/store/${seller.username || seller.id}`;
 
   const [activeTab, setActiveTab] = useState<TabKey>(initialActiveTab);
