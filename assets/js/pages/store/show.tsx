@@ -240,21 +240,21 @@ export default function StoreShow({
           href="/"
           className="flex size-9 items-center justify-center"
         >
-          <ChevronLeft className="size-5 text-neutral-01" />
+          <ChevronLeft className="size-5 text-content" />
         </Link>
-        <h1 className="text-xl font-medium text-neutral-01">
+        <h1 className="text-xl font-medium text-content">
           Store Profile
         </h1>
       </div>
 
       {/* Desktop breadcrumb */}
       <div className="hidden px-10 pt-8 lg:block">
-        <nav className="mb-6 text-sm text-neutral-04">
-          <Link href="/" className="hover:text-neutral-01">
+        <nav className="mb-6 text-sm text-content-tertiary">
+          <Link href="/" className="hover:text-content">
             Home
           </Link>
           <span className="mx-2">/</span>
-          <span className="text-neutral-01">Store Profile</span>
+          <span className="text-content">Store Profile</span>
         </nav>
       </div>
 
@@ -264,52 +264,52 @@ export default function StoreShow({
           {/* Seller info */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
             {/* Avatar */}
-            <div className="flex size-20 shrink-0 items-center justify-center rounded-full bg-neutral-08">
-              <User className="size-10 text-neutral-05" />
+            <div className="flex size-20 shrink-0 items-center justify-center rounded-full bg-surface-muted">
+              <User className="size-10 text-content-placeholder" />
             </div>
 
             <div className="space-y-3">
               {/* Name + badge */}
               <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-semibold text-neutral-01">
+                <h2 className="text-2xl font-semibold text-content">
                   {displayName}
                 </h2>
                 <BadgeCheck className="size-5 text-primary-600" />
               </div>
 
               {/* Stats row (placeholders) */}
-              <div className="flex items-center gap-4 text-sm text-neutral-04">
+              <div className="flex items-center gap-4 text-sm text-content-tertiary">
                 <span className="flex items-center gap-1">
                   <Star className="size-4 text-yellow-500" />
                   <span className="font-medium">4.8</span>
-                  <span className="text-neutral-05">(120 reviews)</span>
+                  <span className="text-content-placeholder">(120 reviews)</span>
                 </span>
-                <span className="text-neutral-06">|</span>
+                <span className="text-surface-emphasis">|</span>
                 <span>{auctionItems.length}+ listings</span>
               </div>
 
               {/* Join date */}
-              <p className="text-sm text-neutral-05">
+              <p className="text-sm text-content-placeholder">
                 Joined {formatJoinDate(seller.createdAt)}
               </p>
 
               {/* Contact info */}
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral-04">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-content-tertiary">
                 {(seller.storeProfile?.location || seller.location) && (
                   <span className="flex items-center gap-1.5">
-                    <MapPin className="size-4 text-neutral-05" />
+                    <MapPin className="size-4 text-content-placeholder" />
                     {seller.storeProfile?.location || seller.location}
                   </span>
                 )}
                 {(seller.storeProfile?.contactPhone || seller.phoneNumber) && (
                   <span className="flex items-center gap-1.5">
-                    <Phone className="size-4 text-neutral-05" />
+                    <Phone className="size-4 text-content-placeholder" />
                     {seller.storeProfile?.contactPhone || seller.phoneNumber}
                   </span>
                 )}
                 {(seller.storeProfile?.whatsappLink || seller.whatsappNumber) && (
                   <span className="flex items-center gap-1.5">
-                    <MessageCircle className="size-4 text-neutral-05" />
+                    <MessageCircle className="size-4 text-content-placeholder" />
                     {seller.storeProfile?.whatsappLink || seller.whatsappNumber}
                   </span>
                 )}
@@ -321,10 +321,10 @@ export default function StoreShow({
                   {categorySummary.map((cat) => (
                     <span
                       key={cat.id}
-                      className="rounded-lg border border-neutral-08 bg-neutral-09 px-3 py-1 text-xs text-neutral-03"
+                      className="rounded-lg border border-surface-muted bg-surface-secondary px-3 py-1 text-xs text-content-secondary"
                     >
                       {cat.name}{" "}
-                      <span className="text-neutral-05">({cat.count})</span>
+                      <span className="text-content-placeholder">({cat.count})</span>
                     </span>
                   ))}
                 </div>
@@ -335,7 +335,7 @@ export default function StoreShow({
           {/* Action buttons */}
           <div className="flex shrink-0 items-center gap-3">
             <button
-              className="flex items-center gap-2 rounded-full border border-neutral-06 px-5 py-2.5 text-sm font-medium text-neutral-03 transition-colors hover:bg-neutral-09"
+              className="flex items-center gap-2 rounded-full border border-strong px-5 py-2.5 text-sm font-medium text-content-secondary transition-colors hover:bg-surface-secondary"
               onClick={() => {
                 /* Follow placeholder */
               }}
@@ -345,7 +345,7 @@ export default function StoreShow({
             </button>
             <button
               onClick={handleShareStore}
-              className="flex items-center gap-2 rounded-full border border-neutral-06 px-5 py-2.5 text-sm font-medium text-neutral-03 transition-colors hover:bg-neutral-09"
+              className="flex items-center gap-2 rounded-full border border-strong px-5 py-2.5 text-sm font-medium text-content-secondary transition-colors hover:bg-surface-secondary"
             >
               <Share2 className="size-4" />
               Share
@@ -355,7 +355,7 @@ export default function StoreShow({
       </div>
 
       {/* Tabs + view toggle */}
-      <div className="mt-8 flex items-center justify-between border-b border-neutral-08 px-4 lg:px-10">
+      <div className="mt-8 flex items-center justify-between border-b border-surface-muted px-4 lg:px-10">
         <div className="flex">
           {tabs.map((tab) => (
             <button
@@ -364,7 +364,7 @@ export default function StoreShow({
               className={`relative px-5 py-3 text-sm font-medium transition-colors ${
                 activeTab === tab.key
                   ? "text-primary-600"
-                  : "text-neutral-04 hover:text-neutral-02"
+                  : "text-content-tertiary hover:text-content"
               }`}
             >
               {tab.label}
@@ -384,7 +384,7 @@ export default function StoreShow({
               className={`flex size-8 items-center justify-center rounded transition-colors ${
                 viewMode === "grid"
                   ? "text-primary-600"
-                  : "text-neutral-05 hover:text-neutral-03"
+                  : "text-content-placeholder hover:text-content-secondary"
               }`}
             >
               <LayoutGrid className="size-4" />
@@ -395,7 +395,7 @@ export default function StoreShow({
               className={`flex size-8 items-center justify-center rounded transition-colors ${
                 viewMode === "list"
                   ? "text-primary-600"
-                  : "text-neutral-05 hover:text-neutral-03"
+                  : "text-content-placeholder hover:text-content-secondary"
               }`}
             >
               <List className="size-4" />
@@ -409,9 +409,9 @@ export default function StoreShow({
         {activeTab === "reviews" ? (
           /* Reviews placeholder */
           <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
-            <Star className="mb-3 size-12 text-neutral-06" />
-            <p className="text-lg text-neutral-04">No reviews yet</p>
-            <p className="mt-1 text-sm text-neutral-05">
+            <Star className="mb-3 size-12 text-surface-emphasis" />
+            <p className="text-lg text-content-tertiary">No reviews yet</p>
+            <p className="mt-1 text-sm text-content-placeholder">
               Reviews will appear here once buyers leave feedback
             </p>
           </div>
@@ -420,7 +420,7 @@ export default function StoreShow({
             {/* Loading state for history initial load */}
             {activeTab === "history" && isLoadingHistory && !historyLoaded ? (
               <div className="flex items-center justify-center py-16">
-                <Loader2 className="size-6 animate-spin text-neutral-04" />
+                <Loader2 className="size-6 animate-spin text-content-tertiary" />
               </div>
             ) : currentItems.length > 0 ? (
               <>
@@ -450,7 +450,7 @@ export default function StoreShow({
                     <button
                       onClick={currentLoadMore}
                       disabled={currentIsLoading}
-                      className="flex items-center gap-2 rounded-full border border-neutral-06 px-8 py-3 text-sm font-medium text-neutral-03 transition-colors hover:bg-neutral-09 disabled:opacity-50"
+                      className="flex items-center gap-2 rounded-full border border-strong px-8 py-3 text-sm font-medium text-content-secondary transition-colors hover:bg-surface-secondary disabled:opacity-50"
                     >
                       {currentIsLoading ? (
                         <>
@@ -466,12 +466,12 @@ export default function StoreShow({
               </>
             ) : (
               <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
-                <p className="text-lg text-neutral-04">
+                <p className="text-lg text-content-tertiary">
                   {activeTab === "auctions"
                     ? "No active auctions"
                     : "No past auctions"}
                 </p>
-                <p className="mt-1 text-sm text-neutral-05">
+                <p className="mt-1 text-sm text-content-placeholder">
                   {activeTab === "auctions"
                     ? "This seller has no active listings right now"
                     : "This seller has no completed auctions yet"}

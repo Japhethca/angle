@@ -16,12 +16,12 @@ export default function Dashboard({ stats, recent_activity }: DashboardProps) {
   return (
     <>
       <Head title="Dashboard" />
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-surface-muted">
         <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <div className="px-4 py-6 sm:px-0">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="mt-2 text-sm text-gray-600">Welcome to your dashboard</p>
+              <h1 className="text-3xl font-bold text-content">Dashboard</h1>
+              <p className="mt-2 text-sm text-content-secondary">Welcome to your dashboard</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -59,7 +59,7 @@ export default function Dashboard({ stats, recent_activity }: DashboardProps) {
               </CardHeader>
               <CardContent>
                 {recent_activity.length === 0 ? (
-                  <p className="text-gray-600">No recent activity</p>
+                  <p className="text-content-secondary">No recent activity</p>
                 ) : (
                   <div className="space-y-2">
                     {recent_activity.map((_, index) => (
