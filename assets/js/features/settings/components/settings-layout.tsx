@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 
 const settingsMenuItems = [
   { label: "Account", href: "/settings/account", icon: User },
-  { label: "Store", href: "#", disabled: true, icon: Store },
+  { label: "Store", href: "/settings/store", icon: Store },
   { label: "Security", href: "#", disabled: true, icon: Shield },
   { label: "Payments", href: "#", disabled: true, icon: CreditCard },
   { label: "Notifications", href: "#", disabled: true, icon: Bell },
@@ -28,10 +28,11 @@ const settingsMenuItems = [
 
 interface SettingsLayoutProps {
   title: string;
+  breadcrumbSuffix?: string;
   children: React.ReactNode;
 }
 
-export function SettingsLayout({ title, children }: SettingsLayoutProps) {
+export function SettingsLayout({ title, breadcrumbSuffix, children }: SettingsLayoutProps) {
   const { url } = usePage();
 
   const handleLogout = () => {
@@ -95,7 +96,13 @@ export function SettingsLayout({ title, children }: SettingsLayoutProps) {
           <nav className="mb-6 flex items-center gap-1.5 text-xs text-neutral-04">
             <span>Settings</span>
             <ChevronRight className="size-3" />
-            <span className="text-neutral-02">{title}</span>
+            <span className={breadcrumbSuffix ? "" : "text-neutral-02"}>{title}</span>
+            {breadcrumbSuffix && (
+              <>
+                <ChevronRight className="size-3" />
+                <span className="text-neutral-02">{breadcrumbSuffix}</span>
+              </>
+            )}
           </nav>
 
           {children}
