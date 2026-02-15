@@ -31,7 +31,7 @@ export function CountdownTimer({ endTime, className }: CountdownTimerProps) {
 
   if (!remaining) {
     return (
-      <span className={cn("inline-flex items-center gap-1 text-xs text-neutral-04", className)}>
+      <span className={cn("inline-flex items-center gap-1 text-xs text-content-tertiary", className)}>
         <Clock className="size-3" />
         Ended
       </span>
@@ -39,7 +39,7 @@ export function CountdownTimer({ endTime, className }: CountdownTimerProps) {
   }
 
   return (
-    <span className={cn("inline-flex items-center gap-1 text-xs text-neutral-04", className)}>
+    <span className={cn("inline-flex items-center gap-1 text-xs text-content-tertiary", className)}>
       <Clock className="size-3" />
       {remaining.days}d {remaining.hours}h {remaining.minutes}m
     </span>
