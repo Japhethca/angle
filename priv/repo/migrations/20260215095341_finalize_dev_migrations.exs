@@ -1,4 +1,4 @@
-defmodule Angle.Repo.Migrations.MigrateResources1 do
+defmodule Angle.Repo.Migrations.FinalizeDevMigrations do
   @moduledoc """
   Updates resources based on their most recent snapshots.
 
@@ -8,6 +8,18 @@ defmodule Angle.Repo.Migrations.MigrateResources1 do
   use Ecto.Migration
 
   def up do
+    alter table(:users) do
+      add :username, :text
+      add :location, :text
+      add :whatsapp_number, :text
+
+      add :created_at, :utc_datetime_usec,
+        null: false,
+        default: fragment("(now() AT TIME ZONE 'utc')")
+    end
+
+    create unique_index(:users, [:username], name: "users_unique_username_index")
+
     create table(:store_profiles, primary_key: false) do
       add :id, :uuid, null: false, default: fragment("gen_random_uuid()"), primary_key: true
       add :store_name, :text, null: false
@@ -46,5 +58,14 @@ defmodule Angle.Repo.Migrations.MigrateResources1 do
     drop constraint(:store_profiles, "store_profiles_user_id_fkey")
 
     drop table(:store_profiles)
+
+    drop_if_exists unique_index(:users, [:username], name: "users_unique_username_index")
+
+    alter table(:users) do
+      remove :created_at
+      remove :whatsapp_number
+      remove :location
+      remove :username
+    end
   end
 end

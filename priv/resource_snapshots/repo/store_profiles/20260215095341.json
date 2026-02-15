@@ -21,19 +21,7 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "email",
-      "type": "citext"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "hashed_password",
+      "source": "store_name",
       "type": "text"
     },
     {
@@ -45,19 +33,7 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "confirmed_at",
-      "type": "utc_datetime_usec"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "full_name",
+      "source": "contact_phone",
       "type": "text"
     },
     {
@@ -69,19 +45,7 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "phone_number",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "username",
+      "source": "whatsapp_link",
       "type": "text"
     },
     {
@@ -105,7 +69,19 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "whatsapp_number",
+      "source": "address",
+      "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "\"you_arrange\"",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "delivery_preference",
       "type": "text"
     },
     {
@@ -117,8 +93,51 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "created_at",
+      "source": "inserted_at",
       "type": "utc_datetime_usec"
+    },
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "updated_at",
+      "type": "utc_datetime_usec"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "match_type": null,
+        "match_with": null,
+        "multitenancy": {
+          "attribute": null,
+          "global": null,
+          "strategy": null
+        },
+        "name": "store_profiles_user_id_fkey",
+        "on_delete": null,
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "users"
+      },
+      "scale": null,
+      "size": null,
+      "source": "user_id",
+      "type": "uuid"
     }
   ],
   "base_filter": null,
@@ -127,33 +146,19 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "9E99F85D3D0B45CE0309A135E3F0A769E1041856B0F6315BB4E49D8B1E7BE6F0",
+  "hash": "2ACD82CD628938868F42C0579182BE14F4C5ED4C8E761E7EC69C34B5EF94859F",
   "identities": [
     {
       "all_tenants?": false,
       "base_filter": null,
-      "index_name": "users_unique_email_index",
+      "index_name": "store_profiles_unique_user_index",
       "keys": [
         {
           "type": "atom",
-          "value": "email"
+          "value": "user_id"
         }
       ],
-      "name": "unique_email",
-      "nils_distinct?": true,
-      "where": null
-    },
-    {
-      "all_tenants?": false,
-      "base_filter": null,
-      "index_name": "users_unique_username_index",
-      "keys": [
-        {
-          "type": "atom",
-          "value": "username"
-        }
-      ],
-      "name": "unique_username",
+      "name": "unique_user",
       "nils_distinct?": true,
       "where": null
     }
@@ -165,5 +170,5 @@
   },
   "repo": "Elixir.Angle.Repo",
   "schema": null,
-  "table": "users"
+  "table": "store_profiles"
 }
