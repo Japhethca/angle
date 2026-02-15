@@ -64,10 +64,10 @@ export function LoginForm() {
   return (
     <div className="w-full max-w-md">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+        <h1 className="text-3xl font-bold tracking-tight text-content">
           Welcome Back
         </h1>
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-content-tertiary">
           Sign in to continue bidding on your favourite items.
         </p>
       </div>
@@ -86,7 +86,7 @@ export function LoginForm() {
             {...register("email")}
           />
           {errors.email && (
-            <p className="text-sm text-red-600">{errors.email.message}</p>
+            <p className="text-sm text-feedback-error">{errors.email.message}</p>
           )}
         </div>
 
@@ -110,7 +110,7 @@ export function LoginForm() {
             />
             <button
               type="button"
-              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-content-placeholder hover:text-content-secondary"
               onClick={() => setShowPassword(!showPassword)}
               tabIndex={-1}
               aria-label={showPassword ? "Hide password" : "Show password"}
@@ -123,7 +123,7 @@ export function LoginForm() {
             </button>
           </div>
           {errors.password && (
-            <p className="text-sm text-red-600">{errors.password.message}</p>
+            <p className="text-sm text-feedback-error">{errors.password.message}</p>
           )}
         </div>
 
@@ -135,7 +135,7 @@ export function LoginForm() {
           {isSubmitting ? "Signing in..." : "Sign In"}
         </Button>
 
-        <p className="text-center text-sm text-gray-600">
+        <p className="text-center text-sm text-content-secondary">
           Don't have an account?{" "}
           <Link
             href="/auth/register"
@@ -147,10 +147,10 @@ export function LoginForm() {
 
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-gray-200" />
+            <span className="w-full border-t border-subtle" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-gray-400">or</span>
+            <span className="bg-surface px-2 text-content-placeholder">or</span>
           </div>
         </div>
 

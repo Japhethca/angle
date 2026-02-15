@@ -77,7 +77,7 @@ function PasswordField({
         <button
           type="button"
           onClick={onToggle}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-content-placeholder hover:text-content-secondary"
           tabIndex={-1}
           aria-label={showPassword ? "Hide password" : "Show password"}
         >
@@ -88,7 +88,7 @@ function PasswordField({
           )}
         </button>
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-feedback-error">{error}</p>}
     </div>
   );
 }
@@ -138,21 +138,21 @@ export function RegisterForm() {
   return (
     <div className="w-full space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-content">Create Account</h1>
+        <p className="mt-1 text-sm text-content-tertiary">
           Join Angle to start bidding on exclusive items
         </p>
       </div>
 
       {/* Mode toggle */}
-      <div className="flex rounded-full border border-gray-200 p-1">
+      <div className="flex rounded-full border border-subtle p-1">
         <button
           type="button"
           onClick={() => handleModeSwitch("email")}
           className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
             mode === "email"
               ? "bg-orange-500 text-white"
-              : "text-gray-500 hover:text-gray-700"
+              : "text-content-tertiary hover:text-content-secondary"
           }`}
         >
           Email
@@ -163,7 +163,7 @@ export function RegisterForm() {
           className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
             mode === "phone"
               ? "bg-orange-500 text-white"
-              : "text-gray-500 hover:text-gray-700"
+              : "text-content-tertiary hover:text-content-secondary"
           }`}
         >
           Phone
@@ -186,7 +186,7 @@ export function RegisterForm() {
               {...emailForm.register("full_name")}
             />
             {emailForm.formState.errors.full_name && (
-              <p className="text-sm text-red-600">
+              <p className="text-sm text-feedback-error">
                 {emailForm.formState.errors.full_name.message}
               </p>
             )}
@@ -201,7 +201,7 @@ export function RegisterForm() {
               {...emailForm.register("email")}
             />
             {emailForm.formState.errors.email && (
-              <p className="text-sm text-red-600">
+              <p className="text-sm text-feedback-error">
                 {emailForm.formState.errors.email.message}
               </p>
             )}
@@ -240,7 +240,7 @@ export function RegisterForm() {
               {...phoneForm.register("full_name")}
             />
             {phoneForm.formState.errors.full_name && (
-              <p className="text-sm text-red-600">
+              <p className="text-sm text-feedback-error">
                 {phoneForm.formState.errors.full_name.message}
               </p>
             )}
@@ -249,7 +249,7 @@ export function RegisterForm() {
           <div className="space-y-2">
             <Label htmlFor="phone_number">Phone Number</Label>
             <div className="flex gap-2">
-              <div className="flex h-9 items-center rounded-md border border-input bg-gray-50 px-3 text-sm text-gray-500">
+              <div className="flex h-9 items-center rounded-md border border-input bg-surface-muted px-3 text-sm text-content-tertiary">
                 +234
               </div>
               <Input
@@ -261,7 +261,7 @@ export function RegisterForm() {
               />
             </div>
             {phoneForm.formState.errors.phone_number && (
-              <p className="text-sm text-red-600">
+              <p className="text-sm text-feedback-error">
                 {phoneForm.formState.errors.phone_number.message}
               </p>
             )}
@@ -284,7 +284,7 @@ export function RegisterForm() {
         </form>
       )}
 
-      <p className="text-center text-xs text-gray-500">
+      <p className="text-center text-xs text-content-tertiary">
         By signing up, you agree to our{" "}
         <Link href="/terms" className="text-orange-500 hover:underline">
           Terms of Service
@@ -295,7 +295,7 @@ export function RegisterForm() {
         </Link>
       </p>
 
-      <div className="text-center text-sm text-gray-600">
+      <div className="text-center text-sm text-content-secondary">
         Already have an account?{" "}
         <Link
           href="/auth/login"
@@ -308,10 +308,10 @@ export function RegisterForm() {
       {/* Divider */}
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-200" />
+          <div className="w-full border-t border-subtle" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="bg-white px-4 text-gray-400">or</span>
+          <span className="bg-surface px-4 text-content-placeholder">or</span>
         </div>
       </div>
 

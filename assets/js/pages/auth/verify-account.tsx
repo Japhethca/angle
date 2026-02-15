@@ -70,10 +70,10 @@ export default function VerifyAccount() {
 
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+          <h1 className="text-2xl font-bold tracking-tight text-content">
             Verify Account
           </h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-content-secondary">
             Check your email for the OTP code shared.
           </p>
         </div>
@@ -86,7 +86,7 @@ export default function VerifyAccount() {
 
         <form id="verify-form" onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-content-secondary">
               Secure code
             </label>
             <InputOTP
@@ -117,7 +117,7 @@ export default function VerifyAccount() {
           </Button>
         </form>
 
-        <div className="text-center text-sm text-gray-600">
+        <div className="text-center text-sm text-content-secondary">
           Didn't receive code?{" "}
           <button
             type="button"

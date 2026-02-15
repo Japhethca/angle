@@ -57,7 +57,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           />
           <button
             type="button"
-            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+            className="absolute inset-y-0 right-0 flex items-center pr-3 text-content-placeholder hover:text-content-secondary"
             onClick={() => setShowPassword(!showPassword)}
             tabIndex={-1}
             aria-label={showPassword ? "Hide password" : "Show password"}
@@ -70,7 +70,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           </button>
         </div>
         {errors.password && (
-          <p className="text-sm text-red-600">{errors.password.message}</p>
+          <p className="text-sm text-feedback-error">{errors.password.message}</p>
         )}
       </div>
 
@@ -86,7 +86,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           />
           <button
             type="button"
-            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+            className="absolute inset-y-0 right-0 flex items-center pr-3 text-content-placeholder hover:text-content-secondary"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             tabIndex={-1}
             aria-label={
@@ -101,7 +101,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           </button>
         </div>
         {errors.password_confirmation && (
-          <p className="text-sm text-red-600">
+          <p className="text-sm text-feedback-error">
             {errors.password_confirmation.message}
           </p>
         )}
