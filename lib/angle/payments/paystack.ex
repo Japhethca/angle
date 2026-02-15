@@ -1,5 +1,6 @@
 defmodule Angle.Payments.Paystack do
   @moduledoc "Paystack API client using Req for direct HTTP calls."
+  @behaviour Angle.Payments.PaystackBehaviour
 
   @base_url "https://api.paystack.co"
 

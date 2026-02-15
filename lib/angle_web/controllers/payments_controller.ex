@@ -1,9 +1,10 @@
 defmodule AngleWeb.PaymentsController do
   use AngleWeb, :controller
 
-  alias Angle.Payments.Paystack
   alias Angle.Payments.PaymentMethod
   alias Angle.Payments.PayoutMethod
+
+  @paystack Application.compile_env(:angle, :paystack_client, Angle.Payments.Paystack)
 
   # ₦50 in kobo — small charge to verify card ownership
   @card_verification_amount 5000
@@ -13,7 +14,7 @@ defmodule AngleWeb.PaymentsController do
   def initialize_card(conn, _params) do
     user = conn.assigns.current_user
 
-    case Paystack.initialize_transaction(to_string(user.email), @card_verification_amount) do
+    case @paystack.initialize_transaction(to_string(user.email), @card_verification_amount) do
       {:ok, data} ->
         json(conn, %{access_code: data.access_code, reference: data.reference})
 
@@ -24,10 +25,11 @@ defmodule AngleWeb.PaymentsController do
 
   # POST /api/payments/verify-card
   # Verifies a Paystack transaction and saves the card
-  def verify_card(conn, %{"reference" => reference}) do
+  def verify_card(conn, %{"reference" => reference})
+      when is_binary(reference) and byte_size(reference) > 0 do
     user = conn.assigns.current_user
 
-    with {:ok, transaction} <- Paystack.verify_transaction(reference),
+    with {:ok, transaction} <- @paystack.verify_transaction(reference),
          :ok <- validate_transaction(transaction),
          {:ok, _payment_method} <- create_payment_method(user, transaction) do
       json(conn, %{success: true})
@@ -41,6 +43,10 @@ defmodule AngleWeb.PaymentsController do
       {:error, _} ->
         conn |> put_status(422) |> json(%{error: "Failed to save payment method"})
     end
+  end
+
+  def verify_card(conn, _params) do
+    conn |> put_status(422) |> json(%{error: "Missing or invalid reference"})
   end
 
   # DELETE /api/payments/payment-methods/:id
@@ -58,30 +64,42 @@ defmodule AngleWeb.PaymentsController do
 
   # POST /api/payments/add-payout
   # Resolves bank account, creates transfer recipient, saves payout method
-  def add_payout(conn, %{"bank_code" => bank_code, "account_number" => account_number}) do
-    user = conn.assigns.current_user
+  def add_payout(conn, %{
+        "bank_code" => bank_code,
+        "bank_name" => bank_name,
+        "account_number" => account_number
+      })
+      when is_binary(bank_code) and is_binary(bank_name) and is_binary(account_number) do
+    if Regex.match?(~r/^\d{10}$/, account_number) do
+      user = conn.assigns.current_user
 
-    with {:ok, resolved} <- Paystack.resolve_account(account_number, bank_code),
-         {:ok, recipient} <-
-           Paystack.create_transfer_recipient(resolved.account_name, account_number, bank_code),
-         {:ok, bank_name} <- get_bank_name(bank_code),
-         {:ok, _payout} <-
-           create_payout_method(
-             user,
-             bank_name,
-             bank_code,
-             account_number,
-             resolved.account_name,
-             recipient.recipient_code
-           ) do
-      json(conn, %{success: true})
+      with {:ok, resolved} <- @paystack.resolve_account(account_number, bank_code),
+           {:ok, recipient} <-
+             @paystack.create_transfer_recipient(resolved.account_name, account_number, bank_code),
+           {:ok, _payout} <-
+             create_payout_method(
+               user,
+               bank_name,
+               bank_code,
+               account_number,
+               resolved.account_name,
+               recipient.recipient_code
+             ) do
+        json(conn, %{success: true})
+      else
+        {:error, reason} when is_binary(reason) ->
+          conn |> put_status(422) |> json(%{error: reason})
+
+        {:error, _} ->
+          conn |> put_status(422) |> json(%{error: "Failed to add payout method"})
+      end
     else
-      {:error, reason} when is_binary(reason) ->
-        conn |> put_status(422) |> json(%{error: reason})
-
-      {:error, _} ->
-        conn |> put_status(422) |> json(%{error: "Failed to add payout method"})
+      conn |> put_status(422) |> json(%{error: "Account number must be 10 digits"})
     end
+  end
+
+  def add_payout(conn, _params) do
+    conn |> put_status(422) |> json(%{error: "Missing bank_code or account_number"})
   end
 
   # DELETE /api/payments/payout-methods/:id
@@ -100,7 +118,7 @@ defmodule AngleWeb.PaymentsController do
   # GET /api/payments/banks
   # Lists banks from Paystack (could add caching later)
   def list_banks(conn, _params) do
-    case Paystack.list_banks() do
+    case @paystack.list_banks() do
       {:ok, banks} -> json(conn, %{banks: banks})
       {:error, _} -> conn |> put_status(500) |> json(%{error: "Failed to fetch banks"})
     end
@@ -158,19 +176,6 @@ defmodule AngleWeb.PaymentsController do
       actor: user
     )
     |> Ash.create()
-  end
-
-  defp get_bank_name(bank_code) do
-    case Paystack.list_banks() do
-      {:ok, banks} ->
-        case Enum.find(banks, fn b -> b.code == bank_code end) do
-          nil -> {:ok, "Unknown Bank"}
-          bank -> {:ok, bank.name}
-        end
-
-      {:error, _} ->
-        {:ok, "Unknown Bank"}
-    end
   end
 
   defp error_message(%Ash.Error.Invalid{errors: errors}) do

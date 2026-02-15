@@ -115,6 +115,7 @@ export function PayoutMethodsSection({ methods }: PayoutMethodsSectionProps) {
         },
         body: JSON.stringify({
           bank_code: selectedBankCode,
+          bank_name: banks.find((b) => b.code === selectedBankCode)?.name || "Unknown Bank",
           account_number: accountNumber,
         }),
       });
