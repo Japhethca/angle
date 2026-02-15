@@ -13,7 +13,7 @@ const menuItems = [
   { label: "Security", icon: Shield, href: "/settings/security" },
   { label: "Payments", icon: CreditCard, href: "/settings/payments" },
   { label: "Notifications", icon: Bell, disabled: true },
-  { label: "Preferences", icon: SlidersHorizontal, disabled: true },
+  { label: "Preferences", icon: SlidersHorizontal, href: "/settings/preferences" },
   { label: "Legal", icon: Scale, disabled: true },
   { label: "Support", icon: HelpCircle, disabled: true },
 ];

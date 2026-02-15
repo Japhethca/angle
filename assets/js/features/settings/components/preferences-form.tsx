@@ -19,7 +19,8 @@ export function PreferencesForm() {
     () => (typeof window !== "undefined" ? localStorage.getItem("language") : null) || "en"
   );
 
-  const isDirty = selectedTheme !== theme || language !== (localStorage.getItem("language") || "en");
+  const storedLanguage = typeof window !== "undefined" ? localStorage.getItem("language") || "en" : "en";
+  const isDirty = selectedTheme !== theme || language !== storedLanguage;
 
   const handleSave = () => {
     setTheme(selectedTheme);

@@ -1,5 +1,5 @@
 import { Head } from "@inertiajs/react";
-import { SettingsLayout } from "@/features/settings";
+import { SettingsLayout, PreferencesForm } from "@/features/settings";
 import type { SettingsUser } from "@/features/settings";
 
 interface SettingsPreferencesProps {
@@ -11,9 +11,7 @@ export default function SettingsPreferences({ user }: SettingsPreferencesProps) 
     <>
       <Head title="Preferences" />
       <SettingsLayout title="Preferences">
-        <div className="space-y-8">
-          <p>Preferences settings coming soon.</p>
-        </div>
+        <PreferencesForm />
       </SettingsLayout>
     </>
   );
