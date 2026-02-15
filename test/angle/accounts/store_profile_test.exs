@@ -65,4 +65,35 @@ defmodule Angle.Accounts.StoreProfileTest do
       assert profile.delivery_preference == "you_arrange"
     end
   end
+
+  describe "authorization" do
+    test "owner can upsert their own store profile" do
+      user = create_user()
+
+      profile =
+        Ash.create!(
+          Angle.Accounts.StoreProfile,
+          %{user_id: user.id, store_name: "My Store"},
+          action: :upsert,
+          actor: user
+        )
+
+      assert profile.store_name == "My Store"
+      assert profile.user_id == user.id
+    end
+
+    test "rejects upsert from a different user" do
+      user = create_user()
+      other_user = create_user()
+
+      assert_raise Ash.Error.Forbidden, fn ->
+        Ash.create!(
+          Angle.Accounts.StoreProfile,
+          %{user_id: user.id, store_name: "Hacked Store"},
+          action: :upsert,
+          actor: other_user
+        )
+      end
+    end
+  end
 end
