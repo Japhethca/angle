@@ -91,15 +91,15 @@ export function BidSection({
     <div className="space-y-4">
       {/* Bid count */}
       {bidCount > 0 && (
-        <p className="text-xs text-neutral-04">
+        <p className="text-xs text-content-tertiary">
           {bidCount} bid{bidCount !== 1 ? "s" : ""} so far
         </p>
       )}
 
       {/* Bid amount label */}
       <div className="flex items-center gap-1.5">
-        <span className="text-sm font-medium text-neutral-02">Bid Amount</span>
-        <Info className="size-3.5 text-neutral-04" />
+        <span className="text-sm font-medium text-content">Bid Amount</span>
+        <Info className="size-3.5 text-content-tertiary" />
       </div>
 
       {/* Bid input with +/- buttons */}
@@ -107,20 +107,20 @@ export function BidSection({
         <button
           onClick={handleDecrement}
           disabled={bidAmount - increment <= basePrice}
-          className="flex size-10 shrink-0 items-center justify-center rounded-full border border-neutral-06 transition-colors hover:bg-neutral-07 disabled:opacity-40"
+          className="flex size-10 shrink-0 items-center justify-center rounded-full border border-strong transition-colors hover:bg-surface-inset disabled:opacity-40"
         >
-          <Minus className="size-4 text-neutral-03" />
+          <Minus className="size-4 text-content-secondary" />
         </button>
 
-        <div className="flex-1 rounded-xl bg-neutral-08 px-4 py-3 text-center text-base font-semibold text-neutral-01">
+        <div className="flex-1 rounded-xl bg-surface-muted px-4 py-3 text-center text-base font-semibold text-content">
           {formatNaira(bidAmount)}
         </div>
 
         <button
           onClick={handleIncrement}
-          className="flex size-10 shrink-0 items-center justify-center rounded-full border border-neutral-06 transition-colors hover:bg-neutral-07"
+          className="flex size-10 shrink-0 items-center justify-center rounded-full border border-strong transition-colors hover:bg-surface-inset"
         >
-          <Plus className="size-4 text-neutral-03" />
+          <Plus className="size-4 text-content-secondary" />
         </button>
       </div>
 
@@ -130,7 +130,7 @@ export function BidSection({
           <button
             key={amount}
             onClick={() => handleQuickAdd(amount)}
-            className="rounded-full border border-neutral-06 px-3 py-1.5 text-xs font-medium text-neutral-03 transition-colors hover:bg-neutral-07"
+            className="rounded-full border border-strong px-3 py-1.5 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-inset"
           >
             +{formatNaira(amount)}
           </button>
@@ -148,11 +148,11 @@ export function BidSection({
 
       {/* Desktop: Watch & Share buttons */}
       <div className="hidden gap-3 lg:flex">
-        <button className="flex flex-1 items-center justify-center gap-2 rounded-full border border-neutral-06 py-2.5 text-sm font-medium text-neutral-02 transition-colors hover:bg-neutral-07">
+        <button className="flex flex-1 items-center justify-center gap-2 rounded-full border border-strong py-2.5 text-sm font-medium text-content transition-colors hover:bg-surface-inset">
           <Heart className="size-4" />
           Watch
         </button>
-        <button className="flex flex-1 items-center justify-center gap-2 rounded-full border border-neutral-06 py-2.5 text-sm font-medium text-neutral-02 transition-colors hover:bg-neutral-07">
+        <button className="flex flex-1 items-center justify-center gap-2 rounded-full border border-strong py-2.5 text-sm font-medium text-content transition-colors hover:bg-surface-inset">
           <Share2 className="size-4" />
           Share
         </button>

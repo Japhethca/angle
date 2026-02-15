@@ -84,8 +84,8 @@ export function BidForm({ item, userBid }: BidFormProps) {
           }>
             <form onSubmit={handleSubmit} className="space-y-4">
               {userBid && (
-                <div className="bg-blue-50 p-4 rounded-md">
-                  <p className="text-sm text-blue-800">
+                <div className="bg-feedback-info-muted p-4 rounded-md">
+                  <p className="text-sm text-feedback-info">
                     Your current bid: <span className="font-semibold">${userBid.amount}</span>
                     <br />
                     <span className="text-xs">Placed on {new Date(userBid.bid_time).toLocaleString()}</span>
@@ -94,7 +94,7 @@ export function BidForm({ item, userBid }: BidFormProps) {
               )}
 
               <div>
-                <label htmlFor="bidAmount" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="bidAmount" className="block text-sm font-medium text-content-secondary">
                   Your Bid ($)
                 </label>
                 <Input
@@ -108,7 +108,7 @@ export function BidForm({ item, userBid }: BidFormProps) {
                   required
                   className="mt-1"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-content-tertiary mt-1">
                   Minimum bid: ${(item.current_price + 0.01).toFixed(2)}
                 </p>
               </div>
@@ -132,8 +132,8 @@ export function BidForm({ item, userBid }: BidFormProps) {
 
         {/* Admin/Management Actions */}
         <PermissionGuard permission="manage_bids">
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <h4 className="text-sm font-medium text-gray-900 mb-3">Management Actions</h4>
+          <div className="mt-6 pt-4 border-t border-subtle">
+            <h4 className="text-sm font-medium text-content mb-3">Management Actions</h4>
             <div className="flex space-x-2">
               <Button variant="outline" size="sm">
                 View All Bids
