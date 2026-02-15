@@ -41,6 +41,12 @@ defmodule AngleWeb.SettingsController do
     |> render_inertia("settings/payments")
   end
 
+  def notifications(conn, _params) do
+    conn
+    |> assign_prop(:user, user_notifications_data(conn))
+    |> render_inertia("settings/notifications")
+  end
+
   def preferences(conn, _params) do
     conn
     |> assign_prop(:user, user_profile_data(conn))
@@ -84,6 +90,26 @@ defmodule AngleWeb.SettingsController do
       full_name: user.full_name,
       phone_number: user.phone_number,
       location: user.location
+    }
+  end
+
+  defp user_notifications_data(conn) do
+    user = conn.assigns.current_user
+    prefs = user.notification_preferences || %{}
+
+    %{
+      id: user.id,
+      notification_preferences: %{
+        push_bidding: Map.get(prefs, :push_bidding, true),
+        push_watchlist: Map.get(prefs, :push_watchlist, true),
+        push_payments: Map.get(prefs, :push_payments, true),
+        push_communication: Map.get(prefs, :push_communication, true),
+        email_communication: Map.get(prefs, :email_communication, true),
+        email_marketing: Map.get(prefs, :email_marketing, true),
+        email_security: Map.get(prefs, :email_security, true),
+        sms_communication: Map.get(prefs, :sms_communication, true),
+        sms_security: Map.get(prefs, :sms_security, true)
+      }
     }
   end
 
