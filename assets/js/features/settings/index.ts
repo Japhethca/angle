@@ -13,6 +13,7 @@ export { PaymentMethodsSection } from "./components/payment-methods-section";
 export { PayoutMethodsSection } from "./components/payout-methods-section";
 export { PreferencesForm } from "./components/preferences-form";
 export { NotificationSection } from "./components/notification-section";
+export { LegalContent } from "./components/legal-content";
 
 export interface SettingsUser {
   id: string;

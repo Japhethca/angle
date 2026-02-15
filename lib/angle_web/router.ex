@@ -71,6 +71,8 @@ defmodule AngleWeb.Router do
     get "/categories/:slug", CategoriesController, :show
     get "/categories/:slug/:sub_slug", CategoriesController, :show_subcategory
     get "/store/:identifier", StoreController, :show
+    get "/terms", PageController, :terms
+    get "/privacy", PageController, :privacy
     post "/rpc/run", AshTypescriptRpcController, :run
     post "/rpc/validate", AshTypescriptRpcController, :validate
   end
@@ -116,6 +118,7 @@ defmodule AngleWeb.Router do
     get "/settings/payments", SettingsController, :payments
     get "/settings/notifications", SettingsController, :notifications
     get "/settings/preferences", SettingsController, :preferences
+    get "/settings/legal", SettingsController, :legal
   end
 
   # Payments API endpoints (same-origin, session-authenticated with CSRF)
