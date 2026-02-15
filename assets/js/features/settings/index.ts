@@ -11,6 +11,7 @@ export { TwoFactorSection } from "./components/two-factor-section";
 export { AutoChargeSection } from "./components/auto-charge-section";
 export { PaymentMethodsSection } from "./components/payment-methods-section";
 export { PayoutMethodsSection } from "./components/payout-methods-section";
+export { PreferencesForm } from "./components/preferences-form";
 
 export interface SettingsUser {
   id: string;
