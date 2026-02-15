@@ -44,7 +44,7 @@ export function AuthLayout({
   }, [flash]);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-surface text-content">
       {/* Hero panel - hidden on mobile, visible on lg+ */}
       <div className="relative hidden lg:flex lg:w-1/2 lg:flex-col lg:justify-between">
         <img
