@@ -25,6 +25,14 @@ defmodule AngleWeb.PageController do
     |> render_inertia(:home)
   end
 
+  def terms(conn, _params) do
+    conn |> render_inertia(:terms)
+  end
+
+  def privacy(conn, _params) do
+    conn |> render_inertia(:privacy)
+  end
+
   defp run_item_query(conn, filter, sort, page) do
     params = %{filter: filter, sort: sort, page: page}
 
