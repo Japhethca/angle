@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Head } from "@inertiajs/react";
 import { Separator } from "@/components/ui/separator";
-import { SettingsLayout } from "@/features/settings";
-import { NotificationSection } from "@/features/settings/components/notification-section";
+import { SettingsLayout, NotificationSection } from "@/features/settings";
 import { useAshMutation } from "@/hooks/use-ash-query";
 import {
   updateNotificationPreferences,

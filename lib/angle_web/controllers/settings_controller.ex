@@ -95,21 +95,27 @@ defmodule AngleWeb.SettingsController do
 
   defp user_notifications_data(conn) do
     user = conn.assigns.current_user
-    prefs = user.notification_preferences || %{}
+
+    prefs =
+      case user.notification_preferences do
+        %Angle.Accounts.NotificationPreferences{} = p -> p
+        _ -> %Angle.Accounts.NotificationPreferences{}
+      end
 
     %{
       id: user.id,
-      notification_preferences: %{
-        push_bidding: Map.get(prefs, :push_bidding, true),
-        push_watchlist: Map.get(prefs, :push_watchlist, true),
-        push_payments: Map.get(prefs, :push_payments, true),
-        push_communication: Map.get(prefs, :push_communication, true),
-        email_communication: Map.get(prefs, :email_communication, true),
-        email_marketing: Map.get(prefs, :email_marketing, true),
-        email_security: Map.get(prefs, :email_security, true),
-        sms_communication: Map.get(prefs, :sms_communication, true),
-        sms_security: Map.get(prefs, :sms_security, true)
-      }
+      notification_preferences:
+        Map.take(prefs, [
+          :push_bidding,
+          :push_watchlist,
+          :push_payments,
+          :push_communication,
+          :email_communication,
+          :email_marketing,
+          :email_security,
+          :sms_communication,
+          :sms_security
+        ])
     }
   end
 
