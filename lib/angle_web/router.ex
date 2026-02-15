@@ -115,6 +115,18 @@ defmodule AngleWeb.Router do
     get "/settings/security", SettingsController, :security
   end
 
+  # Payments API endpoints (same-origin, session-authenticated with CSRF)
+  scope "/api/payments", AngleWeb do
+    pipe_through [:browser, :require_auth]
+
+    post "/initialize-card", PaymentsController, :initialize_card
+    post "/verify-card", PaymentsController, :verify_card
+    delete "/payment-methods/:id", PaymentsController, :delete_payment_method
+    post "/add-payout", PaymentsController, :add_payout
+    delete "/payout-methods/:id", PaymentsController, :delete_payout_method
+    get "/banks", PaymentsController, :list_banks
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", AngleWeb do
   #   pipe_through :api
