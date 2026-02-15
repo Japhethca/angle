@@ -1169,23 +1169,6 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
-// User Typed Queries
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "storeName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount"]>>;
-
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export const sellerProfileFields = ["id", "username", "fullName", "storeName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount"];
-
-
-
 // Item Typed Queries
 /**
  * Typed query for Item
@@ -1245,6 +1228,23 @@ export type ItemDetail = Array<InferResult<ItemResourceSchema, ["id", "title", "
  * @typedQuery true
  */
 export const itemDetailFields = ["id", "title", "description", "slug", "startingPrice", "currentPrice", "reservePrice", "bidIncrement", "buyNowPrice", "endTime", "startTime", "auctionStatus", "publicationStatus", "condition", "saleType", "auctionFormat", "viewCount", "location", "attributes", "lotNumber", "createdById", "bidCount", { category: ["id", "name", "slug"] }] satisfies ListItemsFields;
+
+
+
+// User Typed Queries
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "storeName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount"]>>;
+
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export const sellerProfileFields = ["id", "username", "fullName", "storeName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount"];
 
 
 
@@ -2061,6 +2061,84 @@ export async function validateListUsers(
   const payload = {
     action: "list_users",
     ...(config.tenant !== undefined && { tenant: config.tenant })
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type UpdateProfileInput = {
+  fullName?: string | null;
+  phoneNumber?: string | null;
+  location?: string | null;
+};
+
+export type UpdateProfileFields = UnifiedFieldSelection<UserResourceSchema>[];
+
+export type InferUpdateProfileResult<
+  Fields extends UpdateProfileFields | undefined,
+> = InferResult<UserResourceSchema, Fields>;
+
+export type UpdateProfileResult<Fields extends UpdateProfileFields | undefined = undefined> = | { success: true; data: InferUpdateProfileResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Update an existing User
+ *
+ * @ashActionType :update
+ */
+export async function updateProfile<Fields extends UpdateProfileFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  input?: UpdateProfileInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<UpdateProfileResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "update_profile",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<UpdateProfileResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Update an existing User
+ *
+ * @ashActionType :update
+ * @validation true
+ */
+export async function validateUpdateProfile(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  input?: UpdateProfileInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "update_profile",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input
   };
 
   return executeValidationRpcRequest<ValidationResult>(
