@@ -6,6 +6,7 @@ import { createInertiaApp } from "@inertiajs/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Layout from "./layouts/layout";
 import { AuthProvider } from "./features/auth";
+import { ThemeProvider } from "./hooks/use-theme";
 
 axios.defaults.xsrfHeaderName = "x-csrf-token";
 
@@ -36,7 +37,9 @@ export function render(page: any) {
       });
       return (
         <QueryClientProvider client={queryClient}>
-          <App {...props} />
+          <ThemeProvider>
+            <App {...props} />
+          </ThemeProvider>
         </QueryClientProvider>
       );
     },
