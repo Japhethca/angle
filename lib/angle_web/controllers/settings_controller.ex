@@ -41,6 +41,12 @@ defmodule AngleWeb.SettingsController do
     |> render_inertia("settings/payments")
   end
 
+  def preferences(conn, _params) do
+    conn
+    |> assign_prop(:user, user_profile_data(conn))
+    |> render_inertia("settings/preferences")
+  end
+
   def store(conn, _params) do
     user = conn.assigns.current_user
 

@@ -114,6 +114,7 @@ defmodule AngleWeb.Router do
     get "/settings/store", SettingsController, :store
     get "/settings/security", SettingsController, :security
     get "/settings/payments", SettingsController, :payments
+    get "/settings/preferences", SettingsController, :preferences
   end
 
   # Payments API endpoints (same-origin, session-authenticated with CSRF)

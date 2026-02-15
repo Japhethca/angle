@@ -96,6 +96,25 @@ defmodule AngleWeb.SettingsControllerTest do
     end
   end
 
+  describe "GET /settings/preferences" do
+    test "renders settings/preferences page for authenticated user", %{conn: conn} do
+      user = create_user(%{email: "prefs@example.com"})
+
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/settings/preferences")
+
+      response = html_response(conn, 200)
+      assert response =~ "settings/preferences"
+    end
+
+    test "redirects to login when not authenticated", %{conn: conn} do
+      conn = get(conn, ~p"/settings/preferences")
+      assert redirected_to(conn) == ~p"/auth/login"
+    end
+  end
+
   describe "GET /settings/security" do
     test "renders settings/security page for authenticated user", %{conn: conn} do
       user = create_user(%{email: "security@example.com"})
