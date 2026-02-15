@@ -11,6 +11,7 @@ defmodule Angle.Accounts do
     resource Angle.Accounts.User do
       rpc_action :list_users, :read
       rpc_action :update_profile, :update_profile
+      rpc_action :update_auto_charge, :update_auto_charge
       rpc_action :change_password, :change_password
 
       typed_query :seller_profile, :read_public_profile do

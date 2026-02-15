@@ -379,6 +379,11 @@ defmodule Angle.Accounts.User do
       accept [:full_name, :phone_number, :location]
     end
 
+    update :update_auto_charge do
+      description "Update the user's auto-charge preference"
+      accept [:auto_charge]
+    end
+
     read :read_public_profile do
       description "Public read action for seller/store profiles"
 
@@ -467,6 +472,7 @@ defmodule Angle.Accounts.User do
     attribute :username, :string, public?: true
     attribute :location, :string, public?: true
     attribute :whatsapp_number, :string, public?: true
+    attribute :auto_charge, :boolean, default: false, public?: true
 
     create_timestamp :created_at do
       allow_nil? false
