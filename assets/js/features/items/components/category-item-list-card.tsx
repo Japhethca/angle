@@ -15,11 +15,11 @@ export function CategoryItemListCard({ item }: CategoryItemListCardProps) {
   const { guard } = useAuthGuard();
 
   return (
-    <div className="flex gap-3 border-b border-neutral-08 pb-4">
+    <div className="flex gap-3 border-b border-subtle pb-4">
       {/* Thumbnail */}
       <Link href={itemUrl} className="shrink-0">
-        <div className="relative size-[100px] overflow-hidden rounded-lg bg-neutral-08">
-          <div className="flex h-full items-center justify-center text-neutral-05">
+        <div className="relative size-[100px] overflow-hidden rounded-lg bg-surface-muted">
+          <div className="flex h-full items-center justify-center text-content-placeholder">
             <Gavel className="size-8" />
           </div>
         </div>
@@ -29,9 +29,9 @@ export function CategoryItemListCard({ item }: CategoryItemListCardProps) {
       <div className="flex min-w-0 flex-1 flex-col justify-between">
         <div>
           <Link href={itemUrl}>
-            <h3 className="line-clamp-1 text-base text-neutral-04">{item.title}</h3>
+            <h3 className="line-clamp-1 text-base text-content-tertiary">{item.title}</h3>
           </Link>
-          <p className="mt-0.5 text-base font-bold text-neutral-01">
+          <p className="mt-0.5 text-base font-bold text-content">
             {formatNaira(price)}
           </p>
         </div>
@@ -45,8 +45,8 @@ export function CategoryItemListCard({ item }: CategoryItemListCardProps) {
           )}
           {item.bidCount > 0 && (
             <>
-              <span className="text-neutral-05">&middot;</span>
-              <span className="text-neutral-04">{item.bidCount} bids</span>
+              <span className="text-content-placeholder">&middot;</span>
+              <span className="text-content-tertiary">{item.bidCount} bids</span>
             </>
           )}
         </div>
@@ -55,7 +55,7 @@ export function CategoryItemListCard({ item }: CategoryItemListCardProps) {
       {/* Actions */}
       <div className="flex shrink-0 flex-col items-end justify-between">
         <button
-          className="flex size-8 items-center justify-center rounded-full border border-neutral-07 text-neutral-04 transition-colors hover:bg-neutral-08"
+          className="flex size-8 items-center justify-center rounded-full border border-subtle text-content-tertiary transition-colors hover:bg-surface-muted"
           onClick={() => guard(itemUrl)}
         >
           <Heart className="size-3.5" />

@@ -22,13 +22,13 @@ export function ItemImageGallery({ title }: ItemImageGalleryProps) {
               key={i}
               onClick={() => setActiveIndex(i)}
               className={cn(
-                "relative flex aspect-square items-center justify-center rounded-lg bg-neutral-08 transition-all",
+                "relative flex aspect-square items-center justify-center rounded-lg bg-surface-muted transition-all",
                 activeIndex === i
                   ? "ring-2 ring-primary-600"
                   : "opacity-70 hover:opacity-100"
               )}
             >
-              <Gavel className="size-5 text-neutral-05" />
+              <Gavel className="size-5 text-content-placeholder" />
               {/* Video placeholder on last thumbnail */}
               {i === THUMBNAIL_COUNT - 1 && (
                 <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/30">
@@ -40,17 +40,17 @@ export function ItemImageGallery({ title }: ItemImageGalleryProps) {
         </div>
 
         {/* Main image */}
-        <div className="flex flex-1 items-center justify-center rounded-2xl bg-neutral-08">
+        <div className="flex flex-1 items-center justify-center rounded-2xl bg-surface-muted">
           <div className="flex aspect-square w-full items-center justify-center">
-            <Gavel className="size-24 text-neutral-05" />
+            <Gavel className="size-24 text-content-placeholder" />
           </div>
         </div>
       </div>
 
       {/* Mobile: single image */}
       <div className="lg:hidden">
-        <div className="flex aspect-[4/3] items-center justify-center rounded-2xl bg-neutral-08">
-          <Gavel className="size-16 text-neutral-05" />
+        <div className="flex aspect-[4/3] items-center justify-center rounded-2xl bg-surface-muted">
+          <Gavel className="size-16 text-content-placeholder" />
         </div>
       </div>
     </>

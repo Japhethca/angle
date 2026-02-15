@@ -44,39 +44,39 @@ export default function Show({
       <div className="flex items-center justify-between px-4 py-3 lg:hidden">
         <button
           onClick={() => window.history.back()}
-          className="flex size-9 items-center justify-center rounded-full border border-neutral-06"
+          className="flex size-9 items-center justify-center rounded-full border border-strong"
         >
-          <ArrowLeft className="size-4 text-neutral-02" />
+          <ArrowLeft className="size-4 text-content" />
         </button>
-        <span className="text-sm font-medium text-neutral-02">
+        <span className="text-sm font-medium text-content">
           {item.category?.name || "Item"}
         </span>
         <div className="flex gap-2">
-          <button className="flex size-9 items-center justify-center rounded-full border border-neutral-06">
-            <Share2 className="size-4 text-neutral-02" />
+          <button className="flex size-9 items-center justify-center rounded-full border border-strong">
+            <Share2 className="size-4 text-content" />
           </button>
-          <button className="flex size-9 items-center justify-center rounded-full border border-neutral-06">
-            <Heart className="size-4 text-neutral-02" />
+          <button className="flex size-9 items-center justify-center rounded-full border border-strong">
+            <Heart className="size-4 text-content" />
           </button>
         </div>
       </div>
 
       {/* Desktop breadcrumb */}
       <div className="hidden px-10 pt-6 lg:block">
-        <nav className="flex items-center gap-1.5 text-xs text-neutral-04">
-          <Link href="/" className="hover:text-neutral-02">
+        <nav className="flex items-center gap-1.5 text-xs text-content-tertiary">
+          <Link href="/" className="hover:text-content">
             Home
           </Link>
           <ChevronRight className="size-3" />
           {item.category && (
             <>
-              <span className="hover:text-neutral-02">
+              <span className="hover:text-content">
                 {item.category.name}
               </span>
               <ChevronRight className="size-3" />
             </>
           )}
-          <span className="text-neutral-02">{item.title}</span>
+          <span className="text-content">{item.title}</span>
         </nav>
       </div>
 
@@ -98,10 +98,10 @@ export default function Show({
               {/* Item header info */}
               <div className="space-y-3">
                 <ConditionBadge condition={item.condition} />
-                <h1 className="font-heading text-xl font-semibold text-neutral-01">
+                <h1 className="font-heading text-xl font-semibold text-content">
                   {item.title}
                 </h1>
-                <div className="flex items-center gap-3 text-xs text-neutral-04">
+                <div className="flex items-center gap-3 text-xs text-content-tertiary">
                   {item.endTime && (
                     <CountdownTimer endTime={item.endTime} />
                   )}
@@ -116,8 +116,8 @@ export default function Show({
 
               {/* Current price */}
               <div>
-                <p className="text-xs text-neutral-04">Current Price</p>
-                <p className="text-2xl font-bold text-neutral-01">
+                <p className="text-xs text-content-tertiary">Current Price</p>
+                <p className="text-2xl font-bold text-content">
                   {formatNaira(price)}
                 </p>
               </div>
@@ -141,10 +141,10 @@ export default function Show({
           {/* Item header */}
           <div className="space-y-2">
             <ConditionBadge condition={item.condition} />
-            <h1 className="font-heading text-lg font-semibold text-neutral-01">
+            <h1 className="font-heading text-lg font-semibold text-content">
               {item.title}
             </h1>
-            <div className="flex items-center gap-3 text-xs text-neutral-04">
+            <div className="flex items-center gap-3 text-xs text-content-tertiary">
               {item.endTime && <CountdownTimer endTime={item.endTime} />}
               {item.viewCount != null && item.viewCount > 0 && (
                 <span className="inline-flex items-center gap-1">
@@ -157,8 +157,8 @@ export default function Show({
 
           {/* Current price */}
           <div>
-            <p className="text-xs text-neutral-04">Current Price</p>
-            <p className="text-xl font-bold text-neutral-01">
+            <p className="text-xs text-content-tertiary">Current Price</p>
+            <p className="text-xl font-bold text-content">
               {formatNaira(price)}
             </p>
           </div>
