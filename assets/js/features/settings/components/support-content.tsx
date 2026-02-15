@@ -60,10 +60,12 @@ export function SupportContent() {
               <Phone className="size-5 text-content-tertiary" />
               <div>
                 <p className="text-sm font-medium text-content">Phone</p>
-                <p className="text-sm text-content-secondary">+23481796988</p>
-                <p className="text-sm text-content-secondary">
+                <a href="tel:+23481796988" className="block text-sm text-primary-600">
+                  +23481796988
+                </a>
+                <a href="tel:+2348177417875" className="block text-sm text-primary-600">
                   +2348177417875
-                </p>
+                </a>
               </div>
             </div>
 
@@ -83,8 +85,6 @@ export function SupportContent() {
       {/* Section 3: Report An Issue */}
       <a
         href="#"
-        target="_blank"
-        rel="noopener noreferrer"
         className="inline-flex items-center gap-1 text-sm font-medium text-primary-600"
       >
         Report An Issue

@@ -60,35 +60,19 @@ export default function SettingsIndex({ user }: SettingsIndexProps) {
 
         {/* Menu items */}
         <div className="space-y-1">
-          {menuItems.map((item) => {
-            if ('href' in item && item.href) {
-              return (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="flex items-center justify-between rounded-lg px-3 py-3 text-content"
-                >
-                  <div className="flex items-center gap-3">
-                    <item.icon className="size-5" />
-                    <span className="text-sm font-medium">{item.label}</span>
-                  </div>
-                  <ChevronRight className="size-4 text-content-tertiary" />
-                </Link>
-              );
-            }
-            return (
-              <div
-                key={item.label}
-                className="flex cursor-not-allowed items-center justify-between rounded-lg px-3 py-3 text-content-tertiary"
-              >
-                <div className="flex items-center gap-3">
-                  <item.icon className="size-5" />
-                  <span className="text-sm font-medium">{item.label}</span>
-                </div>
-                <ChevronRight className="size-4" />
+          {menuItems.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="flex items-center justify-between rounded-lg px-3 py-3 text-content"
+            >
+              <div className="flex items-center gap-3">
+                <item.icon className="size-5" />
+                <span className="text-sm font-medium">{item.label}</span>
               </div>
-            );
-          })}
+              <ChevronRight className="size-4 text-content-tertiary" />
+            </Link>
+          ))}
         </div>
 
         {/* Log Out */}
