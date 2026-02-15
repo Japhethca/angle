@@ -39,5 +39,6 @@ defmodule Angle.Accounts do
     resource Angle.Accounts.Permission
     resource Angle.Accounts.RolePermission
     resource Angle.Accounts.Otp
+    resource Angle.Accounts.StoreProfile
   end
 end
