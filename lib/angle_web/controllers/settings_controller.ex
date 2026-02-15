@@ -15,6 +15,12 @@ defmodule AngleWeb.SettingsController do
     |> render_inertia("settings/account")
   end
 
+  def security(conn, _params) do
+    conn
+    |> assign_prop(:user, user_profile_data(conn))
+    |> render_inertia("settings/security")
+  end
+
   def store(conn, _params) do
     user = conn.assigns.current_user
 

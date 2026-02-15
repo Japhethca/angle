@@ -93,18 +93,6 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "store_name",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
       "source": "location",
       "type": "text"
     },
@@ -139,7 +127,7 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "4CFA4E6F81E8063DA8F4690605A588B1FECE12365FDC8B5A38A3D524660DDD2D",
+  "hash": "3CB5B74B1A273A3272DC59FC9E0568D5E955067FAB78BA026508406792CB8179",
   "identities": [
     {
       "all_tenants?": false,

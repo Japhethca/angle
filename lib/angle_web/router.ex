@@ -112,6 +112,7 @@ defmodule AngleWeb.Router do
     get "/settings", SettingsController, :index
     get "/settings/account", SettingsController, :account
     get "/settings/store", SettingsController, :store
+    get "/settings/security", SettingsController, :security
   end
 
   # Other scopes may use custom stacks.

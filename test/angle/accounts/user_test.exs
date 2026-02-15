@@ -73,4 +73,64 @@ defmodule Angle.Accounts.UserTest do
       end
     end
   end
+
+  describe "change_password" do
+    test "changes password with correct current password" do
+      user = create_user(%{password: "oldpassword123", password_confirmation: "oldpassword123"})
+
+      updated =
+        user
+        |> Ash.Changeset.for_update(:change_password, %{
+          current_password: "oldpassword123",
+          password: "newpassword456",
+          password_confirmation: "newpassword456"
+        })
+        |> Ash.update!(actor: user)
+
+      assert updated.id == user.id
+    end
+
+    test "rejects change with wrong current password" do
+      user = create_user(%{password: "oldpassword123", password_confirmation: "oldpassword123"})
+
+      assert_raise Ash.Error.Forbidden, fn ->
+        user
+        |> Ash.Changeset.for_update(:change_password, %{
+          current_password: "wrongpassword",
+          password: "newpassword456",
+          password_confirmation: "newpassword456"
+        })
+        |> Ash.update!(actor: user)
+      end
+    end
+
+    test "rejects change when password confirmation does not match" do
+      user = create_user(%{password: "oldpassword123", password_confirmation: "oldpassword123"})
+
+      assert_raise Ash.Error.Invalid, fn ->
+        user
+        |> Ash.Changeset.for_update(:change_password, %{
+          current_password: "oldpassword123",
+          password: "newpassword456",
+          password_confirmation: "differentpassword"
+        })
+        |> Ash.update!(actor: user)
+      end
+    end
+
+    test "rejects change from a different user" do
+      user = create_user(%{password: "oldpassword123", password_confirmation: "oldpassword123"})
+      other_user = create_user()
+
+      assert_raise Ash.Error.Forbidden, fn ->
+        user
+        |> Ash.Changeset.for_update(:change_password, %{
+          current_password: "oldpassword123",
+          password: "newpassword456",
+          password_confirmation: "newpassword456"
+        })
+        |> Ash.update!(actor: other_user)
+      end
+    end
+  end
 end
