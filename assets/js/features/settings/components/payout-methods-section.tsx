@@ -107,7 +107,7 @@ export function PayoutMethodsSection({ methods }: PayoutMethodsSectionProps) {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch("/api/payments/payout-methods", {
+      const res = await fetch("/api/payments/add-payout", {
         method: "POST",
         headers: {
           "content-type": "application/json",

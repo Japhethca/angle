@@ -48,7 +48,7 @@ defmodule AngleWeb.PaymentsController do
     user = conn.assigns.current_user
 
     with {:ok, method} <- Ash.get(PaymentMethod, id, actor: user),
-         {:ok, _} <- Ash.destroy(method, actor: user) do
+         :ok <- Ash.destroy(method, actor: user) do
       json(conn, %{success: true})
     else
       {:error, _} ->
@@ -89,7 +89,7 @@ defmodule AngleWeb.PaymentsController do
     user = conn.assigns.current_user
 
     with {:ok, method} <- Ash.get(PayoutMethod, id, actor: user),
-         {:ok, _} <- Ash.destroy(method, actor: user) do
+         :ok <- Ash.destroy(method, actor: user) do
       json(conn, %{success: true})
     else
       {:error, _} ->

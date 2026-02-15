@@ -50,7 +50,9 @@ defmodule Angle.Payments.PayoutMethod do
       filter expr(user_id == ^actor(:id))
     end
 
-    destroy :destroy
+    destroy :destroy do
+      primary? true
+    end
   end
 
   policies do
