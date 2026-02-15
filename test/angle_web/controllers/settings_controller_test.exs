@@ -50,4 +50,49 @@ defmodule AngleWeb.SettingsControllerTest do
       assert redirected_to(conn) == ~p"/auth/login"
     end
   end
+
+  describe "GET /settings/store" do
+    test "renders settings/store page with store profile data", %{conn: conn} do
+      user = create_user(%{email: "store@example.com"})
+
+      _store_profile =
+        create_store_profile(%{
+          user_id: user.id,
+          store_name: "Test Store",
+          contact_phone: "08012345678",
+          whatsapp_link: "wa.me/2348012345678",
+          location: "Lagos",
+          address: "9A, Bade drive, Lagos",
+          delivery_preference: "seller_delivers"
+        })
+
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/settings/store")
+
+      response = html_response(conn, 200)
+      assert response =~ "settings/store"
+      assert response =~ "Test Store"
+      assert response =~ "08012345678"
+      assert response =~ "Lagos"
+    end
+
+    test "renders settings/store page when user has no store profile", %{conn: conn} do
+      user = create_user(%{email: "nostore@example.com"})
+
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/settings/store")
+
+      response = html_response(conn, 200)
+      assert response =~ "settings/store"
+    end
+
+    test "redirects to login when not authenticated", %{conn: conn} do
+      conn = get(conn, ~p"/settings/store")
+      assert redirected_to(conn) == ~p"/auth/login"
+    end
+  end
 end
