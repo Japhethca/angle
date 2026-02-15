@@ -37,11 +37,11 @@ export function AutoChargeSection({ userId, autoCharge }: AutoChargeSectionProps
   return (
     <div>
       <Separator className="mb-5" />
-      <h2 className="mb-4 text-base font-semibold text-neutral-01">Post-win</h2>
-      <div className="flex items-center justify-between rounded-xl border border-neutral-07 p-4">
+      <h2 className="mb-4 text-base font-semibold text-content">Post-win</h2>
+      <div className="flex items-center justify-between rounded-xl border border-subtle p-4">
         <div>
-          <p className="text-sm font-medium text-neutral-01">Auto-charge</p>
-          <p className="text-xs text-neutral-04">
+          <p className="text-sm font-medium text-content">Auto-charge</p>
+          <p className="text-xs text-content-tertiary">
             Your saved payment method would automatically be charged when you win a bid
           </p>
         </div>

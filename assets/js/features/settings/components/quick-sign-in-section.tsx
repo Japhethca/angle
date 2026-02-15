@@ -30,7 +30,7 @@ export function QuickSignInSection() {
               <p className="text-sm font-medium text-content">Google</p>
               <p className="text-xs text-content-tertiary">
                 user@example.com{" "}
-                <span className="text-green-600">&middot; connected</span>
+                <span className="text-feedback-success">&middot; connected</span>
               </p>
             </div>
           </div>

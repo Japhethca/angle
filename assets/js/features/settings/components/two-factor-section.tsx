@@ -19,7 +19,7 @@ export function TwoFactorSection() {
             <p className="text-sm font-medium text-content">Phone Number</p>
             <p className="text-xs text-content-tertiary">
               08142963054{" "}
-              <span className="text-green-600">· connected</span>
+              <span className="text-feedback-success">· connected</span>
             </p>
           </div>
         </div>
