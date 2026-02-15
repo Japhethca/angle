@@ -4,5 +4,6 @@ defmodule Angle.Payments do
 
   resources do
     resource Angle.Payments.PaymentMethod
+    resource Angle.Payments.PayoutMethod
   end
 end
