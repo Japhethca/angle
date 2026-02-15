@@ -384,6 +384,11 @@ defmodule Angle.Accounts.User do
       accept [:auto_charge]
     end
 
+    update :update_notification_preferences do
+      description "Update the user's notification preferences"
+      accept [:notification_preferences]
+    end
+
     read :read_public_profile do
       description "Public read action for seller/store profiles"
 
@@ -473,6 +478,10 @@ defmodule Angle.Accounts.User do
     attribute :location, :string, public?: true
     attribute :whatsapp_number, :string, public?: true
     attribute :auto_charge, :boolean, default: false, public?: true
+
+    attribute :notification_preferences, Angle.Accounts.NotificationPreferences,
+      default: %{},
+      public?: true
 
     create_timestamp :created_at do
       allow_nil? false
