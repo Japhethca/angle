@@ -72,6 +72,11 @@ if config_env() == :prod do
       System.get_env("TOKEN_SIGNING_SECRET") ||
         raise("Missing environment variable `TOKEN_SIGNING_SECRET`!")
 
+  config :angle,
+    paystack_secret_key:
+      System.get_env("PAYSTACK_SECRET_KEY") ||
+        raise("Missing environment variable `PAYSTACK_SECRET_KEY`!")
+
   # ## SSL Support
   #
   # To get SSL working, you will need to add the `https` key

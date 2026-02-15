@@ -85,3 +85,6 @@ config :phoenix_live_view,
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+# Paystack API key for development (placeholder)
+config :angle, :paystack_secret_key, "sk_test_xxx"
