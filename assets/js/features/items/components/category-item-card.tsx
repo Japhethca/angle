@@ -39,7 +39,7 @@ export function CategoryItemCard({ item }: CategoryItemCardProps) {
 
           {/* Almost gone badge */}
           {item.endTime && isEndingSoon(item.endTime) && (
-            <div className="absolute bottom-4 left-0 flex items-center gap-1.5 rounded-r-lg bg-[#C1170B] px-3 py-1.5 text-xs font-medium text-white">
+            <div className="absolute bottom-4 left-0 flex items-center gap-1.5 rounded-r-lg bg-feedback-error px-3 py-1.5 text-xs font-medium text-white">
               <Clock className="size-3" />
               Almost gone
             </div>
@@ -60,7 +60,7 @@ export function CategoryItemCard({ item }: CategoryItemCardProps) {
 
         <div className="flex items-center gap-2 text-xs">
           {item.endTime && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#F7F2F5] px-2.5 py-1 font-medium text-feedback-error">
+            <span className="inline-flex items-center gap-1 rounded-full bg-feedback-error-muted px-2.5 py-1 font-medium text-feedback-error">
               <Clock className="size-3" />
               <CountdownTimer endTime={item.endTime} className="text-feedback-error" />
             </span>

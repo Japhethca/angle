@@ -69,7 +69,7 @@ export function ItemCard({ item, badge }: ItemCardProps) {
 
         <div className="flex items-center gap-2 text-xs">
           {item.endTime && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#f7f2f5] px-2.5 py-1 font-medium text-feedback-error">
+            <span className="inline-flex items-center gap-1 rounded-full bg-feedback-error-muted px-2.5 py-1 font-medium text-feedback-error">
               <Clock className="size-3" />
               <CountdownTimer endTime={item.endTime} className="text-feedback-error" />
             </span>

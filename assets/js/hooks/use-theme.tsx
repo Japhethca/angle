@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useLayoutEffect, useState } from "react";
+import { createContext, useContext, useLayoutEffect, useState } from "react";
 
 type Theme = "light" | "dark";
 
@@ -14,15 +14,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>("light");
 
   // Correct theme from localStorage after hydration, before browser paints.
-  // Using useLayoutEffect ensures no visible flash of wrong selection state.
   useLayoutEffect(() => {
-    const stored = (localStorage.getItem("theme") as Theme) || "light";
-    if (stored !== theme) {
-      setTheme(stored);
+    const stored = localStorage.getItem("theme");
+    const validTheme: Theme = stored === "dark" ? "dark" : "light";
+    if (validTheme !== "light") {
+      setTheme(validTheme);
     }
   }, []);
 
-  useEffect(() => {
+  // Sync DOM class and localStorage whenever theme changes.
+  // useLayoutEffect prevents a single-frame flash when correcting from SSR default.
+  useLayoutEffect(() => {
     const root = document.documentElement;
     root.classList.remove("light", "dark");
     root.classList.add(theme);
