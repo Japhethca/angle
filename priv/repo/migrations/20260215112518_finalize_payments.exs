@@ -1,4 +1,4 @@
-defmodule Angle.Repo.Migrations.AddPaymentMethods do
+defmodule Angle.Repo.Migrations.FinalizePayments do
   @moduledoc """
   Updates resources based on their most recent snapshots.
 
@@ -8,6 +8,37 @@ defmodule Angle.Repo.Migrations.AddPaymentMethods do
   use Ecto.Migration
 
   def up do
+    alter table(:users) do
+      add :auto_charge, :boolean, default: false
+    end
+
+    create table(:payout_methods, primary_key: false) do
+      add :id, :uuid, null: false, default: fragment("gen_random_uuid()"), primary_key: true
+      add :bank_name, :text, null: false
+      add :bank_code, :text, null: false
+      add :account_number, :text, null: false
+      add :account_name, :text, null: false
+      add :recipient_code, :text, null: false
+      add :is_default, :boolean, default: false
+
+      add :inserted_at, :utc_datetime_usec,
+        null: false,
+        default: fragment("(now() AT TIME ZONE 'utc')")
+
+      add :updated_at, :utc_datetime_usec,
+        null: false,
+        default: fragment("(now() AT TIME ZONE 'utc')")
+
+      add :user_id,
+          references(:users,
+            column: :id,
+            name: "payout_methods_user_id_fkey",
+            type: :uuid,
+            prefix: "public"
+          ),
+          null: false
+    end
+
     create table(:payment_methods, primary_key: false) do
       add :id, :uuid, null: false, default: fragment("gen_random_uuid()"), primary_key: true
       add :card_type, :text, null: false
@@ -50,5 +81,13 @@ defmodule Angle.Repo.Migrations.AddPaymentMethods do
     drop constraint(:payment_methods, "payment_methods_user_id_fkey")
 
     drop table(:payment_methods)
+
+    drop constraint(:payout_methods, "payout_methods_user_id_fkey")
+
+    drop table(:payout_methods)
+
+    alter table(:users) do
+      remove :auto_charge
+    end
   end
 end
