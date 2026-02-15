@@ -76,7 +76,7 @@ export function PaymentMethodsSection({ methods, userEmail: _userEmail }: Paymen
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onSuccess: async (transaction: any) => {
           try {
-            await fetch("/api/payments/verify-card", {
+            const verifyRes = await fetch("/api/payments/verify-card", {
               method: "POST",
               headers: {
                 "content-type": "application/json",
@@ -84,6 +84,13 @@ export function PaymentMethodsSection({ methods, userEmail: _userEmail }: Paymen
               },
               body: JSON.stringify({ reference: transaction.reference }),
             });
+
+            if (!verifyRes.ok) {
+              const data = await verifyRes.json().catch(() => null);
+              toast.error(data?.error || "Failed to verify card");
+              return;
+            }
+
             toast.success("Card added successfully");
             router.reload();
           } catch {

@@ -30,17 +30,17 @@ defmodule Angle.Payments.PaymentMethod do
         :last_four,
         :exp_month,
         :exp_year,
-        :authorization_code,
         :bank,
-        :is_default,
-        :paystack_reference
+        :is_default
       ]
 
-      argument :user_id, :uuid do
-        allow_nil? false
-      end
+      argument :user_id, :uuid, allow_nil?: false
+      argument :authorization_code, :string, allow_nil?: false, sensitive?: true
+      argument :paystack_reference, :string, allow_nil?: false, sensitive?: true
 
       change set_attribute(:user_id, arg(:user_id))
+      change set_attribute(:authorization_code, arg(:authorization_code))
+      change set_attribute(:paystack_reference, arg(:paystack_reference))
     end
 
     read :read do

@@ -30,15 +30,14 @@ defmodule Angle.Payments.PayoutMethod do
         :bank_code,
         :account_number,
         :account_name,
-        :recipient_code,
         :is_default
       ]
 
-      argument :user_id, :uuid do
-        allow_nil? false
-      end
+      argument :user_id, :uuid, allow_nil?: false
+      argument :recipient_code, :string, allow_nil?: false, sensitive?: true
 
       change set_attribute(:user_id, arg(:user_id))
+      change set_attribute(:recipient_code, arg(:recipient_code))
     end
 
     read :read do
@@ -81,7 +80,7 @@ defmodule Angle.Payments.PayoutMethod do
 
     attribute :bank_name, :string, allow_nil?: false, public?: true
     attribute :bank_code, :string, allow_nil?: false, public?: true
-    attribute :account_number, :string, allow_nil?: false, public?: true
+    attribute :account_number, :string, allow_nil?: false, sensitive?: true, public?: true
     attribute :account_name, :string, allow_nil?: false, public?: true
     attribute :recipient_code, :string, allow_nil?: false, sensitive?: true, public?: true
     attribute :is_default, :boolean, default: false, public?: true
