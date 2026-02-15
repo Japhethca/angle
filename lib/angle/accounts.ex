@@ -35,6 +35,10 @@ defmodule Angle.Accounts do
         ]
       end
     end
+
+    resource Angle.Accounts.StoreProfile do
+      rpc_action :upsert_store_profile, :upsert
+    end
   end
 
   resources do
