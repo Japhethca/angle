@@ -95,4 +95,23 @@ defmodule AngleWeb.SettingsControllerTest do
       assert redirected_to(conn) == ~p"/auth/login"
     end
   end
+
+  describe "GET /settings/security" do
+    test "renders settings/security page for authenticated user", %{conn: conn} do
+      user = create_user(%{email: "security@example.com"})
+
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/settings/security")
+
+      response = html_response(conn, 200)
+      assert response =~ "settings/security"
+    end
+
+    test "redirects to login when not authenticated", %{conn: conn} do
+      conn = get(conn, ~p"/settings/security")
+      assert redirected_to(conn) == ~p"/auth/login"
+    end
+  end
 end
