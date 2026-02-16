@@ -1,5 +1,6 @@
 defmodule AngleWeb.ItemsController do
   use AngleWeb, :controller
+  require Ash.Query
 
   @published_filter %{publication_status: "published"}
 
@@ -21,6 +22,7 @@ defmodule AngleWeb.ItemsController do
         conn
         |> assign_prop(:item, item)
         |> assign_prop(:similar_items, similar_items)
+        |> assign_prop(:watchlist_entry_id, load_watchlist_entry_id(conn, item["id"]))
         |> render_inertia("items/show")
 
       :not_found ->
@@ -93,6 +95,25 @@ defmodule AngleWeb.ItemsController do
   defp extract_results(data) when is_list(data), do: data
   defp extract_results(%{"results" => results}) when is_list(results), do: results
   defp extract_results(_), do: []
+
+  defp load_watchlist_entry_id(conn, item_id) when is_binary(item_id) do
+    case conn.assigns[:current_user] do
+      nil ->
+        nil
+
+      user ->
+        Angle.Inventory.WatchlistItem
+        |> Ash.Query.for_read(:by_user, %{}, actor: user)
+        |> Ash.Query.filter(item_id == ^item_id)
+        |> Ash.read!(authorize?: false)
+        |> case do
+          [entry | _] -> entry.id
+          _ -> nil
+        end
+    end
+  end
+
+  defp load_watchlist_entry_id(_conn, _item_id), do: nil
 
   defp uuid?(string) do
     case Ecto.UUID.cast(string) do

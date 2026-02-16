@@ -17,6 +17,7 @@ import {
   SimilarItems,
 } from "@/features/items";
 import { BidSection } from "@/features/bidding";
+import { useWatchlistToggle } from "@/features/watchlist/hooks/use-watchlist-toggle";
 
 interface Seller {
   id: string;
@@ -28,13 +29,19 @@ interface Seller {
 interface ShowProps {
   item: ItemDetail[number] & { user: Seller | null };
   similar_items: HomepageItemCard;
+  watchlist_entry_id: string | null;
 }
 
 export default function Show({
   item,
   similar_items = [],
+  watchlist_entry_id = null,
 }: ShowProps) {
   const price = item.currentPrice || item.startingPrice;
+  const { isWatchlisted, toggle, isPending } = useWatchlistToggle({
+    itemId: item.id,
+    watchlistEntryId: watchlist_entry_id,
+  });
 
   return (
     <>
@@ -55,8 +62,14 @@ export default function Show({
           <button className="flex size-9 items-center justify-center rounded-full border border-strong">
             <Share2 className="size-4 text-content" />
           </button>
-          <button className="flex size-9 items-center justify-center rounded-full border border-strong">
-            <Heart className="size-4 text-content" />
+          <button
+            onClick={toggle}
+            disabled={isPending}
+            className="flex size-9 items-center justify-center rounded-full border border-strong"
+          >
+            <Heart
+              className={`size-4 ${isWatchlisted ? "fill-red-500 text-red-500" : "text-content"}`}
+            />
           </button>
         </div>
       </div>
@@ -97,7 +110,18 @@ export default function Show({
             <div className="sticky top-24 space-y-5">
               {/* Item header info */}
               <div className="space-y-3">
-                <ConditionBadge condition={item.condition} />
+                <div className="flex items-start justify-between">
+                  <ConditionBadge condition={item.condition} />
+                  <button
+                    onClick={toggle}
+                    disabled={isPending}
+                    className="flex size-9 items-center justify-center rounded-full border border-strong transition-colors hover:bg-surface-muted"
+                  >
+                    <Heart
+                      className={`size-4 ${isWatchlisted ? "fill-red-500 text-red-500" : "text-content"}`}
+                    />
+                  </button>
+                </div>
                 <h1 className="font-heading text-xl font-semibold text-content">
                   {item.title}
                 </h1>
