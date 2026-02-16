@@ -260,6 +260,36 @@ defmodule Angle.Factory do
     |> Ash.create!(authorize?: false)
   end
 
+  @doc """
+  Creates an order with the given attributes.
+
+  Requires a buyer, seller, and item. If not provided, they will be created.
+
+  ## Options
+
+    * `:amount` - defaults to Decimal.new("100.00")
+    * `:buyer` - the buyer user record (creates one if not provided)
+    * `:seller` - the seller user record (creates one if not provided)
+    * `:item` - the item record (creates one owned by seller if not provided)
+
+  """
+  def create_order(attrs \\ %{}) do
+    buyer = attrs[:buyer] || create_user()
+    seller = attrs[:seller] || create_user()
+    item = attrs[:item] || create_item(%{created_by_id: seller.id})
+
+    params = %{
+      amount: Map.get(attrs, :amount, Decimal.new("100.00")),
+      item_id: item.id,
+      buyer_id: buyer.id,
+      seller_id: seller.id
+    }
+
+    Angle.Bidding.Order
+    |> Ash.Changeset.for_create(:create, params, authorize?: false)
+    |> Ash.create!(authorize?: false)
+  end
+
   # Helpers
 
   defp unique_email do
