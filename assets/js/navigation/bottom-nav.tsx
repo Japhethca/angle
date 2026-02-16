@@ -7,7 +7,7 @@ const tabs = [
   { label: "Home", href: "/", icon: Home, auth: false },
   { label: "Bids", href: "/bids", icon: Gavel, auth: true },
   { label: "Watchlist", href: "/watchlist", icon: Heart, auth: true },
-  { label: "Sell", href: "/items/new", icon: Store, auth: true },
+  { label: "Store", href: "/store", icon: Store, auth: true },
   { label: "Settings", href: "/settings", icon: Settings, auth: true },
 ];
 
