@@ -118,6 +118,7 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
               {/* CTA buttons */}
               <div className="flex items-center gap-3">
                 <WatchButton
+                  key={activeItem.id}
                   itemId={activeItem.id}
                   watchlistEntryId={watchlistedMap[activeItem.id] ?? null}
                 />
@@ -179,6 +180,7 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
             <div className="flex gap-3">
               <div className="flex-1">
                 <WatchButton
+                  key={activeItem.id}
                   itemId={activeItem.id}
                   watchlistEntryId={watchlistedMap[activeItem.id] ?? null}
                 />
