@@ -10,6 +10,10 @@ defmodule Angle.Bidding.Review do
   postgres do
     table "reviews"
     repo Angle.Repo
+
+    custom_indexes do
+      index [:seller_id]
+    end
   end
 
   typescript do
@@ -23,8 +27,7 @@ defmodule Angle.Bidding.Review do
       accept [:order_id, :rating, :comment]
       change set_attribute(:reviewer_id, actor(:id))
       change Angle.Bidding.Review.SetSellerFromOrder
-      change Angle.Bidding.Review.ValidateOrderCompleted
-      change Angle.Bidding.Review.ValidateReviewWindow
+      change Angle.Bidding.Review.ValidateOrderEligibility
     end
 
     update :update do
