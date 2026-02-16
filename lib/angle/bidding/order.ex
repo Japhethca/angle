@@ -161,6 +161,11 @@ defmodule Angle.Bidding.Order do
       allow_nil? false
       public? true
     end
+
+    has_one :review, Angle.Bidding.Review do
+      destination_attribute :order_id
+      public? true
+    end
   end
 
   identities do

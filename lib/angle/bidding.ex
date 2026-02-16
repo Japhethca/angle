@@ -135,5 +135,6 @@ defmodule Angle.Bidding do
   resources do
     resource Angle.Bidding.Bid
     resource Angle.Bidding.Order
+    resource Angle.Bidding.Review
   end
 end
