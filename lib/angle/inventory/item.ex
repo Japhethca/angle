@@ -107,8 +107,18 @@ defmodule Angle.Inventory.Item do
 
     update :publish_item do
       description "Publish an item, making it visible to users"
+      require_atomic? false
 
       change set_attribute(:publication_status, :published)
+      change {Angle.Inventory.Item.ScheduleEndAuction, []}
+    end
+
+    update :end_auction do
+      description "End an auction, setting the final auction status"
+
+      argument :new_status, ItemStatus, allow_nil?: false
+      validate one_of(:new_status, [:ended, :sold])
+      change set_attribute(:auction_status, arg(:new_status))
     end
 
     read :test_item do
@@ -212,6 +222,11 @@ defmodule Angle.Inventory.Item do
     policy action(:publish_item) do
       forbid_unless expr(created_by_id == ^actor(:id))
       authorize_if {Angle.Accounts.Checks.HasPermission, permission: "publish_items"}
+    end
+
+    # End auction - system action called by worker, always authorized
+    policy action(:end_auction) do
+      authorize_if always()
     end
   end
 
