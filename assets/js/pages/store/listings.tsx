@@ -154,7 +154,7 @@ export default function StoreListings({
 
           {/* Desktop table (always show headers for sort/filter access) */}
           <div className="hidden lg:block">
-            <div className="rounded-xl border border-surface-muted bg-white">
+            <div className="rounded-xl border border-surface-muted bg-surface">
               <ListingTable items={items} sort={sort} dir={dir} status={status} perPage={p.per_page} onNavigate={navigate} />
               {items.length > 0 && (
                 <PaginationControls pagination={p} status={status} sort={sort} dir={dir} onNavigate={navigate} />
@@ -173,7 +173,7 @@ export default function StoreListings({
                   type="button"
                   onClick={loadMore}
                   disabled={mobileLoading}
-                  className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-surface-muted bg-white py-3 text-sm font-medium text-content-secondary transition-colors hover:bg-surface-secondary disabled:opacity-50"
+                  className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-surface-muted bg-surface py-3 text-sm font-medium text-content-secondary transition-colors hover:bg-surface-secondary disabled:opacity-50"
                 >
                   {mobileLoading ? (
                     <>
@@ -190,7 +190,7 @@ export default function StoreListings({
               </p>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-surface-muted bg-white py-16 text-center lg:hidden">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-surface-muted bg-surface py-16 text-center lg:hidden">
               <Package className="mb-3 size-12 text-surface-emphasis" />
               <p className="text-lg text-content-tertiary">No listings yet</p>
               <p className="mt-1 text-sm text-content-placeholder">

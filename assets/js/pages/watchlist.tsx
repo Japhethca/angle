@@ -100,7 +100,7 @@ export default function Watchlist({
                       }
                     }
                   }}
-                  className="flex items-center gap-2 rounded-full border border-subtle bg-white px-4 py-2 text-sm font-medium text-content"
+                  className="flex items-center gap-2 rounded-full border border-subtle bg-surface px-4 py-2 text-sm font-medium text-content"
                 >
                   <SlidersHorizontal className="size-4" />
                   {activeCategoryName}
@@ -111,7 +111,7 @@ export default function Watchlist({
 
             {/* Items list or filtered empty state */}
             {isEmpty && isFiltered ? (
-              <div className="flex min-h-[40vh] flex-col items-center justify-center rounded-2xl border border-subtle bg-white px-4 py-16">
+              <div className="flex min-h-[40vh] flex-col items-center justify-center rounded-2xl border border-subtle bg-surface px-4 py-16">
                 <Search className="mb-4 size-12 text-content-placeholder" />
                 <p className="text-base font-medium text-content">
                   No items found in this category

@@ -37,7 +37,7 @@ export function StoreLayout({ title, children }: StoreLayoutProps) {
                   className={cn(
                     "flex-1 rounded-md px-3 py-2 text-center text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-white text-content shadow-sm"
+                      ? "bg-surface text-content shadow-sm"
                       : "text-content-tertiary",
                   )}
                 >

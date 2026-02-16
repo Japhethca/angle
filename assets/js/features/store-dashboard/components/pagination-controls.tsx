@@ -41,7 +41,7 @@ export function PaginationControls({ pagination: p, status, sort, dir, onNavigat
             onChange={(e) =>
               onNavigate({ status, sort, dir, page: 1, per_page: Number(e.target.value) })
             }
-            className="rounded border border-surface-muted bg-white px-2 py-1 text-sm text-content"
+            className="rounded border border-surface-muted bg-surface px-2 py-1 text-sm text-content"
           >
             <option value={10}>10</option>
             <option value={25}>25</option>

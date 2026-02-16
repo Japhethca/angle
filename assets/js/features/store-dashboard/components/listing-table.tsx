@@ -30,11 +30,11 @@ function StatusBadge({ status }: { status: string | null | undefined }) {
   const key = (status || "draft") as StatusKey;
   const config: Record<StatusKey, { label: string; className: string }> = {
     active: { label: "Active", className: "bg-feedback-success-muted text-feedback-success" },
-    ended: { label: "Ended", className: "bg-orange-100 text-orange-700" },
+    ended: { label: "Ended", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
     sold: { label: "Sold", className: "bg-feedback-success-muted text-feedback-success" },
     draft: { label: "Draft", className: "bg-surface-secondary text-content-tertiary" },
-    pending: { label: "Pending", className: "bg-yellow-100 text-yellow-700" },
-    scheduled: { label: "Scheduled", className: "bg-blue-100 text-blue-700" },
+    pending: { label: "Pending", className: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" },
+    scheduled: { label: "Scheduled", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
     paused: { label: "Paused", className: "bg-surface-secondary text-content-tertiary" },
     cancelled: { label: "Cancelled", className: "bg-surface-secondary text-content-tertiary" },
   };
@@ -123,7 +123,7 @@ function StatusFilterHeader({ currentStatus, onFilter }: StatusFilterHeaderProps
       </button>
       {open && (
         <div
-          className="absolute left-0 top-full z-10 mt-1 w-36 rounded-lg border border-surface-muted bg-white py-1 shadow-lg"
+          className="absolute left-0 top-full z-10 mt-1 w-36 rounded-lg border border-surface-muted bg-surface py-1 shadow-lg dark:shadow-black/20"
         >
           {STATUS_OPTIONS.map((opt) => (
             <button

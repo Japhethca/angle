@@ -17,7 +17,7 @@ export function ConditionBadge({ condition, className }: ConditionBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-block rounded-full bg-[rgba(253,224,204,0.4)] px-4 py-1 text-[10px] font-medium text-primary-800",
+        "inline-block rounded-full bg-[rgba(253,224,204,0.4)] dark:bg-primary-600/20 px-4 py-1 text-[10px] font-medium text-primary-800 dark:text-primary-400",
         className
       )}
     >
