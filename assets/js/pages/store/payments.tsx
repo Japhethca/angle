@@ -59,7 +59,7 @@ export default function StorePayments({ orders = [], balance }: StorePaymentsPro
             <>
               {/* Desktop table */}
               <div className="hidden lg:block">
-                <div className="rounded-xl border border-surface-muted bg-white">
+                <div className="rounded-xl border border-surface-muted bg-surface">
                   <PaymentTable orders={orders} />
                 </div>
               </div>
@@ -72,7 +72,7 @@ export default function StorePayments({ orders = [], balance }: StorePaymentsPro
               </div>
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-surface-muted bg-white py-16 text-center">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-surface-muted bg-surface py-16 text-center">
               <Wallet className="mb-3 size-12 text-surface-emphasis" />
               <p className="text-lg text-content-tertiary">No payments yet</p>
               <p className="mt-1 text-sm text-content-placeholder">

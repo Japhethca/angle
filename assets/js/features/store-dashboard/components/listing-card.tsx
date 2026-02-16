@@ -11,11 +11,11 @@ function StatusBadge({ status }: { status: string | null | undefined }) {
   const key = (status || "draft") as StatusKey;
   const config: Record<StatusKey, { label: string; className: string }> = {
     active: { label: "Active", className: "bg-feedback-success-muted text-feedback-success" },
-    ended: { label: "Ended", className: "bg-orange-100 text-orange-700" },
+    ended: { label: "Ended", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
     sold: { label: "Sold", className: "bg-feedback-success-muted text-feedback-success" },
     draft: { label: "Draft", className: "bg-surface-secondary text-content-tertiary" },
-    pending: { label: "Pending", className: "bg-yellow-100 text-yellow-700" },
-    scheduled: { label: "Scheduled", className: "bg-blue-100 text-blue-700" },
+    pending: { label: "Pending", className: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" },
+    scheduled: { label: "Scheduled", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
     paused: { label: "Paused", className: "bg-surface-secondary text-content-tertiary" },
     cancelled: { label: "Cancelled", className: "bg-surface-secondary text-content-tertiary" },
   };
@@ -35,7 +35,7 @@ interface ListingCardProps {
 
 export function ListingCard({ item }: ListingCardProps) {
   return (
-    <div className="rounded-xl border border-surface-muted bg-white p-4">
+    <div className="rounded-xl border border-surface-muted bg-surface p-4">
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-medium text-content">

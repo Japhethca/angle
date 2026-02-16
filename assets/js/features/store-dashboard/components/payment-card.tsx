@@ -13,7 +13,7 @@ function PaymentStatusBadge({ status }: { status: string | null | undefined }) {
   const className = isPaid
     ? "bg-feedback-success-muted text-feedback-success"
     : isPending
-      ? "bg-orange-100 text-orange-700"
+      ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
       : "bg-surface-secondary text-content-tertiary";
 
   return (
@@ -29,7 +29,7 @@ interface PaymentCardProps {
 
 export function PaymentCard({ order }: PaymentCardProps) {
   return (
-    <div className="rounded-xl border border-surface-muted bg-white p-4">
+    <div className="rounded-xl border border-surface-muted bg-surface p-4">
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-medium text-content">

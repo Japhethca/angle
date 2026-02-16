@@ -2,7 +2,7 @@ import { Star } from "lucide-react";
 
 export function ReviewsSection() {
   return (
-    <div className="rounded-xl border border-surface-muted bg-white p-6">
+    <div className="rounded-xl border border-surface-muted bg-surface p-6">
       <h3 className="text-base font-semibold text-content">Reviews</h3>
 
       <div className="flex flex-col items-center justify-center py-12 text-center">
