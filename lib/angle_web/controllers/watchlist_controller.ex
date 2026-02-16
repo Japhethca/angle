@@ -6,8 +6,9 @@ defmodule AngleWeb.WatchlistController do
   def index(conn, params) do
     category_id = params["category"]
 
-    items = load_watchlist_items(conn, category_id)
-    categories = load_top_categories()
+    all_items = load_watchlist_items(conn)
+    categories = extract_categories(all_items)
+    items = filter_by_category(all_items, category_id)
     watchlisted_map = load_watchlisted_map(conn)
 
     conn
@@ -18,26 +19,27 @@ defmodule AngleWeb.WatchlistController do
     |> render_inertia("watchlist")
   end
 
-  defp load_watchlist_items(conn, category_id) do
-    query_params = %{
-      filter: build_filter(category_id)
-    }
-
-    case AshTypescript.Rpc.run_typed_query(:angle, :watchlist_item_card, query_params, conn) do
+  defp load_watchlist_items(conn) do
+    case AshTypescript.Rpc.run_typed_query(:angle, :watchlist_item_card, %{}, conn) do
       %{"success" => true, "data" => data} -> extract_results(data)
       _ -> []
     end
   end
 
-  defp build_filter(nil), do: %{}
-  defp build_filter(category_id), do: %{category_id: category_id}
+  defp extract_categories(items) do
+    items
+    |> Enum.map(& &1["category"])
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq_by(& &1["id"])
+    |> Enum.sort_by(& &1["name"])
+  end
 
-  defp load_top_categories do
-    Angle.Catalog.Category
-    |> Ash.Query.filter(is_nil(parent_id))
-    |> Ash.Query.sort(:name)
-    |> Ash.read!(authorize?: false)
-    |> Enum.map(fn cat -> %{id: cat.id, name: cat.name, slug: cat.slug} end)
+  defp filter_by_category(items, nil), do: items
+
+  defp filter_by_category(items, category_id) do
+    Enum.filter(items, fn item ->
+      get_in(item, ["category", "id"]) == category_id
+    end)
   end
 
   defp load_watchlisted_map(conn) do
