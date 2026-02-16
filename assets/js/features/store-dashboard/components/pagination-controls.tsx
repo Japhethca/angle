@@ -19,8 +19,8 @@ interface PaginationControlsProps {
 }
 
 export function PaginationControls({ pagination: p, status, onNavigate }: PaginationControlsProps) {
-  const startItem = (p.page - 1) * p.per_page + 1;
-  const endItem = Math.min(p.page * p.per_page, p.total);
+  const startItem = p.total > 0 ? (p.page - 1) * p.per_page + 1 : 0;
+  const endItem = p.total > 0 ? Math.min(p.page * p.per_page, p.total) : 0;
 
   function goToPage(page: number) {
     onNavigate({ status, page, per_page: p.per_page });
@@ -30,7 +30,7 @@ export function PaginationControls({ pagination: p, status, onNavigate }: Pagina
     <div className="flex flex-col items-center justify-between gap-3 border-t border-surface-muted px-4 py-3 sm:flex-row">
       <div className="flex items-center gap-4 text-sm text-content-tertiary">
         <span>
-          Showing {p.total > 0 ? startItem : 0}-{endItem} of {p.total} items
+          Showing {startItem}-{endItem} of {p.total} items
         </span>
         <div className="flex items-center gap-2">
           <span>Rows per page</span>
@@ -54,6 +54,7 @@ export function PaginationControls({ pagination: p, status, onNavigate }: Pagina
         </span>
         <div className="flex items-center gap-1">
           <button
+            aria-label="First page"
             onClick={() => goToPage(1)}
             disabled={p.page === 1}
             className="flex size-8 items-center justify-center rounded text-content-tertiary transition-colors hover:bg-surface-secondary disabled:opacity-30"
@@ -61,6 +62,7 @@ export function PaginationControls({ pagination: p, status, onNavigate }: Pagina
             <ChevronFirst className="size-4" />
           </button>
           <button
+            aria-label="Previous page"
             onClick={() => goToPage(p.page - 1)}
             disabled={p.page === 1}
             className="flex size-8 items-center justify-center rounded text-content-tertiary transition-colors hover:bg-surface-secondary disabled:opacity-30"
@@ -68,6 +70,7 @@ export function PaginationControls({ pagination: p, status, onNavigate }: Pagina
             <ChevronLeft className="size-4" />
           </button>
           <button
+            aria-label="Next page"
             onClick={() => goToPage(p.page + 1)}
             disabled={p.page === p.total_pages}
             className="flex size-8 items-center justify-center rounded text-content-tertiary transition-colors hover:bg-surface-secondary disabled:opacity-30"
@@ -75,6 +78,7 @@ export function PaginationControls({ pagination: p, status, onNavigate }: Pagina
             <ChevronRight className="size-4" />
           </button>
           <button
+            aria-label="Last page"
             onClick={() => goToPage(p.total_pages)}
             disabled={p.page === p.total_pages}
             className="flex size-8 items-center justify-center rounded text-content-tertiary transition-colors hover:bg-surface-secondary disabled:opacity-30"

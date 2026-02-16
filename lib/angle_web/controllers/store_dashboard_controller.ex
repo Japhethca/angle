@@ -75,6 +75,8 @@ defmodule AngleWeb.StoreDashboardController do
     end
   end
 
+  # Stats are computed from up to 1000 items in memory (unfiltered).
+  # For sellers with more items, consider a dedicated aggregate query.
   defp load_seller_stats(conn) do
     params = %{
       page: %{limit: 1000, offset: 0, count: false}
