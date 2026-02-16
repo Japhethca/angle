@@ -1565,38 +1565,6 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
-// Category Typed Queries
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
-
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { categories: ["id", "name", "slug"] }]>>;
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
-
-
-
 // Item Typed Queries
 /**
  * Typed query for Item
@@ -1721,6 +1689,38 @@ export const sellerProfileFields = ["id", "username", "fullName", "location", "p
 
 
 
+// Order Typed Queries
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
+
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
+
+
+
 // Bid Typed Queries
 /**
  * Typed query for Bid
@@ -1753,35 +1753,35 @@ export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userI
 
 
 
-// Order Typed Queries
+// Category Typed Queries
 /**
- * Typed query for Order
+ * Typed query for Category
  *
  * @typedQuery true
  */
-export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
+export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
 
 /**
- * Typed query for Order
+ * Typed query for Category
  *
  * @typedQuery true
  */
-export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
+export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
 
 
 /**
- * Typed query for Order
+ * Typed query for Category
  *
  * @typedQuery true
  */
-export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }]>>;
+export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { categories: ["id", "name", "slug"] }]>>;
 
 /**
- * Typed query for Order
+ * Typed query for Category
  *
  * @typedQuery true
  */
-export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
+export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
 
 
 

@@ -46,9 +46,18 @@ export default function StoreListings({ items = [], stats }: StoreListingsProps)
 
         {/* Item listings section */}
         <div className="mt-8">
-          <h2 className="mb-4 text-lg font-semibold text-content">
-            Item Listings
-          </h2>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-content">
+              Item Listings
+            </h2>
+            <Link
+              href="/items/new"
+              className="hidden items-center gap-2 rounded-full bg-primary-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700 lg:inline-flex"
+            >
+              <Plus className="size-4" />
+              List Item
+            </Link>
+          </div>
 
           {items.length > 0 ? (
             <>
