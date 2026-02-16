@@ -141,7 +141,7 @@ defmodule AngleWeb.PaymentsController do
       {:error, reason} when is_binary(reason) ->
         conn |> put_status(422) |> json(%{error: reason})
 
-      :invalid_status ->
+      {:error, :invalid_status} ->
         conn |> put_status(422) |> json(%{error: "Order is not in payment pending status"})
 
       {:error, %Ash.Error.Forbidden{}} ->
@@ -245,7 +245,7 @@ defmodule AngleWeb.PaymentsController do
   defp error_message(_), do: "An error occurred"
 
   defp validate_order_status(order, expected) do
-    if order.status == expected, do: :ok, else: :invalid_status
+    if order.status == expected, do: :ok, else: {:error, :invalid_status}
   end
 
   defp validate_payment_success(%{status: "success"}), do: :ok

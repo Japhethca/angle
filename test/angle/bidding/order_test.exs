@@ -142,4 +142,87 @@ defmodule Angle.Bidding.OrderTest do
                |> Ash.update(authorize?: false)
     end
   end
+
+  describe "authorization policies" do
+    setup do
+      buyer = create_user()
+      seller = create_user()
+      other_user = create_user()
+      item = create_item(%{created_by_id: seller.id, starting_price: Decimal.new("100.00")})
+
+      order =
+        create_order(%{
+          buyer: buyer,
+          seller: seller,
+          item: item,
+          amount: Decimal.new("150.00")
+        })
+
+      %{buyer: buyer, seller: seller, other_user: other_user, item: item, order: order}
+    end
+
+    test "buyer can read their own order", %{order: order, buyer: buyer} do
+      assert {:ok, _} = Ash.get(Angle.Bidding.Order, order.id, actor: buyer)
+    end
+
+    test "seller can read order for their item", %{order: order, seller: seller} do
+      assert {:ok, _} = Ash.get(Angle.Bidding.Order, order.id, actor: seller)
+    end
+
+    test "other user cannot read someone else's order", %{order: order, other_user: other_user} do
+      # Ash read policies filter rather than forbid, so unauthorized reads return NotFound
+      assert {:error, %Ash.Error.Invalid{}} =
+               Ash.get(Angle.Bidding.Order, order.id, actor: other_user)
+    end
+
+    test "seller cannot pay_order", %{order: order, seller: seller} do
+      assert {:error, %Ash.Error.Forbidden{}} =
+               order
+               |> Ash.Changeset.for_update(:pay_order, %{payment_reference: "PSK_ref_123"},
+                 actor: seller
+               )
+               |> Ash.update()
+    end
+
+    test "buyer cannot mark_dispatched", %{order: order, buyer: buyer, seller: seller} do
+      {:ok, paid_order} =
+        order
+        |> Ash.Changeset.for_update(:pay_order, %{payment_reference: "PSK_ref_123"}, actor: buyer)
+        |> Ash.update()
+
+      assert {:error, %Ash.Error.Forbidden{}} =
+               paid_order
+               |> Ash.Changeset.for_update(:mark_dispatched, %{}, actor: buyer)
+               |> Ash.update()
+
+      # seller can mark dispatched
+      assert {:ok, _} =
+               paid_order
+               |> Ash.Changeset.for_update(:mark_dispatched, %{}, actor: seller)
+               |> Ash.update()
+    end
+
+    test "seller cannot confirm_receipt", %{order: order, buyer: buyer, seller: seller} do
+      {:ok, paid_order} =
+        order
+        |> Ash.Changeset.for_update(:pay_order, %{payment_reference: "PSK_ref_123"}, actor: buyer)
+        |> Ash.update()
+
+      {:ok, dispatched_order} =
+        paid_order
+        |> Ash.Changeset.for_update(:mark_dispatched, %{}, actor: seller)
+        |> Ash.update()
+
+      assert {:error, %Ash.Error.Forbidden{}} =
+               dispatched_order
+               |> Ash.Changeset.for_update(:confirm_receipt, %{}, actor: seller)
+               |> Ash.update()
+
+      # buyer can confirm receipt
+      assert {:ok, _} =
+               dispatched_order
+               |> Ash.Changeset.for_update(:confirm_receipt, %{}, actor: buyer)
+               |> Ash.update()
+    end
+  end
 end

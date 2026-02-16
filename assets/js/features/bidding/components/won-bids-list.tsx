@@ -11,12 +11,19 @@ interface WonBidsListProps {
 }
 
 export function WonBidsList({ orders }: WonBidsListProps) {
-  const [payPending, setPayPending] = useState(false);
+  const [payPendingId, setPayPendingId] = useState<string | null>(null);
+  const [paystackReady, setPaystackReady] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((window as any).PaystackPop) {
+      setPaystackReady(true);
+      return;
+    }
     const script = document.createElement("script");
     script.src = "https://js.paystack.co/v2/inline.js";
     script.async = true;
+    script.onload = () => setPaystackReady(true);
     document.body.appendChild(script);
     return () => {
       document.body.removeChild(script);
@@ -24,8 +31,12 @@ export function WonBidsList({ orders }: WonBidsListProps) {
   }, []);
 
   const handlePay = async (orderId: string) => {
+    if (!paystackReady) {
+      toast.error("Payment system is loading, please try again");
+      return;
+    }
     const csrfToken = getPhoenixCSRFToken();
-    setPayPending(true);
+    setPayPendingId(orderId);
 
     try {
       const res = await fetch("/api/payments/pay-order", {
@@ -82,7 +93,7 @@ export function WonBidsList({ orders }: WonBidsListProps) {
     } catch {
       toast.error("Failed to initialize payment");
     } finally {
-      setPayPending(false);
+      setPayPendingId(null);
     }
   };
 
@@ -126,7 +137,7 @@ export function WonBidsList({ orders }: WonBidsListProps) {
             order={order}
             onPay={handlePay}
             onConfirmReceipt={handleConfirmReceipt}
-            payPending={payPending}
+            payPending={payPendingId === order.id}
             confirmPending={confirmPending}
           />
         ))}

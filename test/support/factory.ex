@@ -152,7 +152,9 @@ defmodule Angle.Factory do
         user_id: user_id
       }
 
-    Ash.create!(Angle.Bidding.Bid, params, authorize?: false)
+    Angle.Bidding.Bid
+    |> Ash.Changeset.for_create(:create, params, authorize?: false)
+    |> Ash.create!(authorize?: false)
   end
 
   @doc """

@@ -1,6 +1,8 @@
 defmodule AngleWeb.BidsController do
   use AngleWeb, :controller
 
+  require Ash.Query
+
   def index(conn, params) do
     tab = Map.get(params, "tab", "active")
     user = conn.assigns.current_user
@@ -64,16 +66,12 @@ defmodule AngleWeb.BidsController do
       end
 
     # Load won item IDs so frontend can determine outcome
-    order_params = %{}
-
     won_item_ids =
-      case AshTypescript.Rpc.run_typed_query(:angle, :won_order_card, order_params, conn) do
-        %{"success" => true, "data" => data} ->
-          extract_results(data) |> Enum.map(& &1["item"]["id"])
-
-        _ ->
-          []
-      end
+      Angle.Bidding.Order
+      |> Ash.Query.filter(buyer_id == ^user.id)
+      |> Ash.Query.select([:item_id])
+      |> Ash.read!(authorize?: false)
+      |> Enum.map(& &1.item_id)
 
     conn
     |> assign_prop(:bids, bids)

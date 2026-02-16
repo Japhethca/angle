@@ -1,5 +1,6 @@
 defmodule Angle.Bidding.Workers.EndAuctionWorkerTest do
   use Angle.DataCase, async: true
+  import Angle.Factory
 
   alias Angle.Bidding.Workers.EndAuctionWorker
   alias Angle.Bidding.Order
@@ -11,8 +12,8 @@ defmodule Angle.Bidding.Workers.EndAuctionWorkerTest do
       bidder1 = create_user()
       bidder2 = create_user()
 
-      _bid1 = create_test_bid(bidder1.id, item.id, "100.00")
-      _bid2 = create_test_bid(bidder2.id, item.id, "150.00")
+      _bid1 = create_bid(%{user_id: bidder1.id, item_id: item.id, amount: Decimal.new("100.00")})
+      _bid2 = create_bid(%{user_id: bidder2.id, item_id: item.id, amount: Decimal.new("150.00")})
 
       assert :ok = EndAuctionWorker.perform(%Oban.Job{args: %{"item_id" => item.id}})
 
@@ -53,20 +54,5 @@ defmodule Angle.Bidding.Workers.EndAuctionWorkerTest do
       assert {:error, _} =
                EndAuctionWorker.perform(%Oban.Job{args: %{"item_id" => fake_id}})
     end
-  end
-
-  defp create_test_bid(user_id, item_id, amount) do
-    Angle.Bidding.Bid
-    |> Ash.Changeset.for_create(
-      :create,
-      %{
-        amount: Decimal.new(amount),
-        bid_type: :manual,
-        item_id: item_id,
-        user_id: user_id
-      },
-      authorize?: false
-    )
-    |> Ash.create!(authorize?: false)
   end
 end

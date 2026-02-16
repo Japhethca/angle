@@ -1,4 +1,6 @@
 defmodule Angle.Bidding.Order do
+  @moduledoc "Represents an order created when a buyer wins an auction."
+
   use Ash.Resource,
     domain: Angle.Bidding,
     data_layer: AshPostgres.DataLayer,
@@ -20,7 +22,11 @@ defmodule Angle.Bidding.Order do
     defaults []
 
     create :create do
-      accept [:amount, :item_id, :buyer_id, :seller_id]
+      accept [:amount, :item_id]
+      argument :buyer_id, :uuid, allow_nil?: false
+      argument :seller_id, :uuid, allow_nil?: false
+      change set_attribute(:buyer_id, arg(:buyer_id))
+      change set_attribute(:seller_id, arg(:seller_id))
       change set_attribute(:status, :payment_pending)
     end
 

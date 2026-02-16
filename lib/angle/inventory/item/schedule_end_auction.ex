@@ -9,12 +9,15 @@ defmodule Angle.Inventory.Item.ScheduleEndAuction do
   def change(changeset, _opts, _context) do
     Ash.Changeset.after_action(changeset, fn _changeset, item ->
       if item.end_time do
-        %{item_id: item.id}
-        |> Angle.Bidding.Workers.EndAuctionWorker.new(scheduled_at: item.end_time)
-        |> Oban.insert!()
+        case %{item_id: item.id}
+             |> Angle.Bidding.Workers.EndAuctionWorker.new(scheduled_at: item.end_time)
+             |> Oban.insert() do
+          {:ok, _job} -> {:ok, item}
+          {:error, reason} -> {:error, reason}
+        end
+      else
+        {:ok, item}
       end
-
-      {:ok, item}
     end)
   end
 end

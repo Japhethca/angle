@@ -7,33 +7,24 @@ import {
   HistoryBidsList,
 } from "@/features/bidding";
 
-interface BidsPageProps {
-  tab: string;
-  bids?: ActiveBidCard | HistoryBidCard;
-  orders?: WonOrderCard;
-  won_item_ids?: string[];
-}
+type BidsPageProps =
+  | { tab: "active"; bids: ActiveBidCard }
+  | { tab: "won"; orders: WonOrderCard }
+  | { tab: "history"; bids: HistoryBidCard; won_item_ids: string[] };
 
-export default function Bids({
-  tab = "active",
-  bids = [],
-  orders = [],
-  won_item_ids = [],
-}: BidsPageProps) {
+export default function Bids(props: BidsPageProps) {
+  const tab = props.tab;
+
   return (
     <>
       <Head title="My Bids" />
       <BidsLayout tab={tab}>
-        {tab === "active" && (
-          <ActiveBidsList bids={bids as ActiveBidCard} />
-        )}
-        {tab === "won" && (
-          <WonBidsList orders={orders as WonOrderCard} />
-        )}
+        {tab === "active" && <ActiveBidsList bids={props.bids} />}
+        {tab === "won" && <WonBidsList orders={props.orders} />}
         {tab === "history" && (
           <HistoryBidsList
-            bids={bids as HistoryBidCard}
-            wonItemIds={won_item_ids}
+            bids={props.bids}
+            wonItemIds={props.won_item_ids}
           />
         )}
       </BidsLayout>
