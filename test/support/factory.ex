@@ -310,6 +310,52 @@ defmodule Angle.Factory do
     |> Ash.create!(authorize?: false)
   end
 
+  @doc """
+  Creates a review for a completed order.
+
+  Completes the order if it isn't already, then creates the review.
+
+  ## Options
+
+    * `:order` - the order to review (required)
+    * `:buyer` - the buyer user (required, must be the order's buyer)
+    * `:rating` - defaults to 5
+    * `:comment` - optional
+
+  """
+  def create_review(attrs \\ %{}) do
+    order = attrs[:order] || raise "create_review requires :order"
+    buyer = attrs[:buyer] || raise "create_review requires :buyer"
+
+    # Complete the order if not already completed
+    order =
+      if order.status != :completed do
+        order
+        |> Ash.Changeset.for_update(
+          :pay_order,
+          %{payment_reference: "PAY_#{System.unique_integer([:positive])}"},
+          authorize?: false
+        )
+        |> Ash.update!()
+        |> Ash.Changeset.for_update(:mark_dispatched, %{}, authorize?: false)
+        |> Ash.update!()
+        |> Ash.Changeset.for_update(:confirm_receipt, %{}, authorize?: false)
+        |> Ash.update!()
+      else
+        order
+      end
+
+    params = %{
+      order_id: order.id,
+      rating: Map.get(attrs, :rating, 5),
+      comment: Map.get(attrs, :comment)
+    }
+
+    Angle.Bidding.Review
+    |> Ash.Changeset.for_create(:create, params, actor: buyer)
+    |> Ash.create!()
+  end
+
   # Helpers
 
   defp unique_email do
