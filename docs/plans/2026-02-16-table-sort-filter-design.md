@@ -31,7 +31,7 @@ Replace `prepare build(sort: [inserted_at: :desc])` with a dynamic prepare:
 prepare fn query, _context ->
   field = Ash.Query.get_argument(query, :sort_field) || :inserted_at
   dir = Ash.Query.get_argument(query, :sort_dir) || :desc
-  {:ok, Ash.Query.sort(query, [{field, dir}])}
+  Ash.Query.sort(query, [{field, dir}])
 end
 ```
 

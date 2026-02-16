@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SellerDashboardCard } from "@/ash_rpc";
@@ -107,7 +107,6 @@ interface StatusFilterHeaderProps {
 
 function StatusFilterHeader({ currentStatus, onFilter }: StatusFilterHeaderProps) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
 
   const activeLabel = STATUS_OPTIONS.find((o) => o.key === currentStatus)?.label ?? "Status";
 
@@ -124,7 +123,6 @@ function StatusFilterHeader({ currentStatus, onFilter }: StatusFilterHeaderProps
       </button>
       {open && (
         <div
-          ref={ref}
           className="absolute left-0 top-full z-10 mt-1 w-36 rounded-lg border border-surface-muted bg-white py-1 shadow-lg"
         >
           {STATUS_OPTIONS.map((opt) => (
@@ -155,16 +153,17 @@ interface ListingTableProps {
   sort: string;
   dir: string;
   status: string;
+  perPage: number;
   onNavigate: (params: Record<string, string | number>) => void;
 }
 
-export function ListingTable({ items, sort, dir, status, onNavigate }: ListingTableProps) {
+export function ListingTable({ items, sort, dir, status, perPage, onNavigate }: ListingTableProps) {
   function handleSort(field: string, direction: string) {
-    onNavigate({ status, sort: field, dir: direction, page: 1, per_page: items.length || 10 });
+    onNavigate({ status, sort: field, dir: direction, page: 1, per_page: perPage });
   }
 
   function handleFilter(newStatus: string) {
-    onNavigate({ status: newStatus, sort, dir, page: 1, per_page: items.length || 10 });
+    onNavigate({ status: newStatus, sort, dir, page: 1, per_page: perPage });
   }
 
   return (

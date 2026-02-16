@@ -82,8 +82,12 @@ export default function StoreListings({
       // Initial load or filter reset
       setMobileItems(items);
     } else {
-      // Load more — append new items
-      setMobileItems((prev) => [...prev, ...items]);
+      // Load more — append new items, deduplicating by ID
+      setMobileItems((prev) => {
+        const existingIds = new Set(prev.map((i) => i.id));
+        const newItems = items.filter((i) => !existingIds.has(i.id));
+        return [...prev, ...newItems];
+      });
     }
     setMobileLoading(false);
   }, [items, p.page, status]);
@@ -151,7 +155,7 @@ export default function StoreListings({
           {/* Desktop table (always show headers for sort/filter access) */}
           <div className="hidden lg:block">
             <div className="rounded-xl border border-surface-muted bg-white">
-              <ListingTable items={items} sort={sort} dir={dir} status={status} onNavigate={navigate} />
+              <ListingTable items={items} sort={sort} dir={dir} status={status} perPage={p.per_page} onNavigate={navigate} />
               {items.length > 0 && (
                 <PaginationControls pagination={p} status={status} sort={sort} dir={dir} onNavigate={navigate} />
               )}
