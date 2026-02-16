@@ -7,9 +7,10 @@ type Item = HomepageItemCard[number];
 
 interface EndingSoonSectionProps {
   initialItems: Item[];
+  watchlistedMap?: Record<string, string>;
 }
 
-export function EndingSoonSection({ initialItems }: EndingSoonSectionProps) {
+export function EndingSoonSection({ initialItems, watchlistedMap = {} }: EndingSoonSectionProps) {
   const { data } = useAshQuery(
     ["homepage", "ending-soon"],
     () =>
@@ -40,7 +41,7 @@ export function EndingSoonSection({ initialItems }: EndingSoonSectionProps) {
       ) : (
         <div className="scrollbar-hide flex gap-4 overflow-x-auto px-4 pb-4 lg:gap-6 lg:px-10">
           {items.map((item) => (
-            <ItemCard key={item.id} item={item} badge="ending-soon" />
+            <ItemCard key={item.id} item={item} badge="ending-soon" watchlistEntryId={watchlistedMap[item.id] ?? null} />
           ))}
         </div>
       )}

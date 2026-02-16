@@ -6,6 +6,7 @@ type Item = HomepageItemCard[number];
 
 interface RecommendedSectionProps {
   items: Item[];
+  watchlistedMap?: Record<string, string>;
 }
 
 function getGreeting(): string {
@@ -15,7 +16,7 @@ function getGreeting(): string {
   return "Good evening";
 }
 
-export function RecommendedSection({ items }: RecommendedSectionProps) {
+export function RecommendedSection({ items, watchlistedMap = {} }: RecommendedSectionProps) {
   const { authenticated, user } = useAuth();
 
   const greeting = authenticated && user?.full_name
@@ -34,7 +35,7 @@ export function RecommendedSection({ items }: RecommendedSectionProps) {
       ) : (
         <div className="scrollbar-hide flex gap-4 overflow-x-auto px-4 pb-4 lg:gap-6 lg:px-10">
           {items.map((item) => (
-            <ItemCard key={item.id} item={item} />
+            <ItemCard key={item.id} item={item} watchlistEntryId={watchlistedMap[item.id] ?? null} />
           ))}
         </div>
       )}

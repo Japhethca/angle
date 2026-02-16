@@ -27,6 +27,7 @@ interface CategoryShowProps {
   items: CategoryItemType[];
   has_more: boolean;
   active_subcategory: string | null;
+  watchlisted_map: Record<string, string>;
 }
 
 export default function CategoryShow({
@@ -35,6 +36,7 @@ export default function CategoryShow({
   items: initialItems = [],
   has_more: initialHasMore = false,
   active_subcategory,
+  watchlisted_map = {},
 }: CategoryShowProps) {
   const parentSlug = category.slug;
   const [viewMode, setViewMode] = useState<ViewMode>(getInitialViewMode);
@@ -178,13 +180,13 @@ export default function CategoryShow({
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 gap-6 px-4 sm:grid-cols-2 lg:grid-cols-3 lg:px-10">
               {items.map((item) => (
-                <CategoryItemCard key={item.id} item={item} />
+                <CategoryItemCard key={item.id} item={item} watchlistEntryId={watchlisted_map[item.id] ?? null} />
               ))}
             </div>
           ) : (
             <div className="flex flex-col gap-4 px-4 lg:px-10">
               {items.map((item) => (
-                <CategoryItemListCard key={item.id} item={item} />
+                <CategoryItemListCard key={item.id} item={item} watchlistEntryId={watchlisted_map[item.id] ?? null} />
               ))}
             </div>
           )}
