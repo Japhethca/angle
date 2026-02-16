@@ -1,7 +1,44 @@
 defmodule AngleWeb.WatchlistController do
   use AngleWeb, :controller
 
-  def index(conn, _params) do
-    render_inertia(conn, "watchlist")
+  require Ash.Query
+
+  def index(conn, params) do
+    category_id = params["category"]
+
+    items = load_watchlist_items(conn, category_id)
+    categories = load_top_categories()
+
+    conn
+    |> assign_prop(:items, items)
+    |> assign_prop(:categories, categories)
+    |> assign_prop(:active_category, category_id)
+    |> render_inertia("watchlist")
   end
+
+  defp load_watchlist_items(conn, category_id) do
+    query_params = %{
+      filter: build_filter(category_id)
+    }
+
+    case AshTypescript.Rpc.run_typed_query(:angle, :watchlist_item_card, query_params, conn) do
+      %{"success" => true, "data" => data} -> extract_results(data)
+      _ -> []
+    end
+  end
+
+  defp build_filter(nil), do: %{}
+  defp build_filter(category_id), do: %{category_id: category_id}
+
+  defp load_top_categories do
+    Angle.Catalog.Category
+    |> Ash.Query.filter(is_nil(parent_id))
+    |> Ash.Query.sort(:name)
+    |> Ash.read!(authorize?: false)
+    |> Enum.map(fn cat -> %{id: cat.id, name: cat.name, slug: cat.slug} end)
+  end
+
+  defp extract_results(data) when is_list(data), do: data
+  defp extract_results(%{"results" => results}) when is_list(results), do: results
+  defp extract_results(_), do: []
 end
