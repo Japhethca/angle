@@ -8,11 +8,15 @@ import {
 interface UseWatchlistToggleOptions {
   itemId: string;
   watchlistEntryId: string | null;
+  onAdd?: () => void;
+  onRemove?: () => void;
 }
 
 export function useWatchlistToggle({
   itemId,
   watchlistEntryId,
+  onAdd,
+  onRemove,
 }: UseWatchlistToggleOptions) {
   const [isWatchlisted, setIsWatchlisted] = useState(!!watchlistEntryId);
   const [entryId, setEntryId] = useState(watchlistEntryId);
@@ -30,6 +34,7 @@ export function useWatchlistToggle({
           headers: buildCSRFHeaders(),
         });
         setEntryId(null);
+        onRemove?.();
       } catch {
         setIsWatchlisted(true);
       }
@@ -43,6 +48,7 @@ export function useWatchlistToggle({
         });
         if (result.success) {
           setEntryId(result.data.id);
+          onAdd?.();
         }
       } catch {
         setIsWatchlisted(false);

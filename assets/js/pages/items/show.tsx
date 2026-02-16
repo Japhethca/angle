@@ -18,6 +18,7 @@ import {
 } from "@/features/items";
 import { BidSection } from "@/features/bidding";
 import { useWatchlistToggle } from "@/features/watchlist/hooks/use-watchlist-toggle";
+import { toast } from "sonner";
 
 interface Seller {
   id: string;
@@ -38,9 +39,11 @@ export default function Show({
   watchlist_entry_id = null,
 }: ShowProps) {
   const price = item.currentPrice || item.startingPrice;
-  const { isWatchlisted, toggle, isPending } = useWatchlistToggle({
+  const { isWatchlisted, toggle: toggleWatch, isPending: isWatchPending } = useWatchlistToggle({
     itemId: item.id,
     watchlistEntryId: watchlist_entry_id,
+    onAdd: () => toast.success("Added to your watchlist"),
+    onRemove: () => toast.success("Removed from your watchlist"),
   });
 
   return (
@@ -63,8 +66,8 @@ export default function Show({
             <Share2 className="size-4 text-content" />
           </button>
           <button
-            onClick={toggle}
-            disabled={isPending}
+            onClick={toggleWatch}
+            disabled={isWatchPending}
             className="flex size-9 items-center justify-center rounded-full border border-strong"
           >
             <Heart
@@ -110,18 +113,7 @@ export default function Show({
             <div className="sticky top-24 space-y-5">
               {/* Item header info */}
               <div className="space-y-3">
-                <div className="flex items-start justify-between">
-                  <ConditionBadge condition={item.condition} />
-                  <button
-                    onClick={toggle}
-                    disabled={isPending}
-                    className="flex size-9 items-center justify-center rounded-full border border-strong transition-colors hover:bg-surface-muted"
-                  >
-                    <Heart
-                      className={`size-4 ${isWatchlisted ? "fill-red-500 text-red-500" : "text-content"}`}
-                    />
-                  </button>
-                </div>
+                <ConditionBadge condition={item.condition} />
                 <h1 className="font-heading text-xl font-semibold text-content">
                   {item.title}
                 </h1>
@@ -153,6 +145,9 @@ export default function Show({
                 startingPrice={item.startingPrice}
                 bidIncrement={item.bidIncrement}
                 bidCount={item.bidCount}
+                isWatchlisted={isWatchlisted}
+                onToggleWatch={toggleWatch}
+                isWatchPending={isWatchPending}
               />
             </div>
           </div>
@@ -189,10 +184,14 @@ export default function Show({
 
           <BidSection
             itemId={item.id}
+            itemTitle={item.title}
             currentPrice={item.currentPrice}
             startingPrice={item.startingPrice}
             bidIncrement={item.bidIncrement}
             bidCount={item.bidCount}
+            isWatchlisted={isWatchlisted}
+            onToggleWatch={toggleWatch}
+            isWatchPending={isWatchPending}
           />
 
           <ItemDetailTabs description={item.description} />
