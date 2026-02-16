@@ -1,7 +1,8 @@
+import { useEffect, useState } from "react";
 import { router } from "@inertiajs/react";
 import { toast } from "sonner";
 import type { WonOrderCard as WonOrderCardType } from "@/ash_rpc";
-import { payOrder, confirmReceipt, buildCSRFHeaders } from "@/ash_rpc";
+import { confirmReceipt, buildCSRFHeaders, getPhoenixCSRFToken } from "@/ash_rpc";
 import { useAshMutation } from "@/hooks/use-ash-query";
 import { WonBidCard } from "./won-bid-card";
 
@@ -10,23 +11,80 @@ interface WonBidsListProps {
 }
 
 export function WonBidsList({ orders }: WonBidsListProps) {
-  const { mutate: handlePay, isPending: payPending } = useAshMutation(
-    (orderId: string) =>
-      payOrder({
-        identity: orderId,
-        input: { paymentReference: `PSK_${Date.now()}` }, // TODO: integrate real Paystack flow
-        headers: buildCSRFHeaders(),
-      }),
-    {
-      onSuccess: () => {
-        toast.success("Payment processed!");
-        router.reload();
-      },
-      onError: (error) => {
-        toast.error(error.message || "Payment failed");
-      },
-    },
-  );
+  const [payPending, setPayPending] = useState(false);
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://js.paystack.co/v2/inline.js";
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const handlePay = async (orderId: string) => {
+    const csrfToken = getPhoenixCSRFToken();
+    setPayPending(true);
+
+    try {
+      const res = await fetch("/api/payments/pay-order", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...(csrfToken ? { "x-csrf-token": csrfToken } : {}),
+        },
+        body: JSON.stringify({ order_id: orderId }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        toast.error(data?.error || "Failed to initialize payment");
+        return;
+      }
+
+      const data = await res.json();
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const paystack = new (window as any).PaystackPop();
+      paystack.resumeTransaction(data.access_code, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onSuccess: async (transaction: any) => {
+          try {
+            const verifyRes = await fetch("/api/payments/verify-order-payment", {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+                ...(csrfToken ? { "x-csrf-token": csrfToken } : {}),
+              },
+              body: JSON.stringify({
+                reference: transaction.reference,
+                order_id: orderId,
+              }),
+            });
+
+            if (!verifyRes.ok) {
+              const errData = await verifyRes.json().catch(() => null);
+              toast.error(errData?.error || "Payment verification failed");
+              return;
+            }
+
+            toast.success("Payment processed!");
+            router.reload();
+          } catch {
+            toast.error("Payment verification failed");
+          }
+        },
+        onCancel: () => {
+          toast.error("Payment was cancelled");
+        },
+      });
+    } catch {
+      toast.error("Failed to initialize payment");
+    } finally {
+      setPayPending(false);
+    }
+  };
 
   const { mutate: handleConfirmReceipt, isPending: confirmPending } =
     useAshMutation(

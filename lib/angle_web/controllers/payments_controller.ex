@@ -128,8 +128,7 @@ defmodule AngleWeb.PaymentsController do
   def pay_order(conn, %{"order_id" => order_id}) do
     user = conn.assigns.current_user
 
-    with {:ok, order} <- Ash.get(Angle.Bidding.Order, order_id, authorize?: false),
-         :ok <- validate_buyer(order, user),
+    with {:ok, order} <- Ash.get(Angle.Bidding.Order, order_id, actor: user),
          :ok <- validate_order_status(order, :payment_pending),
          {:ok, data} <-
            @paystack.initialize_transaction(to_string(user.email), order_amount_in_kobo(order)) do
@@ -142,11 +141,11 @@ defmodule AngleWeb.PaymentsController do
       {:error, reason} when is_binary(reason) ->
         conn |> put_status(422) |> json(%{error: reason})
 
-      :unauthorized ->
-        conn |> put_status(403) |> json(%{error: "Not authorized"})
-
       :invalid_status ->
         conn |> put_status(422) |> json(%{error: "Order is not in payment pending status"})
+
+      {:error, %Ash.Error.Forbidden{}} ->
+        conn |> put_status(403) |> json(%{error: "Not authorized"})
 
       {:error, _} ->
         conn |> put_status(422) |> json(%{error: "Failed to initialize payment"})
@@ -161,24 +160,19 @@ defmodule AngleWeb.PaymentsController do
   def verify_order_payment(conn, %{"reference" => reference, "order_id" => order_id}) do
     user = conn.assigns.current_user
 
-    with {:ok, order} <- Ash.get(Angle.Bidding.Order, order_id, authorize?: false),
-         :ok <- validate_buyer(order, user),
+    with {:ok, order} <- Ash.get(Angle.Bidding.Order, order_id, actor: user),
          {:ok, transaction} <- @paystack.verify_transaction(reference),
-         :ok <- validate_payment_success(transaction) do
-      {:ok, _updated_order} =
-        order
-        |> Ash.Changeset.for_update(:pay_order, %{payment_reference: reference},
-          actor: user,
-          authorize?: false
-        )
-        |> Ash.update(authorize?: false)
-
+         :ok <- validate_payment_success(transaction),
+         {:ok, _updated_order} <-
+           order
+           |> Ash.Changeset.for_update(:pay_order, %{payment_reference: reference}, actor: user)
+           |> Ash.update() do
       json(conn, %{success: true})
     else
       {:error, reason} when is_binary(reason) ->
         conn |> put_status(422) |> json(%{error: reason})
 
-      :unauthorized ->
+      {:error, %Ash.Error.Forbidden{}} ->
         conn |> put_status(403) |> json(%{error: "Not authorized"})
 
       {:error, _} ->
@@ -249,10 +243,6 @@ defmodule AngleWeb.PaymentsController do
   end
 
   defp error_message(_), do: "An error occurred"
-
-  defp validate_buyer(order, user) do
-    if order.buyer_id == user.id, do: :ok, else: :unauthorized
-  end
 
   defp validate_order_status(order, expected) do
     if order.status == expected, do: :ok, else: :invalid_status

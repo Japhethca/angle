@@ -42,26 +42,34 @@ defmodule Angle.Bidding.Workers.EndAuctionWorker do
 
   defp end_with_winner(item, winning_bid) do
     Angle.Repo.transaction(fn ->
-      Angle.Bidding.Order
-      |> Ash.Changeset.for_create(
-        :create,
-        %{
-          amount: winning_bid.amount,
-          item_id: item.id,
-          buyer_id: winning_bid.user_id,
-          seller_id: item.created_by_id
-        },
-        authorize?: false
-      )
-      |> Ash.create!(authorize?: false)
+      {_order, order_notifications} =
+        Angle.Bidding.Order
+        |> Ash.Changeset.for_create(
+          :create,
+          %{
+            amount: winning_bid.amount,
+            item_id: item.id,
+            buyer_id: winning_bid.user_id,
+            seller_id: item.created_by_id
+          },
+          authorize?: false
+        )
+        |> Ash.create!(authorize?: false, return_notifications?: true)
 
-      item
-      |> Ash.Changeset.for_update(:end_auction, %{new_status: :sold}, authorize?: false)
-      |> Ash.update!(authorize?: false)
+      {_item, item_notifications} =
+        item
+        |> Ash.Changeset.for_update(:end_auction, %{new_status: :sold}, authorize?: false)
+        |> Ash.update!(authorize?: false, return_notifications?: true)
+
+      order_notifications ++ item_notifications
     end)
     |> case do
-      {:ok, _} -> :ok
-      {:error, reason} -> {:error, reason}
+      {:ok, notifications} ->
+        Ash.Notifier.notify(notifications)
+        :ok
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 end
