@@ -124,6 +124,66 @@ defmodule AngleWeb.PaymentsController do
     end
   end
 
+  # POST /api/payments/pay-order
+  def pay_order(conn, %{"order_id" => order_id}) do
+    user = conn.assigns.current_user
+
+    with {:ok, order} <- Ash.get(Angle.Bidding.Order, order_id, actor: user),
+         :ok <- validate_order_status(order, :payment_pending),
+         {:ok, data} <-
+           @paystack.initialize_transaction(to_string(user.email), order_amount_in_kobo(order)) do
+      json(conn, %{
+        authorization_url: data.authorization_url,
+        access_code: data.access_code,
+        reference: data.reference
+      })
+    else
+      {:error, reason} when is_binary(reason) ->
+        conn |> put_status(422) |> json(%{error: reason})
+
+      {:error, :invalid_status} ->
+        conn |> put_status(422) |> json(%{error: "Order is not in payment pending status"})
+
+      {:error, %Ash.Error.Forbidden{}} ->
+        conn |> put_status(403) |> json(%{error: "Not authorized"})
+
+      {:error, _} ->
+        conn |> put_status(422) |> json(%{error: "Failed to initialize payment"})
+    end
+  end
+
+  def pay_order(conn, _params) do
+    conn |> put_status(422) |> json(%{error: "Missing order_id"})
+  end
+
+  # POST /api/payments/verify-order-payment
+  def verify_order_payment(conn, %{"reference" => reference, "order_id" => order_id}) do
+    user = conn.assigns.current_user
+
+    with {:ok, order} <- Ash.get(Angle.Bidding.Order, order_id, actor: user),
+         {:ok, transaction} <- @paystack.verify_transaction(reference),
+         :ok <- validate_payment_success(transaction),
+         {:ok, _updated_order} <-
+           order
+           |> Ash.Changeset.for_update(:pay_order, %{payment_reference: reference}, actor: user)
+           |> Ash.update() do
+      json(conn, %{success: true})
+    else
+      {:error, reason} when is_binary(reason) ->
+        conn |> put_status(422) |> json(%{error: reason})
+
+      {:error, %Ash.Error.Forbidden{}} ->
+        conn |> put_status(403) |> json(%{error: "Not authorized"})
+
+      {:error, _} ->
+        conn |> put_status(422) |> json(%{error: "Payment verification failed"})
+    end
+  end
+
+  def verify_order_payment(conn, _params) do
+    conn |> put_status(422) |> json(%{error: "Missing reference or order_id"})
+  end
+
   # --- Private helpers ---
 
   defp validate_transaction(%{status: "success", amount: amount})
@@ -183,4 +243,15 @@ defmodule AngleWeb.PaymentsController do
   end
 
   defp error_message(_), do: "An error occurred"
+
+  defp validate_order_status(order, expected) do
+    if order.status == expected, do: :ok, else: {:error, :invalid_status}
+  end
+
+  defp validate_payment_success(%{status: "success"}), do: :ok
+  defp validate_payment_success(_), do: {:error, "Payment was not successful"}
+
+  defp order_amount_in_kobo(order) do
+    order.amount |> Decimal.mult(100) |> Decimal.to_integer()
+  end
 end

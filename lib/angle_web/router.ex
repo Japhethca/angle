@@ -132,6 +132,8 @@ defmodule AngleWeb.Router do
     post "/add-payout", PaymentsController, :add_payout
     delete "/payout-methods/:id", PaymentsController, :delete_payout_method
     get "/banks", PaymentsController, :list_banks
+    post "/pay-order", PaymentsController, :pay_order
+    post "/verify-order-payment", PaymentsController, :verify_order_payment
   end
 
   # Other scopes may use custom stacks.
