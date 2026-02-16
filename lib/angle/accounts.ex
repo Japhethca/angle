@@ -28,6 +28,8 @@ defmodule Angle.Accounts do
           :whatsapp_number,
           :created_at,
           :published_item_count,
+          :avg_rating,
+          :review_count,
           store_profile: [
             :store_name,
             :location,
