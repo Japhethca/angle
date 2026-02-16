@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { Search, Bell, Menu, User } from 'lucide-react';
+import { Search, Bell, Menu } from 'lucide-react';
 import { useAuth, AuthLink } from '@/features/auth';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -12,6 +12,8 @@ import {
   NavigationMenuContent,
 } from '@/components/ui/navigation-menu';
 import { CategoryMegaMenu, type NavCategory } from './category-mega-menu';
+import { UserMenuPopover } from './user-menu-popover';
+import { UserMenuContent } from './user-menu-content';
 
 interface MainNavProps {
   navCategories: NavCategory[];
@@ -115,12 +117,7 @@ export function MainNav({ navCategories }: MainNavProps) {
               <button className="flex size-10 items-center justify-center rounded-lg text-content-secondary transition-colors hover:bg-surface-muted">
                 <Bell className="size-5" />
               </button>
-              <Link
-                href="/settings/account"
-                className="flex size-10 items-center justify-center rounded-lg text-content-secondary transition-colors hover:bg-surface-muted"
-              >
-                <User className="size-5" />
-              </Link>
+              <UserMenuPopover />
             </>
           ) : (
             <>
@@ -163,13 +160,7 @@ export function MainNav({ navCategories }: MainNavProps) {
 
               <div className="flex flex-col gap-6 px-4 pt-4">
                 {authenticated ? (
-                  <Link
-                    href="/settings/account"
-                    className="text-sm font-medium text-content"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    Profile
-                  </Link>
+                  <UserMenuContent onNavigate={() => setMobileOpen(false)} />
                 ) : (
                   <div className="flex flex-col gap-2">
                     <Button variant="outline" asChild>
