@@ -1,10 +1,96 @@
-import { Head } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
+import { Eye, Heart, Gavel, Banknote, Plus, Package } from "lucide-react";
+import type { SellerDashboardCard } from "@/ash_rpc";
+import {
+  StoreLayout,
+  StatsCard,
+  ListingTable,
+  ListingCard,
+} from "@/features/store-dashboard";
 
-export default function StoreListings() {
+type Item = SellerDashboardCard[number];
+
+interface Stats {
+  total_views: number;
+  total_watches: number;
+  total_bids: number;
+  total_amount: string;
+}
+
+interface StoreListingsProps {
+  items: Item[];
+  stats: Stats;
+}
+
+function formatCurrency(value: string | number | null | undefined): string {
+  if (value == null) return "\u20A60";
+  const num = typeof value === "string" ? parseFloat(value) : value;
+  if (isNaN(num)) return "\u20A60";
+  return "\u20A6" + num.toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+export default function StoreListings({ items = [], stats }: StoreListingsProps) {
+  const defaultStats: Stats = {
+    total_views: 0,
+    total_watches: 0,
+    total_bids: 0,
+    total_amount: "0",
+  };
+  const s = stats || defaultStats;
+
   return (
     <>
       <Head title="Store - Listings" />
-      <div>Store Listings placeholder</div>
+      <StoreLayout title="Listings">
+        {/* Stats grid */}
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <StatsCard label="Views" value={s.total_views} icon={Eye} />
+          <StatsCard label="Watch" value={s.total_watches} icon={Heart} />
+          <StatsCard label="Bids" value={s.total_bids} icon={Gavel} />
+          <StatsCard label="Amount" value={formatCurrency(s.total_amount)} icon={Banknote} />
+        </div>
+
+        {/* Item listings section */}
+        <div className="mt-8">
+          <h2 className="mb-4 text-lg font-semibold text-content">
+            Item Listings
+          </h2>
+
+          {items.length > 0 ? (
+            <>
+              {/* Desktop table */}
+              <div className="hidden lg:block">
+                <div className="rounded-xl border border-surface-muted bg-white">
+                  <ListingTable items={items} />
+                </div>
+              </div>
+
+              {/* Mobile cards */}
+              <div className="flex flex-col gap-3 lg:hidden">
+                {items.map((item) => (
+                  <ListingCard key={item.id} item={item} />
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center rounded-xl border border-surface-muted bg-white py-16 text-center">
+              <Package className="mb-3 size-12 text-surface-emphasis" />
+              <p className="text-lg text-content-tertiary">No listings yet</p>
+              <p className="mt-1 text-sm text-content-placeholder">
+                Create your first listing to start selling
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile FAB */}
+        <Link
+          href="/items/new"
+          className="fixed bottom-20 right-4 z-20 flex size-14 items-center justify-center rounded-full bg-primary-600 text-white shadow-lg transition-transform hover:scale-105 lg:hidden"
+        >
+          <Plus className="size-6" />
+        </Link>
+      </StoreLayout>
     </>
   );
 }
