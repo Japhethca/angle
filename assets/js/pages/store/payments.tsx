@@ -8,6 +8,7 @@ import {
   PaymentTable,
   PaymentCard,
 } from "@/features/store-dashboard";
+import { formatCurrency } from "@/features/store-dashboard/utils";
 
 type Order = SellerPaymentCard[number];
 
@@ -19,13 +20,6 @@ interface Balance {
 interface StorePaymentsProps {
   orders: Order[];
   balance: Balance;
-}
-
-function formatCurrency(value: string | number | null | undefined): string {
-  if (value == null) return "\u20A60";
-  const num = typeof value === "string" ? parseFloat(value) : value;
-  if (isNaN(num)) return "\u20A60";
-  return "\u20A6" + num.toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 
 export default function StorePayments({ orders = [], balance }: StorePaymentsProps) {

@@ -8,15 +8,9 @@ import {
 import { cn } from "@/lib/utils";
 import type { SellerDashboardCard } from "@/ash_rpc";
 import { ListingActionsMenu } from "./listing-actions-menu";
+import { formatCurrency } from "../utils";
 
 type Item = SellerDashboardCard[number];
-
-function formatCurrency(value: string | number | null | undefined): string {
-  if (value == null) return "\u20A60";
-  const num = typeof value === "string" ? parseFloat(value) : value;
-  if (isNaN(num)) return "\u20A60";
-  return "\u20A6" + num.toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-}
 
 function formatTimeLeft(endTime: string | null | undefined): string {
   if (!endTime) return "--";

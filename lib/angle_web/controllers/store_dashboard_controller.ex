@@ -51,7 +51,11 @@ defmodule AngleWeb.StoreDashboardController do
   end
 
   defp load_seller_orders(conn) do
-    case AshTypescript.Rpc.run_typed_query(:angle, :seller_payment_card, %{}, conn) do
+    params = %{
+      page: %{limit: 100, offset: 0, count: true}
+    }
+
+    case AshTypescript.Rpc.run_typed_query(:angle, :seller_payment_card, params, conn) do
       %{"success" => true, "data" => data} -> extract_results(data)
       _ -> []
     end
