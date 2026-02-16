@@ -37,6 +37,45 @@ export type BidAttributesOnlySchema = {
 };
 
 
+// Order Schema
+export type OrderResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "status" | "amount" | "paymentReference" | "paidAt" | "dispatchedAt" | "completedAt" | "createdAt" | "itemId" | "buyerId" | "sellerId";
+  id: UUID;
+  status: "payment_pending" | "paid" | "dispatched" | "completed" | "cancelled";
+  amount: Decimal;
+  paymentReference: string | null;
+  paidAt: UtcDateTimeUsec | null;
+  dispatchedAt: UtcDateTimeUsec | null;
+  completedAt: UtcDateTimeUsec | null;
+  createdAt: UtcDateTimeUsec;
+  itemId: UUID;
+  buyerId: UUID;
+  sellerId: UUID;
+  item: { __type: "Relationship"; __resource: ItemResourceSchema; };
+  buyer: { __type: "Relationship"; __resource: UserResourceSchema; };
+  seller: { __type: "Relationship"; __resource: UserResourceSchema; };
+};
+
+
+
+export type OrderAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "status" | "amount" | "paymentReference" | "paidAt" | "dispatchedAt" | "completedAt" | "createdAt" | "itemId" | "buyerId" | "sellerId";
+  id: UUID;
+  status: "payment_pending" | "paid" | "dispatched" | "completed" | "cancelled";
+  amount: Decimal;
+  paymentReference: string | null;
+  paidAt: UtcDateTimeUsec | null;
+  dispatchedAt: UtcDateTimeUsec | null;
+  completedAt: UtcDateTimeUsec | null;
+  createdAt: UtcDateTimeUsec;
+  itemId: UUID;
+  buyerId: UUID;
+  sellerId: UUID;
+};
+
+
 // Category Schema
 export type CategoryResourceSchema = {
   __type: "Resource";
@@ -299,6 +338,105 @@ export type BidFilterInput = {
   item?: ItemFilterInput;
 
   user?: UserFilterInput;
+
+};
+export type OrderFilterInput = {
+  and?: Array<OrderFilterInput>;
+  or?: Array<OrderFilterInput>;
+  not?: Array<OrderFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  status?: {
+    eq?: "payment_pending" | "paid" | "dispatched" | "completed" | "cancelled";
+    notEq?: "payment_pending" | "paid" | "dispatched" | "completed" | "cancelled";
+    in?: Array<"payment_pending" | "paid" | "dispatched" | "completed" | "cancelled">;
+  };
+
+  amount?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  paymentReference?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  paidAt?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+  dispatchedAt?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+  completedAt?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+  createdAt?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+  itemId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  buyerId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  sellerId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+
+  item?: ItemFilterInput;
+
+  buyer?: UserFilterInput;
+
+  seller?: UserFilterInput;
 
 };
 export type CategoryFilterInput = {
@@ -1427,6 +1565,40 @@ export const itemDetailFields = ["id", "title", "description", "slug", "starting
 
 
 
+// User Typed Queries
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
+
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
+
+
+
+// Order Typed Queries
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
+
+
+
 // Category Typed Queries
 /**
  * Typed query for Category
@@ -1459,20 +1631,35 @@ export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "na
 
 
 
-// User Typed Queries
+// Bid Typed Queries
 /**
- * Typed query for User
+ * Typed query for Bid
  *
  * @typedQuery true
  */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
+export type ActiveBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "viewCount"] }]>>;
 
 /**
- * Typed query for User
+ * Typed query for Bid
  *
  * @typedQuery true
  */
-export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
+export const activeBidCardFields = ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "viewCount"] }] satisfies ListBidsFields;
+
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById"] }]>>;
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById"] }] satisfies ListBidsFields;
 
 
 
@@ -1643,6 +1830,305 @@ export async function validateMakeBid(
     action: "make_bid",
     ...(config.tenant !== undefined && { tenant: config.tenant }),
     input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type ListOrdersFields = UnifiedFieldSelection<OrderResourceSchema>[];
+
+
+export type InferListOrdersResult<
+  Fields extends ListOrdersFields | undefined,
+  Page extends ListOrdersConfig["page"] = undefined
+> = ConditionalPaginatedResult<Page, Array<InferResult<OrderResourceSchema, Fields>>, {
+  results: Array<InferResult<OrderResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+  count?: number | null;
+  type: "offset";
+}>;
+
+export type ListOrdersConfig = {
+  tenant?: string;
+  fields: ListOrdersFields;
+  filter?: OrderFilterInput;
+  sort?: string;
+  page?: {
+    limit?: number;
+    offset?: number;
+    after?: never;
+    before?: never;
+    count?: boolean;
+  };
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
+
+export type ListOrdersResult<Fields extends ListOrdersFields, Page extends ListOrdersConfig["page"] = undefined> = | { success: true; data: InferListOrdersResult<Fields, Page>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read Order records
+ *
+ * @ashActionType :read
+ */
+export async function listOrders<Fields extends ListOrdersFields, Config extends ListOrdersConfig = ListOrdersConfig>(
+  config: Config & { fields: Fields }
+): Promise<ListOrdersResult<Fields, Config["page"]>> {
+  const payload = {
+    action: "list_orders",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort }),
+    ...(config.page && { page: config.page })
+  };
+
+  return executeActionRpcRequest<ListOrdersResult<Fields, Config["page"]>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read Order records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateListOrders(
+  config: {
+  tenant?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "list_orders",
+    ...(config.tenant !== undefined && { tenant: config.tenant })
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type PayOrderInput = {
+  paymentReference: string;
+};
+
+export type PayOrderFields = UnifiedFieldSelection<OrderResourceSchema>[];
+
+export type InferPayOrderResult<
+  Fields extends PayOrderFields | undefined,
+> = InferResult<OrderResourceSchema, Fields>;
+
+export type PayOrderResult<Fields extends PayOrderFields | undefined = undefined> = | { success: true; data: InferPayOrderResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Update an existing Order
+ *
+ * @ashActionType :update
+ */
+export async function payOrder<Fields extends PayOrderFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  input: PayOrderInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<PayOrderResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "pay_order",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<PayOrderResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Update an existing Order
+ *
+ * @ashActionType :update
+ * @validation true
+ */
+export async function validatePayOrder(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  input: PayOrderInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "pay_order",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type MarkDispatchedFields = UnifiedFieldSelection<OrderResourceSchema>[];
+
+export type InferMarkDispatchedResult<
+  Fields extends MarkDispatchedFields | undefined,
+> = InferResult<OrderResourceSchema, Fields>;
+
+export type MarkDispatchedResult<Fields extends MarkDispatchedFields | undefined = undefined> = | { success: true; data: InferMarkDispatchedResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Update an existing Order
+ *
+ * @ashActionType :update
+ */
+export async function markDispatched<Fields extends MarkDispatchedFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<MarkDispatchedResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "mark_dispatched",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<MarkDispatchedResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Update an existing Order
+ *
+ * @ashActionType :update
+ * @validation true
+ */
+export async function validateMarkDispatched(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "mark_dispatched",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type ConfirmReceiptFields = UnifiedFieldSelection<OrderResourceSchema>[];
+
+export type InferConfirmReceiptResult<
+  Fields extends ConfirmReceiptFields | undefined,
+> = InferResult<OrderResourceSchema, Fields>;
+
+export type ConfirmReceiptResult<Fields extends ConfirmReceiptFields | undefined = undefined> = | { success: true; data: InferConfirmReceiptResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Update an existing Order
+ *
+ * @ashActionType :update
+ */
+export async function confirmReceipt<Fields extends ConfirmReceiptFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ConfirmReceiptResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "confirm_receipt",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<ConfirmReceiptResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Update an existing Order
+ *
+ * @ashActionType :update
+ * @validation true
+ */
+export async function validateConfirmReceipt(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "confirm_receipt",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity
   };
 
   return executeValidationRpcRequest<ValidationResult>(
