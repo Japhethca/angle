@@ -1,18 +1,11 @@
 import { Head, router } from "@inertiajs/react";
-import { Search } from "lucide-react";
+import { ChevronDown, Search, SlidersHorizontal } from "lucide-react";
 import type { WatchlistItemCard as WatchlistItemCardType } from "@/ash_rpc";
 import {
   EmptyWatchlist,
   WatchlistItemCard,
   WatchlistCategorySidebar,
 } from "@/features/watchlist";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface Category {
   id: string;
@@ -46,13 +39,8 @@ export default function Watchlist({
     );
   }
 
-  function handleMobileCategoryChange(value: string) {
-    if (value === "all") {
-      router.visit("/watchlist");
-    } else {
-      router.visit(`/watchlist?category=${value}`);
-    }
-  }
+  const activeCategoryName =
+    categories.find((c) => c.id === active_category)?.name ?? "All";
 
   return (
     <>
@@ -71,36 +59,54 @@ export default function Watchlist({
 
           {/* Main content */}
           <div className="min-w-0 flex-1">
-            {/* Header */}
-            <div className="mb-6 flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-content">
-                Watchlist{" "}
-                {items.length > 0 && (
-                  <span className="text-content-tertiary">
-                    ({items.length})
-                  </span>
-                )}
+            {/* Desktop header */}
+            <div className="mb-6 hidden items-center lg:flex">
+              <h1 className="flex items-center gap-2 text-2xl font-bold text-content">
+                Watchlist
+                <ChevronDown className="size-5 text-content-tertiary" />
               </h1>
             </div>
 
-            {/* Mobile category filter */}
-            <div className="mb-4 lg:hidden">
-              <Select
-                value={active_category ?? "all"}
-                onValueChange={handleMobileCategoryChange}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Filter by category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Mobile header with filter */}
+            <div className="mb-4 flex items-center gap-3 lg:hidden">
+              <h1 className="text-2xl font-bold text-content">Watchlist</h1>
+              <div className="ml-auto flex items-center gap-2">
+                <button
+                  type="button"
+                  aria-label="Search watchlist"
+                  className="flex size-10 items-center justify-center rounded-full bg-surface-muted"
+                >
+                  <Search className="size-5 text-content-tertiary" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    // Cycle through: All -> first category -> ... -> All
+                    if (!active_category) {
+                      if (categories.length > 0) {
+                        router.visit(`/watchlist?category=${categories[0].id}`);
+                      }
+                    } else {
+                      const currentIndex = categories.findIndex(
+                        (c) => c.id === active_category
+                      );
+                      const nextIndex = currentIndex + 1;
+                      if (nextIndex < categories.length) {
+                        router.visit(
+                          `/watchlist?category=${categories[nextIndex].id}`
+                        );
+                      } else {
+                        router.visit("/watchlist");
+                      }
+                    }
+                  }}
+                  className="flex items-center gap-2 rounded-full border border-subtle bg-white px-4 py-2 text-sm font-medium text-content"
+                >
+                  <SlidersHorizontal className="size-4" />
+                  {activeCategoryName}
+                  <ChevronDown className="size-4 text-content-tertiary" />
+                </button>
+              </div>
             </div>
 
             {/* Items list or filtered empty state */}
@@ -116,15 +122,19 @@ export default function Watchlist({
                 <button
                   type="button"
                   onClick={() => router.visit("/watchlist")}
-                  className="mt-4 rounded-lg border border-strong px-5 py-2 text-sm font-medium text-content transition-colors hover:bg-surface-muted"
+                  className="mt-4 rounded-full border-[1.2px] border-content px-5 py-2 text-sm font-medium text-content transition-colors hover:bg-surface-muted"
                 >
                   View All
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-10">
                 {items.map((item) => (
-                  <WatchlistItemCard key={item.id} item={item} watchlistEntryId={watchlisted_map[item.id] ?? null} />
+                  <WatchlistItemCard
+                    key={item.id}
+                    item={item}
+                    watchlistEntryId={watchlisted_map[item.id] ?? null}
+                  />
                 ))}
               </div>
             )}
