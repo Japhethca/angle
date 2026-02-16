@@ -38,7 +38,7 @@ export function WatchlistCategorySidebar({
   }
 
   return (
-    <nav className="flex h-full flex-col rounded-xl bg-white py-6 shadow-[0px_1px_2px_rgba(0,0,0,0.08)]">
+    <nav className="flex h-full flex-col rounded-xl bg-surface py-6 shadow-[0px_1px_2px_rgba(0,0,0,0.08)] dark:shadow-black/10">
       <div className="flex flex-col gap-1 px-3">
         {/* All option */}
         <button
@@ -47,7 +47,7 @@ export function WatchlistCategorySidebar({
           className={cn(
             "flex items-center gap-2 rounded-lg px-4 py-2 text-left text-base font-medium transition-colors",
             isAllActive
-              ? "bg-[rgba(253,224,204,0.4)] text-primary-800"
+              ? "bg-[rgba(253,224,204,0.4)] dark:bg-primary-600/20 text-primary-800 dark:text-primary-400"
               : "text-content-tertiary hover:bg-surface-muted hover:text-content"
           )}
         >
@@ -68,7 +68,7 @@ export function WatchlistCategorySidebar({
               className={cn(
                 "flex items-center gap-2 rounded-lg px-4 py-2 text-left text-base font-medium transition-colors",
                 isActive
-                  ? "bg-[rgba(253,224,204,0.4)] text-primary-800"
+                  ? "bg-[rgba(253,224,204,0.4)] dark:bg-primary-600/20 text-primary-800 dark:text-primary-400"
                   : "text-content-tertiary hover:bg-surface-muted hover:text-content"
               )}
             >

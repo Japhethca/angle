@@ -1677,40 +1677,6 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
-// Review Typed Queries
-/**
- * Typed query for Review
- *
- * @typedQuery true
- */
-export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }]>>;
-
-/**
- * Typed query for Review
- *
- * @typedQuery true
- */
-export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
-
-
-
-// User Typed Queries
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
-
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
-
-
-
 // Bid Typed Queries
 /**
  * Typed query for Bid
@@ -1740,6 +1706,87 @@ export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount
  * @typedQuery true
  */
 export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
+
+
+
+// Order Typed Queries
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
+
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
+
+
+
+// Category Typed Queries
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
+
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { categories: ["id", "name", "slug"] }]>>;
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
+
+
+
+// User Typed Queries
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
+
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
 
 
 
@@ -1850,67 +1897,20 @@ export const sellerDashboardCardFields = ["id", "title", "slug", "startingPrice"
 
 
 
-// Order Typed Queries
+// Review Typed Queries
 /**
- * Typed query for Order
+ * Typed query for Review
  *
  * @typedQuery true
  */
-export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
+export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }]>>;
 
 /**
- * Typed query for Order
+ * Typed query for Review
  *
  * @typedQuery true
  */
-export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
-
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }]>>;
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
-
-
-
-// Category Typed Queries
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
-
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { categories: ["id", "name", "slug"] }]>>;
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
+export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
 
 
 
@@ -3310,6 +3310,12 @@ export async function validatePublishItem(
 }
 
 
+export type ListMyListingsInput = {
+  statusFilter?: "all" | "active" | "ended" | "draft";
+  sortField?: "inserted_at" | "view_count" | "bid_count" | "watcher_count" | "current_price";
+  sortDir?: "asc" | "desc";
+};
+
 export type ListMyListingsFields = UnifiedFieldSelection<ItemResourceSchema>[];
 
 
@@ -3327,6 +3333,7 @@ export type InferListMyListingsResult<
 
 export type ListMyListingsConfig = {
   tenant?: string;
+  input?: ListMyListingsInput;
   fields: ListMyListingsFields;
   filter?: ItemFilterInput;
   sort?: string;
@@ -3358,6 +3365,7 @@ export async function listMyListings<Fields extends ListMyListingsFields, Config
   const payload = {
     action: "list_my_listings",
     ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input,
     ...(config.fields !== undefined && { fields: config.fields }),
     ...(config.filter && { filter: config.filter }),
     ...(config.sort && { sort: config.sort }),
@@ -3380,6 +3388,7 @@ export async function listMyListings<Fields extends ListMyListingsFields, Config
 export async function validateListMyListings(
   config: {
   tenant?: string;
+  input?: ListMyListingsInput;
   headers?: Record<string, string>;
   fetchOptions?: RequestInit;
   customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
@@ -3387,7 +3396,8 @@ export async function validateListMyListings(
 ): Promise<ValidationResult> {
   const payload = {
     action: "list_my_listings",
-    ...(config.tenant !== undefined && { tenant: config.tenant })
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input
   };
 
   return executeValidationRpcRequest<ValidationResult>(

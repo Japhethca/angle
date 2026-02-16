@@ -13,7 +13,7 @@ function PaymentStatusBadge({ status }: { status: string | null | undefined }) {
   const className = isPaid
     ? "bg-feedback-success-muted text-feedback-success"
     : isPending
-      ? "bg-orange-100 text-orange-700"
+      ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
       : "bg-surface-secondary text-content-tertiary";
 
   return (

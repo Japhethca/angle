@@ -134,8 +134,54 @@ defmodule Angle.Inventory.Item do
 
     read :my_listings do
       description "List all items owned by the current user (for seller dashboard)"
+
+      argument :status_filter, :atom do
+        default :all
+        constraints one_of: [:all, :active, :ended, :draft]
+      end
+
+      argument :sort_field, :atom do
+        default :inserted_at
+
+        constraints one_of: [
+                      :inserted_at,
+                      :view_count,
+                      :bid_count,
+                      :watcher_count,
+                      :current_price
+                    ]
+      end
+
+      argument :sort_dir, :atom do
+        default :desc
+        constraints one_of: [:asc, :desc]
+      end
+
       filter expr(created_by_id == ^actor(:id))
-      prepare build(sort: [inserted_at: :desc])
+
+      filter expr(
+               if ^arg(:status_filter) == :active do
+                 publication_status == :published and
+                   auction_status in [:pending, :scheduled, :active]
+               else
+                 if ^arg(:status_filter) == :ended do
+                   publication_status == :published and auction_status in [:ended, :sold]
+                 else
+                   if ^arg(:status_filter) == :draft do
+                     publication_status == :draft
+                   else
+                     true
+                   end
+                 end
+               end
+             )
+
+      prepare fn query, _context ->
+        field = Ash.Query.get_argument(query, :sort_field) || :inserted_at
+        dir = Ash.Query.get_argument(query, :sort_dir) || :desc
+        Ash.Query.sort(query, [{field, dir}])
+      end
+
       pagination offset?: true, required?: false
     end
 

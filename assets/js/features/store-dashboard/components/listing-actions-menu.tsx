@@ -57,7 +57,7 @@ export function ListingActionsMenu({ slug }: ListingActionsMenuProps) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-10 mt-1 w-40 rounded-lg border border-surface-muted bg-white py-1 shadow-lg">
+        <div className="absolute right-0 top-full z-10 mt-1 w-40 rounded-lg border border-surface-muted bg-surface py-1 shadow-lg dark:shadow-black/20">
           <button
             onClick={handleShare}
             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-secondary transition-colors hover:bg-surface-secondary"
