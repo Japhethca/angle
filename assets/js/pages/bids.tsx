@@ -1,15 +1,42 @@
 import { Head } from "@inertiajs/react";
+import type { ActiveBidCard, WonOrderCard, HistoryBidCard } from "@/ash_rpc";
+import {
+  BidsLayout,
+  ActiveBidsList,
+  WonBidsList,
+  HistoryBidsList,
+} from "@/features/bidding";
 
-export default function Bids() {
+interface BidsPageProps {
+  tab: string;
+  bids?: ActiveBidCard | HistoryBidCard;
+  orders?: WonOrderCard;
+  won_item_ids?: string[];
+}
+
+export default function Bids({
+  tab = "active",
+  bids = [],
+  orders = [],
+  won_item_ids = [],
+}: BidsPageProps) {
   return (
     <>
       <Head title="My Bids" />
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-content">My Bids</h1>
-          <p className="mt-2 text-sm text-content-tertiary">Coming soon</p>
-        </div>
-      </div>
+      <BidsLayout tab={tab}>
+        {tab === "active" && (
+          <ActiveBidsList bids={bids as ActiveBidCard} />
+        )}
+        {tab === "won" && (
+          <WonBidsList orders={orders as WonOrderCard} />
+        )}
+        {tab === "history" && (
+          <HistoryBidsList
+            bids={bids as HistoryBidCard}
+            wonItemIds={won_item_ids}
+          />
+        )}
+      </BidsLayout>
     </>
   );
 }
