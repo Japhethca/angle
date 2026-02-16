@@ -61,7 +61,7 @@ export function ReviewForm({
   const isEdit = !!existingReview;
 
   const { mutate: submitCreate, isPending: createPending } = useAshMutation(
-    () =>
+    (_: void) =>
       createReview({
         input: {
           orderId,
@@ -81,7 +81,7 @@ export function ReviewForm({
   );
 
   const { mutate: submitUpdate, isPending: updatePending } = useAshMutation(
-    () =>
+    (_: void) =>
       updateReview({
         identity: existingReview?.id || "",
         input: { rating, comment: comment || undefined },
