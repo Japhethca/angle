@@ -1637,14 +1637,14 @@ export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "na
  *
  * @typedQuery true
  */
-export type ActiveBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "viewCount"] }]>>;
+export type ActiveBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }]>>;
 
 /**
  * Typed query for Bid
  *
  * @typedQuery true
  */
-export const activeBidCardFields = ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "viewCount"] }] satisfies ListBidsFields;
+export const activeBidCardFields = ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }] satisfies ListBidsFields;
 
 
 /**
