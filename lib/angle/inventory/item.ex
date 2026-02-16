@@ -149,6 +149,31 @@ defmodule Angle.Inventory.Item do
 
       pagination offset?: true, required?: false
     end
+
+    read :watchlisted do
+      description "List items in the current user's watchlist"
+
+      argument :category_id, :uuid do
+        description "Optional category filter"
+      end
+
+      filter expr(
+               exists(watchlist_items, user_id == ^actor(:id)) and
+                 publication_status == :published and
+                 (is_nil(^arg(:category_id)) or category_id == ^arg(:category_id))
+             )
+
+      pagination offset?: true, required?: false
+    end
+
+    read :user_watchlist_ids do
+      description "Get IDs of items in the current user's watchlist"
+
+      filter expr(
+               exists(watchlist_items, user_id == ^actor(:id)) and
+                 publication_status == :published
+             )
+    end
   end
 
   policies do
@@ -317,10 +342,18 @@ defmodule Angle.Inventory.Item do
     has_many :bids, Angle.Bidding.Bid do
       destination_attribute :item_id
     end
+
+    has_many :watchlist_items, Angle.Inventory.WatchlistItem do
+      destination_attribute :item_id
+    end
   end
 
   aggregates do
     count :bid_count, :bids do
+      public? true
+    end
+
+    count :watcher_count, :watchlist_items do
       public? true
     end
   end
