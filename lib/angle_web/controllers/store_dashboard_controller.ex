@@ -3,17 +3,33 @@ defmodule AngleWeb.StoreDashboardController do
 
   require Ash.Query
 
+  @valid_statuses ~w(all active ended draft)
+  @valid_per_page [10, 25, 50]
+  @default_per_page 10
+
   def index(conn, _params) do
     redirect(conn, to: ~p"/store/listings")
   end
 
-  def listings(conn, _params) do
-    items = load_seller_items(conn)
-    stats = compute_stats(items)
+  def listings(conn, params) do
+    status = validate_status(params["status"])
+    page = parse_positive_int(params["page"], 1)
+    per_page = validate_per_page(params["per_page"])
+
+    {items, total} = load_seller_items(conn, status, page, per_page)
+    stats = load_seller_stats(conn)
+    total_pages = max(1, ceil(total / per_page))
 
     conn
     |> assign_prop(:items, items)
     |> assign_prop(:stats, stats)
+    |> assign_prop(:pagination, %{
+      page: page,
+      per_page: per_page,
+      total: total,
+      total_pages: total_pages
+    })
+    |> assign_prop(:status, status)
     |> render_inertia("store/listings")
   end
 
@@ -39,15 +55,38 @@ defmodule AngleWeb.StoreDashboardController do
     |> render_inertia("store/profile")
   end
 
-  defp load_seller_items(conn) do
+  defp load_seller_items(conn, status, page, per_page) do
+    offset = (page - 1) * per_page
+
     params = %{
-      page: %{limit: 100, offset: 0, count: true}
+      input: %{status_filter: status},
+      page: %{limit: per_page, offset: offset, count: true}
     }
 
     case AshTypescript.Rpc.run_typed_query(:angle, :seller_dashboard_card, params, conn) do
-      %{"success" => true, "data" => data} -> extract_results(data)
-      _ -> []
+      %{"success" => true, "data" => %{"results" => results, "count" => count}} ->
+        {results, count}
+
+      %{"success" => true, "data" => data} when is_list(data) ->
+        {data, length(data)}
+
+      _ ->
+        {[], 0}
     end
+  end
+
+  defp load_seller_stats(conn) do
+    params = %{
+      page: %{limit: 1000, offset: 0, count: false}
+    }
+
+    items =
+      case AshTypescript.Rpc.run_typed_query(:angle, :seller_dashboard_card, params, conn) do
+        %{"success" => true, "data" => data} -> extract_results(data)
+        _ -> []
+      end
+
+    compute_stats(items)
   end
 
   defp load_seller_orders(conn) do
@@ -158,6 +197,28 @@ defmodule AngleWeb.StoreDashboardController do
       "deliveryPreference" => profile.delivery_preference
     }
   end
+
+  defp validate_status(status) when status in @valid_statuses, do: status
+  defp validate_status(_), do: "all"
+
+  defp validate_per_page(per_page) do
+    case parse_positive_int(per_page, @default_per_page) do
+      val when val in @valid_per_page -> val
+      _ -> @default_per_page
+    end
+  end
+
+  defp parse_positive_int(nil, default), do: default
+
+  defp parse_positive_int(val, default) when is_binary(val) do
+    case Integer.parse(val) do
+      {n, ""} when n > 0 -> n
+      _ -> default
+    end
+  end
+
+  defp parse_positive_int(val, _default) when is_integer(val) and val > 0, do: val
+  defp parse_positive_int(_, default), do: default
 
   defp extract_results(data) when is_list(data), do: data
   defp extract_results(%{"results" => results}) when is_list(results), do: results
