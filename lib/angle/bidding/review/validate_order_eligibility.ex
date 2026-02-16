@@ -1,39 +1,38 @@
 defmodule Angle.Bidding.Review.ValidateOrderEligibility do
-  @moduledoc "Validates that the order is completed and within the 30-day review window."
+  @moduledoc "Validates order is completed and within 30-day window, and sets seller_id."
   use Ash.Resource.Change
 
   @review_window_days 30
 
   @impl true
   def change(changeset, _opts, _context) do
-    Ash.Changeset.after_action(changeset, fn _changeset, review ->
-      case Ash.get(Angle.Bidding.Order, review.order_id, authorize?: false) do
+    Ash.Changeset.before_action(changeset, fn changeset ->
+      order_id = Ash.Changeset.get_attribute(changeset, :order_id)
+
+      case Ash.get(Angle.Bidding.Order, order_id, authorize?: false) do
         {:ok, order} ->
           cond do
             order.status != :completed ->
-              {:error,
-               Ash.Error.Changes.InvalidAttribute.exception(
-                 field: :order_id,
-                 message: "Order must be completed before leaving a review"
-               )}
+              Ash.Changeset.add_error(changeset,
+                field: :order_id,
+                message: "Order must be completed before leaving a review"
+              )
 
             not within_review_window?(order) ->
-              {:error,
-               Ash.Error.Changes.InvalidAttribute.exception(
-                 field: :order_id,
-                 message: "Review window has expired (30 days after order completion)"
-               )}
+              Ash.Changeset.add_error(changeset,
+                field: :order_id,
+                message: "Review window has expired (30 days after order completion)"
+              )
 
             true ->
-              {:ok, review}
+              Ash.Changeset.force_change_attribute(changeset, :seller_id, order.seller_id)
           end
 
         {:error, _} ->
-          {:error,
-           Ash.Error.Changes.InvalidAttribute.exception(
-             field: :order_id,
-             message: "Order not found"
-           )}
+          Ash.Changeset.add_error(changeset,
+            field: :order_id,
+            message: "Order not found"
+          )
       end
     end)
   end

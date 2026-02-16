@@ -298,7 +298,7 @@ export function WonBidCard({
           <ReviewForm
             orderId={order.id}
             existingReview={review}
-            onClose={onCloseReviewForm!}
+            onClose={onCloseReviewForm ?? (() => {})}
           />
         </div>
       )}

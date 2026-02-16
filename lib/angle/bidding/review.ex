@@ -26,7 +26,6 @@ defmodule Angle.Bidding.Review do
     create :create do
       accept [:order_id, :rating, :comment]
       change set_attribute(:reviewer_id, actor(:id))
-      change Angle.Bidding.Review.SetSellerFromOrder
       change Angle.Bidding.Review.ValidateOrderEligibility
     end
 
