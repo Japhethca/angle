@@ -9,3 +9,5 @@ export { PaymentCard } from "./components/payment-card";
 export { ProfileHeader } from "./components/profile-header";
 export { ProfileDetails } from "./components/profile-details";
 export { ReviewsSection } from "./components/reviews-section";
+export { StatusTabs } from "./components/status-tabs";
+export { PaginationControls } from "./components/pagination-controls";
