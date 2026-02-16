@@ -1,4 +1,4 @@
-defmodule Angle.Repo.Migrations.MigrateResources1 do
+defmodule Angle.Repo.Migrations.AddOrderResource do
   @moduledoc """
   Updates resources based on their most recent snapshots.
 
