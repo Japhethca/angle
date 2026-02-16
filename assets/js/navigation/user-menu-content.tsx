@@ -9,8 +9,9 @@ interface UserMenuContentProps {
 
 function getInitials(name: string | null): string {
   if (!name) return "?";
-  return name
-    .split(" ")
+  const parts = name.trim().split(" ").filter(Boolean);
+  if (parts.length === 0) return "?";
+  return parts
     .map((n) => n[0])
     .join("")
     .toUpperCase()
@@ -47,7 +48,8 @@ export function UserMenuContent({ onNavigate }: UserMenuContentProps) {
           <ChevronRight className="size-5" />
         </Link>
         <button
-          className="flex items-center justify-between text-base text-content-tertiary transition-colors hover:text-content-secondary"
+          type="button"
+          className="flex w-full items-center justify-between text-base text-content-tertiary transition-colors hover:text-content-secondary"
           onClick={() => {
             onNavigate?.();
             router.post("/auth/logout");

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { User } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { UserMenuContent } from "./user-menu-content";
@@ -21,11 +21,20 @@ export function UserMenuPopover() {
     closeTimeout.current = setTimeout(() => setOpen(false), CLOSE_DELAY);
   }
 
+  useEffect(() => {
+    return () => {
+      if (closeTimeout.current) clearTimeout(closeTimeout.current);
+    };
+  }, []);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <div onMouseEnter={handleOpen} onMouseLeave={handleClose}>
         <PopoverTrigger asChild>
-          <button className="flex size-10 items-center justify-center rounded-lg text-content-secondary transition-colors hover:bg-surface-muted">
+          <button
+            aria-label="User menu"
+            className="flex size-10 items-center justify-center rounded-lg text-content-secondary transition-colors hover:bg-surface-muted"
+          >
             <User className="size-5" />
           </button>
         </PopoverTrigger>

@@ -20,7 +20,7 @@ Use the existing shadcn Popover component with manual hover state management (op
 Shared content rendered in both desktop popover and mobile sheet:
 
 1. **Avatar + user details** (centered, stacked)
-   - `Avatar` (40px) with `AvatarFallback` showing user initials, warm background (`bg-[#ffe7cc]`, text `text-[#a34400]`)
+   - `Avatar` (80px) with `AvatarFallback` showing user initials, warm background (`bg-[#ffe7cc]`, text `text-[#a34400]`)
    - User's full name — `text-xl text-content`
    - User's email — `text-sm text-content-tertiary`
 2. **Settings row** — "Settings" text + `ChevronRight` icon, full-width, links to `/settings/account`
@@ -51,7 +51,7 @@ Desktop-only wrapper:
 - Popover width: `304px`
 - Border radius: `12px` (`rounded-xl`)
 - Shadow: `0px 1px 2px 0px rgba(0,0,0,0.08)`
-- Avatar: 40px, rounded-full, warm fallback bg
+- Avatar: 80px, rounded-full, warm fallback bg
 - Name: 20px, `#0a0a0a`
 - Email: 14px, `#737373`
 - Settings row: 16px, `#0a0a0a`, with right-arrow icon
