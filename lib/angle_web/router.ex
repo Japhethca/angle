@@ -123,6 +123,11 @@ defmodule AngleWeb.Router do
     get "/settings/preferences", SettingsController, :preferences
     get "/settings/legal", SettingsController, :legal
     get "/settings/support", SettingsController, :support
+
+    # Image upload endpoints (JSON)
+    post "/uploads", UploadController, :create
+    delete "/uploads/:id", UploadController, :delete
+    patch "/uploads/reorder", UploadController, :reorder
   end
 
   # Public store profile (catch-all with :identifier must come after specific /store/* routes)
