@@ -4,17 +4,23 @@ import type { CategoryItemCard as CategoryItemCardType } from "@/ash_rpc";
 import { CountdownTimer } from "@/shared/components/countdown-timer";
 import { formatNaira } from "@/lib/format";
 import { useAuthGuard } from "@/features/auth";
+import { useWatchlistToggle } from "@/features/watchlist";
 
 export type CategoryItem = CategoryItemCardType[number];
 
 interface CategoryItemCardProps {
   item: CategoryItem;
+  watchlistEntryId?: string | null;
 }
 
-export function CategoryItemCard({ item }: CategoryItemCardProps) {
+export function CategoryItemCard({ item, watchlistEntryId = null }: CategoryItemCardProps) {
   const itemUrl = `/items/${item.slug || item.id}`;
   const price = item.currentPrice || item.startingPrice;
-  const { guard } = useAuthGuard();
+  const { guard, authenticated } = useAuthGuard();
+  const { isWatchlisted, isPending, toggle } = useWatchlistToggle({
+    itemId: item.id,
+    watchlistEntryId,
+  });
 
   return (
     <div className="w-full">
@@ -28,13 +34,20 @@ export function CategoryItemCard({ item }: CategoryItemCardProps) {
           {/* Watchlist heart */}
           <button
             className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full border border-strong bg-white/80 backdrop-blur-sm transition-colors hover:bg-white"
+            disabled={isPending}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              guard(itemUrl);
+              if (authenticated) {
+                toggle();
+              } else {
+                guard(itemUrl);
+              }
             }}
           >
-            <Heart className="size-4 text-content-secondary" />
+            <Heart
+              className={`size-4 ${isWatchlisted ? "fill-red-500 text-red-500" : "text-content-secondary"}`}
+            />
           </button>
 
           {/* Almost gone badge */}

@@ -4,18 +4,24 @@ import type { HomepageItemCard } from "@/ash_rpc";
 import { CountdownTimer } from "@/shared/components/countdown-timer";
 import { formatNaira } from "@/lib/format";
 import { useAuthGuard, AuthLink } from "@/features/auth";
+import { useWatchlistToggle } from "@/features/watchlist";
 
 type ItemCardItem = HomepageItemCard[number];
 
 interface ItemCardProps {
   item: ItemCardItem;
   badge?: "ending-soon" | "hot-now";
+  watchlistEntryId?: string | null;
 }
 
-export function ItemCard({ item, badge }: ItemCardProps) {
+export function ItemCard({ item, badge, watchlistEntryId = null }: ItemCardProps) {
   const itemUrl = `/items/${item.slug || item.id}`;
   const price = item.currentPrice || item.startingPrice;
-  const { guard } = useAuthGuard();
+  const { guard, authenticated } = useAuthGuard();
+  const { isWatchlisted, isPending, toggle } = useWatchlistToggle({
+    itemId: item.id,
+    watchlistEntryId,
+  });
 
   return (
     <div className="w-[85vw] shrink-0 sm:w-[320px] lg:w-[432px]">
@@ -30,13 +36,20 @@ export function ItemCard({ item, badge }: ItemCardProps) {
           {/* Watchlist heart */}
           <button
             className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full border border-white/30 bg-white/20 backdrop-blur-sm transition-colors hover:bg-white/40"
+            disabled={isPending}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              guard(itemUrl);
+              if (authenticated) {
+                toggle();
+              } else {
+                guard(itemUrl);
+              }
             }}
           >
-            <Heart className="size-4 text-white" />
+            <Heart
+              className={`size-4 ${isWatchlisted ? "fill-red-500 text-red-500" : "text-white"}`}
+            />
           </button>
 
           {/* Ending soon badge - red left-edge strip */}

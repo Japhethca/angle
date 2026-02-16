@@ -22,6 +22,7 @@ defmodule AngleWeb.PageController do
     |> assign_prop(:ending_soon_items, ending_soon_items)
     |> assign_prop(:hot_items, hot_items)
     |> assign_prop(:categories, categories)
+    |> assign_prop(:watchlisted_map, load_watchlisted_map(conn))
     |> render_inertia(:home)
   end
 
@@ -46,6 +47,19 @@ defmodule AngleWeb.PageController do
     case AshTypescript.Rpc.run_typed_query(:angle, :homepage_category, %{}, conn) do
       %{"success" => true, "data" => data} -> extract_results(data)
       _ -> []
+    end
+  end
+
+  defp load_watchlisted_map(conn) do
+    case conn.assigns[:current_user] do
+      nil ->
+        %{}
+
+      user ->
+        Angle.Inventory.WatchlistItem
+        |> Ash.Query.for_read(:by_user, %{}, actor: user)
+        |> Ash.read!(authorize?: false)
+        |> Map.new(fn entry -> {entry.item_id, entry.id} end)
     end
   end
 

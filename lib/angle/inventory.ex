@@ -103,11 +103,45 @@ defmodule Angle.Inventory do
           %{category: [:id, :name, :slug]}
         ]
       end
+
+      typed_query :watchlist_item_card, :watchlisted do
+        ts_result_type_name "WatchlistItemCard"
+        ts_fields_const_name "watchlistItemCardFields"
+
+        fields [
+          :id,
+          :title,
+          :slug,
+          :starting_price,
+          :current_price,
+          :end_time,
+          :auction_status,
+          :condition,
+          :sale_type,
+          :bid_count,
+          :watcher_count,
+          %{category: [:id, :name, :slug]},
+          %{user: [:id, :full_name]}
+        ]
+      end
+
+      typed_query :user_watchlist_ids, :user_watchlist_ids do
+        ts_result_type_name "UserWatchlistId"
+        ts_fields_const_name "userWatchlistIdFields"
+
+        fields [:id]
+      end
+    end
+
+    resource Angle.Inventory.WatchlistItem do
+      rpc_action :add_to_watchlist, :add
+      rpc_action :remove_from_watchlist, :remove
     end
   end
 
   resources do
     resource Angle.Inventory.Item
     resource Angle.Inventory.ItemActivity
+    resource Angle.Inventory.WatchlistItem
   end
 end

@@ -40,6 +40,7 @@ interface StoreShowProps {
   has_more: boolean;
   category_summary: CategorySummary[];
   active_tab: TabKey;
+  watchlisted_map: Record<string, string>;
 }
 
 const ITEMS_PER_PAGE = 20;
@@ -65,6 +66,7 @@ export default function StoreShow({
   has_more: initialHasMore = false,
   category_summary: categorySummary = [],
   active_tab: initialActiveTab = "auctions",
+  watchlisted_map: watchlistedMap = {},
 }: StoreShowProps) {
   const displayName = seller.storeProfile?.storeName || seller.fullName || "Store";
   const storeUrl = `/store/${seller.username || seller.id}`;
@@ -430,6 +432,7 @@ export default function StoreShow({
                       <CategoryItemCard
                         key={item.id}
                         item={item as CategoryItem}
+                        watchlistEntryId={watchlistedMap[item.id] ?? null}
                       />
                     ))}
                   </div>
@@ -439,6 +442,7 @@ export default function StoreShow({
                       <CategoryItemListCard
                         key={item.id}
                         item={item as CategoryItem}
+                        watchlistEntryId={watchlistedMap[item.id] ?? null}
                       />
                     ))}
                   </div>

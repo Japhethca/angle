@@ -3,16 +3,22 @@ import { Heart, Clock, Gavel } from "lucide-react";
 import { CountdownTimer } from "@/shared/components/countdown-timer";
 import { formatNaira } from "@/lib/format";
 import { useAuthGuard } from "@/features/auth";
+import { useWatchlistToggle } from "@/features/watchlist";
 import type { CategoryItem } from "./category-item-card";
 
 interface CategoryItemListCardProps {
   item: CategoryItem;
+  watchlistEntryId?: string | null;
 }
 
-export function CategoryItemListCard({ item }: CategoryItemListCardProps) {
+export function CategoryItemListCard({ item, watchlistEntryId = null }: CategoryItemListCardProps) {
   const itemUrl = `/items/${item.slug || item.id}`;
   const price = item.currentPrice || item.startingPrice;
-  const { guard } = useAuthGuard();
+  const { guard, authenticated } = useAuthGuard();
+  const { isWatchlisted, isPending, toggle } = useWatchlistToggle({
+    itemId: item.id,
+    watchlistEntryId,
+  });
 
   return (
     <div className="flex gap-3 border-b border-subtle pb-4">
@@ -56,9 +62,16 @@ export function CategoryItemListCard({ item }: CategoryItemListCardProps) {
       <div className="flex shrink-0 flex-col items-end justify-between">
         <button
           className="flex size-8 items-center justify-center rounded-full border border-subtle text-content-tertiary transition-colors hover:bg-surface-muted"
-          onClick={() => guard(itemUrl)}
+          disabled={isPending}
+          onClick={() => {
+            if (authenticated) {
+              toggle();
+            } else {
+              guard(itemUrl);
+            }
+          }}
         >
-          <Heart className="size-3.5" />
+          <Heart className={`size-3.5 ${isWatchlisted ? "fill-red-500 text-red-500" : ""}`} />
         </button>
         <Link
           href={itemUrl}

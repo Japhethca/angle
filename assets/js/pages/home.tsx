@@ -13,6 +13,7 @@ interface HomeProps {
   ending_soon_items: HomepageItemCard;
   hot_items: HomepageItemCard;
   categories: HomepageCategory;
+  watchlisted_map: Record<string, string>;
 }
 
 export default function Home({
@@ -21,13 +22,14 @@ export default function Home({
   ending_soon_items = [],
   hot_items = [],
   categories = [],
+  watchlisted_map = {},
 }: HomeProps) {
   return (
     <div>
-      <FeaturedItemCarousel items={featured_items} />
-      <RecommendedSection items={recommended_items} />
-      <EndingSoonSection initialItems={ending_soon_items} />
-      <HotNowSection items={hot_items} />
+      <FeaturedItemCarousel items={featured_items} watchlistedMap={watchlisted_map} />
+      <RecommendedSection items={recommended_items} watchlistedMap={watchlisted_map} />
+      <EndingSoonSection initialItems={ending_soon_items} watchlistedMap={watchlisted_map} />
+      <HotNowSection items={hot_items} watchlistedMap={watchlisted_map} />
       <BrowseCategoriesSection categories={categories} />
     </div>
   );

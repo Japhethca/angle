@@ -31,6 +31,7 @@ defmodule AngleWeb.StoreController do
         |> assign_prop(:has_more, has_more)
         |> assign_prop(:category_summary, category_summary)
         |> assign_prop(:active_tab, tab)
+        |> assign_prop(:watchlisted_map, load_watchlisted_map(conn))
         |> render_inertia("store/show")
     end
   end
@@ -94,6 +95,19 @@ defmodule AngleWeb.StoreController do
         "count" => cat.aggregates[:item_count]
       }
     end)
+  end
+
+  defp load_watchlisted_map(conn) do
+    case conn.assigns[:current_user] do
+      nil ->
+        %{}
+
+      user ->
+        Angle.Inventory.WatchlistItem
+        |> Ash.Query.for_read(:by_user, %{}, actor: user)
+        |> Ash.read!(authorize?: false)
+        |> Map.new(fn entry -> {entry.item_id, entry.id} end)
+    end
   end
 
   defp extract_results(data) when is_list(data), do: data

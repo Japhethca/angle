@@ -5,9 +5,10 @@ type Item = HomepageItemCard[number];
 
 interface HotNowSectionProps {
   items: Item[];
+  watchlistedMap?: Record<string, string>;
 }
 
-export function HotNowSection({ items }: HotNowSectionProps) {
+export function HotNowSection({ items, watchlistedMap = {} }: HotNowSectionProps) {
   return (
     <section className="py-10 lg:py-12">
       <h2 className="mb-6 px-4 font-heading text-2xl font-semibold text-content lg:px-10 lg:text-[32px]">
@@ -20,7 +21,7 @@ export function HotNowSection({ items }: HotNowSectionProps) {
       ) : (
         <div className="scrollbar-hide flex gap-4 overflow-x-auto px-4 pb-4 lg:gap-6 lg:px-10">
           {items.map((item) => (
-            <ItemCard key={item.id} item={item} badge="hot-now" />
+            <ItemCard key={item.id} item={item} badge="hot-now" watchlistEntryId={watchlistedMap[item.id] ?? null} />
           ))}
         </div>
       )}

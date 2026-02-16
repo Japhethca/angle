@@ -15,6 +15,9 @@ interface BidSectionProps {
   startingPrice: string;
   bidIncrement: string | null;
   bidCount: number;
+  isWatchlisted?: boolean;
+  onToggleWatch?: () => void;
+  isWatchPending?: boolean;
 }
 
 const QUICK_ADD_AMOUNTS = [1000, 5000, 10000];
@@ -26,6 +29,9 @@ export function BidSection({
   startingPrice,
   bidIncrement,
   bidCount,
+  isWatchlisted = false,
+  onToggleWatch,
+  isWatchPending = false,
 }: BidSectionProps) {
   const { authenticated } = useAuth();
   const increment = bidIncrement ? parseFloat(bidIncrement) : 1000;
@@ -148,9 +154,17 @@ export function BidSection({
 
       {/* Desktop: Watch & Share buttons */}
       <div className="hidden gap-3 lg:flex">
-        <button className="flex flex-1 items-center justify-center gap-2 rounded-full border border-strong py-2.5 text-sm font-medium text-content transition-colors hover:bg-surface-inset">
-          <Heart className="size-4" />
-          Watch
+        <button
+          onClick={onToggleWatch}
+          disabled={isWatchPending}
+          className={`flex flex-1 items-center justify-center gap-2 rounded-full border py-2.5 text-sm font-medium transition-colors ${
+            isWatchlisted
+              ? "border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
+              : "border-strong text-content hover:bg-surface-inset"
+          }`}
+        >
+          <Heart className={`size-4 ${isWatchlisted ? "fill-red-500 text-red-500" : ""}`} />
+          {isWatchlisted ? "Watching" : "Watch"}
         </button>
         <button className="flex flex-1 items-center justify-center gap-2 rounded-full border border-strong py-2.5 text-sm font-medium text-content transition-colors hover:bg-surface-inset">
           <Share2 className="size-4" />
