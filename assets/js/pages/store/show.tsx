@@ -16,8 +16,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import type { SellerProfile, SellerItemCard } from "@/ash_rpc";
-import { listItems, sellerItemCardFields, buildCSRFHeaders } from "@/ash_rpc";
-import type { ListItemsFields } from "@/ash_rpc";
+import {
+  listItems,
+  listReviewsBySeller,
+  sellerItemCardFields,
+  sellerReviewCardFields,
+  buildCSRFHeaders,
+} from "@/ash_rpc";
+import type { ListItemsFields, ListReviewsBySellerFields } from "@/ash_rpc";
 import { CategoryItemCard, CategoryItemListCard } from "@/features/items";
 import type { CategoryItem } from "@/features/items";
 import { ReviewCard } from "@/components/reviews/review-card";
@@ -42,14 +48,16 @@ interface StoreShowProps {
   category_summary: CategorySummary[];
   active_tab: TabKey;
   watchlisted_map: Record<string, string>;
-  reviews?: Array<{
-    id: string;
-    rating: number;
-    comment: string | null;
-    insertedAt: string;
-    reviewer?: { id: string; username: string | null; fullName: string | null };
-  }>;
+  reviews?: ReviewItem[];
 }
+
+type ReviewItem = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  insertedAt: string;
+  reviewer?: { id: string; username: string | null; fullName: string | null };
+};
 
 const ITEMS_PER_PAGE = 20;
 const VIEW_MODE_KEY = "store-view-mode";
@@ -99,6 +107,12 @@ export default function StoreShow({
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isLoadingMoreHistory, setIsLoadingMoreHistory] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(historyTabActive);
+
+  // Reviews tab state (server-loaded when active_tab is reviews, otherwise client-loaded on demand)
+  const reviewsTabActive = initialActiveTab === "reviews";
+  const [reviewItems, setReviewItems] = useState<ReviewItem[]>(reviewsTabActive && reviews ? reviews : []);
+  const [isLoadingReviews, setIsLoadingReviews] = useState(false);
+  const [reviewsLoaded, setReviewsLoaded] = useState(reviewsTabActive && (reviews?.length ?? 0) > 0);
 
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
@@ -209,10 +223,36 @@ export default function StoreShow({
     }
   }, [seller.id, historyItems.length, isLoadingMoreHistory]);
 
+  const loadReviews = useCallback(async () => {
+    if (isLoadingReviews) return;
+    setIsLoadingReviews(true);
+    try {
+      const fields = sellerReviewCardFields as ListReviewsBySellerFields;
+      const result = await listReviewsBySeller({
+        fields,
+        input: { sellerId: seller.id },
+        page: { limit: ITEMS_PER_PAGE, offset: 0 },
+        headers: buildCSRFHeaders(),
+      });
+
+      if (result.success && result.data) {
+        const data = result.data as { results: ReviewItem[] } | ReviewItem[];
+        const items = Array.isArray(data) ? data : data.results;
+        setReviewItems(items);
+        setReviewsLoaded(true);
+      }
+    } finally {
+      setIsLoadingReviews(false);
+    }
+  }, [seller.id, isLoadingReviews]);
+
   const handleTabChange = (tab: TabKey) => {
     setActiveTab(tab);
     if (tab === "history" && !historyLoaded) {
       loadHistory();
+    }
+    if (tab === "reviews" && !reviewsLoaded) {
+      loadReviews();
     }
 
     // Update URL to reflect the active tab
@@ -422,9 +462,13 @@ export default function StoreShow({
       {/* Tab content */}
       <div className="mt-6">
         {activeTab === "reviews" ? (
-          reviews && reviews.length > 0 ? (
+          isLoadingReviews ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="size-6 animate-spin text-content-tertiary" />
+            </div>
+          ) : reviewItems.length > 0 ? (
             <div className="px-4 lg:px-10">
-              {reviews.map((review) => (
+              {reviewItems.map((review) => (
                 <ReviewCard key={review.id} review={review} />
               ))}
             </div>
