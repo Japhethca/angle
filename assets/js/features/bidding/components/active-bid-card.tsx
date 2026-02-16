@@ -38,7 +38,7 @@ export function ActiveBidCard({ bid }: ActiveBidCardProps) {
           <div className="flex items-center gap-4 text-sm text-content-tertiary">
             {item.endTime && <CountdownTimer endTime={item.endTime} />}
             <span>{item.bidCount || 0} bids</span>
-            <span>{item.viewCount || 0} watching</span>
+            <span>{item.watcherCount || 0} watching</span>
           </div>
           <p className="text-sm text-content-tertiary">
             Highest bid:{" "}

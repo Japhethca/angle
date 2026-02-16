@@ -34,7 +34,7 @@ defmodule Angle.Bidding do
               :end_time,
               :auction_status,
               :bid_count,
-              :view_count
+              :watcher_count
             ]
           }
         ]

@@ -1,8 +1,9 @@
-import { Link } from "@inertiajs/react";
-import { Star, Gavel } from "lucide-react";
+import { Link, router } from "@inertiajs/react";
+import { Star, Gavel, Heart } from "lucide-react";
 import type { WatchlistItemCard as WatchlistItemCardType } from "@/ash_rpc";
 import { CountdownTimer } from "@/shared/components/countdown-timer";
 import { ConditionBadge } from "@/features/items";
+import { useWatchlistToggle } from "@/features/watchlist";
 import { formatNaira } from "@/lib/format";
 
 export type WatchlistItem = WatchlistItemCardType[number];
@@ -17,20 +18,38 @@ function isEndingSoon(endTime: string): boolean {
   return total > 0 && total < 2 * 60 * 60 * 1000; // < 2 hours
 }
 
-export function WatchlistItemCard({ item }: WatchlistItemCardProps) {
+export function WatchlistItemCard({ item, watchlistEntryId }: WatchlistItemCardProps) {
   const itemUrl = `/items/${item.slug || item.id}`;
   const price = item.currentPrice || item.startingPrice;
   const endingSoon = item.endTime ? isEndingSoon(item.endTime) : false;
+  const { isWatchlisted, isPending, toggle } = useWatchlistToggle({
+    itemId: item.id,
+    watchlistEntryId: watchlistEntryId ?? null,
+    onRemove: () => router.reload({ only: ["items", "watchlisted_map"] }),
+  });
 
   return (
     <div className="flex flex-col lg:flex-row lg:gap-6">
       {/* Image */}
-      <Link href={itemUrl} className="shrink-0">
+      <Link href={itemUrl} className="relative shrink-0">
         <div className="aspect-square w-full overflow-hidden rounded-2xl bg-surface-muted lg:h-[304px] lg:w-[304px]">
           <div className="flex h-full items-center justify-center text-content-placeholder">
             <Gavel className="size-12 lg:size-16" />
           </div>
         </div>
+        <button
+          className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full border border-white/30 bg-white/20 backdrop-blur-sm transition-colors hover:bg-white/40"
+          disabled={isPending}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggle();
+          }}
+        >
+          <Heart
+            className={`size-4 ${isWatchlisted ? "fill-red-500 text-red-500" : "text-white"}`}
+          />
+        </button>
       </Link>
 
       {/* Details */}
