@@ -186,6 +186,15 @@ if Mix.env() == :dev do
     ]
 end
 
+# Cloudflare R2 (S3-compatible) for image storage
+config :ex_aws,
+  json_codec: Jason,
+  region: "auto"
+
+config :angle, Angle.Media,
+  bucket: "angle-images",
+  base_url: "https://images.angle.ng"
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

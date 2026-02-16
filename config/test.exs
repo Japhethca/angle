@@ -43,3 +43,8 @@ config :phoenix, :plug_init_mode, :runtime
 # Enable helpful, but potentially expensive runtime checks
 config :phoenix_live_view,
   enable_expensive_runtime_checks: true
+
+config :angle, Angle.Media,
+  bucket: "angle-images-test",
+  base_url: "http://localhost:9000/angle-images-test",
+  storage_module: Angle.Media.Storage.Mock

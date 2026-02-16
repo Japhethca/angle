@@ -86,7 +86,11 @@ defmodule Angle.MixProject do
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.10"},
       {:bcrypt_elixir, "~> 3.0"},
-      {:tidewave, "~> 0.2", only: :dev}
+      {:tidewave, "~> 0.2", only: :dev},
+      {:image, "~> 0.54"},
+      {:ex_aws, "~> 2.5"},
+      {:ex_aws_s3, "~> 2.5"},
+      {:sweet_xml, "~> 0.7"}
     ]
   end
 
