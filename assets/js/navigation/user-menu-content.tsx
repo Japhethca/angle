@@ -25,8 +25,8 @@ export function UserMenuContent({ onNavigate }: UserMenuContentProps) {
     <div className="flex flex-col gap-10">
       {/* User details */}
       <div className="flex flex-col items-center gap-2">
-        <Avatar className="size-10">
-          <AvatarFallback className="bg-[#ffe7cc] text-sm font-medium text-[#a34400]">
+        <Avatar className="size-20">
+          <AvatarFallback className="bg-[#ffe7cc] text-2xl font-medium text-[#a34400]">
             {getInitials(user.full_name)}
           </AvatarFallback>
         </Avatar>
