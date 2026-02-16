@@ -9,7 +9,11 @@ import {
 
 type BidsPageProps =
   | { tab: "active"; bids: ActiveBidCard }
-  | { tab: "won"; orders: WonOrderCard }
+  | {
+      tab: "won";
+      orders: WonOrderCard;
+      reviews_by_order?: Record<string, any>;
+    }
   | { tab: "history"; bids: HistoryBidCard; won_item_ids: string[] };
 
 export default function Bids(props: BidsPageProps) {
@@ -20,7 +24,12 @@ export default function Bids(props: BidsPageProps) {
       <Head title="My Bids" />
       <BidsLayout tab={tab}>
         {tab === "active" && <ActiveBidsList bids={props.bids} />}
-        {tab === "won" && <WonBidsList orders={props.orders} />}
+        {tab === "won" && (
+          <WonBidsList
+            orders={props.orders}
+            reviewsByOrder={props.reviews_by_order}
+          />
+        )}
         {tab === "history" && (
           <HistoryBidsList
             bids={props.bids}

@@ -1,17 +1,35 @@
 import { Link } from "@inertiajs/react";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Star } from "lucide-react";
 import type { WonOrderCard as WonOrderCardType } from "@/ash_rpc";
 import { formatNaira } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { ReviewForm } from "./review-form";
 
 type OrderItem = WonOrderCardType[number];
 
+function isWithinEditWindow(insertedAt: string): boolean {
+  const created = new Date(insertedAt);
+  const now = new Date();
+  const diffDays =
+    (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
+  return diffDays <= 7;
+}
+
 interface WonBidCardProps {
   order: OrderItem;
+  review?: {
+    id: string;
+    rating: number;
+    comment: string | null;
+    insertedAt: string;
+  } | null;
   onPay?: (orderId: string) => void;
   onConfirmReceipt?: (orderId: string) => void;
+  onReview?: (orderId: string) => void;
   payPending?: boolean;
   confirmPending?: boolean;
+  showReviewForm?: boolean;
+  onCloseReviewForm?: () => void;
 }
 
 const statusConfig: Record<string, { label: string; className: string }> = {
@@ -51,10 +69,14 @@ function getWhatsAppUrl(
 
 export function WonBidCard({
   order,
+  review,
   onPay,
   onConfirmReceipt,
+  onReview,
   payPending,
   confirmPending,
+  showReviewForm,
+  onCloseReviewForm,
 }: WonBidCardProps) {
   const status = statusConfig[order.status] || statusConfig.payment_pending;
   const whatsAppUrl = getWhatsAppUrl(
@@ -129,6 +151,42 @@ export function WonBidCard({
               {confirmPending ? "Confirming..." : "Confirm Receipt"}
             </button>
           )}
+          {order.status === "completed" &&
+            !review &&
+            !showReviewForm &&
+            onReview && (
+              <button
+                onClick={() => onReview(order.id)}
+                className="rounded-full border border-primary-600 px-5 py-2 text-sm font-medium text-primary-600 hover:bg-primary-50"
+              >
+                Leave Review
+              </button>
+            )}
+          {order.status === "completed" && review && !showReviewForm && (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-0.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={cn(
+                      "size-4",
+                      star <= review.rating
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-surface-emphasis",
+                    )}
+                  />
+                ))}
+              </div>
+              {isWithinEditWindow(review.insertedAt) && onReview && (
+                <button
+                  onClick={() => onReview(order.id)}
+                  className="text-sm text-primary-600 hover:underline"
+                >
+                  Edit
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -197,7 +255,53 @@ export function WonBidCard({
             </button>
           </div>
         )}
+        {order.status === "completed" &&
+          !review &&
+          !showReviewForm &&
+          onReview && (
+            <button
+              onClick={() => onReview(order.id)}
+              className="w-full rounded-full border border-primary-600 py-3 text-sm font-medium text-primary-600 hover:bg-primary-50"
+            >
+              Leave Review
+            </button>
+          )}
+        {order.status === "completed" && review && !showReviewForm && (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-0.5">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={cn(
+                    "size-4",
+                    star <= review.rating
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-surface-emphasis",
+                  )}
+                />
+              ))}
+            </div>
+            {isWithinEditWindow(review.insertedAt) && onReview && (
+              <button
+                onClick={() => onReview(order.id)}
+                className="text-sm text-primary-600 hover:underline"
+              >
+                Edit
+              </button>
+            )}
+          </div>
+        )}
       </div>
+
+      {showReviewForm && (
+        <div className="mt-2">
+          <ReviewForm
+            orderId={order.id}
+            existingReview={review}
+            onClose={onCloseReviewForm ?? (() => {})}
+          />
+        </div>
+      )}
     </>
   );
 }

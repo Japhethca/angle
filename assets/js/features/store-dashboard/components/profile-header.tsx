@@ -5,9 +5,11 @@ import { toast } from "sonner";
 interface ProfileHeaderProps {
   storeName: string;
   username: string | null;
+  avgRating?: number | null;
+  reviewCount?: number;
 }
 
-export function ProfileHeader({ storeName, username }: ProfileHeaderProps) {
+export function ProfileHeader({ storeName, username, avgRating, reviewCount }: ProfileHeaderProps) {
   const handleShare = async () => {
     const storeUrl = `${window.location.origin}/store/${username || ""}`;
     try {
@@ -36,9 +38,10 @@ export function ProfileHeader({ storeName, username }: ProfileHeaderProps) {
               <BadgeCheck className="size-5 text-primary-600" />
             </div>
 
-            {/* Stats row (placeholder) */}
+            {/* Stats row */}
             <p className="mt-1 text-sm text-content-tertiary">
-              5 {"\u2605"} {"\u2022"} 95% {"\u2022"} 0 Reviews {"\u2022"} 0 followers
+              {avgRating ? Number(avgRating).toFixed(1) : "\u2013"} {"\u2605"} {"\u2022"}{" "}
+              {reviewCount || 0} {(reviewCount || 0) === 1 ? "Review" : "Reviews"}
             </p>
           </div>
         </div>

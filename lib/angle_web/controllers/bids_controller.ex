@@ -44,8 +44,32 @@ defmodule AngleWeb.BidsController do
         _ -> []
       end
 
+    # Load existing reviews for the buyer's orders
+    order_ids = Enum.map(orders, fn o -> o["id"] end)
+
+    reviews_by_order =
+      if order_ids != [] do
+        Angle.Bidding.Review
+        |> Ash.Query.filter(order_id in ^order_ids)
+        |> Ash.Query.select([:id, :order_id, :rating, :comment, :inserted_at])
+        |> Ash.read!(authorize?: false)
+        |> Map.new(fn r ->
+          {r.order_id,
+           %{
+             "id" => r.id,
+             "orderId" => r.order_id,
+             "rating" => r.rating,
+             "comment" => r.comment,
+             "insertedAt" => r.inserted_at && DateTime.to_iso8601(r.inserted_at)
+           }}
+        end)
+      else
+        %{}
+      end
+
     conn
     |> assign_prop(:orders, orders)
+    |> assign_prop(:reviews_by_order, reviews_by_order)
     |> assign_prop(:tab, "won")
     |> render_inertia("bids")
   end

@@ -133,4 +133,39 @@ defmodule Angle.Accounts.UserTest do
       end
     end
   end
+
+  describe "review aggregates" do
+    test "avg_rating and review_count reflect received reviews" do
+      buyer1 = create_user()
+      buyer2 = create_user()
+      seller = create_user()
+
+      item1 = create_item(%{created_by_id: seller.id})
+      item2 = create_item(%{created_by_id: seller.id})
+
+      order1 = create_order(%{buyer: buyer1, seller: seller, item: item1})
+      order2 = create_order(%{buyer: buyer2, seller: seller, item: item2})
+
+      create_review(%{order: order1, buyer: buyer1, rating: 5})
+      create_review(%{order: order2, buyer: buyer2, rating: 3})
+
+      user =
+        Angle.Accounts.User
+        |> Ash.get!(seller.id, load: [:avg_rating, :review_count], authorize?: false)
+
+      assert user.review_count == 2
+      assert user.avg_rating == 4.0
+    end
+
+    test "seller with no reviews has zero count and nil avg" do
+      seller = create_user()
+
+      user =
+        Angle.Accounts.User
+        |> Ash.get!(seller.id, load: [:avg_rating, :review_count], authorize?: false)
+
+      assert user.review_count == 0
+      assert is_nil(user.avg_rating)
+    end
+  end
 end

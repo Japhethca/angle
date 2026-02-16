@@ -31,18 +31,28 @@ interface UserData {
   phoneNumber: string | null;
   location: string | null;
   createdAt: string | null;
+  avgRating?: number | null;
+  reviewCount?: number;
 }
 
 interface StoreProfileProps {
   store_profile: StoreProfileData | null;
   category_summary: CategorySummary[];
   user: UserData;
+  reviews?: Array<{
+    id: string;
+    rating: number;
+    comment: string | null;
+    insertedAt: string;
+    reviewer?: { id: string; username: string | null; fullName: string | null };
+  }>;
 }
 
 export default function StoreProfile({
   store_profile: storeProfile,
   category_summary: categorySummary = [],
   user,
+  reviews,
 }: StoreProfileProps) {
   const storeName = storeProfile?.storeName || user?.fullName || "My Store";
 
@@ -54,13 +64,15 @@ export default function StoreProfile({
           <ProfileHeader
             storeName={storeName}
             username={user?.username || null}
+            avgRating={user?.avgRating}
+            reviewCount={user?.reviewCount}
           />
           <ProfileDetails
             user={user}
             storeProfile={storeProfile}
             categorySummary={categorySummary}
           />
-          <ReviewsSection />
+          <ReviewsSection reviews={reviews || []} />
         </div>
       </StoreLayout>
     </>

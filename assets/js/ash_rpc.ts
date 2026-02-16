@@ -55,6 +55,7 @@ export type OrderResourceSchema = {
   item: { __type: "Relationship"; __resource: ItemResourceSchema; };
   buyer: { __type: "Relationship"; __resource: UserResourceSchema; };
   seller: { __type: "Relationship"; __resource: UserResourceSchema; };
+  review: { __type: "Relationship"; __resource: ReviewResourceSchema | null; };
 };
 
 
@@ -72,6 +73,37 @@ export type OrderAttributesOnlySchema = {
   createdAt: UtcDateTimeUsec;
   itemId: UUID;
   buyerId: UUID;
+  sellerId: UUID;
+};
+
+
+// Review Schema
+export type ReviewResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "rating" | "comment" | "insertedAt" | "orderId" | "reviewerId" | "sellerId";
+  id: UUID;
+  rating: number;
+  comment: string | null;
+  insertedAt: UtcDateTimeUsec;
+  orderId: UUID;
+  reviewerId: UUID;
+  sellerId: UUID;
+  order: { __type: "Relationship"; __resource: OrderResourceSchema; };
+  reviewer: { __type: "Relationship"; __resource: UserResourceSchema; };
+  seller: { __type: "Relationship"; __resource: UserResourceSchema; };
+};
+
+
+
+export type ReviewAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "rating" | "comment" | "insertedAt" | "orderId" | "reviewerId" | "sellerId";
+  id: UUID;
+  rating: number;
+  comment: string | null;
+  insertedAt: UtcDateTimeUsec;
+  orderId: UUID;
+  reviewerId: UUID;
   sellerId: UUID;
 };
 
@@ -196,7 +228,7 @@ export type WatchlistItemAttributesOnlySchema = {
 // User Schema
 export type UserResourceSchema = {
   __type: "Resource";
-  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber" | "username" | "location" | "whatsappNumber" | "autoCharge" | "createdAt" | "publishedItemCount";
+  __primitiveFields: "id" | "email" | "fullName" | "phoneNumber" | "username" | "location" | "whatsappNumber" | "autoCharge" | "createdAt" | "publishedItemCount" | "reviewCount" | "avgRating";
   id: UUID;
   email: string;
   fullName: string | null;
@@ -207,9 +239,12 @@ export type UserResourceSchema = {
   autoCharge: boolean | null;
   createdAt: UtcDateTimeUsec;
   publishedItemCount: number;
+  reviewCount: number;
+  avgRating: number;
   notificationPreferences: { __type: "Relationship"; __resource: AngleAccountsNotificationPreferencesResourceSchema | null; };
   storeProfile: { __type: "Relationship"; __resource: StoreProfileResourceSchema | null; };
   items: { __type: "Relationship"; __array: true; __resource: ItemResourceSchema; };
+  receivedReviews: { __type: "Relationship"; __array: true; __resource: ReviewResourceSchema; };
 };
 
 
@@ -458,6 +493,71 @@ export type OrderFilterInput = {
   item?: ItemFilterInput;
 
   buyer?: UserFilterInput;
+
+  seller?: UserFilterInput;
+
+  review?: ReviewFilterInput;
+
+};
+export type ReviewFilterInput = {
+  and?: Array<ReviewFilterInput>;
+  or?: Array<ReviewFilterInput>;
+  not?: Array<ReviewFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  rating?: {
+    eq?: number;
+    notEq?: number;
+    greaterThan?: number;
+    greaterThanOrEqual?: number;
+    lessThan?: number;
+    lessThanOrEqual?: number;
+    in?: Array<number>;
+  };
+
+  comment?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  insertedAt?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+  orderId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  reviewerId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  sellerId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+
+  order?: OrderFilterInput;
+
+  reviewer?: UserFilterInput;
 
   seller?: UserFilterInput;
 
@@ -824,9 +924,21 @@ export type UserFilterInput = {
     in?: Array<number>;
   };
 
+  reviewCount?: {
+    eq?: number;
+    notEq?: number;
+    greaterThan?: number;
+    greaterThanOrEqual?: number;
+    lessThan?: number;
+    lessThanOrEqual?: number;
+    in?: Array<number>;
+  };
+
   storeProfile?: StoreProfileFilterInput;
 
   items?: ItemFilterInput;
+
+  receivedReviews?: ReviewFilterInput;
 
 };
 export type StoreProfileFilterInput = {
@@ -1565,35 +1677,35 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
-// Category Typed Queries
+// Bid Typed Queries
 /**
- * Typed query for Category
+ * Typed query for Bid
  *
  * @typedQuery true
  */
-export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
+export type ActiveBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }]>>;
 
 /**
- * Typed query for Category
+ * Typed query for Bid
  *
  * @typedQuery true
  */
-export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
+export const activeBidCardFields = ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }] satisfies ListBidsFields;
 
 
 /**
- * Typed query for Category
+ * Typed query for Bid
  *
  * @typedQuery true
  */
-export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { categories: ["id", "name", "slug"] }]>>;
+export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }]>>;
 
 /**
- * Typed query for Category
+ * Typed query for Bid
  *
  * @typedQuery true
  */
-export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
+export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
 
 
 
@@ -1629,35 +1741,35 @@ export const sellerPaymentCardFields = ["id", "status", "amount", "paymentRefere
 
 
 
-// Bid Typed Queries
+// Category Typed Queries
 /**
- * Typed query for Bid
+ * Typed query for Category
  *
  * @typedQuery true
  */
-export type ActiveBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }]>>;
+export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
 
 /**
- * Typed query for Bid
+ * Typed query for Category
  *
  * @typedQuery true
  */
-export const activeBidCardFields = ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }] satisfies ListBidsFields;
+export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
 
 
 /**
- * Typed query for Bid
+ * Typed query for Category
  *
  * @typedQuery true
  */
-export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }]>>;
+export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { categories: ["id", "name", "slug"] }]>>;
 
 /**
- * Typed query for Bid
+ * Typed query for Category
  *
  * @typedQuery true
  */
-export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
+export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
 
 
 
@@ -1667,14 +1779,14 @@ export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userI
  *
  * @typedQuery true
  */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
 
 /**
  * Typed query for User
  *
  * @typedQuery true
  */
-export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
+export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
 
 
 
@@ -1782,6 +1894,23 @@ export type SellerDashboardCard = Array<InferResult<ItemResourceSchema, ["id", "
  * @typedQuery true
  */
 export const sellerDashboardCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "publicationStatus", "condition", "saleType", "viewCount", "bidCount", "watcherCount", { category: ["id", "name"] }] satisfies ListMyListingsFields;
+
+
+
+// Review Typed Queries
+/**
+ * Typed query for Review
+ *
+ * @typedQuery true
+ */
+export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }]>>;
+
+/**
+ * Typed query for Review
+ *
+ * @typedQuery true
+ */
+export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
 
 
 
@@ -2338,6 +2467,327 @@ export async function validateListSellerOrders(
   const payload = {
     action: "list_seller_orders",
     ...(config.tenant !== undefined && { tenant: config.tenant })
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type CreateReviewInput = {
+  orderId: UUID;
+  rating: number;
+  comment?: string | null;
+};
+
+export type CreateReviewFields = UnifiedFieldSelection<ReviewResourceSchema>[];
+
+export type InferCreateReviewResult<
+  Fields extends CreateReviewFields | undefined,
+> = InferResult<ReviewResourceSchema, Fields>;
+
+export type CreateReviewResult<Fields extends CreateReviewFields | undefined = undefined> = | { success: true; data: InferCreateReviewResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Create a new Review
+ *
+ * @ashActionType :create
+ */
+export async function createReview<Fields extends CreateReviewFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  input: CreateReviewInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<CreateReviewResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "create_review",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<CreateReviewResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Create a new Review
+ *
+ * @ashActionType :create
+ * @validation true
+ */
+export async function validateCreateReview(
+  config: {
+  tenant?: string;
+  input: CreateReviewInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "create_review",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type UpdateReviewInput = {
+  rating?: number;
+  comment?: string | null;
+};
+
+export type UpdateReviewFields = UnifiedFieldSelection<ReviewResourceSchema>[];
+
+export type InferUpdateReviewResult<
+  Fields extends UpdateReviewFields | undefined,
+> = InferResult<ReviewResourceSchema, Fields>;
+
+export type UpdateReviewResult<Fields extends UpdateReviewFields | undefined = undefined> = | { success: true; data: InferUpdateReviewResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Update an existing Review
+ *
+ * @ashActionType :update
+ */
+export async function updateReview<Fields extends UpdateReviewFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  input: UpdateReviewInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<UpdateReviewResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "update_review",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<UpdateReviewResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Update an existing Review
+ *
+ * @ashActionType :update
+ * @validation true
+ */
+export async function validateUpdateReview(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  input: UpdateReviewInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "update_review",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type ListReviewsBySellerInput = {
+  sellerId: UUID;
+};
+
+export type ListReviewsBySellerFields = UnifiedFieldSelection<ReviewResourceSchema>[];
+
+
+export type InferListReviewsBySellerResult<
+  Fields extends ListReviewsBySellerFields | undefined,
+  Page extends ListReviewsBySellerConfig["page"] = undefined
+> = ConditionalPaginatedResult<Page, Array<InferResult<ReviewResourceSchema, Fields>>, {
+  results: Array<InferResult<ReviewResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+  count?: number | null;
+  type: "offset";
+}>;
+
+export type ListReviewsBySellerConfig = {
+  tenant?: string;
+  input: ListReviewsBySellerInput;
+  fields: ListReviewsBySellerFields;
+  filter?: ReviewFilterInput;
+  sort?: string;
+  page?: {
+    limit?: number;
+    offset?: number;
+    after?: never;
+    before?: never;
+    count?: boolean;
+  };
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
+
+export type ListReviewsBySellerResult<Fields extends ListReviewsBySellerFields, Page extends ListReviewsBySellerConfig["page"] = undefined> = | { success: true; data: InferListReviewsBySellerResult<Fields, Page>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read Review records
+ *
+ * @ashActionType :read
+ */
+export async function listReviewsBySeller<Fields extends ListReviewsBySellerFields, Config extends ListReviewsBySellerConfig = ListReviewsBySellerConfig>(
+  config: Config & { fields: Fields }
+): Promise<ListReviewsBySellerResult<Fields, Config["page"]>> {
+  const payload = {
+    action: "list_reviews_by_seller",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort }),
+    ...(config.page && { page: config.page })
+  };
+
+  return executeActionRpcRequest<ListReviewsBySellerResult<Fields, Config["page"]>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read Review records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateListReviewsBySeller(
+  config: {
+  tenant?: string;
+  input: ListReviewsBySellerInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "list_reviews_by_seller",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type GetReviewForOrderInput = {
+  orderId: UUID;
+};
+
+export type GetReviewForOrderFields = UnifiedFieldSelection<ReviewResourceSchema>[];
+export type InferGetReviewForOrderResult<
+  Fields extends GetReviewForOrderFields,
+> = Array<InferResult<ReviewResourceSchema, Fields>>;
+
+export type GetReviewForOrderResult<Fields extends GetReviewForOrderFields> = | { success: true; data: InferGetReviewForOrderResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read Review records
+ *
+ * @ashActionType :read
+ */
+export async function getReviewForOrder<Fields extends GetReviewForOrderFields>(
+  config: {
+  tenant?: string;
+  input: GetReviewForOrderInput;
+  fields: Fields;
+  filter?: ReviewFilterInput;
+  sort?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<GetReviewForOrderResult<Fields>> {
+  const payload = {
+    action: "get_review_for_order",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort })
+  };
+
+  return executeActionRpcRequest<GetReviewForOrderResult<Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read Review records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateGetReviewForOrder(
+  config: {
+  tenant?: string;
+  input: GetReviewForOrderInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "get_review_for_order",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input
   };
 
   return executeValidationRpcRequest<ValidationResult>(

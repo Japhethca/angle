@@ -15,24 +15,38 @@ defmodule AngleWeb.StoreController do
 
       seller ->
         tab = validate_tab(params["tab"])
-
-        {items, has_more} =
-          case tab do
-            "reviews" -> {[], false}
-            "history" -> load_seller_items(conn, seller["id"], :history)
-            _ -> load_seller_items(conn, seller["id"], :active)
-          end
-
         category_summary = build_category_summary(seller["id"])
 
-        conn
-        |> assign_prop(:seller, seller)
-        |> assign_prop(:items, items)
-        |> assign_prop(:has_more, has_more)
-        |> assign_prop(:category_summary, category_summary)
-        |> assign_prop(:active_tab, tab)
-        |> assign_prop(:watchlisted_map, load_watchlisted_map(conn))
-        |> render_inertia("store/show")
+        conn =
+          conn
+          |> assign_prop(:seller, seller)
+          |> assign_prop(:category_summary, category_summary)
+          |> assign_prop(:active_tab, tab)
+          |> assign_prop(:watchlisted_map, load_watchlisted_map(conn))
+
+        case tab do
+          "reviews" ->
+            reviews = load_seller_reviews(conn, seller["id"])
+
+            conn
+            |> assign_prop(:items, [])
+            |> assign_prop(:has_more, false)
+            |> assign_prop(:reviews, reviews)
+            |> render_inertia("store/show")
+
+          _ ->
+            {items, has_more} =
+              case tab do
+                "history" -> load_seller_items(conn, seller["id"], :history)
+                _ -> load_seller_items(conn, seller["id"], :active)
+              end
+
+            conn
+            |> assign_prop(:items, items)
+            |> assign_prop(:has_more, has_more)
+            |> assign_prop(:reviews, [])
+            |> render_inertia("store/show")
+        end
     end
   end
 
@@ -74,6 +88,18 @@ defmodule AngleWeb.StoreController do
 
       _ ->
         {[], false}
+    end
+  end
+
+  defp load_seller_reviews(conn, seller_id) do
+    params = %{
+      input: %{seller_id: seller_id},
+      page: %{limit: @items_per_page, offset: 0, count: false}
+    }
+
+    case AshTypescript.Rpc.run_typed_query(:angle, :seller_review_card, params, conn) do
+      %{"success" => true, "data" => data} -> extract_results(data)
+      _ -> []
     end
   end
 

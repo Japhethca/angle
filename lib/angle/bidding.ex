@@ -130,10 +130,37 @@ defmodule Angle.Bidding do
         ]
       end
     end
+
+    resource Angle.Bidding.Review do
+      rpc_action :create_review, :create
+      rpc_action :update_review, :update
+      rpc_action :list_reviews_by_seller, :by_seller
+      rpc_action :get_review_for_order, :for_order
+
+      typed_query :seller_review_card, :by_seller do
+        ts_result_type_name "SellerReviewCard"
+        ts_fields_const_name "sellerReviewCardFields"
+
+        fields [
+          :id,
+          :rating,
+          :comment,
+          :inserted_at,
+          %{
+            reviewer: [
+              :id,
+              :username,
+              :full_name
+            ]
+          }
+        ]
+      end
+    end
   end
 
   resources do
     resource Angle.Bidding.Bid
     resource Angle.Bidding.Order
+    resource Angle.Bidding.Review
   end
 end

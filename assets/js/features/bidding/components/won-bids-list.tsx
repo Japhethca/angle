@@ -8,10 +8,17 @@ import { WonBidCard } from "./won-bid-card";
 
 interface WonBidsListProps {
   orders: WonOrderCardType;
+  reviewsByOrder?: Record<
+    string,
+    { id: string; rating: number; comment: string | null; insertedAt: string }
+  >;
 }
 
-export function WonBidsList({ orders }: WonBidsListProps) {
+export function WonBidsList({ orders, reviewsByOrder }: WonBidsListProps) {
   const [payPendingId, setPayPendingId] = useState<string | null>(null);
+  const [reviewFormOrderId, setReviewFormOrderId] = useState<string | null>(
+    null,
+  );
   const [paystackReady, setPaystackReady] = useState(false);
 
   useEffect(() => {
@@ -135,10 +142,14 @@ export function WonBidsList({ orders }: WonBidsListProps) {
           <WonBidCard
             key={order.id}
             order={order}
+            review={reviewsByOrder?.[order.id] || null}
             onPay={handlePay}
             onConfirmReceipt={handleConfirmReceipt}
+            onReview={(orderId) => setReviewFormOrderId(orderId)}
             payPending={payPendingId === order.id}
             confirmPending={confirmPending}
+            showReviewForm={reviewFormOrderId === order.id}
+            onCloseReviewForm={() => setReviewFormOrderId(null)}
           />
         ))}
       </div>

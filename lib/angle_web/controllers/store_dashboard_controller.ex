@@ -55,11 +55,13 @@ defmodule AngleWeb.StoreDashboardController do
     user = conn.assigns.current_user
     store_profile = load_store_profile(user)
     category_summary = build_category_summary(user.id)
+    reviews = load_seller_reviews(conn, user.id)
 
     conn
     |> assign_prop(:store_profile, store_profile)
     |> assign_prop(:category_summary, category_summary)
     |> assign_prop(:user, serialize_user(user))
+    |> assign_prop(:reviews, reviews)
     |> render_inertia("store/profile")
   end
 
@@ -105,6 +107,18 @@ defmodule AngleWeb.StoreDashboardController do
     }
 
     case AshTypescript.Rpc.run_typed_query(:angle, :seller_payment_card, params, conn) do
+      %{"success" => true, "data" => data} -> extract_results(data)
+      _ -> []
+    end
+  end
+
+  defp load_seller_reviews(conn, seller_id) do
+    params = %{
+      input: %{seller_id: seller_id},
+      page: %{limit: 100, offset: 0, count: true}
+    }
+
+    case AshTypescript.Rpc.run_typed_query(:angle, :seller_review_card, params, conn) do
       %{"success" => true, "data" => data} -> extract_results(data)
       _ -> []
     end
@@ -183,6 +197,8 @@ defmodule AngleWeb.StoreDashboardController do
   end
 
   defp serialize_user(user) do
+    user = Ash.load!(user, [:avg_rating, :review_count], authorize?: false)
+
     %{
       "id" => user.id,
       "email" => user.email,
@@ -190,7 +206,9 @@ defmodule AngleWeb.StoreDashboardController do
       "username" => user.username,
       "phoneNumber" => user.phone_number,
       "location" => user.location,
-      "createdAt" => user.created_at && DateTime.to_iso8601(user.created_at)
+      "createdAt" => user.created_at && DateTime.to_iso8601(user.created_at),
+      "avgRating" => user.avg_rating,
+      "reviewCount" => user.review_count
     }
   end
 

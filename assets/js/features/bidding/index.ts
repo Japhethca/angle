@@ -8,6 +8,7 @@ export { ActiveBidCard } from "./components/active-bid-card";
 export { OutbidBadge } from "./components/outbid-badge";
 export { WonBidsList } from "./components/won-bids-list";
 export { WonBidCard } from "./components/won-bid-card";
+export { ReviewForm } from "./components/review-form";
 export { HistoryBidsList } from "./components/history-bids-list";
 export { HistoryBidCard } from "./components/history-bid-card";
 export { useBiddingChannel } from "./hooks/use-bidding-channel";

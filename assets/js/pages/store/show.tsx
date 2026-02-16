@@ -16,10 +16,17 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import type { SellerProfile, SellerItemCard } from "@/ash_rpc";
-import { listItems, sellerItemCardFields, buildCSRFHeaders } from "@/ash_rpc";
-import type { ListItemsFields } from "@/ash_rpc";
+import {
+  listItems,
+  listReviewsBySeller,
+  sellerItemCardFields,
+  sellerReviewCardFields,
+  buildCSRFHeaders,
+} from "@/ash_rpc";
+import type { ListItemsFields, ListReviewsBySellerFields } from "@/ash_rpc";
 import { CategoryItemCard, CategoryItemListCard } from "@/features/items";
 import type { CategoryItem } from "@/features/items";
+import { ReviewCard } from "@/components/reviews/review-card";
 
 type Seller = SellerProfile[number];
 type SellerItem = SellerItemCard[number];
@@ -41,7 +48,16 @@ interface StoreShowProps {
   category_summary: CategorySummary[];
   active_tab: TabKey;
   watchlisted_map: Record<string, string>;
+  reviews?: ReviewItem[];
 }
+
+type ReviewItem = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  insertedAt: string;
+  reviewer?: { id: string; username: string | null; fullName: string | null };
+};
 
 const ITEMS_PER_PAGE = 20;
 const VIEW_MODE_KEY = "store-view-mode";
@@ -67,6 +83,7 @@ export default function StoreShow({
   category_summary: categorySummary = [],
   active_tab: initialActiveTab = "auctions",
   watchlisted_map: watchlistedMap = {},
+  reviews,
 }: StoreShowProps) {
   const displayName = seller.storeProfile?.storeName || seller.fullName || "Store";
   const storeUrl = `/store/${seller.username || seller.id}`;
@@ -90,6 +107,12 @@ export default function StoreShow({
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isLoadingMoreHistory, setIsLoadingMoreHistory] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(historyTabActive);
+
+  // Reviews tab state (server-loaded when active_tab is reviews, otherwise client-loaded on demand)
+  const reviewsTabActive = initialActiveTab === "reviews";
+  const [reviewItems, setReviewItems] = useState<ReviewItem[]>(reviewsTabActive && reviews ? reviews : []);
+  const [isLoadingReviews, setIsLoadingReviews] = useState(false);
+  const [reviewsLoaded, setReviewsLoaded] = useState(reviewsTabActive && (reviews?.length ?? 0) > 0);
 
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
@@ -200,10 +223,36 @@ export default function StoreShow({
     }
   }, [seller.id, historyItems.length, isLoadingMoreHistory]);
 
+  const loadReviews = useCallback(async () => {
+    if (isLoadingReviews) return;
+    setIsLoadingReviews(true);
+    try {
+      const fields = sellerReviewCardFields as ListReviewsBySellerFields;
+      const result = await listReviewsBySeller({
+        fields,
+        input: { sellerId: seller.id },
+        page: { limit: ITEMS_PER_PAGE, offset: 0 },
+        headers: buildCSRFHeaders(),
+      });
+
+      if (result.success && result.data) {
+        const data = result.data as { results: ReviewItem[] } | ReviewItem[];
+        const items = Array.isArray(data) ? data : data.results;
+        setReviewItems(items);
+        setReviewsLoaded(true);
+      }
+    } finally {
+      setIsLoadingReviews(false);
+    }
+  }, [seller.id, isLoadingReviews]);
+
   const handleTabChange = (tab: TabKey) => {
     setActiveTab(tab);
     if (tab === "history" && !historyLoaded) {
       loadHistory();
+    }
+    if (tab === "reviews" && !reviewsLoaded) {
+      loadReviews();
     }
 
     // Update URL to reflect the active tab
@@ -279,12 +328,16 @@ export default function StoreShow({
                 <BadgeCheck className="size-5 text-primary-600" />
               </div>
 
-              {/* Stats row (placeholders) */}
+              {/* Stats row */}
               <div className="flex items-center gap-4 text-sm text-content-tertiary">
                 <span className="flex items-center gap-1">
                   <Star className="size-4 text-yellow-500" />
-                  <span className="font-medium">4.8</span>
-                  <span className="text-content-placeholder">(120 reviews)</span>
+                  <span className="font-medium">
+                    {seller.avgRating ? Number(seller.avgRating).toFixed(1) : "\u2013"}
+                  </span>
+                  <span className="text-content-placeholder">
+                    ({seller.reviewCount || 0} {seller.reviewCount === 1 ? "review" : "reviews"})
+                  </span>
                 </span>
                 <span className="text-surface-emphasis">|</span>
                 <span>{auctionItems.length}+ listings</span>
@@ -409,14 +462,25 @@ export default function StoreShow({
       {/* Tab content */}
       <div className="mt-6">
         {activeTab === "reviews" ? (
-          /* Reviews placeholder */
-          <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
-            <Star className="mb-3 size-12 text-surface-emphasis" />
-            <p className="text-lg text-content-tertiary">No reviews yet</p>
-            <p className="mt-1 text-sm text-content-placeholder">
-              Reviews will appear here once buyers leave feedback
-            </p>
-          </div>
+          isLoadingReviews ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="size-6 animate-spin text-content-tertiary" />
+            </div>
+          ) : reviewItems.length > 0 ? (
+            <div className="px-4 lg:px-10">
+              {reviewItems.map((review) => (
+                <ReviewCard key={review.id} review={review} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
+              <Star className="mb-3 size-12 text-surface-emphasis" />
+              <p className="text-lg text-content-tertiary">No reviews yet</p>
+              <p className="mt-1 text-sm text-content-placeholder">
+                Reviews will appear here once buyers leave feedback
+              </p>
+            </div>
+          )
         ) : (
           <>
             {/* Loading state for history initial load */}

@@ -511,6 +511,11 @@ defmodule Angle.Accounts.User do
       destination_attribute :created_by_id
       public? true
     end
+
+    has_many :received_reviews, Angle.Bidding.Review do
+      destination_attribute :seller_id
+      public? true
+    end
   end
 
   calculations do
@@ -635,6 +640,14 @@ defmodule Angle.Accounts.User do
   aggregates do
     count :published_item_count, :items do
       filter expr(publication_status == :published)
+      public? true
+    end
+
+    count :review_count, :received_reviews do
+      public? true
+    end
+
+    avg :avg_rating, :received_reviews, :rating do
       public? true
     end
   end
