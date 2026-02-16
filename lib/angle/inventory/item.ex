@@ -134,7 +134,31 @@ defmodule Angle.Inventory.Item do
 
     read :my_listings do
       description "List all items owned by the current user (for seller dashboard)"
+
+      argument :status_filter, :atom do
+        default :all
+        constraints one_of: [:all, :active, :ended, :draft]
+      end
+
       filter expr(created_by_id == ^actor(:id))
+
+      filter expr(
+               if ^arg(:status_filter) == :active do
+                 publication_status == :published and
+                   auction_status in [:pending, :scheduled, :active]
+               else
+                 if ^arg(:status_filter) == :ended do
+                   publication_status == :published and auction_status in [:ended, :sold]
+                 else
+                   if ^arg(:status_filter) == :draft do
+                     publication_status == :draft
+                   else
+                     true
+                   end
+                 end
+               end
+             )
+
       prepare build(sort: [inserted_at: :desc])
       pagination offset?: true, required?: false
     end
