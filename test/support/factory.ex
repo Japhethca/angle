@@ -260,6 +260,24 @@ defmodule Angle.Factory do
     |> Ash.create!(authorize?: false)
   end
 
+  @doc """
+  Creates a watchlist item (adds an item to a user's watchlist).
+
+  ## Options
+
+    * `:user` - the user record (creates one if not provided)
+    * `:item` - the item record (creates one if not provided)
+
+  """
+  def create_watchlist_item(opts \\ []) do
+    user = Keyword.get_lazy(opts, :user, fn -> create_user() end)
+    item = Keyword.get_lazy(opts, :item, fn -> create_item() end)
+
+    Angle.Inventory.WatchlistItem
+    |> Ash.Changeset.for_create(:add, %{item_id: item.id}, actor: user, authorize?: false)
+    |> Ash.create!()
+  end
+
   # Helpers
 
   defp unique_email do
