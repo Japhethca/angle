@@ -1,17 +1,46 @@
 import { useState } from "react";
 import { Link } from "@inertiajs/react";
-import { ChevronLeft, ChevronRight, Gavel, Eye } from "lucide-react";
+import { ChevronLeft, ChevronRight, Gavel, Eye, Heart } from "lucide-react";
 import type { HomepageItemCard } from "@/ash_rpc";
 import { CountdownTimer } from "@/shared/components/countdown-timer";
 import { formatNaira } from "@/lib/format";
+import { useAuthGuard } from "@/features/auth";
+import { useWatchlistToggle } from "@/features/watchlist";
 
 type Item = HomepageItemCard[number];
 
 interface FeaturedItemCarouselProps {
   items: Item[];
+  watchlistedMap?: Record<string, string>;
 }
 
-export function FeaturedItemCarousel({ items }: FeaturedItemCarouselProps) {
+function WatchButton({ itemId, watchlistEntryId }: { itemId: string; watchlistEntryId: string | null }) {
+  const { guard, authenticated } = useAuthGuard();
+  const { isWatchlisted, isPending, toggle } = useWatchlistToggle({ itemId, watchlistEntryId });
+
+  return (
+    <button
+      disabled={isPending}
+      onClick={() => {
+        if (authenticated) {
+          toggle();
+        } else {
+          guard(`/items/${itemId}`);
+        }
+      }}
+      className={`flex items-center gap-2 rounded-full border px-6 py-2.5 text-sm font-medium transition-colors ${
+        isWatchlisted
+          ? "border-red-200 bg-red-50 text-red-600"
+          : "border-strong bg-surface text-content hover:bg-surface-muted"
+      }`}
+    >
+      <Heart className={`size-4 ${isWatchlisted ? "fill-red-500" : ""}`} />
+      {isWatchlisted ? "Watching" : "Watch"}
+    </button>
+  );
+}
+
+export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedItemCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   if (items.length === 0) {
@@ -88,9 +117,11 @@ export function FeaturedItemCarousel({ items }: FeaturedItemCarouselProps) {
 
               {/* CTA buttons */}
               <div className="flex items-center gap-3">
-                <button className="rounded-full border border-strong bg-surface px-6 py-2.5 text-sm font-medium text-content transition-colors hover:bg-surface-muted">
-                  Watch
-                </button>
+                <WatchButton
+                  key={activeItem.id}
+                  itemId={activeItem.id}
+                  watchlistEntryId={watchlistedMap[activeItem.id] ?? null}
+                />
                 <Link
                   href={itemUrl}
                   className="flex items-center gap-2 rounded-full bg-primary-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-600/90"
@@ -147,9 +178,13 @@ export function FeaturedItemCarousel({ items }: FeaturedItemCarouselProps) {
             </div>
 
             <div className="flex gap-3">
-              <button className="flex-1 rounded-full border border-strong bg-surface py-2.5 text-sm font-medium text-content">
-                Watch
-              </button>
+              <div className="flex-1">
+                <WatchButton
+                  key={activeItem.id}
+                  itemId={activeItem.id}
+                  watchlistEntryId={watchlistedMap[activeItem.id] ?? null}
+                />
+              </div>
               <Link
                 href={itemUrl}
                 className="flex flex-1 items-center justify-center gap-2 rounded-full bg-primary-600 py-2.5 text-sm font-medium text-white"

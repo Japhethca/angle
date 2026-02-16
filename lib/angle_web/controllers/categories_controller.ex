@@ -29,6 +29,7 @@ defmodule AngleWeb.CategoriesController do
         |> assign_prop(:items, items)
         |> assign_prop(:has_more, has_more)
         |> assign_prop(:active_subcategory, nil)
+        |> assign_prop(:watchlisted_map, load_watchlisted_map(conn))
         |> render_inertia("categories/show")
     end
   end
@@ -51,6 +52,7 @@ defmodule AngleWeb.CategoriesController do
           |> assign_prop(:items, items)
           |> assign_prop(:has_more, has_more)
           |> assign_prop(:active_subcategory, sub_slug)
+          |> assign_prop(:watchlisted_map, load_watchlisted_map(conn))
           |> render_inertia("categories/show")
         else
           conn
@@ -99,6 +101,19 @@ defmodule AngleWeb.CategoriesController do
 
       _ ->
         {[], false}
+    end
+  end
+
+  defp load_watchlisted_map(conn) do
+    case conn.assigns[:current_user] do
+      nil ->
+        %{}
+
+      user ->
+        Angle.Inventory.WatchlistItem
+        |> Ash.Query.for_read(:by_user, %{}, actor: user)
+        |> Ash.read!(authorize?: false)
+        |> Map.new(fn entry -> {entry.item_id, entry.id} end)
     end
   end
 

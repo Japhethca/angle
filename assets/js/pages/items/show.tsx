@@ -17,6 +17,8 @@ import {
   SimilarItems,
 } from "@/features/items";
 import { BidSection } from "@/features/bidding";
+import { useWatchlistToggle } from "@/features/watchlist/hooks/use-watchlist-toggle";
+import { toast } from "sonner";
 
 interface Seller {
   id: string;
@@ -28,13 +30,21 @@ interface Seller {
 interface ShowProps {
   item: ItemDetail[number] & { user: Seller | null };
   similar_items: HomepageItemCard;
+  watchlist_entry_id: string | null;
 }
 
 export default function Show({
   item,
   similar_items = [],
+  watchlist_entry_id = null,
 }: ShowProps) {
   const price = item.currentPrice || item.startingPrice;
+  const { isWatchlisted, toggle: toggleWatch, isPending: isWatchPending } = useWatchlistToggle({
+    itemId: item.id,
+    watchlistEntryId: watchlist_entry_id,
+    onAdd: () => toast.success("Added to your watchlist"),
+    onRemove: () => toast.success("Removed from your watchlist"),
+  });
 
   return (
     <>
@@ -55,8 +65,14 @@ export default function Show({
           <button className="flex size-9 items-center justify-center rounded-full border border-strong">
             <Share2 className="size-4 text-content" />
           </button>
-          <button className="flex size-9 items-center justify-center rounded-full border border-strong">
-            <Heart className="size-4 text-content" />
+          <button
+            onClick={toggleWatch}
+            disabled={isWatchPending}
+            className="flex size-9 items-center justify-center rounded-full border border-strong"
+          >
+            <Heart
+              className={`size-4 ${isWatchlisted ? "fill-red-500 text-red-500" : "text-content"}`}
+            />
           </button>
         </div>
       </div>
@@ -129,6 +145,9 @@ export default function Show({
                 startingPrice={item.startingPrice}
                 bidIncrement={item.bidIncrement}
                 bidCount={item.bidCount}
+                isWatchlisted={isWatchlisted}
+                onToggleWatch={toggleWatch}
+                isWatchPending={isWatchPending}
               />
             </div>
           </div>
@@ -165,10 +184,14 @@ export default function Show({
 
           <BidSection
             itemId={item.id}
+            itemTitle={item.title}
             currentPrice={item.currentPrice}
             startingPrice={item.startingPrice}
             bidIncrement={item.bidIncrement}
             bidCount={item.bidCount}
+            isWatchlisted={isWatchlisted}
+            onToggleWatch={toggleWatch}
+            isWatchPending={isWatchPending}
           />
 
           <ItemDetailTabs description={item.description} />
