@@ -8,11 +8,13 @@ defmodule AngleWeb.WatchlistController do
 
     items = load_watchlist_items(conn, category_id)
     categories = load_top_categories()
+    watchlisted_map = load_watchlisted_map(conn)
 
     conn
     |> assign_prop(:items, items)
     |> assign_prop(:categories, categories)
     |> assign_prop(:active_category, category_id)
+    |> assign_prop(:watchlisted_map, watchlisted_map)
     |> render_inertia("watchlist")
   end
 
@@ -36,6 +38,19 @@ defmodule AngleWeb.WatchlistController do
     |> Ash.Query.sort(:name)
     |> Ash.read!(authorize?: false)
     |> Enum.map(fn cat -> %{id: cat.id, name: cat.name, slug: cat.slug} end)
+  end
+
+  defp load_watchlisted_map(conn) do
+    case conn.assigns[:current_user] do
+      nil ->
+        %{}
+
+      user ->
+        Angle.Inventory.WatchlistItem
+        |> Ash.Query.for_read(:by_user, %{}, actor: user)
+        |> Ash.read!(authorize?: false)
+        |> Map.new(fn entry -> {entry.item_id, entry.id} end)
+    end
   end
 
   defp extract_results(data) when is_list(data), do: data

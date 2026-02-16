@@ -26,36 +26,40 @@ export function useWatchlistToggle({
     if (isPending) return;
     setIsPending(true);
 
-    if (isWatchlisted && entryId) {
-      setIsWatchlisted(false);
-      try {
-        await removeFromWatchlist({
-          identity: entryId,
-          headers: buildCSRFHeaders(),
-        });
-        setEntryId(null);
-        onRemove?.();
-      } catch {
-        setIsWatchlisted(true);
-      }
-    } else {
-      setIsWatchlisted(true);
-      try {
-        const result = await addToWatchlist({
-          input: { itemId },
-          fields: ["id"],
-          headers: buildCSRFHeaders(),
-        });
-        if (result.success) {
-          setEntryId(result.data.id);
-          onAdd?.();
-        }
-      } catch {
+    try {
+      if (isWatchlisted && entryId) {
         setIsWatchlisted(false);
+        try {
+          await removeFromWatchlist({
+            identity: entryId,
+            headers: buildCSRFHeaders(),
+          });
+          setEntryId(null);
+          onRemove?.();
+        } catch {
+          setIsWatchlisted(true);
+        }
+      } else {
+        setIsWatchlisted(true);
+        try {
+          const result = await addToWatchlist({
+            input: { itemId },
+            fields: ["id"],
+            headers: buildCSRFHeaders(),
+          });
+          if (result.success) {
+            setEntryId(result.data.id);
+            onAdd?.();
+          } else {
+            setIsWatchlisted(false);
+          }
+        } catch {
+          setIsWatchlisted(false);
+        }
       }
+    } finally {
+      setIsPending(false);
     }
-
-    setIsPending(false);
   }
 
   return { isWatchlisted, isPending, toggle };

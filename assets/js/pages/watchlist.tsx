@@ -24,12 +24,14 @@ interface WatchlistProps {
   items: WatchlistItemCardType;
   categories: Category[];
   active_category: string | null;
+  watchlisted_map: Record<string, string>;
 }
 
 export default function Watchlist({
   items = [],
   categories = [],
   active_category = null,
+  watchlisted_map = {},
 }: WatchlistProps) {
   const isEmpty = items.length === 0;
   const isFiltered = active_category !== null;
@@ -122,7 +124,7 @@ export default function Watchlist({
             ) : (
               <div className="flex flex-col gap-4">
                 {items.map((item) => (
-                  <WatchlistItemCard key={item.id} item={item} />
+                  <WatchlistItemCard key={item.id} item={item} watchlistEntryId={watchlisted_map[item.id] ?? null} />
                 ))}
               </div>
             )}

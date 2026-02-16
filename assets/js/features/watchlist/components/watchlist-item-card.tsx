@@ -1,30 +1,49 @@
-import { Link } from "@inertiajs/react";
-import { Clock, Gavel, Eye } from "lucide-react";
+import { Link, router } from "@inertiajs/react";
+import { Clock, Gavel, Eye, Heart } from "lucide-react";
 import type { WatchlistItemCard as WatchlistItemCardType } from "@/ash_rpc";
 import { CountdownTimer } from "@/shared/components/countdown-timer";
 import { ConditionBadge } from "@/features/items";
 import { formatNaira } from "@/lib/format";
+import { useWatchlistToggle } from "@/features/watchlist";
 
 export type WatchlistItem = WatchlistItemCardType[number];
 
 interface WatchlistItemCardProps {
   item: WatchlistItem;
+  watchlistEntryId?: string | null;
 }
 
-export function WatchlistItemCard({ item }: WatchlistItemCardProps) {
+export function WatchlistItemCard({ item, watchlistEntryId = null }: WatchlistItemCardProps) {
+  const { isWatchlisted, isPending, toggle } = useWatchlistToggle({
+    itemId: item.id,
+    watchlistEntryId,
+    onRemove: () => router.reload(),
+  });
   const itemUrl = `/items/${item.slug || item.id}`;
   const price = item.currentPrice || item.startingPrice;
 
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-subtle bg-white lg:flex-row">
       {/* Image */}
-      <Link href={itemUrl} className="shrink-0">
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface-muted lg:aspect-auto lg:h-[200px] lg:w-[300px]">
-          <div className="flex h-full items-center justify-center text-content-placeholder">
-            <Gavel className="size-12 lg:size-16" />
+      <div className="relative shrink-0">
+        <Link href={itemUrl}>
+          <div className="aspect-[4/3] w-full overflow-hidden bg-surface-muted lg:aspect-auto lg:h-[200px] lg:w-[300px]">
+            <div className="flex h-full items-center justify-center text-content-placeholder">
+              <Gavel className="size-12 lg:size-16" />
+            </div>
           </div>
-        </div>
-      </Link>
+        </Link>
+        <button
+          className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full border border-white/30 bg-white/20 backdrop-blur-sm transition-colors hover:bg-white/40"
+          disabled={isPending}
+          onClick={toggle}
+          aria-label={isWatchlisted ? "Remove from watchlist" : "Add to watchlist"}
+        >
+          <Heart
+            className={`size-4 ${isWatchlisted ? "fill-red-500 text-red-500" : "text-content-tertiary"}`}
+          />
+        </button>
+      </div>
 
       {/* Details */}
       <div className="flex flex-1 flex-col justify-between gap-3 p-4 lg:p-5">
