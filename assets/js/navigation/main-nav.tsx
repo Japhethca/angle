@@ -22,7 +22,7 @@ interface MainNavProps {
 const navLinks = [
   { label: 'Home', href: '/' },
   { label: 'My Bids', href: '/bids', auth: true },
-  { label: 'List Item', href: '/items/new', auth: true },
+  { label: 'Store', href: '/store', auth: true },
   { label: 'Watchlist', href: '/watchlist', auth: true },
 ];
 

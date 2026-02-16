@@ -1565,104 +1565,6 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
-// Order Typed Queries
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
-
-
-
-// User Typed Queries
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
-
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
-
-
-
-// Category Typed Queries
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
-
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { categories: ["id", "name", "slug"] }]>>;
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
-
-
-
-// Bid Typed Queries
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export type ActiveBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }]>>;
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export const activeBidCardFields = ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }] satisfies ListBidsFields;
-
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }]>>;
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
-
-
-
 // Item Typed Queries
 /**
  * Typed query for Item
@@ -1752,6 +1654,134 @@ export type UserWatchlistId = Array<InferResult<ItemResourceSchema, ["id"]>>;
  * @typedQuery true
  */
 export const userWatchlistIdFields = ["id"];
+
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export type SellerDashboardCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "publicationStatus", "condition", "saleType", "viewCount", "bidCount", "watcherCount", { category: ["id", "name"] }]>>;
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export const sellerDashboardCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "publicationStatus", "condition", "saleType", "viewCount", "bidCount", "watcherCount", { category: ["id", "name"] }] satisfies ListMyListingsFields;
+
+
+
+// User Typed Queries
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
+
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
+
+
+
+// Order Typed Queries
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
+
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
+
+
+
+// Bid Typed Queries
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export type ActiveBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }]>>;
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export const activeBidCardFields = ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }] satisfies ListBidsFields;
+
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }]>>;
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
+
+
+
+// Category Typed Queries
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
+
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { categories: ["id", "name", "slug"] }]>>;
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
 
 
 
@@ -2221,6 +2251,93 @@ export async function validateConfirmReceipt(
     action: "confirm_receipt",
     ...(config.tenant !== undefined && { tenant: config.tenant }),
     identity: config.identity
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type ListSellerOrdersFields = UnifiedFieldSelection<OrderResourceSchema>[];
+
+
+export type InferListSellerOrdersResult<
+  Fields extends ListSellerOrdersFields | undefined,
+  Page extends ListSellerOrdersConfig["page"] = undefined
+> = ConditionalPaginatedResult<Page, Array<InferResult<OrderResourceSchema, Fields>>, {
+  results: Array<InferResult<OrderResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+  count?: number | null;
+  type: "offset";
+}>;
+
+export type ListSellerOrdersConfig = {
+  tenant?: string;
+  fields: ListSellerOrdersFields;
+  filter?: OrderFilterInput;
+  sort?: string;
+  page?: {
+    limit?: number;
+    offset?: number;
+    after?: never;
+    before?: never;
+    count?: boolean;
+  };
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
+
+export type ListSellerOrdersResult<Fields extends ListSellerOrdersFields, Page extends ListSellerOrdersConfig["page"] = undefined> = | { success: true; data: InferListSellerOrdersResult<Fields, Page>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read Order records
+ *
+ * @ashActionType :read
+ */
+export async function listSellerOrders<Fields extends ListSellerOrdersFields, Config extends ListSellerOrdersConfig = ListSellerOrdersConfig>(
+  config: Config & { fields: Fields }
+): Promise<ListSellerOrdersResult<Fields, Config["page"]>> {
+  const payload = {
+    action: "list_seller_orders",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort }),
+    ...(config.page && { page: config.page })
+  };
+
+  return executeActionRpcRequest<ListSellerOrdersResult<Fields, Config["page"]>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read Order records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateListSellerOrders(
+  config: {
+  tenant?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "list_seller_orders",
+    ...(config.tenant !== undefined && { tenant: config.tenant })
   };
 
   return executeValidationRpcRequest<ValidationResult>(
@@ -2734,6 +2851,93 @@ export async function validatePublishItem(
     action: "publish_item",
     ...(config.tenant !== undefined && { tenant: config.tenant }),
     identity: config.identity
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type ListMyListingsFields = UnifiedFieldSelection<ItemResourceSchema>[];
+
+
+export type InferListMyListingsResult<
+  Fields extends ListMyListingsFields | undefined,
+  Page extends ListMyListingsConfig["page"] = undefined
+> = ConditionalPaginatedResult<Page, Array<InferResult<ItemResourceSchema, Fields>>, {
+  results: Array<InferResult<ItemResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+  count?: number | null;
+  type: "offset";
+}>;
+
+export type ListMyListingsConfig = {
+  tenant?: string;
+  fields: ListMyListingsFields;
+  filter?: ItemFilterInput;
+  sort?: string;
+  page?: {
+    limit?: number;
+    offset?: number;
+    after?: never;
+    before?: never;
+    count?: boolean;
+  };
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
+
+export type ListMyListingsResult<Fields extends ListMyListingsFields, Page extends ListMyListingsConfig["page"] = undefined> = | { success: true; data: InferListMyListingsResult<Fields, Page>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read Item records
+ *
+ * @ashActionType :read
+ */
+export async function listMyListings<Fields extends ListMyListingsFields, Config extends ListMyListingsConfig = ListMyListingsConfig>(
+  config: Config & { fields: Fields }
+): Promise<ListMyListingsResult<Fields, Config["page"]>> {
+  const payload = {
+    action: "list_my_listings",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort }),
+    ...(config.page && { page: config.page })
+  };
+
+  return executeActionRpcRequest<ListMyListingsResult<Fields, Config["page"]>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read Item records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateListMyListings(
+  config: {
+  tenant?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "list_my_listings",
+    ...(config.tenant !== undefined && { tenant: config.tenant })
   };
 
   return executeValidationRpcRequest<ValidationResult>(

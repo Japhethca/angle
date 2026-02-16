@@ -108,6 +108,27 @@ defmodule Angle.Bidding do
           }
         ]
       end
+
+      rpc_action :list_seller_orders, :seller_orders
+
+      typed_query :seller_payment_card, :seller_orders do
+        ts_result_type_name "SellerPaymentCard"
+        ts_fields_const_name "sellerPaymentCardFields"
+
+        fields [
+          :id,
+          :status,
+          :amount,
+          :payment_reference,
+          :created_at,
+          %{
+            item: [
+              :id,
+              :title
+            ]
+          }
+        ]
+      end
     end
   end
 

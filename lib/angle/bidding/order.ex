@@ -41,6 +41,13 @@ defmodule Angle.Bidding.Order do
       pagination offset?: true, required?: false
     end
 
+    read :seller_orders do
+      description "List orders for the current seller"
+      filter expr(seller_id == ^actor(:id))
+      prepare build(sort: [created_at: :desc])
+      pagination offset?: true, required?: false
+    end
+
     update :pay_order do
       accept []
       argument :payment_reference, :string, allow_nil?: false
@@ -85,6 +92,10 @@ defmodule Angle.Bidding.Order do
     end
 
     policy action(:buyer_orders) do
+      authorize_if always()
+    end
+
+    policy action(:seller_orders) do
       authorize_if always()
     end
 

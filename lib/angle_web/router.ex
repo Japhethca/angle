@@ -70,7 +70,6 @@ defmodule AngleWeb.Router do
     get "/categories", CategoriesController, :index
     get "/categories/:slug", CategoriesController, :show
     get "/categories/:slug/:sub_slug", CategoriesController, :show_subcategory
-    get "/store/:identifier", StoreController, :show
     get "/terms", PageController, :terms
     get "/privacy", PageController, :privacy
     post "/rpc/run", AshTypescriptRpcController, :run
@@ -111,6 +110,10 @@ defmodule AngleWeb.Router do
     get "/watchlist", WatchlistController, :index
     get "/items/new", ItemsController, :new
     get "/profile", ProfileController, :show
+    get "/store", StoreDashboardController, :index
+    get "/store/listings", StoreDashboardController, :listings
+    get "/store/payments", StoreDashboardController, :payments
+    get "/store/profile", StoreDashboardController, :profile
     get "/settings", SettingsController, :index
     get "/settings/account", SettingsController, :account
     get "/settings/store", SettingsController, :store
@@ -120,6 +123,13 @@ defmodule AngleWeb.Router do
     get "/settings/preferences", SettingsController, :preferences
     get "/settings/legal", SettingsController, :legal
     get "/settings/support", SettingsController, :support
+  end
+
+  # Public store profile (catch-all with :identifier must come after specific /store/* routes)
+  scope "/", AngleWeb do
+    pipe_through :browser
+
+    get "/store/:identifier", StoreController, :show
   end
 
   # Payments API endpoints (same-origin, session-authenticated with CSRF)
