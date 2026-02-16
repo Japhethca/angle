@@ -73,7 +73,7 @@ export type CategoryAttributesOnlySchema = {
 // Item Schema
 export type ItemResourceSchema = {
   __type: "Resource";
-  __primitiveFields: "id" | "title" | "description" | "startingPrice" | "reservePrice" | "currentPrice" | "bidIncrement" | "slug" | "startTime" | "endTime" | "categoryId" | "lotNumber" | "publicationStatus" | "auctionStatus" | "condition" | "location" | "attributes" | "saleType" | "auctionFormat" | "buyNowPrice" | "viewCount" | "createdById" | "bidCount";
+  __primitiveFields: "id" | "title" | "description" | "startingPrice" | "reservePrice" | "currentPrice" | "bidIncrement" | "slug" | "startTime" | "endTime" | "categoryId" | "lotNumber" | "publicationStatus" | "auctionStatus" | "condition" | "location" | "attributes" | "saleType" | "auctionFormat" | "buyNowPrice" | "viewCount" | "createdById" | "bidCount" | "watcherCount";
   id: UUID;
   title: string;
   description: string | null;
@@ -97,6 +97,7 @@ export type ItemResourceSchema = {
   viewCount: number | null;
   createdById: UUID | null;
   bidCount: number;
+  watcherCount: number;
   user: { __type: "Relationship"; __resource: UserResourceSchema | null; };
   category: { __type: "Relationship"; __resource: CategoryResourceSchema | null; };
 };
@@ -128,6 +129,28 @@ export type ItemAttributesOnlySchema = {
   buyNowPrice: Decimal | null;
   viewCount: number | null;
   createdById: UUID | null;
+};
+
+
+// WatchlistItem Schema
+export type WatchlistItemResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "userId" | "itemId";
+  id: UUID;
+  userId: UUID;
+  itemId: UUID;
+  user: { __type: "Relationship"; __resource: UserResourceSchema | null; };
+  item: { __type: "Relationship"; __resource: ItemResourceSchema | null; };
+};
+
+
+
+export type WatchlistItemAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "userId" | "itemId";
+  id: UUID;
+  userId: UUID;
+  itemId: UUID;
 };
 
 
@@ -541,9 +564,48 @@ export type ItemFilterInput = {
     in?: Array<number>;
   };
 
+  watcherCount?: {
+    eq?: number;
+    notEq?: number;
+    greaterThan?: number;
+    greaterThanOrEqual?: number;
+    lessThan?: number;
+    lessThanOrEqual?: number;
+    in?: Array<number>;
+  };
+
   user?: UserFilterInput;
 
   category?: CategoryFilterInput;
+
+};
+export type WatchlistItemFilterInput = {
+  and?: Array<WatchlistItemFilterInput>;
+  or?: Array<WatchlistItemFilterInput>;
+  not?: Array<WatchlistItemFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  userId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  itemId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+
+  user?: UserFilterInput;
+
+  item?: ItemFilterInput;
 
 };
 export type UserFilterInput = {
@@ -1475,6 +1537,36 @@ export type ItemDetail = Array<InferResult<ItemResourceSchema, ["id", "title", "
 export const itemDetailFields = ["id", "title", "description", "slug", "startingPrice", "currentPrice", "reservePrice", "bidIncrement", "buyNowPrice", "endTime", "startTime", "auctionStatus", "publicationStatus", "condition", "saleType", "auctionFormat", "viewCount", "location", "attributes", "lotNumber", "createdById", "bidCount", { category: ["id", "name", "slug"] }] satisfies ListItemsFields;
 
 
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export type WatchlistItemCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "bidCount", "watcherCount", { category: ["id", "name", "slug"] }, { user: ["id", "fullName"] }]>>;
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export const watchlistItemCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "bidCount", "watcherCount", { category: ["id", "name", "slug"] }, { user: ["id", "fullName"] }];
+
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export type UserWatchlistId = Array<InferResult<ItemResourceSchema, ["id"]>>;
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export const userWatchlistIdFields = ["id"];
+
+
 
 
 export type ListBidsFields = UnifiedFieldSelection<BidResourceSchema>[];
@@ -2154,6 +2246,139 @@ export async function validatePublishItem(
 ): Promise<ValidationResult> {
   const payload = {
     action: "publish_item",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type AddToWatchlistInput = {
+  itemId: UUID;
+};
+
+export type AddToWatchlistFields = UnifiedFieldSelection<WatchlistItemResourceSchema>[];
+
+export type InferAddToWatchlistResult<
+  Fields extends AddToWatchlistFields | undefined,
+> = InferResult<WatchlistItemResourceSchema, Fields>;
+
+export type AddToWatchlistResult<Fields extends AddToWatchlistFields | undefined = undefined> = | { success: true; data: InferAddToWatchlistResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Create a new WatchlistItem
+ *
+ * @ashActionType :create
+ */
+export async function addToWatchlist<Fields extends AddToWatchlistFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  input: AddToWatchlistInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<AddToWatchlistResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "add_to_watchlist",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<AddToWatchlistResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Create a new WatchlistItem
+ *
+ * @ashActionType :create
+ * @validation true
+ */
+export async function validateAddToWatchlist(
+  config: {
+  tenant?: string;
+  input: AddToWatchlistInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "add_to_watchlist",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+
+export type RemoveFromWatchlistResult = | { success: true; data: {}; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Delete a WatchlistItem
+ *
+ * @ashActionType :destroy
+ */
+export async function removeFromWatchlist(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<RemoveFromWatchlistResult> {
+  const payload = {
+    action: "remove_from_watchlist",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity
+  };
+
+  return executeActionRpcRequest<RemoveFromWatchlistResult>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Delete a WatchlistItem
+ *
+ * @ashActionType :destroy
+ * @validation true
+ */
+export async function validateRemoveFromWatchlist(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "remove_from_watchlist",
     ...(config.tenant !== undefined && { tenant: config.tenant }),
     identity: config.identity
   };
