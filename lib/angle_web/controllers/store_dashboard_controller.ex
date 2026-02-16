@@ -6,6 +6,10 @@ defmodule AngleWeb.StoreDashboardController do
   @valid_statuses ~w(all active ended draft)
   @valid_per_page [10, 25, 50]
   @default_per_page 10
+  @valid_sort_fields ~w(inserted_at view_count bid_count watcher_count current_price)
+  @default_sort_field "inserted_at"
+  @valid_sort_dirs ~w(asc desc)
+  @default_sort_dir "desc"
 
   def index(conn, _params) do
     redirect(conn, to: ~p"/store/listings")
@@ -15,8 +19,10 @@ defmodule AngleWeb.StoreDashboardController do
     status = validate_status(params["status"])
     page = parse_positive_int(params["page"], 1)
     per_page = validate_per_page(params["per_page"])
+    sort = validate_sort_field(params["sort"])
+    dir = validate_sort_dir(params["dir"])
 
-    {items, total} = load_seller_items(conn, status, page, per_page)
+    {items, total} = load_seller_items(conn, status, page, per_page, sort, dir)
     stats = load_seller_stats(conn)
     total_pages = max(1, ceil(total / per_page))
 
@@ -30,6 +36,8 @@ defmodule AngleWeb.StoreDashboardController do
       total_pages: total_pages
     })
     |> assign_prop(:status, status)
+    |> assign_prop(:sort, sort)
+    |> assign_prop(:dir, dir)
     |> render_inertia("store/listings")
   end
 
@@ -55,11 +63,11 @@ defmodule AngleWeb.StoreDashboardController do
     |> render_inertia("store/profile")
   end
 
-  defp load_seller_items(conn, status, page, per_page) do
+  defp load_seller_items(conn, status, page, per_page, sort, dir) do
     offset = (page - 1) * per_page
 
     params = %{
-      input: %{status_filter: status},
+      input: %{status_filter: status, sort_field: sort, sort_dir: dir},
       page: %{limit: per_page, offset: offset, count: true}
     }
 
@@ -202,6 +210,12 @@ defmodule AngleWeb.StoreDashboardController do
 
   defp validate_status(status) when status in @valid_statuses, do: status
   defp validate_status(_), do: "all"
+
+  defp validate_sort_field(field) when field in @valid_sort_fields, do: field
+  defp validate_sort_field(_), do: @default_sort_field
+
+  defp validate_sort_dir(dir) when dir in @valid_sort_dirs, do: dir
+  defp validate_sort_dir(_), do: @default_sort_dir
 
   defp validate_per_page(per_page) do
     case parse_positive_int(per_page, @default_per_page) do

@@ -140,6 +140,23 @@ defmodule Angle.Inventory.Item do
         constraints one_of: [:all, :active, :ended, :draft]
       end
 
+      argument :sort_field, :atom do
+        default :inserted_at
+
+        constraints one_of: [
+                      :inserted_at,
+                      :view_count,
+                      :bid_count,
+                      :watcher_count,
+                      :current_price
+                    ]
+      end
+
+      argument :sort_dir, :atom do
+        default :desc
+        constraints one_of: [:asc, :desc]
+      end
+
       filter expr(created_by_id == ^actor(:id))
 
       filter expr(
@@ -159,7 +176,12 @@ defmodule Angle.Inventory.Item do
                end
              )
 
-      prepare build(sort: [inserted_at: :desc])
+      prepare fn query, _context ->
+        field = Ash.Query.get_argument(query, :sort_field) || :inserted_at
+        dir = Ash.Query.get_argument(query, :sort_dir) || :desc
+        Ash.Query.sort(query, [{field, dir}])
+      end
+
       pagination offset?: true, required?: false
     end
 

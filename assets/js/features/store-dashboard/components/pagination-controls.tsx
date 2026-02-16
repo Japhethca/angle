@@ -15,15 +15,17 @@ interface Pagination {
 interface PaginationControlsProps {
   pagination: Pagination;
   status: string;
+  sort: string;
+  dir: string;
   onNavigate: (params: Record<string, string | number>) => void;
 }
 
-export function PaginationControls({ pagination: p, status, onNavigate }: PaginationControlsProps) {
+export function PaginationControls({ pagination: p, status, sort, dir, onNavigate }: PaginationControlsProps) {
   const startItem = p.total > 0 ? (p.page - 1) * p.per_page + 1 : 0;
   const endItem = p.total > 0 ? Math.min(p.page * p.per_page, p.total) : 0;
 
   function goToPage(page: number) {
-    onNavigate({ status, page, per_page: p.per_page });
+    onNavigate({ status, sort, dir, page, per_page: p.per_page });
   }
 
   return (
@@ -37,7 +39,7 @@ export function PaginationControls({ pagination: p, status, onNavigate }: Pagina
           <select
             value={p.per_page}
             onChange={(e) =>
-              onNavigate({ status, page: 1, per_page: Number(e.target.value) })
+              onNavigate({ status, sort, dir, page: 1, per_page: Number(e.target.value) })
             }
             className="rounded border border-surface-muted bg-white px-2 py-1 text-sm text-content"
           >

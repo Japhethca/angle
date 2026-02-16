@@ -33,6 +33,8 @@ interface StoreListingsProps {
   stats: Stats;
   pagination: Pagination;
   status: string;
+  sort: string;
+  dir: string;
 }
 
 function navigate(params: Record<string, string | number>) {
@@ -41,7 +43,9 @@ function navigate(params: Record<string, string | number>) {
       ([k, v]) =>
         !(k === "status" && v === "all") &&
         !(k === "page" && v === 1) &&
-        !(k === "per_page" && v === 10)
+        !(k === "per_page" && v === 10) &&
+        !(k === "sort" && v === "inserted_at") &&
+        !(k === "dir" && v === "desc")
     )
   );
   router.get("/store/listings", query, { preserveState: true, preserveScroll: false });
@@ -52,6 +56,8 @@ export default function StoreListings({
   stats,
   pagination,
   status = "all",
+  sort = "inserted_at",
+  dir = "desc",
 }: StoreListingsProps) {
   const defaultStats: Stats = {
     total_views: 0,
@@ -87,13 +93,17 @@ export default function StoreListings({
     const query = Object.fromEntries(
       Object.entries({
         status,
+        sort,
+        dir,
         page: p.page + 1,
         per_page: p.per_page,
       }).filter(
         ([k, v]) =>
           !(k === "status" && v === "all") &&
           !(k === "page" && v === 1) &&
-          !(k === "per_page" && v === 10)
+          !(k === "per_page" && v === 10) &&
+          !(k === "sort" && v === "inserted_at") &&
+          !(k === "dir" && v === "desc")
       )
     );
     router.get("/store/listings", query, {
@@ -133,15 +143,17 @@ export default function StoreListings({
             </Link>
           </div>
 
-          {/* Status filter tabs */}
-          <StatusTabs current={status} perPage={p.per_page} onNavigate={navigate} />
+          {/* Status filter tabs (mobile only — desktop uses column header dropdown) */}
+          <div className="lg:hidden">
+            <StatusTabs current={status} perPage={p.per_page} onNavigate={navigate} />
+          </div>
 
           {/* Desktop table */}
           {items.length > 0 ? (
             <div className="hidden lg:block">
               <div className="rounded-xl border border-surface-muted bg-white">
-                <ListingTable items={items} />
-                <PaginationControls pagination={p} status={status} onNavigate={navigate} />
+                <ListingTable items={items} sort={sort} dir={dir} status={status} onNavigate={navigate} />
+                <PaginationControls pagination={p} status={status} sort={sort} dir={dir} onNavigate={navigate} />
               </div>
             </div>
           ) : (
