@@ -1,11 +1,14 @@
-import { Head, Link } from "@inertiajs/react";
-import { Eye, Heart, Gavel, Banknote, Plus, Package } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Head, Link, router } from "@inertiajs/react";
+import { Eye, Heart, Gavel, Banknote, Plus, Package, Loader2 } from "lucide-react";
 import type { SellerDashboardCard } from "@/ash_rpc";
 import {
   StoreLayout,
   StatsCard,
   ListingTable,
   ListingCard,
+  StatusTabs,
+  PaginationControls,
 } from "@/features/store-dashboard";
 import { formatCurrency } from "@/features/store-dashboard/utils";
 
@@ -18,12 +21,44 @@ interface Stats {
   total_amount: string;
 }
 
+interface Pagination {
+  page: number;
+  per_page: number;
+  total: number;
+  total_pages: number;
+}
+
 interface StoreListingsProps {
   items: Item[];
   stats: Stats;
+  pagination: Pagination;
+  status: string;
+  sort: string;
+  dir: string;
 }
 
-export default function StoreListings({ items = [], stats }: StoreListingsProps) {
+function navigate(params: Record<string, string | number>) {
+  const query = Object.fromEntries(
+    Object.entries(params).filter(
+      ([k, v]) =>
+        !(k === "status" && v === "all") &&
+        !(k === "page" && v === 1) &&
+        !(k === "per_page" && v === 10) &&
+        !(k === "sort" && v === "inserted_at") &&
+        !(k === "dir" && v === "desc")
+    )
+  );
+  router.get("/store/listings", query, { preserveState: true, preserveScroll: false });
+}
+
+export default function StoreListings({
+  items = [],
+  stats,
+  pagination,
+  status = "all",
+  sort = "inserted_at",
+  dir = "desc",
+}: StoreListingsProps) {
   const defaultStats: Stats = {
     total_views: 0,
     total_watches: 0,
@@ -31,6 +66,59 @@ export default function StoreListings({ items = [], stats }: StoreListingsProps)
     total_amount: "0",
   };
   const s = stats || defaultStats;
+  const p = pagination || { page: 1, per_page: 10, total: 0, total_pages: 1 };
+
+  // Mobile "Load More" state
+  const [mobileItems, setMobileItems] = useState<Item[]>(items);
+  const [mobileLoading, setMobileLoading] = useState(false);
+  const prevStatusRef = useRef(status);
+
+  useEffect(() => {
+    if (status !== prevStatusRef.current) {
+      // Filter changed — reset
+      setMobileItems(items);
+      prevStatusRef.current = status;
+    } else if (p.page === 1) {
+      // Initial load or filter reset
+      setMobileItems(items);
+    } else {
+      // Load more — append new items, deduplicating by ID
+      setMobileItems((prev) => {
+        const existingIds = new Set(prev.map((i) => i.id));
+        const newItems = items.filter((i) => !existingIds.has(i.id));
+        return [...prev, ...newItems];
+      });
+    }
+    setMobileLoading(false);
+  }, [items, p.page, status]);
+
+  function loadMore() {
+    setMobileLoading(true);
+    const query = Object.fromEntries(
+      Object.entries({
+        status,
+        sort,
+        dir,
+        page: p.page + 1,
+        per_page: p.per_page,
+      }).filter(
+        ([k, v]) =>
+          !(k === "status" && v === "all") &&
+          !(k === "page" && v === 1) &&
+          !(k === "per_page" && v === 10) &&
+          !(k === "sort" && v === "inserted_at") &&
+          !(k === "dir" && v === "desc")
+      )
+    );
+    router.get("/store/listings", query, {
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
+      only: ["items", "pagination"],
+    });
+  }
+
+  const hasMore = p.page < p.total_pages;
 
   return (
     <>
@@ -59,28 +147,56 @@ export default function StoreListings({ items = [], stats }: StoreListingsProps)
             </Link>
           </div>
 
-          {items.length > 0 ? (
-            <>
-              {/* Desktop table */}
-              <div className="hidden lg:block">
-                <div className="rounded-xl border border-surface-muted bg-white">
-                  <ListingTable items={items} />
-                </div>
-              </div>
+          {/* Status filter tabs (mobile only — desktop uses column header dropdown) */}
+          <div className="lg:hidden">
+            <StatusTabs current={status} perPage={p.per_page} onNavigate={navigate} />
+          </div>
 
-              {/* Mobile cards */}
-              <div className="flex flex-col gap-3 lg:hidden">
-                {items.map((item) => (
-                  <ListingCard key={item.id} item={item} />
-                ))}
-              </div>
-            </>
+          {/* Desktop table (always show headers for sort/filter access) */}
+          <div className="hidden lg:block">
+            <div className="rounded-xl border border-surface-muted bg-white">
+              <ListingTable items={items} sort={sort} dir={dir} status={status} perPage={p.per_page} onNavigate={navigate} />
+              {items.length > 0 && (
+                <PaginationControls pagination={p} status={status} sort={sort} dir={dir} onNavigate={navigate} />
+              )}
+            </div>
+          </div>
+
+          {/* Mobile cards with Load More */}
+          {mobileItems.length > 0 ? (
+            <div className="flex flex-col gap-3 lg:hidden">
+              {mobileItems.map((item) => (
+                <ListingCard key={item.id} item={item} />
+              ))}
+              {hasMore && (
+                <button
+                  type="button"
+                  onClick={loadMore}
+                  disabled={mobileLoading}
+                  className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-surface-muted bg-white py-3 text-sm font-medium text-content-secondary transition-colors hover:bg-surface-secondary disabled:opacity-50"
+                >
+                  {mobileLoading ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    "Load More"
+                  )}
+                </button>
+              )}
+              <p className="text-center text-xs text-content-placeholder">
+                Showing {mobileItems.length} of {p.total} items
+              </p>
+            </div>
           ) : (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-surface-muted bg-white py-16 text-center">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-surface-muted bg-white py-16 text-center lg:hidden">
               <Package className="mb-3 size-12 text-surface-emphasis" />
               <p className="text-lg text-content-tertiary">No listings yet</p>
               <p className="mt-1 text-sm text-content-placeholder">
-                Create your first listing to start selling
+                {status === "all"
+                  ? "Create your first listing to start selling"
+                  : `No ${status} listings found`}
               </p>
             </div>
           )}

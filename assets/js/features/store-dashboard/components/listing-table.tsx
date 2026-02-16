@@ -1,10 +1,5 @@
 import { useState } from "react";
-import {
-  ChevronFirst,
-  ChevronLast,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SellerDashboardCard } from "@/ash_rpc";
 import { ListingActionsMenu } from "./listing-actions-menu";
@@ -53,39 +48,152 @@ function StatusBadge({ status }: { status: string | null | undefined }) {
   );
 }
 
-interface ListingTableProps {
-  items: Item[];
+// --- Sortable column header ---
+
+interface SortHeaderProps {
+  label: string;
+  field: string;
+  currentSort: string;
+  currentDir: string;
+  onSort: (field: string, dir: string) => void;
 }
 
-export function ListingTable({ items }: ListingTableProps) {
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [currentPage, setCurrentPage] = useState(1);
+function SortHeader({ label, field, currentSort, currentDir, onSort }: SortHeaderProps) {
+  const isActive = currentSort === field;
 
-  const totalPages = Math.max(1, Math.ceil(items.length / rowsPerPage));
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedItems = items.slice(startIndex, startIndex + rowsPerPage);
-
-  const goToPage = (page: number) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-  };
+  function handleClick() {
+    if (isActive) {
+      onSort(field, currentDir === "asc" ? "desc" : "asc");
+    } else {
+      onSort(field, "desc");
+    }
+  }
 
   return (
-    <div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-surface-muted text-left text-xs font-medium uppercase tracking-wider text-content-tertiary">
-              <th className="px-4 py-3">Item</th>
-              <th className="px-4 py-3">Views</th>
-              <th className="px-4 py-3">Watch</th>
-              <th className="px-4 py-3">Bids</th>
-              <th className="px-4 py-3">Highest Bid</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3"></th>
+    <th className="px-4 py-3">
+      <button
+        type="button"
+        onClick={handleClick}
+        className="inline-flex items-center gap-1 text-xs font-medium uppercase tracking-wider transition-colors hover:text-content"
+      >
+        {label}
+        {isActive ? (
+          currentDir === "asc" ? (
+            <ArrowUp className="size-3.5" />
+          ) : (
+            <ArrowDown className="size-3.5" />
+          )
+        ) : (
+          <ArrowUpDown className="size-3.5 opacity-40" />
+        )}
+      </button>
+    </th>
+  );
+}
+
+// --- Status filter column header ---
+
+const STATUS_OPTIONS = [
+  { key: "all", label: "All" },
+  { key: "active", label: "Active" },
+  { key: "ended", label: "Ended" },
+  { key: "draft", label: "Draft" },
+] as const;
+
+interface StatusFilterHeaderProps {
+  currentStatus: string;
+  onFilter: (status: string) => void;
+}
+
+function StatusFilterHeader({ currentStatus, onFilter }: StatusFilterHeaderProps) {
+  const [open, setOpen] = useState(false);
+
+  const activeLabel = STATUS_OPTIONS.find((o) => o.key === currentStatus)?.label ?? "Status";
+
+  return (
+    <th className="relative px-4 py-3">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        className="inline-flex items-center gap-1 text-xs font-medium uppercase tracking-wider transition-colors hover:text-content"
+      >
+        {currentStatus === "all" ? "Status" : activeLabel}
+        <ChevronDown className={cn("size-3.5 transition-transform", open && "rotate-180")} />
+      </button>
+      {open && (
+        <div
+          className="absolute left-0 top-full z-10 mt-1 w-36 rounded-lg border border-surface-muted bg-white py-1 shadow-lg"
+        >
+          {STATUS_OPTIONS.map((opt) => (
+            <button
+              key={opt.key}
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                onFilter(opt.key);
+                setOpen(false);
+              }}
+              className="flex w-full items-center justify-between px-3 py-1.5 text-left text-sm text-content-secondary transition-colors hover:bg-surface-secondary"
+            >
+              {opt.label}
+              {currentStatus === opt.key && <Check className="size-3.5 text-primary-600" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </th>
+  );
+}
+
+// --- Main table ---
+
+interface ListingTableProps {
+  items: Item[];
+  sort: string;
+  dir: string;
+  status: string;
+  perPage: number;
+  onNavigate: (params: Record<string, string | number>) => void;
+}
+
+export function ListingTable({ items, sort, dir, status, perPage, onNavigate }: ListingTableProps) {
+  function handleSort(field: string, direction: string) {
+    onNavigate({ status, sort: field, dir: direction, page: 1, per_page: perPage });
+  }
+
+  function handleFilter(newStatus: string) {
+    onNavigate({ status: newStatus, sort, dir, page: 1, per_page: perPage });
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full">
+        <thead>
+          <tr className="border-b border-surface-muted text-left text-content-tertiary">
+            <SortHeader label="Item" field="inserted_at" currentSort={sort} currentDir={dir} onSort={handleSort} />
+            <SortHeader label="Views" field="view_count" currentSort={sort} currentDir={dir} onSort={handleSort} />
+            <SortHeader label="Watch" field="watcher_count" currentSort={sort} currentDir={dir} onSort={handleSort} />
+            <SortHeader label="Bids" field="bid_count" currentSort={sort} currentDir={dir} onSort={handleSort} />
+            <SortHeader label="Highest Bid" field="current_price" currentSort={sort} currentDir={dir} onSort={handleSort} />
+            <StatusFilterHeader currentStatus={status} onFilter={handleFilter} />
+            <th className="px-4 py-3"></th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-surface-muted">
+          {items.length === 0 ? (
+            <tr>
+              <td colSpan={7} className="px-4 py-16 text-center">
+                <p className="text-lg text-content-tertiary">No listings found</p>
+                <p className="mt-1 text-sm text-content-placeholder">
+                  {status === "all"
+                    ? "Create your first listing to start selling"
+                    : `No ${status} listings found`}
+                </p>
+              </td>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-surface-muted">
-            {paginatedItems.map((item) => (
+          ) : (
+            items.map((item) => (
               <tr key={item.id} className="transition-colors hover:bg-surface-secondary/50">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
@@ -119,65 +227,10 @@ export function ListingTable({ items }: ListingTableProps) {
                   <ListingActionsMenu slug={item.slug || item.id} />
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination controls */}
-      <div className="flex items-center justify-between border-t border-surface-muted px-4 py-3">
-        <div className="flex items-center gap-2 text-sm text-content-tertiary">
-          <span>Rows per page</span>
-          <select
-            value={rowsPerPage}
-            onChange={(e) => {
-              setRowsPerPage(Number(e.target.value));
-              setCurrentPage(1);
-            }}
-            className="rounded border border-surface-muted bg-white px-2 py-1 text-sm text-content"
-          >
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-          </select>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-content-tertiary">
-            Page {currentPage} of {totalPages}
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => goToPage(1)}
-              disabled={currentPage === 1}
-              className="flex size-8 items-center justify-center rounded text-content-tertiary transition-colors hover:bg-surface-secondary disabled:opacity-30"
-            >
-              <ChevronFirst className="size-4" />
-            </button>
-            <button
-              onClick={() => goToPage(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="flex size-8 items-center justify-center rounded text-content-tertiary transition-colors hover:bg-surface-secondary disabled:opacity-30"
-            >
-              <ChevronLeft className="size-4" />
-            </button>
-            <button
-              onClick={() => goToPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="flex size-8 items-center justify-center rounded text-content-tertiary transition-colors hover:bg-surface-secondary disabled:opacity-30"
-            >
-              <ChevronRight className="size-4" />
-            </button>
-            <button
-              onClick={() => goToPage(totalPages)}
-              disabled={currentPage === totalPages}
-              className="flex size-8 items-center justify-center rounded text-content-tertiary transition-colors hover:bg-surface-secondary disabled:opacity-30"
-            >
-              <ChevronLast className="size-4" />
-            </button>
-          </div>
-        </div>
-      </div>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }
