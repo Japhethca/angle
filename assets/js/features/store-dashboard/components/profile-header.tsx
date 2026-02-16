@@ -38,7 +38,7 @@ export function ProfileHeader({ storeName, username }: ProfileHeaderProps) {
 
             {/* Stats row (placeholder) */}
             <p className="mt-1 text-sm text-content-tertiary">
-              5 &starf; &bull; 95% &bull; 0 Reviews &bull; 0 followers
+              5 {"\u2605"} {"\u2022"} 95% {"\u2022"} 0 Reviews {"\u2022"} 0 followers
             </p>
           </div>
         </div>

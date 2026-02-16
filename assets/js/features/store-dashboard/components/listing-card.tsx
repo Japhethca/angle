@@ -51,7 +51,7 @@ export function ListingCard({ item }: ListingCardProps) {
             Highest bid: {formatCurrency(item.currentPrice || item.startingPrice)}
           </p>
           <p className="mt-1 text-xs text-content-placeholder">
-            {item.viewCount ?? 0} Views &bull; {item.bidCount ?? 0} Bids &bull; {item.watcherCount ?? 0} Watchers
+            {item.viewCount ?? 0} Views {"\u2022"} {item.bidCount ?? 0} Bids {"\u2022"} {item.watcherCount ?? 0} Watchers
           </p>
         </div>
         <ListingActionsMenu slug={item.slug || item.id} />

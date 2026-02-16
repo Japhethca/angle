@@ -58,7 +58,7 @@ export function PaymentCard({ order }: PaymentCardProps) {
       </div>
       <div className="mt-3 flex items-center gap-3 text-xs text-content-placeholder">
         <span>#{order.paymentReference || "--"}</span>
-        <span>&bull;</span>
+        <span>{"\u2022"}</span>
         <span>{formatDate(order.createdAt)}</span>
       </div>
     </div>
