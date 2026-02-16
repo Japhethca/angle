@@ -2862,6 +2862,8 @@ export async function validatePublishItem(
 
 export type ListMyListingsInput = {
   statusFilter?: "all" | "active" | "ended" | "draft";
+  sortField?: "inserted_at" | "view_count" | "bid_count" | "watcher_count" | "current_price";
+  sortDir?: "asc" | "desc";
 };
 
 export type ListMyListingsFields = UnifiedFieldSelection<ItemResourceSchema>[];

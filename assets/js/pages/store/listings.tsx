@@ -148,25 +148,15 @@ export default function StoreListings({
             <StatusTabs current={status} perPage={p.per_page} onNavigate={navigate} />
           </div>
 
-          {/* Desktop table */}
-          {items.length > 0 ? (
-            <div className="hidden lg:block">
-              <div className="rounded-xl border border-surface-muted bg-white">
-                <ListingTable items={items} sort={sort} dir={dir} status={status} onNavigate={navigate} />
+          {/* Desktop table (always show headers for sort/filter access) */}
+          <div className="hidden lg:block">
+            <div className="rounded-xl border border-surface-muted bg-white">
+              <ListingTable items={items} sort={sort} dir={dir} status={status} onNavigate={navigate} />
+              {items.length > 0 && (
                 <PaginationControls pagination={p} status={status} sort={sort} dir={dir} onNavigate={navigate} />
-              </div>
+              )}
             </div>
-          ) : (
-            <div className="hidden lg:flex flex-col items-center justify-center rounded-xl border border-surface-muted bg-white py-16 text-center">
-              <Package className="mb-3 size-12 text-surface-emphasis" />
-              <p className="text-lg text-content-tertiary">No listings yet</p>
-              <p className="mt-1 text-sm text-content-placeholder">
-                {status === "all"
-                  ? "Create your first listing to start selling"
-                  : `No ${status} listings found`}
-              </p>
-            </div>
-          )}
+          </div>
 
           {/* Mobile cards with Load More */}
           {mobileItems.length > 0 ? (

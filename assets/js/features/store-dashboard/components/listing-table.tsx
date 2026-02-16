@@ -182,41 +182,54 @@ export function ListingTable({ items, sort, dir, status, onNavigate }: ListingTa
           </tr>
         </thead>
         <tbody className="divide-y divide-surface-muted">
-          {items.map((item) => (
-            <tr key={item.id} className="transition-colors hover:bg-surface-secondary/50">
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <div className="size-10 shrink-0 rounded-lg bg-surface-muted" />
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-content">
-                      {item.title}
-                    </p>
-                    <p className="text-xs text-content-placeholder">
-                      {formatTimeLeft(item.endTime)}
-                    </p>
-                  </div>
-                </div>
-              </td>
-              <td className="px-4 py-3 text-sm text-content-secondary">
-                {item.viewCount ?? 0}
-              </td>
-              <td className="px-4 py-3 text-sm text-content-secondary">
-                {item.watcherCount ?? 0}
-              </td>
-              <td className="px-4 py-3 text-sm text-content-secondary">
-                {item.bidCount ?? 0}
-              </td>
-              <td className="px-4 py-3 text-sm font-medium text-content">
-                {formatCurrency(item.currentPrice || item.startingPrice)}
-              </td>
-              <td className="px-4 py-3">
-                <StatusBadge status={item.auctionStatus} />
-              </td>
-              <td className="px-4 py-3">
-                <ListingActionsMenu slug={item.slug || item.id} />
+          {items.length === 0 ? (
+            <tr>
+              <td colSpan={7} className="px-4 py-16 text-center">
+                <p className="text-lg text-content-tertiary">No listings found</p>
+                <p className="mt-1 text-sm text-content-placeholder">
+                  {status === "all"
+                    ? "Create your first listing to start selling"
+                    : `No ${status} listings found`}
+                </p>
               </td>
             </tr>
-          ))}
+          ) : (
+            items.map((item) => (
+              <tr key={item.id} className="transition-colors hover:bg-surface-secondary/50">
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="size-10 shrink-0 rounded-lg bg-surface-muted" />
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-content">
+                        {item.title}
+                      </p>
+                      <p className="text-xs text-content-placeholder">
+                        {formatTimeLeft(item.endTime)}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-sm text-content-secondary">
+                  {item.viewCount ?? 0}
+                </td>
+                <td className="px-4 py-3 text-sm text-content-secondary">
+                  {item.watcherCount ?? 0}
+                </td>
+                <td className="px-4 py-3 text-sm text-content-secondary">
+                  {item.bidCount ?? 0}
+                </td>
+                <td className="px-4 py-3 text-sm font-medium text-content">
+                  {formatCurrency(item.currentPrice || item.startingPrice)}
+                </td>
+                <td className="px-4 py-3">
+                  <StatusBadge status={item.auctionStatus} />
+                </td>
+                <td className="px-4 py-3">
+                  <ListingActionsMenu slug={item.slug || item.id} />
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>
