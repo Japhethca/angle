@@ -110,7 +110,14 @@ config :spark,
 config :angle,
   ecto_repos: [Angle.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [Angle.Bidding, Angle.Catalog, Angle.Inventory, Angle.Accounts, Angle.Payments]
+  ash_domains: [
+    Angle.Bidding,
+    Angle.Catalog,
+    Angle.Inventory,
+    Angle.Accounts,
+    Angle.Payments,
+    Angle.Media
+  ]
 
 # Configures the endpoint
 config :angle, AngleWeb.Endpoint,
