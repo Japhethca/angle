@@ -131,6 +131,30 @@ defmodule Angle.Inventory do
 
         fields [:id]
       end
+
+      rpc_action :list_my_listings, :my_listings
+
+      typed_query :seller_dashboard_card, :my_listings do
+        ts_result_type_name "SellerDashboardCard"
+        ts_fields_const_name "sellerDashboardCardFields"
+
+        fields [
+          :id,
+          :title,
+          :slug,
+          :starting_price,
+          :current_price,
+          :end_time,
+          :auction_status,
+          :publication_status,
+          :condition,
+          :sale_type,
+          :view_count,
+          :bid_count,
+          :watcher_count,
+          %{category: [:id, :name]}
+        ]
+      end
     end
 
     resource Angle.Inventory.WatchlistItem do
