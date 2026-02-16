@@ -3,8 +3,11 @@ import { Link } from "@inertiajs/react";
 export function EmptyWatchlist() {
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center px-4">
-      {/* Illustration placeholder */}
-      <div className="mb-6 h-48 w-48 rounded-lg bg-surface-muted" />
+      <img
+        src="/images/empty-watchlist.svg"
+        alt=""
+        className="mb-6 h-48 w-auto"
+      />
 
       <h2 className="text-lg font-semibold text-content">
         Your Watchlist is empty.
