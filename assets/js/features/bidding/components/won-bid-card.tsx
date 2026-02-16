@@ -172,7 +172,7 @@ export function WonBidCard({
                       "size-4",
                       star <= review.rating
                         ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300",
+                        : "text-surface-emphasis",
                     )}
                   />
                 ))}
@@ -276,7 +276,7 @@ export function WonBidCard({
                     "size-4",
                     star <= review.rating
                       ? "fill-yellow-400 text-yellow-400"
-                      : "text-gray-300",
+                      : "text-surface-emphasis",
                   )}
                 />
               ))}

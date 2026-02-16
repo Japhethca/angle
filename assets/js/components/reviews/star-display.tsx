@@ -18,7 +18,7 @@ export function StarDisplay({ rating, size = "sm" }: StarDisplayProps) {
             iconSize,
             star <= Math.round(rating)
               ? "fill-yellow-400 text-yellow-400"
-              : "text-gray-300",
+              : "text-surface-emphasis",
           )}
         />
       ))}

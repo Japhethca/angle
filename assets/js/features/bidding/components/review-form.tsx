@@ -42,7 +42,7 @@ function StarRating({
               "size-6 transition-colors",
               (hover || value) >= star
                 ? "fill-yellow-400 text-yellow-400"
-                : "text-gray-300",
+                : "text-surface-emphasis",
             )}
           />
         </button>

@@ -21,7 +21,7 @@ export function ProfileHeader({ storeName, username, avgRating, reviewCount }: P
   };
 
   return (
-    <div className="rounded-xl border border-surface-muted bg-white p-6">
+    <div className="rounded-xl border border-surface-muted bg-surface p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-4">
           {/* Avatar */}

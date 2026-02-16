@@ -13,7 +13,7 @@ interface ReviewsSectionProps {
 
 export function ReviewsSection({ reviews = [] }: ReviewsSectionProps) {
   return (
-    <div className="rounded-xl border border-surface-muted bg-white p-6">
+    <div className="rounded-xl border border-surface-muted bg-surface p-6">
       <h3 className="text-base font-semibold text-content">Reviews</h3>
 
       {reviews.length > 0 ? (
