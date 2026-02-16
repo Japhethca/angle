@@ -132,6 +132,13 @@ defmodule Angle.Inventory.Item do
       # prepare build())
     end
 
+    read :my_listings do
+      description "List all items owned by the current user (for seller dashboard)"
+      filter expr(created_by_id == ^actor(:id))
+      prepare build(sort: [inserted_at: :desc])
+      pagination offset?: true, required?: false
+    end
+
     read :by_category do
       argument :category_ids, {:array, :uuid}, allow_nil?: false
 
