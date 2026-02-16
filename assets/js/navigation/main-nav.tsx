@@ -56,7 +56,7 @@ export function MainNav({ navCategories }: MainNavProps) {
               href="/"
               className={
                 isActive('/')
-                  ? 'border-b-2 border-primary-1000 pb-1 text-sm font-medium text-primary-1000'
+                  ? 'border-b-2 border-primary-1000 dark:border-primary-600 pb-1 text-sm font-medium text-primary-1000 dark:text-primary-600'
                   : 'text-sm text-content-secondary transition-colors hover:text-content'
               }
             >
@@ -70,7 +70,7 @@ export function MainNav({ navCategories }: MainNavProps) {
                   <NavigationMenuTrigger
                     className={
                       isCategoriesActive
-                        ? 'h-auto rounded-none border-b-2 border-primary-1000 bg-transparent p-0 pb-1 text-sm font-medium text-primary-1000 shadow-none hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent'
+                        ? 'h-auto rounded-none border-b-2 border-primary-1000 dark:border-primary-600 bg-transparent p-0 pb-1 text-sm font-medium text-primary-1000 dark:text-primary-600 shadow-none hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent'
                         : 'h-auto rounded-none bg-transparent p-0 text-sm font-normal text-content-secondary shadow-none transition-colors hover:bg-transparent hover:text-content focus:bg-transparent data-[state=open]:bg-transparent'
                     }
                   >
@@ -91,7 +91,7 @@ export function MainNav({ navCategories }: MainNavProps) {
                 auth={link.auth}
                 className={
                   isActive(link.href)
-                    ? 'border-b-2 border-primary-1000 pb-1 text-sm font-medium text-primary-1000'
+                    ? 'border-b-2 border-primary-1000 dark:border-primary-600 pb-1 text-sm font-medium text-primary-1000 dark:text-primary-600'
                     : 'text-sm text-content-secondary transition-colors hover:text-content'
                 }
               >
