@@ -1,5 +1,5 @@
 import { Link } from "@inertiajs/react";
-import { Gavel, CircleCheck, History } from "lucide-react";
+import { Gavel, CircleCheck, History, Headset } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BidsLayoutProps {
@@ -37,8 +37,8 @@ export function BidsLayout({ tab, children }: BidsLayoutProps) {
       </div>
 
       {/* Desktop: sidebar + content */}
-      <div className="hidden lg:flex lg:gap-10 lg:px-10 lg:py-6">
-        <aside className="w-[160px] shrink-0">
+      <div className="hidden lg:flex lg:min-h-[calc(100vh-88px)] lg:gap-10 lg:px-10 lg:py-6">
+        <aside className="flex w-[160px] shrink-0 flex-col justify-between">
           <nav className="space-y-1">
             {tabs.map((t) => {
               const isActive = tab === t.value;
@@ -59,6 +59,13 @@ export function BidsLayout({ tab, children }: BidsLayoutProps) {
               );
             })}
           </nav>
+          <Link
+            href="/settings/support"
+            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-content-tertiary hover:text-content"
+          >
+            <Headset className="size-5" />
+            Support
+          </Link>
         </aside>
 
         <div className="min-w-0 flex-1">

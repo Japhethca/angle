@@ -64,7 +64,7 @@ export function WonBidCard({
       <div className="hidden items-center gap-4 border-b border-default py-4 lg:flex">
         <Link
           href={`/items/${order.item?.slug || order.item?.id}`}
-          className="block size-16 shrink-0"
+          className="block size-20 shrink-0"
         >
           <div className="size-full rounded-lg bg-surface-muted" />
         </Link>
@@ -133,7 +133,7 @@ export function WonBidCard({
         <div className="flex items-start gap-3">
           <Link
             href={`/items/${order.item?.slug || order.item?.id}`}
-            className="block size-14 shrink-0"
+            className="block size-20 shrink-0"
           >
             <div className="size-full rounded-lg bg-surface-muted" />
           </Link>

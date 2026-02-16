@@ -13,6 +13,8 @@ interface HistoryBidCardProps {
 export function HistoryBidCard({ bid, didWin }: HistoryBidCardProps) {
   const item = bid.item;
   const itemUrl = `/items/${item?.slug || item?.id}`;
+  const seller = item?.user;
+  const sellerName = seller?.username || seller?.fullName;
   const status = didWin
     ? {
         label: "Completed",
@@ -35,7 +37,7 @@ export function HistoryBidCard({ bid, didWin }: HistoryBidCardProps) {
     <>
       {/* Desktop */}
       <div className="hidden items-center gap-4 border-b border-default py-4 lg:flex">
-        <Link href={itemUrl} className="block size-16 shrink-0">
+        <Link href={itemUrl} className="block size-20 shrink-0">
           <div className="size-full rounded-lg bg-surface-muted" />
         </Link>
         <div className="min-w-0 flex-1">
@@ -59,6 +61,12 @@ export function HistoryBidCard({ bid, didWin }: HistoryBidCardProps) {
             <span className="font-bold text-content">
               {formatNaira(bid.amount)}
             </span>
+            {sellerName && (
+              <>
+                <span className="text-content-tertiary">&middot;</span>
+                <span className="text-content-tertiary">{sellerName}</span>
+              </>
+            )}
           </div>
         </div>
         <span className="shrink-0 text-sm text-content-tertiary">
@@ -69,7 +77,7 @@ export function HistoryBidCard({ bid, didWin }: HistoryBidCardProps) {
       {/* Mobile */}
       <div className="space-y-2 rounded-xl border border-default p-4 lg:hidden">
         <div className="flex items-start gap-3">
-          <Link href={itemUrl} className="block size-14 shrink-0">
+          <Link href={itemUrl} className="block size-20 shrink-0">
             <div className="size-full rounded-lg bg-surface-muted" />
           </Link>
           <div className="min-w-0 flex-1">
@@ -90,6 +98,12 @@ export function HistoryBidCard({ bid, didWin }: HistoryBidCardProps) {
               <span className="font-bold text-content">
                 {formatNaira(bid.amount)}
               </span>
+              {sellerName && (
+                <>
+                  <span className="text-content-tertiary">&middot;</span>
+                  <span className="text-content-tertiary">{sellerName}</span>
+                </>
+              )}
             </div>
             <span className="text-xs text-content-tertiary">{bidDate}</span>
           </div>

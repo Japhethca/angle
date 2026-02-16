@@ -57,7 +57,14 @@ defmodule Angle.Bidding do
               :title,
               :slug,
               :auction_status,
-              :created_by_id
+              :created_by_id,
+              %{
+                user: [
+                  :id,
+                  :username,
+                  :full_name
+                ]
+              }
             ]
           }
         ]
