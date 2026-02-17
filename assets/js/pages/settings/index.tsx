@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Head, Link, router } from "@inertiajs/react";
-import { User, ChevronRight, Store, Shield, CreditCard, Bell, SlidersHorizontal, Scale, HelpCircle, LogOut } from "lucide-react";
+import { User, ChevronRight, Store, Shield, CreditCard, Bell, SlidersHorizontal, Scale, Headset, LogOut } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import type { SettingsUser } from "@/features/settings";
 
@@ -15,7 +15,7 @@ const menuItems = [
   { label: "Notifications", icon: Bell, href: "/settings/notifications" },
   { label: "Preferences", icon: SlidersHorizontal, href: "/settings/preferences" },
   { label: "Legal", icon: Scale, href: "/settings/legal" },
-  { label: "Support", icon: HelpCircle, href: "/settings/support" },
+  { label: "Support", icon: Headset, href: "/settings/support" },
 ];
 
 export default function SettingsIndex({ user }: SettingsIndexProps) {
