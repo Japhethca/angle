@@ -12,9 +12,75 @@
 
 ---
 
-## Task 1: Save auction info to server at Step 2
+## Task 1: Add MergeAttributes Ash change for update_draft
 
-Currently Step 2 (auction info) only saves client-side. Add `updateDraftItem` call when the user clicks Next.
+The `attributes` field is a freeform JSONB map that holds category-specific data (brand, size, _customFeatures) from Step 1. Steps 2 and 3 also store data in attributes (_auctionDuration, _deliveryPreference). Without merging, each update would overwrite the entire map. Add a server-side change that deep-merges incoming attributes with existing ones.
+
+**Files:**
+- Create: `lib/angle/inventory/item/merge_attributes.ex`
+- Modify: `lib/angle/inventory/item.ex`
+
+**Step 1: Create MergeAttributes change**
+
+```elixir
+# lib/angle/inventory/item/merge_attributes.ex
+defmodule Angle.Inventory.Item.MergeAttributes do
+  @moduledoc """
+  Ash change that merges incoming attributes with existing ones
+  instead of replacing the entire map.
+  """
+  use Ash.Resource.Change
+
+  @impl true
+  def change(changeset, _opts, _context) do
+    case Ash.Changeset.get_argument_or_attribute(changeset, :attributes) do
+      nil ->
+        changeset
+
+      new_attrs when new_attrs == %{} ->
+        changeset
+
+      new_attrs ->
+        existing = Map.get(changeset.data, :attributes) || %{}
+        merged = Map.merge(existing, new_attrs)
+        Ash.Changeset.force_change_attribute(changeset, :attributes, merged)
+    end
+  end
+end
+```
+
+**Step 2: Add change to update_draft action**
+
+In `lib/angle/inventory/item.ex`, add the change to the `update_draft` action:
+
+```elixir
+update :update_draft do
+  description "Update an existing item in draft status"
+
+  accept @draft_fields
+
+  argument :id, :uuid, allow_nil?: false
+  change {Angle.Inventory.Item.MergeAttributes, []}
+end
+```
+
+**Step 3: Verify compilation**
+
+Run: `mix compile --warnings-as-errors`
+Expected: Compiles with no errors
+
+**Step 4: Commit**
+
+```bash
+git add lib/angle/inventory/item/merge_attributes.ex lib/angle/inventory/item.ex
+git commit -m "feat: add MergeAttributes change for server-side attributes merging"
+```
+
+---
+
+## Task 2: Save auction info to server at Step 2
+
+Currently Step 2 (auction info) only saves client-side. Add `updateDraftItem` call when the user clicks Next. With the MergeAttributes change from Task 1, sending partial attributes (just `_auctionDuration`) is safe — it will merge with existing category attributes.
 
 **Files:**
 - Modify: `assets/js/features/listing-form/components/auction-info-step.tsx`
@@ -113,9 +179,9 @@ git commit -m "feat: save auction info to server at Step 2"
 
 ---
 
-## Task 2: Save logistics to server at Step 3, redirect to preview
+## Task 3: Save logistics to server at Step 3, redirect to preview
 
-Step 3 saves delivery preference via `updateDraftItem` on the item's attributes (keeping it simple — delivery preference is also on StoreProfile but storing on the item makes preview self-contained). After saving, redirect to the preview page instead of advancing to Step 4.
+Step 3 saves delivery preference via `updateDraftItem` on the item's attributes (keeping it simple — delivery preference is also on StoreProfile but storing on the item makes preview self-contained). With MergeAttributes from Task 1, sending partial attributes is safe. After saving, redirect to the preview page instead of advancing to Step 4.
 
 **Files:**
 - Modify: `assets/js/features/listing-form/components/logistics-step.tsx`
@@ -226,7 +292,7 @@ git commit -m "feat: save logistics at Step 3, redirect to preview page"
 
 ---
 
-## Task 3: Add preview and edit routes + controller actions
+## Task 4: Add preview and edit routes + controller actions
 
 **Files:**
 - Modify: `lib/angle_web/router.ex`
@@ -343,7 +409,7 @@ git commit -m "feat: add preview and edit routes + controller actions"
 
 ---
 
-## Task 4: Extract ItemDetailLayout from items/show.tsx
+## Task 5: Extract ItemDetailLayout from items/show.tsx
 
 Create a shared layout component that handles the two-column desktop / single-column mobile structure. Both pages compose this layout with different slot content.
 
@@ -627,7 +693,7 @@ git commit -m "refactor: extract ItemDetailLayout for shared item page structure
 
 ---
 
-## Task 5: Create preview page
+## Task 6: Create preview page
 
 **Files:**
 - Create: `assets/js/pages/store/listings/preview.tsx`
@@ -832,7 +898,7 @@ git commit -m "feat: add server-loaded preview page at /store/listings/:id/previ
 
 ---
 
-## Task 6: Create edit page
+## Task 7: Create edit page
 
 **Files:**
 - Create: `assets/js/pages/store/listings/edit.tsx`
@@ -957,7 +1023,7 @@ git commit -m "feat: add edit page with pre-filled wizard from server data"
 
 ---
 
-## Task 7: Clean up old preview step and update tests
+## Task 8: Clean up old preview step and update tests
 
 **Files:**
 - Delete: `assets/js/features/listing-form/components/preview-step.tsx`
@@ -1074,7 +1140,7 @@ git commit -m "feat: clean up old preview step, add preview/edit route tests"
 
 ---
 
-## Task 8: Visual QA against Figma
+## Task 9: Visual QA against Figma
 
 **Step 1: Build assets**
 
