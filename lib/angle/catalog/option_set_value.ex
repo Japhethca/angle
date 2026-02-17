@@ -3,7 +3,7 @@ defmodule Angle.Catalog.OptionSetValue do
     domain: Angle.Catalog,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshGraphql.Resource, AshJsonApi.Resource]
+    extensions: [AshGraphql.Resource, AshJsonApi.Resource, AshTypescript.Resource]
 
   json_api do
     type "option_set_value"
@@ -31,6 +31,10 @@ defmodule Angle.Catalog.OptionSetValue do
   postgres do
     table "option_set_values"
     repo Angle.Repo
+  end
+
+  typescript do
+    type_name "OptionSetValue"
   end
 
   actions do

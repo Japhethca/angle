@@ -3,7 +3,12 @@ defmodule Angle.Catalog.OptionSet do
     domain: Angle.Catalog,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshGraphql.Resource, AshJsonApi.Resource, AshAdmin.Resource],
+    extensions: [
+      AshGraphql.Resource,
+      AshJsonApi.Resource,
+      AshAdmin.Resource,
+      AshTypescript.Resource
+    ],
     primary_read_warning?: false
 
   json_api do
@@ -37,6 +42,10 @@ defmodule Angle.Catalog.OptionSet do
     repo Angle.Repo
 
     identity_index_names slug: "option_sets_slug_index"
+  end
+
+  typescript do
+    type_name "OptionSet"
   end
 
   actions do

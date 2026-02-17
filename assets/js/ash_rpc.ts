@@ -141,6 +141,66 @@ export type CategoryAttributesOnlySchema = {
 };
 
 
+// OptionSet Schema
+export type OptionSetResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "name" | "slug" | "description" | "parentId";
+  id: UUID;
+  name: string;
+  slug: string;
+  description: string | null;
+  parentId: UUID | null;
+  optionSetValues: { __type: "Relationship"; __array: true; __resource: OptionSetValueResourceSchema; };
+  parent: { __type: "Relationship"; __resource: OptionSetResourceSchema | null; };
+  children: { __type: "Relationship"; __array: true; __resource: OptionSetResourceSchema; };
+};
+
+
+
+export type OptionSetAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "name" | "slug" | "description" | "parentId";
+  id: UUID;
+  name: string;
+  slug: string;
+  description: string | null;
+  parentId: UUID | null;
+};
+
+
+// OptionSetValue Schema
+export type OptionSetValueResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "value" | "label" | "metadata" | "sortOrder" | "isActive" | "parentSetId" | "parentValue" | "optionSetId";
+  id: UUID;
+  value: string;
+  label: string;
+  metadata: Record<string, any> | null;
+  sortOrder: number | null;
+  isActive: boolean | null;
+  parentSetId: UUID | null;
+  parentValue: string | null;
+  optionSetId: UUID;
+  optionSet: { __type: "Relationship"; __resource: OptionSetResourceSchema; };
+};
+
+
+
+export type OptionSetValueAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "value" | "label" | "metadata" | "sortOrder" | "isActive" | "parentSetId" | "parentValue" | "optionSetId";
+  id: UUID;
+  value: string;
+  label: string;
+  metadata: Record<string, any> | null;
+  sortOrder: number | null;
+  isActive: boolean | null;
+  parentSetId: UUID | null;
+  parentValue: string | null;
+  optionSetId: UUID;
+};
+
+
 // Item Schema
 export type ItemResourceSchema = {
   __type: "Resource";
@@ -621,6 +681,115 @@ export type CategoryFilterInput = {
   categories?: CategoryFilterInput;
 
   items?: ItemFilterInput;
+
+};
+export type OptionSetFilterInput = {
+  and?: Array<OptionSetFilterInput>;
+  or?: Array<OptionSetFilterInput>;
+  not?: Array<OptionSetFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  name?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  slug?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  description?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  parentId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+
+  optionSetValues?: OptionSetValueFilterInput;
+
+  parent?: OptionSetFilterInput;
+
+  children?: OptionSetFilterInput;
+
+};
+export type OptionSetValueFilterInput = {
+  and?: Array<OptionSetValueFilterInput>;
+  or?: Array<OptionSetValueFilterInput>;
+  not?: Array<OptionSetValueFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  value?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  label?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  metadata?: {
+    eq?: Record<string, any>;
+    notEq?: Record<string, any>;
+    in?: Array<Record<string, any>>;
+  };
+
+  sortOrder?: {
+    eq?: number;
+    notEq?: number;
+    greaterThan?: number;
+    greaterThanOrEqual?: number;
+    lessThan?: number;
+    lessThanOrEqual?: number;
+    in?: Array<number>;
+  };
+
+  isActive?: {
+    eq?: boolean;
+    notEq?: boolean;
+  };
+
+  parentSetId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  parentValue?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  optionSetId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+
+  optionSet?: OptionSetFilterInput;
 
 };
 export type ItemFilterInput = {
@@ -1677,52 +1846,20 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
-// User Typed Queries
+// Review Typed Queries
 /**
- * Typed query for User
+ * Typed query for Review
  *
  * @typedQuery true
  */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
+export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }]>>;
 
 /**
- * Typed query for User
+ * Typed query for Review
  *
  * @typedQuery true
  */
-export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
-
-
-
-// Order Typed Queries
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
-
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }]>>;
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
+export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
 
 
 
@@ -1865,6 +2002,55 @@ export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userI
 
 
 
+// User Typed Queries
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
+
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
+
+
+
+// Order Typed Queries
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
+
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
+
+
+
 // Category Typed Queries
 /**
  * Typed query for Category
@@ -1896,21 +2082,19 @@ export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name
 export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
 
 
-
-// Review Typed Queries
 /**
- * Typed query for Review
+ * Typed query for Category
  *
  * @typedQuery true
  */
-export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }]>>;
+export type ListingFormCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "attributeSchema", { categories: ["id", "name", "slug", "attributeSchema"] }]>>;
 
 /**
- * Typed query for Review
+ * Typed query for Category
  *
  * @typedQuery true
  */
-export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
+export const listingFormCategoryFields = ["id", "name", "slug", "attributeSchema", { categories: ["id", "name", "slug", "attributeSchema"] }];
 
 
 
@@ -2967,6 +3151,73 @@ export async function validateCreateCategory(
     action: "create_category",
     ...(config.tenant !== undefined && { tenant: config.tenant }),
     input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type ListOptionSetsFields = UnifiedFieldSelection<OptionSetResourceSchema>[];
+export type InferListOptionSetsResult<
+  Fields extends ListOptionSetsFields,
+> = Array<InferResult<OptionSetResourceSchema, Fields>>;
+
+export type ListOptionSetsResult<Fields extends ListOptionSetsFields> = | { success: true; data: InferListOptionSetsResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read OptionSet records
+ *
+ * @ashActionType :read
+ */
+export async function listOptionSets<Fields extends ListOptionSetsFields>(
+  config: {
+  tenant?: string;
+  fields: Fields;
+  filter?: OptionSetFilterInput;
+  sort?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ListOptionSetsResult<Fields>> {
+  const payload = {
+    action: "list_option_sets",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort })
+  };
+
+  return executeActionRpcRequest<ListOptionSetsResult<Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read OptionSet records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateListOptionSets(
+  config: {
+  tenant?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "list_option_sets",
+    ...(config.tenant !== undefined && { tenant: config.tenant })
   };
 
   return executeValidationRpcRequest<ValidationResult>(
