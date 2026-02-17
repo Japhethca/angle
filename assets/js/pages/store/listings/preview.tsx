@@ -5,9 +5,10 @@ import { toast } from "sonner";
 import type { ItemDetail } from "@/ash_rpc";
 import { updateDraftItem, publishItem, buildCSRFHeaders } from "@/ash_rpc";
 import type { ImageData } from "@/lib/image-url";
+import { formatNaira } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { StoreLayout } from "@/features/store-dashboard";
-import { ItemDetailLayout } from "@/features/items";
+import { ItemImageGallery, ConditionBadge } from "@/features/items";
 import { SuccessModal } from "@/features/listing-form/components/success-modal";
 
 const DURATION_MAP: Record<string, { label: string; ms: number }> = {
@@ -94,58 +95,77 @@ export default function PreviewPage({ item, images }: PreviewPageProps) {
     <>
       <Head title="Preview Listing" />
       <StoreLayout title="Preview Listing">
-        <ItemDetailLayout
-          title={item.title}
-          condition={item.condition}
-          price={price}
-          priceLabel="Starting Price"
-          images={images}
-          actionArea={
-            <div className="space-y-3">
-              <p className="text-sm text-content-tertiary">
-                Duration: {duration.label}
-              </p>
-              <Button
-                onClick={handlePublish}
-                disabled={isPublishing}
-                className="w-auto px-10 rounded-full bg-primary-600 text-white hover:bg-primary-600/90"
-              >
-                {isPublishing ? "Publishing..." : "Publish"}
-              </Button>
-            </div>
-          }
-          contentSections={
-            <div className="space-y-6">
-              {/* Product Description */}
-              <PreviewSection title="Product Description" onEdit={() => handleEdit(1)}>
-                <p className="text-sm leading-relaxed text-content-secondary whitespace-pre-line">
-                  {item.description || "No description provided."}
-                </p>
-              </PreviewSection>
+        <div className="space-y-6">
+          {/* Subtitle */}
+          <p className="text-sm text-content-tertiary">
+            Make sure everything looks good before you publish.
+          </p>
 
-              {/* Key Features (custom + category-specific) */}
-              {(customFeatures.length > 0 || categoryAttrs.length > 0) && (
-                <PreviewSection title="Key Features" onEdit={() => handleEdit(1)}>
-                  <ul className="list-inside list-disc space-y-1 text-sm text-content-secondary">
-                    {customFeatures.map((f, i) => (
-                      <li key={`custom-${i}`}>{f}</li>
-                    ))}
-                    {categoryAttrs.map(({ key, value }) => (
-                      <li key={key}>{key}: {value}</li>
-                    ))}
-                  </ul>
-                </PreviewSection>
-              )}
+          {/* Image gallery - full width */}
+          <ItemImageGallery title={item.title} images={images} />
 
-              {/* Logistics */}
-              <PreviewSection title="Logistics" onEdit={() => handleEdit(3)}>
-                <p className="text-sm text-content-secondary">
-                  {DELIVERY_LABELS[deliveryPref] || deliveryPref}
-                </p>
-              </PreviewSection>
+          {/* Title + condition inline */}
+          <div className="flex items-center gap-3">
+            <h1 className="font-heading text-xl font-semibold text-content">{item.title}</h1>
+            <ConditionBadge condition={item.condition} />
+          </div>
+
+          {/* Duration */}
+          <p className="text-sm text-content-tertiary">
+            Duration: {duration.label}
+          </p>
+
+          {/* Price */}
+          {price && (
+            <div>
+              <p className="text-xs text-content-tertiary">Starting Price</p>
+              <p className="text-2xl font-bold text-content">{formatNaira(price)}</p>
             </div>
-          }
-        />
+          )}
+
+          {/* Product Description */}
+          <PreviewSection title="Product Description" onEdit={() => handleEdit(1)}>
+            <p className="text-sm leading-relaxed text-content-secondary whitespace-pre-line">
+              {item.description || "No description provided."}
+            </p>
+          </PreviewSection>
+
+          {/* Key Features (custom + category-specific) */}
+          {(customFeatures.length > 0 || categoryAttrs.length > 0) && (
+            <PreviewSection title="Key Features" onEdit={() => handleEdit(1)}>
+              <ul className="grid grid-cols-1 gap-x-8 gap-y-1 text-sm text-content-secondary md:grid-cols-2">
+                {customFeatures.map((f, i) => (
+                  <li key={`custom-${i}`} className="flex items-start gap-2">
+                    <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-content-tertiary" />
+                    {f}
+                  </li>
+                ))}
+                {categoryAttrs.map(({ key, value }) => (
+                  <li key={key} className="flex items-start gap-2">
+                    <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-content-tertiary" />
+                    {key}: {value}
+                  </li>
+                ))}
+              </ul>
+            </PreviewSection>
+          )}
+
+          {/* Logistics */}
+          <PreviewSection title="Logistics" onEdit={() => handleEdit(3)}>
+            <p className="text-sm text-content-secondary">
+              {DELIVERY_LABELS[deliveryPref] || deliveryPref}
+            </p>
+          </PreviewSection>
+
+          {/* Publish button */}
+          <Button
+            onClick={handlePublish}
+            disabled={isPublishing}
+            className="w-auto px-10 rounded-full bg-primary-600 text-white hover:bg-primary-600/90"
+          >
+            {isPublishing ? "Publishing..." : "Publish"}
+          </Button>
+        </div>
       </StoreLayout>
 
       <SuccessModal open={isPublished} itemId={item.id} />
