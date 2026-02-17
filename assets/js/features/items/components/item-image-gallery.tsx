@@ -3,6 +3,7 @@ import { Gavel } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ImageData } from "@/lib/image-url";
 import { ResponsiveImage } from "@/components/image-upload";
+import { useSwipe } from "@/hooks/use-swipe";
 import { ImageLightbox } from "./image-lightbox";
 
 interface ItemImageGalleryProps {
@@ -70,6 +71,11 @@ export function ItemImageGallery({ title, images = [] }: ItemImageGalleryProps) 
     setLightboxOpen(open);
     if (!open) setMobileIndex(lightboxIndex);
   };
+
+  const mobileSwipe = useSwipe({
+    onSwipeLeft: () => setMobileIndex((i) => Math.min(i + 1, images.length - 1)),
+    onSwipeRight: () => setMobileIndex((i) => Math.max(i - 1, 0)),
+  });
 
   const hasImages = images.length > 0;
 
@@ -166,10 +172,10 @@ export function ItemImageGallery({ title, images = [] }: ItemImageGalleryProps) 
 
       {/* Mobile: full-width single image with dots */}
       <div className="lg:hidden">
-        <button
-          type="button"
+        <div
+          {...mobileSwipe}
           onClick={() => openLightbox(mobileIndex)}
-          className="w-full"
+          className="w-full cursor-pointer"
         >
           <div className="aspect-[4/3] overflow-hidden rounded-2xl bg-surface-muted">
             <ResponsiveImage
@@ -179,7 +185,7 @@ export function ItemImageGallery({ title, images = [] }: ItemImageGalleryProps) 
               loading="eager"
             />
           </div>
-        </button>
+        </div>
 
         {images.length > 1 && (
           <div className="mt-3 flex justify-center gap-1.5">

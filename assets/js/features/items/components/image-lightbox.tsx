@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import type { ImageData } from "@/lib/image-url";
 import { imageUrl } from "@/lib/image-url";
+import { useSwipe } from "@/hooks/use-swipe";
 
 interface ImageLightboxProps {
   images: ImageData[];
@@ -50,6 +51,11 @@ export function ImageLightbox({
     return () => window.removeEventListener("keydown", handler);
   }, [open, goNext, goPrev]);
 
+  const lightboxSwipe = useSwipe({
+    onSwipeLeft: goNext,
+    onSwipeRight: goPrev,
+  });
+
   if (images.length === 0) return null;
   const activeImage = images[activeIndex];
 
@@ -75,7 +81,7 @@ export function ImageLightbox({
         </div>
 
         {/* Main image area with nav arrows */}
-        <div className="relative flex flex-1 items-center justify-center px-12">
+        <div {...lightboxSwipe} className="relative flex flex-1 items-center justify-center px-12">
           {/* Left arrow */}
           {images.length > 1 && (
             <button
