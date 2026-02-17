@@ -352,9 +352,9 @@ async function uploadImages(itemId: string, files: File[]) {
 
     const data = await res.json();
     uploaded.push({
-      id: data.image.id,
-      position: data.image.position,
-      variants: data.image.variants,
+      id: data.id,
+      position: data.position,
+      variants: data.variants,
     });
   }
 
