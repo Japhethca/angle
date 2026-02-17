@@ -32,8 +32,13 @@ defmodule Angle.Catalog do
           :id,
           :name,
           :slug,
-          :attribute_schema,
-          categories: [:id, :name, :slug, :attribute_schema]
+          attribute_schema: [:name, :type, :required, :description, :option_set_slug, :options],
+          categories: [
+            :id,
+            :name,
+            :slug,
+            attribute_schema: [:name, :type, :required, :description, :option_set_slug, :options]
+          ]
         ]
       end
     end

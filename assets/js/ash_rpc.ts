@@ -111,15 +111,15 @@ export type ReviewAttributesOnlySchema = {
 // Category Schema
 export type CategoryResourceSchema = {
   __type: "Resource";
-  __primitiveFields: "id" | "name" | "description" | "slug" | "attributeSchema" | "formSchema" | "imageUrl" | "parentId";
+  __primitiveFields: "id" | "name" | "description" | "slug" | "formSchema" | "imageUrl" | "parentId";
   id: UUID;
   name: string;
   description: string | null;
   slug: string | null;
-  attributeSchema: Record<string, any>;
   formSchema: Record<string, any>;
   imageUrl: string | null;
   parentId: UUID | null;
+  attributeSchema: { __type: "Relationship"; __array: true; __resource: AngleCatalogCategoryFieldResourceSchema; };
   category: { __type: "Relationship"; __resource: CategoryResourceSchema | null; };
   categories: { __type: "Relationship"; __array: true; __resource: CategoryResourceSchema; };
   items: { __type: "Relationship"; __array: true; __resource: ItemResourceSchema; };
@@ -129,15 +129,15 @@ export type CategoryResourceSchema = {
 
 export type CategoryAttributesOnlySchema = {
   __type: "Resource";
-  __primitiveFields: "id" | "name" | "description" | "slug" | "attributeSchema" | "formSchema" | "imageUrl" | "parentId";
+  __primitiveFields: "id" | "name" | "description" | "slug" | "formSchema" | "imageUrl" | "parentId";
   id: UUID;
   name: string;
   description: string | null;
   slug: string | null;
-  attributeSchema: Record<string, any>;
   formSchema: Record<string, any>;
   imageUrl: string | null;
   parentId: UUID | null;
+  attributeSchema: { __type: "Relationship"; __array: true; __resource: AngleCatalogCategoryFieldAttributesOnlySchema; };
 };
 
 
@@ -353,6 +353,42 @@ export type StoreProfileAttributesOnlySchema = {
   address: string | null;
   deliveryPreference: string | null;
   userId: UUID;
+};
+
+
+// AngleCatalogCategoryField Schema
+export type AngleCatalogCategoryFieldResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "name" | "type" | "required" | "description" | "optionSetSlug" | "options";
+  name: string;
+  type: string;
+  required: boolean;
+  description: string | null;
+  optionSetSlug: string | null;
+  options: Array<string> | null;
+};
+
+
+
+export type AngleCatalogCategoryFieldAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "name" | "type" | "required" | "description" | "optionSetSlug" | "options";
+  name: string;
+  type: string;
+  required: boolean;
+  description: string | null;
+  optionSetSlug: string | null;
+  options: Array<string> | null;
+};
+
+
+export type AngleCatalogCategoryFieldInputSchema = {
+  name: string;
+  type?: string;
+  required?: boolean;
+  description?: string | null;
+  optionSetSlug?: string | null;
+  options?: Array<string> | null;
 };
 
 
@@ -652,9 +688,9 @@ export type CategoryFilterInput = {
   };
 
   attributeSchema?: {
-    eq?: Record<string, any>;
-    notEq?: Record<string, any>;
-    in?: Array<Record<string, any>>;
+    eq?: Array<AngleCatalogCategoryFieldResourceSchema>;
+    notEq?: Array<AngleCatalogCategoryFieldResourceSchema>;
+    in?: Array<Array<AngleCatalogCategoryFieldResourceSchema>>;
   };
 
   formSchema?: {
@@ -1165,6 +1201,49 @@ export type StoreProfileFilterInput = {
 
 
   user?: UserFilterInput;
+
+};
+export type AngleCatalogCategoryFieldFilterInput = {
+  and?: Array<AngleCatalogCategoryFieldFilterInput>;
+  or?: Array<AngleCatalogCategoryFieldFilterInput>;
+  not?: Array<AngleCatalogCategoryFieldFilterInput>;
+
+  name?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  type?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  required?: {
+    eq?: boolean;
+    notEq?: boolean;
+  };
+
+  description?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  optionSetSlug?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  options?: {
+    eq?: Array<string>;
+    notEq?: Array<string>;
+    in?: Array<Array<string>>;
+  };
+
+
 
 };
 export type AngleAccountsNotificationPreferencesFilterInput = {
@@ -1846,20 +1925,84 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
-// Review Typed Queries
+// Bid Typed Queries
 /**
- * Typed query for Review
+ * Typed query for Bid
  *
  * @typedQuery true
  */
-export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }]>>;
+export type ActiveBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }]>>;
 
 /**
- * Typed query for Review
+ * Typed query for Bid
  *
  * @typedQuery true
  */
-export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
+export const activeBidCardFields = ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }] satisfies ListBidsFields;
+
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }]>>;
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
+
+
+
+// Order Typed Queries
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
+
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
+
+
+
+// User Typed Queries
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
+
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
 
 
 
@@ -1970,87 +2113,6 @@ export const sellerDashboardCardFields = ["id", "title", "slug", "startingPrice"
 
 
 
-// Bid Typed Queries
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export type ActiveBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }]>>;
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export const activeBidCardFields = ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }] satisfies ListBidsFields;
-
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }]>>;
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
-
-
-
-// User Typed Queries
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
-
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
-
-
-
-// Order Typed Queries
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
-
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }]>>;
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
-
-
-
 // Category Typed Queries
 /**
  * Typed query for Category
@@ -2087,14 +2149,31 @@ export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "na
  *
  * @typedQuery true
  */
-export type ListingFormCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "attributeSchema", { categories: ["id", "name", "slug", "attributeSchema"] }]>>;
+export type ListingFormCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }, { categories: ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }] }]>>;
 
 /**
  * Typed query for Category
  *
  * @typedQuery true
  */
-export const listingFormCategoryFields = ["id", "name", "slug", "attributeSchema", { categories: ["id", "name", "slug", "attributeSchema"] }];
+export const listingFormCategoryFields = ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }, { categories: ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }] }];
+
+
+
+// Review Typed Queries
+/**
+ * Typed query for Review
+ *
+ * @typedQuery true
+ */
+export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }]>>;
+
+/**
+ * Typed query for Review
+ *
+ * @typedQuery true
+ */
+export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
 
 
 
@@ -3086,7 +3165,7 @@ export type CreateCategoryInput = {
   name: string;
   description?: string | null;
   slug?: string | null;
-  attributeSchema?: Record<string, any>;
+  attributeSchema?: Array<AngleCatalogCategoryFieldInputSchema>;
   formSchema?: Record<string, any>;
   imageUrl?: string | null;
   parentId?: UUID | null;
