@@ -27,23 +27,20 @@ The `attributes` field is a freeform JSONB map that holds category-specific data
 defmodule Angle.Inventory.Item.MergeAttributes do
   @moduledoc """
   Ash change that merges incoming attributes with existing ones
-  instead of replacing the entire map.
+  instead of replacing the entire map. Only runs when attributes
+  is actually being changed, to avoid unnecessary DB writes.
   """
   use Ash.Resource.Change
 
   @impl true
   def change(changeset, _opts, _context) do
-    case Ash.Changeset.get_argument_or_attribute(changeset, :attributes) do
-      nil ->
-        changeset
-
-      new_attrs when new_attrs == %{} ->
-        changeset
-
-      new_attrs ->
-        existing = Map.get(changeset.data, :attributes) || %{}
-        merged = Map.merge(existing, new_attrs)
-        Ash.Changeset.force_change_attribute(changeset, :attributes, merged)
+    if :attributes in Ash.Changeset.changing_attributes(changeset) do
+      new_attrs = Ash.Changeset.get_attribute(changeset, :attributes)
+      existing = Map.get(changeset.data, :attributes) || %{}
+      merged = Map.merge(existing, new_attrs)
+      Ash.Changeset.force_change_attribute(changeset, :attributes, merged)
+    else
+      changeset
     end
   end
 end
