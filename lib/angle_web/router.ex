@@ -112,6 +112,8 @@ defmodule AngleWeb.Router do
     get "/store", StoreDashboardController, :index
     get "/store/listings", StoreDashboardController, :listings
     get "/store/listings/new", StoreDashboardController, :new
+    get "/store/listings/:id/preview", StoreDashboardController, :preview
+    get "/store/listings/:id/edit", StoreDashboardController, :edit
     get "/store/payments", StoreDashboardController, :payments
     get "/store/profile", StoreDashboardController, :profile
     get "/settings", SettingsController, :index

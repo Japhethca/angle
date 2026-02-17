@@ -25,6 +25,50 @@ defmodule AngleWeb.StoreDashboardController do
     |> render_inertia("store/listings/new")
   end
 
+  def preview(conn, %{"id" => id}) do
+    user = conn.assigns.current_user
+
+    case load_draft_item(conn, id, user.id) do
+      {:ok, item, images} ->
+        seller = serialize_preview_seller(user)
+
+        conn
+        |> assign_prop(:item, item)
+        |> assign_prop(:images, images)
+        |> assign_prop(:seller, seller)
+        |> render_inertia("store/listings/preview")
+
+      :not_found ->
+        conn
+        |> put_flash(:error, "Draft not found")
+        |> redirect(to: ~p"/store/listings")
+    end
+  end
+
+  def edit(conn, %{"id" => id} = params) do
+    user = conn.assigns.current_user
+    step = parse_positive_int(params["step"], 1)
+
+    case load_draft_item(conn, id, user.id) do
+      {:ok, item, images} ->
+        categories = load_listing_form_categories(conn)
+        store_profile_data = load_store_profile(conn)
+
+        conn
+        |> assign_prop(:item, item)
+        |> assign_prop(:images, images)
+        |> assign_prop(:categories, categories)
+        |> assign_prop(:storeProfile, store_profile_data)
+        |> assign_prop(:step, step)
+        |> render_inertia("store/listings/edit")
+
+      :not_found ->
+        conn
+        |> put_flash(:error, "Draft not found")
+        |> redirect(to: ~p"/store/listings")
+    end
+  end
+
   def listings(conn, params) do
     status = validate_status(params["status"])
     page = parse_positive_int(params["page"], 1)
@@ -305,5 +349,35 @@ defmodule AngleWeb.StoreDashboardController do
             nil
         end
     end
+  end
+
+  defp load_draft_item(conn, id, user_id) do
+    params = %{filter: %{id: id, created_by_id: user_id}, page: %{limit: 1}}
+
+    case AshTypescript.Rpc.run_typed_query(:angle, :item_detail, params, conn) do
+      %{"success" => true, "data" => data} ->
+        case extract_results(data) do
+          [item | _] ->
+            images = AngleWeb.ImageHelpers.load_item_images(id)
+            {:ok, item, images}
+
+          _ ->
+            :not_found
+        end
+
+      _ ->
+        :not_found
+    end
+  end
+
+  defp serialize_preview_seller(user) do
+    user = Ash.load!(user, [:avg_rating, :review_count], authorize?: false)
+
+    %{
+      "id" => user.id,
+      "fullName" => user.full_name,
+      "username" => user.username,
+      "publishedItemCount" => nil
+    }
   end
 end
