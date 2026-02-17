@@ -72,7 +72,7 @@ export function LogisticsStep({ defaultValues, onNext }: LogisticsStepProps) {
 
       <Button
         type="submit"
-        className="w-full rounded-full bg-primary-600 text-white hover:bg-primary-600/90"
+        className="w-auto px-10 rounded-full bg-primary-600 text-white hover:bg-primary-600/90"
       >
         Preview
       </Button>

@@ -190,37 +190,67 @@ export function BasicDetailsStep({
         <Label htmlFor="description">Description</Label>
         <Textarea
           id="description"
-          placeholder="Describe your item in detail..."
+          placeholder="Write a detailed description of your item, why someone should buy it and any extra note."
           rows={4}
           {...register("description")}
         />
       </div>
 
-      {/* Category picker */}
-      <div className="space-y-1.5">
-        <Label>Item Category</Label>
-        <button
-          type="button"
-          onClick={() => setPickerOpen(true)}
-          className="flex w-full items-center justify-between rounded-md border border-input bg-surface px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <span className={categoryName ? "text-content" : "text-content-tertiary"}>
-            {categoryName || "Select a category"}
-          </span>
-          <ChevronDown className="size-4 text-content-tertiary" />
-        </button>
-        {errors.categoryId && (
-          <p className="text-xs text-feedback-error">{errors.categoryId.message}</p>
-        )}
-        <CategoryPicker
-          open={pickerOpen}
-          onOpenChange={setPickerOpen}
-          categories={categories}
-          selectedCategoryId={watchCategoryId}
-          selectedSubcategoryId={watchSubcategoryId || ""}
-          onSelect={handleCategorySelect}
-        />
+      {/* Category + Condition side-by-side */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Category picker */}
+        <div className="space-y-1.5">
+          <Label>Item Category</Label>
+          <button
+            type="button"
+            onClick={() => setPickerOpen(true)}
+            className="flex w-full items-center justify-between rounded-md border border-input bg-surface px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <span className={categoryName ? "text-content" : "text-content-tertiary"}>
+              {categoryName || "Select a category"}
+            </span>
+            <ChevronDown className="size-4 text-content-tertiary" />
+          </button>
+          <p className="text-xs text-content-tertiary">
+            Choose the category that best fits your item
+          </p>
+          {errors.categoryId && (
+            <p className="text-xs text-feedback-error">{errors.categoryId.message}</p>
+          )}
+          <CategoryPicker
+            open={pickerOpen}
+            onOpenChange={setPickerOpen}
+            categories={categories}
+            selectedCategoryId={watchCategoryId}
+            selectedSubcategoryId={watchSubcategoryId || ""}
+            onSelect={handleCategorySelect}
+          />
+        </div>
+
+        {/* Condition */}
+        <div className="space-y-1.5">
+          <Label>Item Condition</Label>
+          <Controller
+            name="condition"
+            control={control}
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select condition" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new">New</SelectItem>
+                  <SelectItem value="used">Fairly Used</SelectItem>
+                  <SelectItem value="refurbished">Refurbished</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+        </div>
       </div>
+
+      {/* Features */}
+      <FeatureFields features={customFeatures} onChange={setCustomFeatures} />
 
       {/* Category-specific fields */}
       {categoryFields.length > 0 && (
@@ -233,33 +263,9 @@ export function BasicDetailsStep({
         />
       )}
 
-      {/* Custom features */}
-      <FeatureFields features={customFeatures} onChange={setCustomFeatures} />
-
-      {/* Condition */}
-      <div className="space-y-1.5">
-        <Label>Item Condition</Label>
-        <Controller
-          name="condition"
-          control={control}
-          render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select condition" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="used">Fairly Used</SelectItem>
-                <SelectItem value="refurbished">Refurbished</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-        />
-      </div>
-
       {/* Photo upload */}
       <div className="space-y-3">
-        <Label>Photos</Label>
+        <Label>Add Product Photos</Label>
 
         {/* Preview existing uploaded images */}
         {existingUploaded.length > 0 && (
@@ -322,7 +328,7 @@ export function BasicDetailsStep({
       <Button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-full bg-primary-600 text-white hover:bg-primary-600/90"
+        className="w-auto px-10 rounded-full bg-primary-600 text-white hover:bg-primary-600/90"
       >
         {isSubmitting ? "Saving..." : "Next"}
       </Button>

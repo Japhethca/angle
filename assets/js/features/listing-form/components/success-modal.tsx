@@ -19,7 +19,7 @@ export function SuccessModal({ open, itemId }: SuccessModalProps) {
   };
 
   const handleListAnother = () => {
-    router.visit("/items/new");
+    router.visit("/store/listings/new");
   };
 
   return (

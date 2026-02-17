@@ -25,11 +25,11 @@ export function FeatureFields({ features, onChange }: FeatureFieldsProps) {
 
   return (
     <div className="space-y-3">
-      <Label className="text-sm font-medium">Additional Features</Label>
+      <Label className="text-sm font-medium">Features</Label>
       {features.map((feature, index) => (
         <div key={index} className="flex items-center gap-2">
           <Input
-            placeholder="e.g., Comes with original box"
+            placeholder={`Feature ${index + 1}`}
             value={feature}
             onChange={(e) => updateFeature(index, e.target.value)}
           />

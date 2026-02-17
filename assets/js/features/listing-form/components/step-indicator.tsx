@@ -14,28 +14,51 @@ interface StepIndicatorProps {
 export function StepIndicator({ currentStep }: StepIndicatorProps) {
   return (
     <>
-      {/* Desktop: tab-style */}
-      <div className="hidden md:flex items-center gap-1 border-b border-border">
-        {STEPS.map((step) => {
+      {/* Desktop: small dots with inline labels connected by lines */}
+      <div className="hidden md:flex items-center gap-0">
+        {STEPS.map((step, index) => {
           const isCompleted = currentStep > step.number;
           const isActive = currentStep === step.number || (currentStep === 4 && step.number === 3);
+          const isLast = index === STEPS.length - 1;
+
           return (
-            <button
-              key={step.number}
-              type="button"
-              disabled
-              className={cn(
-                "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors",
-                isActive
-                  ? "border-primary-600 text-primary-600"
-                  : isCompleted
-                    ? "border-transparent text-content-secondary"
-                    : "border-transparent text-content-tertiary"
+            <div key={step.number} className="flex items-center">
+              {/* Dot + label */}
+              <div className="flex items-center gap-2">
+                <div
+                  className={cn(
+                    "flex size-3.5 shrink-0 items-center justify-center rounded-full transition-colors",
+                    isCompleted
+                      ? "bg-feedback-success"
+                      : isActive
+                        ? "bg-content"
+                        : "border-2 border-content-tertiary/40 bg-transparent"
+                  )}
+                >
+                  {isCompleted && <Check className="size-2.5 text-white" />}
+                </div>
+                <span
+                  className={cn(
+                    "text-sm font-medium whitespace-nowrap",
+                    isActive || isCompleted ? "text-content" : "text-content-tertiary"
+                  )}
+                >
+                  {step.label}
+                </span>
+              </div>
+
+              {/* Connecting line */}
+              {!isLast && (
+                <div className="mx-3 w-20 shrink-0">
+                  <div
+                    className={cn(
+                      "h-px",
+                      isCompleted ? "bg-feedback-success" : "bg-content-tertiary/30"
+                    )}
+                  />
+                </div>
               )}
-            >
-              {isCompleted && <Check className="size-4 text-feedback-success" />}
-              {step.label}
-            </button>
+            </div>
           );
         })}
       </div>

@@ -6,16 +6,6 @@ defmodule AngleWeb.ItemsController do
 
   @published_filter %{publication_status: "published"}
 
-  def new(conn, _params) do
-    categories = load_listing_form_categories(conn)
-    store_profile = load_store_profile(conn)
-
-    conn
-    |> assign_prop(:categories, categories)
-    |> assign_prop(:store_profile, store_profile)
-    |> render_inertia("items/new")
-  end
-
   def show(conn, %{"slug" => slug_or_id}) do
     filter = build_item_filter(slug_or_id)
 
@@ -133,34 +123,6 @@ defmodule AngleWeb.ItemsController do
     case Ecto.UUID.cast(string) do
       {:ok, _} -> true
       :error -> false
-    end
-  end
-
-  defp load_listing_form_categories(conn) do
-    case AshTypescript.Rpc.run_typed_query(:angle, :listing_form_category, %{}, conn) do
-      %{"success" => true, "data" => data} -> extract_results(data)
-      _ -> []
-    end
-  end
-
-  defp load_store_profile(conn) do
-    case conn.assigns[:current_user] do
-      nil ->
-        nil
-
-      user ->
-        case Angle.Accounts.StoreProfile
-             |> Ash.Query.filter(user_id == ^user.id)
-             |> Ash.read_one(authorize?: false) do
-          {:ok, nil} ->
-            nil
-
-          {:ok, profile} ->
-            %{"deliveryPreference" => profile.delivery_preference}
-
-          _ ->
-            nil
-        end
     end
   end
 end

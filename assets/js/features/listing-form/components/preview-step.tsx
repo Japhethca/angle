@@ -144,7 +144,7 @@ export function PreviewStep({ state, categories, onEdit, onPublished }: PreviewS
       <Button
         onClick={handlePublish}
         disabled={isPublishing}
-        className="w-full rounded-full bg-primary-600 text-white hover:bg-primary-600/90"
+        className="w-auto px-10 rounded-full bg-primary-600 text-white hover:bg-primary-600/90"
       >
         {isPublishing ? "Publishing..." : "Publish"}
       </Button>

@@ -60,7 +60,7 @@ export const initialFormState: ListingFormState = {
     subcategoryId: "",
     condition: "used",
     attributes: {},
-    customFeatures: [],
+    customFeatures: ["", "", ""],
   },
   auctionInfo: {
     startingPrice: "",

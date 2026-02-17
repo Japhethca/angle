@@ -15,6 +15,16 @@ defmodule AngleWeb.StoreDashboardController do
     redirect(conn, to: ~p"/store/listings")
   end
 
+  def new(conn, _params) do
+    categories = load_listing_form_categories(conn)
+    store_profile = load_store_profile(conn)
+
+    conn
+    |> assign_prop(:categories, categories)
+    |> assign_prop(:store_profile, store_profile)
+    |> render_inertia("store/listings/new")
+  end
+
   def listings(conn, params) do
     status = validate_status(params["status"])
     page = parse_positive_int(params["page"], 1)
@@ -268,4 +278,32 @@ defmodule AngleWeb.StoreDashboardController do
   defp extract_results(data) when is_list(data), do: data
   defp extract_results(%{"results" => results}) when is_list(results), do: results
   defp extract_results(_), do: []
+
+  defp load_listing_form_categories(conn) do
+    case AshTypescript.Rpc.run_typed_query(:angle, :listing_form_category, %{}, conn) do
+      %{"success" => true, "data" => data} -> extract_results(data)
+      _ -> []
+    end
+  end
+
+  defp load_store_profile(conn) do
+    case conn.assigns[:current_user] do
+      nil ->
+        nil
+
+      user ->
+        case Angle.Accounts.StoreProfile
+             |> Ash.Query.filter(user_id == ^user.id)
+             |> Ash.read_one(authorize?: false) do
+          {:ok, nil} ->
+            nil
+
+          {:ok, profile} ->
+            %{"deliveryPreference" => profile.delivery_preference}
+
+          _ ->
+            nil
+        end
+    end
+  end
 end
