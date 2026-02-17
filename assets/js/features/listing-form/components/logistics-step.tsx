@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { updateDraftItem, buildCSRFHeaders } from "@/ash_rpc";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -12,12 +15,14 @@ const DELIVERY_OPTIONS = [
 ] as const;
 
 interface LogisticsStepProps {
+  draftItemId: string;
   defaultValues: LogisticsData;
   onNext: (data: LogisticsData) => void;
   onBack: () => void;
 }
 
-export function LogisticsStep({ defaultValues, onNext }: LogisticsStepProps) {
+export function LogisticsStep({ draftItemId, defaultValues, onNext }: LogisticsStepProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     handleSubmit,
     watch,
@@ -29,8 +34,32 @@ export function LogisticsStep({ defaultValues, onNext }: LogisticsStepProps) {
 
   const selected = watch("deliveryPreference");
 
+  const onSubmit = async (data: LogisticsData) => {
+    setIsSubmitting(true);
+    try {
+      const result = await updateDraftItem({
+        identity: draftItemId,
+        input: {
+          id: draftItemId,
+          attributes: { _deliveryPreference: data.deliveryPreference },
+        },
+        headers: buildCSRFHeaders(),
+      });
+
+      if (!result.success) {
+        throw new Error(result.errors.map((e: any) => e.message).join("; "));
+      }
+
+      onNext(data);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to save logistics");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(onNext)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-3">
         <Label className="text-base font-medium">How will buyers get the item?</Label>
         <div className="space-y-2">
@@ -72,9 +101,10 @@ export function LogisticsStep({ defaultValues, onNext }: LogisticsStepProps) {
 
       <Button
         type="submit"
+        disabled={isSubmitting}
         className="w-auto px-10 rounded-full bg-primary-600 text-white hover:bg-primary-600/90"
       >
-        Preview
+        {isSubmitting ? "Saving..." : "Preview"}
       </Button>
     </form>
   );

@@ -1,11 +1,10 @@
 import { useReducer, useCallback } from "react";
+import { router } from "@inertiajs/react";
 import { ArrowLeft } from "lucide-react";
 import { StepIndicator } from "./step-indicator";
 import { BasicDetailsStep } from "./basic-details-step";
 import { AuctionInfoStep } from "./auction-info-step";
 import { LogisticsStep } from "./logistics-step";
-import { PreviewStep } from "./preview-step";
-import { SuccessModal } from "./success-modal";
 import {
   listingFormReducer,
   initialFormState,
@@ -52,10 +51,6 @@ export function ListingWizard({ categories, storeProfile }: ListingWizardProps) 
     logistics: { deliveryPreference: defaultDelivery },
   });
 
-  const goToStep = useCallback((step: ListingFormState["currentStep"]) => {
-    dispatch({ type: "SET_STEP", step });
-  }, []);
-
   const handleBasicDetailsNext = useCallback((data: BasicDetailsData, draftId: string, uploadedImages: ListingFormState["uploadedImages"]) => {
     dispatch({ type: "SET_BASIC_DETAILS", data });
     dispatch({ type: "SET_DRAFT_ID", id: draftId });
@@ -70,12 +65,8 @@ export function ListingWizard({ categories, storeProfile }: ListingWizardProps) 
 
   const handleLogisticsNext = useCallback((data: LogisticsData) => {
     dispatch({ type: "SET_LOGISTICS", data });
-    dispatch({ type: "SET_STEP", step: 4 });
-  }, []);
-
-  const handlePublished = useCallback(() => {
-    dispatch({ type: "SET_PUBLISHED", value: true });
-  }, []);
+    router.visit(`/store/listings/${state.draftItemId}/preview`);
+  }, [state.draftItemId]);
 
   const handleBack = useCallback(() => {
     if (state.currentStep > 1) {
@@ -87,7 +78,7 @@ export function ListingWizard({ categories, storeProfile }: ListingWizardProps) 
     <div className="space-y-6">
       {/* Header */}
       <div>
-        {state.currentStep > 1 && state.currentStep < 4 && (
+        {state.currentStep > 1 && (
           <button
             type="button"
             onClick={handleBack}
@@ -97,13 +88,9 @@ export function ListingWizard({ categories, storeProfile }: ListingWizardProps) 
             Back
           </button>
         )}
-        <h1 className="text-xl font-bold text-content">
-          {state.currentStep === 4 ? "Preview Listing" : "List An Item"}
-        </h1>
+        <h1 className="text-xl font-bold text-content">List An Item</h1>
         <p className="mt-1 text-sm text-content-tertiary">
-          {state.currentStep === 4
-            ? "Make sure everything looks good before you publish."
-            : "Turn your item into cash by creating a quick listing"}
+          Turn your item into cash by creating a quick listing
         </p>
       </div>
 
@@ -131,25 +118,12 @@ export function ListingWizard({ categories, storeProfile }: ListingWizardProps) 
       )}
       {state.currentStep === 3 && (
         <LogisticsStep
+          draftItemId={state.draftItemId!}
           defaultValues={state.logistics}
           onNext={handleLogisticsNext}
           onBack={handleBack}
         />
       )}
-      {state.currentStep === 4 && (
-        <PreviewStep
-          state={state}
-          categories={categories}
-          onEdit={goToStep}
-          onPublished={handlePublished}
-        />
-      )}
-
-      {/* Success modal */}
-      <SuccessModal
-        open={state.isPublished}
-        itemId={state.draftItemId}
-      />
     </div>
   );
 }
