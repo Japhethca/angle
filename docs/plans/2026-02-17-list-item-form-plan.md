@@ -136,7 +136,109 @@ git commit -m "feat: load categories and store profile in items/new controller"
 
 ---
 
-## Task 3: Backend — Seed option sets + category attribute_schema data
+## Task 3: Backend — Create CategoryField embedded resource + update Category attribute
+
+Replace the free-form `:map` `attribute_schema` on Category with a typed `{:array, CategoryField}` using an Ash embedded resource. This gives us validation, proper TypeScript codegen types, and a clear schema contract.
+
+**Files:**
+- Create: `lib/angle/catalog/category_field.ex`
+- Modify: `lib/angle/catalog/category.ex:68-73`
+
+**Step 1: Create the embedded resource**
+
+Create `lib/angle/catalog/category_field.ex`:
+
+```elixir
+defmodule Angle.Catalog.CategoryField do
+  use Ash.Resource,
+    data_layer: :embedded
+
+  attributes do
+    attribute :name, :string do
+      allow_nil? false
+      public? true
+    end
+
+    attribute :type, :string do
+      allow_nil? false
+      default "string"
+      public? true
+    end
+
+    attribute :required, :boolean do
+      default false
+      allow_nil? false
+      public? true
+    end
+
+    attribute :description, :string do
+      public? true
+    end
+
+    attribute :option_set_slug, :string do
+      public? true
+    end
+
+    attribute :options, {:array, :string} do
+      public? true
+    end
+  end
+end
+```
+
+**Step 2: Update Category to use the embedded resource**
+
+In `lib/angle/catalog/category.ex`, replace lines 68-73:
+
+```elixir
+# Before:
+attribute :attribute_schema, :map do
+  allow_nil? false
+  default %{}
+  generated? true
+  public? true
+end
+
+# After:
+attribute :attribute_schema, {:array, Angle.Catalog.CategoryField} do
+  allow_nil? false
+  default []
+  public? true
+end
+```
+
+Note: `generated? true` is removed since we'll write this data from seeds/admin.
+
+**Step 3: Run codegen to generate migration**
+
+```bash
+mix ash.codegen --dev
+```
+
+This should generate a migration that changes the `attribute_schema` column. Since existing data is all `%{}` (empty maps), the migration should handle conversion. If the migration doesn't auto-handle the type change, manually add:
+
+```elixir
+execute "UPDATE categories SET attribute_schema = '[]'::jsonb WHERE attribute_schema = '{}'::jsonb"
+```
+
+**Step 4: Run TypeScript codegen**
+
+```bash
+mix ash_typescript.codegen
+```
+
+Verify that `ash_rpc.ts` now has a `CategoryField` type with `name`, `type`, `required`, `description`, `optionSetSlug`, and `options` properties — instead of `Record<string, any>`.
+
+**Step 5: Commit**
+
+```bash
+git add lib/angle/catalog/category_field.ex lib/angle/catalog/category.ex priv/repo/migrations/ assets/js/ash_rpc.ts
+git commit -m "feat: add CategoryField embedded resource for typed attribute_schema"
+```
+
+---
+
+## Task 4: Backend — Seed option sets + category attribute_schema data
 
 Two things need seeding: (1) option sets with their values (for dropdown fields), and (2) category `attribute_schema` data that references those option sets via `optionSetSlug`.
 
@@ -294,154 +396,126 @@ end
 
 # ── Part 2: Seed category attribute_schema ────────────────────────────
 #
-# Fields with `optionSetSlug` will render as <Select> dropdowns,
-# lazy-loaded from the OptionSet RPC. Fields without it render as
-# free text <Input>.
+# Now that attribute_schema is {:array, CategoryField}, we pass a flat
+# list of maps. Each field can use:
+#   - optionSetSlug: lazy-loaded dropdown from OptionSet RPC
+#   - options: inline dropdown (no network call)
+#   - neither: free text input
+#   - description: helper text shown below the field
 
 schemas = %{
-  "Smartphones" => %{
-    "fields" => [
-      %{"name" => "Model", "type" => "string", "required" => true},
-      %{"name" => "Storage", "type" => "string", "optionSetSlug" => "phone-storage"},
-      %{"name" => "Color", "type" => "string"},
-      %{"name" => "Display", "type" => "string"},
-      %{"name" => "Chip", "type" => "string"},
-      %{"name" => "Camera", "type" => "string"},
-      %{"name" => "Battery", "type" => "string"}
-    ]
-  },
-  "Laptops" => %{
-    "fields" => [
-      %{"name" => "Brand & Model", "type" => "string", "required" => true},
-      %{"name" => "Processor", "type" => "string"},
-      %{"name" => "RAM", "type" => "string", "optionSetSlug" => "laptop-ram"},
-      %{"name" => "Storage", "type" => "string", "optionSetSlug" => "laptop-storage"},
-      %{"name" => "Screen Size", "type" => "string", "optionSetSlug" => "screen-size"},
-      %{"name" => "Graphics", "type" => "string"}
-    ]
-  },
-  "Audio & Headphones" => %{
-    "fields" => [
-      %{"name" => "Brand & Model", "type" => "string", "required" => true},
-      %{"name" => "Type", "type" => "string"},
-      %{"name" => "Connectivity", "type" => "string"},
-      %{"name" => "Driver Size", "type" => "string"}
-    ]
-  },
-  "Gaming" => %{
-    "fields" => [
-      %{"name" => "Console/Accessory", "type" => "string", "required" => true},
-      %{"name" => "Model", "type" => "string"},
-      %{"name" => "Storage", "type" => "string", "optionSetSlug" => "gaming-storage"},
-      %{"name" => "Included Accessories", "type" => "string"}
-    ]
-  },
-  "Cameras" => %{
-    "fields" => [
-      %{"name" => "Brand & Model", "type" => "string", "required" => true},
-      %{"name" => "Type", "type" => "string"},
-      %{"name" => "Megapixels", "type" => "string"},
-      %{"name" => "Lens Mount", "type" => "string"}
-    ]
-  },
-  "Men's Clothing" => %{
-    "fields" => [
-      %{"name" => "Type", "type" => "string", "required" => true},
-      %{"name" => "Size", "type" => "string", "optionSetSlug" => "clothing-size"},
-      %{"name" => "Material", "type" => "string"},
-      %{"name" => "Brand", "type" => "string"}
-    ]
-  },
-  "Women's Clothing" => %{
-    "fields" => [
-      %{"name" => "Type", "type" => "string", "required" => true},
-      %{"name" => "Size", "type" => "string", "optionSetSlug" => "clothing-size"},
-      %{"name" => "Material", "type" => "string"},
-      %{"name" => "Brand", "type" => "string"}
-    ]
-  },
-  "Shoes" => %{
-    "fields" => [
-      %{"name" => "Brand & Model", "type" => "string", "required" => true},
-      %{"name" => "Size", "type" => "string", "optionSetSlug" => "shoe-size-us"},
-      %{"name" => "Color", "type" => "string"},
-      %{"name" => "Material", "type" => "string"}
-    ]
-  },
-  "Watches" => %{
-    "fields" => [
-      %{"name" => "Brand & Model", "type" => "string", "required" => true},
-      %{"name" => "Movement", "type" => "string"},
-      %{"name" => "Case Size", "type" => "string"},
-      %{"name" => "Material", "type" => "string"}
-    ]
-  },
-  "Coins & Currency" => %{
-    "fields" => [
-      %{"name" => "Type", "type" => "string", "required" => true},
-      %{"name" => "Year/Period", "type" => "string"},
-      %{"name" => "Country of Origin", "type" => "string"},
-      %{"name" => "Grade", "type" => "string", "optionSetSlug" => "condition-grade"}
-    ]
-  },
-  "Trading Cards" => %{
-    "fields" => [
-      %{"name" => "Card Name", "type" => "string", "required" => true},
-      %{"name" => "Set/Series", "type" => "string"},
-      %{"name" => "Grade", "type" => "string", "optionSetSlug" => "condition-grade"},
-      %{"name" => "Year", "type" => "string"}
-    ]
-  },
-  "Antiques" => %{
-    "fields" => [
-      %{"name" => "Item Type", "type" => "string", "required" => true},
-      %{"name" => "Origin", "type" => "string"},
-      %{"name" => "Age/Period", "type" => "string"},
-      %{"name" => "Material", "type" => "string"}
-    ]
-  },
-  "Paintings" => %{
-    "fields" => [
-      %{"name" => "Artist", "type" => "string"},
-      %{"name" => "Medium", "type" => "string"},
-      %{"name" => "Dimensions", "type" => "string"},
-      %{"name" => "Year", "type" => "string"}
-    ]
-  },
-  "Sculptures" => %{
-    "fields" => [
-      %{"name" => "Artist", "type" => "string"},
-      %{"name" => "Material", "type" => "string", "required" => true},
-      %{"name" => "Dimensions", "type" => "string"},
-      %{"name" => "Weight", "type" => "string"}
-    ]
-  },
-  "Cars" => %{
-    "fields" => [
-      %{"name" => "Make & Model", "type" => "string", "required" => true},
-      %{"name" => "Year", "type" => "string", "required" => true},
-      %{"name" => "Mileage", "type" => "string"},
-      %{"name" => "Transmission", "type" => "string"},
-      %{"name" => "Fuel Type", "type" => "string"}
-    ]
-  },
-  "Motorcycles" => %{
-    "fields" => [
-      %{"name" => "Make & Model", "type" => "string", "required" => true},
-      %{"name" => "Year", "type" => "string"},
-      %{"name" => "Engine Size", "type" => "string"},
-      %{"name" => "Mileage", "type" => "string"}
-    ]
-  }
+  "Smartphones" => [
+    %{name: "Model", type: "string", required: true, description: "e.g. iPhone 15 Pro Max"},
+    %{name: "Storage", type: "string", option_set_slug: "phone-storage"},
+    %{name: "Color", type: "string", options: ["Black", "White", "Blue", "Red", "Gold", "Silver", "Green", "Purple"]},
+    %{name: "Display", type: "string", description: "e.g. 6.7\" Super Retina XDR"},
+    %{name: "Chip", type: "string", description: "e.g. A17 Pro"},
+    %{name: "Camera", type: "string", description: "e.g. 48MP Triple"},
+    %{name: "Battery", type: "string", description: "e.g. 4422 mAh"}
+  ],
+  "Laptops" => [
+    %{name: "Brand & Model", type: "string", required: true, description: "e.g. MacBook Pro 16\""},
+    %{name: "Processor", type: "string", description: "e.g. Apple M3 Pro, Intel i7-13700H"},
+    %{name: "RAM", type: "string", option_set_slug: "laptop-ram"},
+    %{name: "Storage", type: "string", option_set_slug: "laptop-storage"},
+    %{name: "Screen Size", type: "string", option_set_slug: "screen-size"},
+    %{name: "Graphics", type: "string", description: "e.g. Integrated, RTX 4060"}
+  ],
+  "Audio & Headphones" => [
+    %{name: "Brand & Model", type: "string", required: true},
+    %{name: "Type", type: "string", options: ["Over-ear", "On-ear", "In-ear", "Earbuds", "Speaker", "Soundbar"]},
+    %{name: "Connectivity", type: "string", options: ["Wired", "Bluetooth", "Wired + Bluetooth"]},
+    %{name: "Driver Size", type: "string"}
+  ],
+  "Gaming" => [
+    %{name: "Console/Accessory", type: "string", required: true, options: ["PlayStation 5", "Xbox Series X", "Xbox Series S", "Nintendo Switch", "Steam Deck", "Controller", "Headset", "Other"]},
+    %{name: "Model", type: "string"},
+    %{name: "Storage", type: "string", option_set_slug: "gaming-storage"},
+    %{name: "Included Accessories", type: "string", description: "e.g. 2 controllers, charging dock"}
+  ],
+  "Cameras" => [
+    %{name: "Brand & Model", type: "string", required: true},
+    %{name: "Type", type: "string", options: ["DSLR", "Mirrorless", "Point & Shoot", "Action Camera", "Film Camera"]},
+    %{name: "Megapixels", type: "string"},
+    %{name: "Lens Mount", type: "string", description: "e.g. Canon RF, Sony E, Nikon Z"}
+  ],
+  "Men's Clothing" => [
+    %{name: "Type", type: "string", required: true, options: ["Shirt", "T-Shirt", "Trousers", "Jeans", "Jacket", "Suit", "Agbada", "Kaftan", "Other"]},
+    %{name: "Size", type: "string", option_set_slug: "clothing-size"},
+    %{name: "Material", type: "string"},
+    %{name: "Brand", type: "string"}
+  ],
+  "Women's Clothing" => [
+    %{name: "Type", type: "string", required: true, options: ["Dress", "Blouse", "Skirt", "Trousers", "Gown", "Iro & Buba", "Ankara", "Other"]},
+    %{name: "Size", type: "string", option_set_slug: "clothing-size"},
+    %{name: "Material", type: "string"},
+    %{name: "Brand", type: "string"}
+  ],
+  "Shoes" => [
+    %{name: "Brand & Model", type: "string", required: true},
+    %{name: "Size", type: "string", option_set_slug: "shoe-size-us"},
+    %{name: "Color", type: "string"},
+    %{name: "Material", type: "string", options: ["Leather", "Suede", "Canvas", "Synthetic", "Mesh", "Other"]}
+  ],
+  "Watches" => [
+    %{name: "Brand & Model", type: "string", required: true},
+    %{name: "Movement", type: "string", options: ["Automatic", "Quartz", "Manual", "Solar", "Smartwatch"]},
+    %{name: "Case Size", type: "string", description: "e.g. 42mm"},
+    %{name: "Material", type: "string", options: ["Stainless Steel", "Gold", "Titanium", "Ceramic", "Plastic"]}
+  ],
+  "Coins & Currency" => [
+    %{name: "Type", type: "string", required: true, options: ["Coin", "Banknote", "Token", "Medal"]},
+    %{name: "Year/Period", type: "string"},
+    %{name: "Country of Origin", type: "string"},
+    %{name: "Grade", type: "string", option_set_slug: "condition-grade"}
+  ],
+  "Trading Cards" => [
+    %{name: "Card Name", type: "string", required: true},
+    %{name: "Set/Series", type: "string"},
+    %{name: "Grade", type: "string", option_set_slug: "condition-grade"},
+    %{name: "Year", type: "string"}
+  ],
+  "Antiques" => [
+    %{name: "Item Type", type: "string", required: true},
+    %{name: "Origin", type: "string"},
+    %{name: "Age/Period", type: "string"},
+    %{name: "Material", type: "string"}
+  ],
+  "Paintings" => [
+    %{name: "Artist", type: "string"},
+    %{name: "Medium", type: "string", options: ["Oil", "Acrylic", "Watercolor", "Pastel", "Mixed Media", "Digital Print"]},
+    %{name: "Dimensions", type: "string", description: "e.g. 24\" x 36\""},
+    %{name: "Year", type: "string"}
+  ],
+  "Sculptures" => [
+    %{name: "Artist", type: "string"},
+    %{name: "Material", type: "string", required: true, options: ["Bronze", "Wood", "Stone", "Clay", "Metal", "Mixed Media"]},
+    %{name: "Dimensions", type: "string", description: "Height x Width x Depth"},
+    %{name: "Weight", type: "string"}
+  ],
+  "Cars" => [
+    %{name: "Make & Model", type: "string", required: true, description: "e.g. Toyota Camry 2020"},
+    %{name: "Year", type: "string", required: true},
+    %{name: "Mileage", type: "string", description: "e.g. 45,000 km"},
+    %{name: "Transmission", type: "string", options: ["Automatic", "Manual", "CVT"]},
+    %{name: "Fuel Type", type: "string", options: ["Petrol", "Diesel", "Electric", "Hybrid", "CNG"]}
+  ],
+  "Motorcycles" => [
+    %{name: "Make & Model", type: "string", required: true},
+    %{name: "Year", type: "string"},
+    %{name: "Engine Size", type: "string", description: "e.g. 650cc"},
+    %{name: "Mileage", type: "string"}
+  ]
 }
 
-for {name, schema} <- schemas do
+# Update categories that exist in the DB
+for {name, fields} <- schemas do
   case Category
        |> Ash.Query.filter(name == ^name)
        |> Ash.read_one(authorize?: false) do
     {:ok, %Category{} = cat} ->
       cat
-      |> Ash.Changeset.for_update(:update, %{attribute_schema: schema}, authorize?: false)
+      |> Ash.Changeset.for_update(:update, %{attribute_schema: fields}, authorize?: false)
       |> Ash.update!()
 
       IO.puts("Updated attribute_schema for: #{name}")
@@ -471,7 +545,7 @@ git commit -m "feat: seed option sets and category attribute_schema for listing 
 
 ---
 
-## Task 4: Frontend — Listing wizard shell + Zod schemas + state management
+## Task 5: Frontend — Listing wizard shell + Zod schemas + state management
 
 Build the wizard page component, step progress indicator, form state reducer, and Zod schemas.
 
@@ -685,21 +759,23 @@ interface CategoryField {
   name: string;
   type: string;
   required?: boolean;
-  optionSetSlug?: string;
+  description?: string | null;
+  optionSetSlug?: string | null;
+  options?: string[] | null;
 }
 
 interface Subcategory {
   id: string;
   name: string;
   slug: string | null;
-  attributeSchema: { fields?: CategoryField[] } | Record<string, never>;
+  attributeSchema: CategoryField[];
 }
 
 export interface Category {
   id: string;
   name: string;
   slug: string | null;
-  attributeSchema: { fields?: CategoryField[] } | Record<string, never>;
+  attributeSchema: CategoryField[];
   categories: Subcategory[];
 }
 
@@ -886,7 +962,7 @@ git commit -m "feat: add listing wizard shell with state management and step ind
 
 ---
 
-## Task 5: Frontend — Category picker modal
+## Task 6: Frontend — Category picker modal
 
 The most complex UI component. A hierarchical modal that shows top-level categories, lets users navigate into subcategories, and supports search.
 
@@ -1094,7 +1170,7 @@ git commit -m "feat: add hierarchical category picker modal with search"
 
 ---
 
-## Task 6: Frontend — Basic Details step (Step 1)
+## Task 7: Frontend — Basic Details step (Step 1)
 
 The largest form step: title, description, category picker, dynamic category fields, custom features, condition, and photo selection.
 
@@ -1107,7 +1183,12 @@ The largest form step: title, description, category picker, dynamic category fie
 
 Create `assets/js/features/listing-form/components/category-fields.tsx`.
 
-This component renders dynamic form fields from a category's `attribute_schema`. Fields with an `optionSetSlug` property are rendered as `<Select>` dropdowns, lazy-loaded from the OptionSet RPC. Fields without it render as free-text `<Input>`.
+This component renders dynamic form fields from a category's `attribute_schema` (now a typed `CategoryField[]` from the embedded resource). The rendering priority is:
+1. `optionSetSlug` → lazy-load `<Select>` from OptionSet RPC
+2. `options` → inline `<Select>` (no network call)
+3. Neither → free-text `<Input>`
+
+All fields also support an optional `description` shown as helper text below.
 
 ```tsx
 import { useMemo } from "react";
@@ -1128,7 +1209,9 @@ interface CategoryField {
   name: string;
   type: string;
   required?: boolean;
-  optionSetSlug?: string;
+  description?: string | null;
+  optionSetSlug?: string | null;
+  options?: string[] | null;
 }
 
 interface CategoryFieldsProps {
@@ -1184,7 +1267,7 @@ export function CategoryFields({ fields, values, onChange }: CategoryFieldsProps
             </Label>
 
             {field.optionSetSlug ? (
-              // Dropdown from option set
+              // Priority 1: Dropdown from lazy-loaded option set
               optionSetsLoading ? (
                 <div className="flex h-10 items-center gap-2 rounded-md border border-input px-3">
                   <Loader2 className="size-3.5 animate-spin text-content-tertiary" />
@@ -1207,14 +1290,36 @@ export function CategoryFields({ fields, values, onChange }: CategoryFieldsProps
                   </SelectContent>
                 </Select>
               )
+            ) : field.options && field.options.length > 0 ? (
+              // Priority 2: Inline dropdown from options array
+              <Select
+                value={values[field.name] || ""}
+                onValueChange={(v) => onChange(field.name, v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={`Select ${field.name.toLowerCase()}`} />
+                </SelectTrigger>
+                <SelectContent>
+                  {field.options.map((opt) => (
+                    <SelectItem key={opt} value={opt}>
+                      {opt}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             ) : (
-              // Free text input
+              // Priority 3: Free text input
               <Input
                 id={`attr-${field.name}`}
-                placeholder={`Enter ${field.name.toLowerCase()}`}
+                placeholder={field.description || `Enter ${field.name.toLowerCase()}`}
                 value={values[field.name] || ""}
                 onChange={(e) => onChange(field.name, e.target.value)}
               />
+            )}
+
+            {/* Description helper text (shown for all field types) */}
+            {field.description && (
+              <p className="text-xs text-content-tertiary">{field.description}</p>
             )}
           </div>
         ))}
@@ -1365,7 +1470,7 @@ export function BasicDetailsStep({
   const watchCategoryId = watch("categoryId");
   const watchSubcategoryId = watch("subcategoryId");
 
-  // Get the selected (sub)category's attributeSchema fields
+  // Get the selected (sub)category's attributeSchema (now a flat CategoryField[])
   const categoryFields = useMemo(() => {
     const subcatId = watchSubcategoryId;
     const catId = watchCategoryId;
@@ -1373,11 +1478,11 @@ export function BasicDetailsStep({
 
     for (const cat of categories) {
       if (cat.id === catId && !subcatId) {
-        return cat.attributeSchema?.fields || [];
+        return cat.attributeSchema || [];
       }
       for (const sub of cat.categories) {
         if (sub.id === subcatId) {
-          return sub.attributeSchema?.fields || [];
+          return sub.attributeSchema || [];
         }
       }
     }
@@ -1676,7 +1781,7 @@ git commit -m "feat: add Basic Details step with category picker and dynamic fie
 
 ---
 
-## Task 7: Frontend — Auction Info step (Step 2)
+## Task 8: Frontend — Auction Info step (Step 2)
 
 Starting price, reserve price, and auction duration dropdown.
 
@@ -1830,7 +1935,7 @@ git commit -m "feat: add Auction Info step with price inputs and duration"
 
 ---
 
-## Task 8: Frontend — Logistics step (Step 3)
+## Task 9: Frontend — Logistics step (Step 3)
 
 Radio buttons pre-filled from store profile. On change, updates store profile via RPC.
 
@@ -1938,7 +2043,7 @@ git commit -m "feat: add Logistics step with delivery preference radio buttons"
 
 ---
 
-## Task 9: Frontend — Preview step (Step 4) + Publish flow
+## Task 10: Frontend — Preview step (Step 4) + Publish flow
 
 Read-only preview of all item data with edit links. Publish button triggers `updateDraftItem` + `publishItem`.
 
@@ -2150,7 +2255,7 @@ git commit -m "feat: add Preview step with publish flow"
 
 ---
 
-## Task 10: Frontend — Success modal with confetti
+## Task 11: Frontend — Success modal
 
 The celebration modal shown after successful publish.
 
@@ -2241,7 +2346,7 @@ git commit -m "feat: add success modal for published listings"
 
 ---
 
-## Task 11: Controller test
+## Task 12: Controller test
 
 Test that the `items/new` route loads correctly with props.
 
@@ -2301,7 +2406,7 @@ git commit -m "test: add items controller tests for new listing page"
 
 ---
 
-## Task 12: Final build, full test suite, and cleanup
+## Task 13: Final build, full test suite, and cleanup
 
 **Step 1: Run full codegen**
 
@@ -2336,7 +2441,7 @@ git commit -m "chore: final cleanup for list item form feature"
 
 ---
 
-## Task 13: Visual QA against Figma
+## Task 14: Visual QA against Figma
 
 Compare browser screenshots with Figma designs and fix discrepancies.
 
