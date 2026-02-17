@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { router } from "@inertiajs/react";
+import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PermissionGuard, CanCreateItems, usePermissions } from "@/features/auth";
+import { ItemImageManager } from "@/components/image-upload";
+import type { ImageData } from "@/lib/image-url";
 
 interface ItemFormProps {
   item?: {
@@ -14,6 +17,7 @@ interface ItemFormProps {
     starting_price: number;
     publication_status: "draft" | "published";
     created_by_id: string;
+    images?: ImageData[];
   };
 }
 
@@ -25,6 +29,7 @@ export function ItemForm({ item }: ItemFormProps) {
     starting_price: item?.starting_price || 0,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [images, setImages] = useState<ImageData[]>(item?.images ?? []);
 
   const isOwner = item ? item.created_by_id === user?.id : true;
   const canUpdate = hasPermission("update_own_items") && isOwner;
@@ -117,6 +122,22 @@ export function ItemForm({ item }: ItemFormProps) {
               className="mt-1"
             />
           </div>
+
+          {/* Image management -- only available in edit mode (needs item ID) */}
+          {item ? (
+            <ItemImageManager
+              itemId={item.id}
+              images={images}
+              onImagesChange={setImages}
+            />
+          ) : (
+            <div className="flex items-start gap-2 rounded-md border border-border bg-surface-muted p-4">
+              <Info className="mt-0.5 size-4 shrink-0 text-content-tertiary" />
+              <p className="text-sm text-content-secondary">
+                Save your item first, then add images from the edit page.
+              </p>
+            </div>
+          )}
 
           {item && (
             <div className="bg-surface-muted p-4 rounded-md">
