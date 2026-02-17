@@ -1,7 +1,7 @@
-import { Link } from "@inertiajs/react";
-import type { HistoryBidCard as HistoryBidCardType } from "@/ash_rpc";
-import { formatNaira } from "@/lib/format";
-import { cn } from "@/lib/utils";
+import { Link } from '@inertiajs/react';
+import type { HistoryBidCard as HistoryBidCardType } from '@/ash_rpc';
+import { formatNaira } from '@/lib/format';
+import { cn } from '@/lib/utils';
 
 type BidItem = HistoryBidCardType[number];
 
@@ -17,21 +17,23 @@ export function HistoryBidCard({ bid, didWin }: HistoryBidCardProps) {
   const sellerName = seller?.username || seller?.fullName;
   const status = didWin
     ? {
-        label: "Completed",
-        className: "bg-green-50 text-green-700 border-green-200",
+        label: 'Completed',
+        className:
+          'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-400',
       }
     : {
         label: "Didn't win",
-        className: "bg-gray-50 text-gray-500 border-gray-200",
+        className:
+          'border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400',
       };
 
   const bidDate = bid.bidTime
-    ? new Date(bid.bidTime).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
+    ? new Date(bid.bidTime).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
       })
-    : "";
+    : '';
 
   return (
     <>
@@ -43,14 +45,12 @@ export function HistoryBidCard({ bid, didWin }: HistoryBidCardProps) {
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
             <Link href={itemUrl}>
-              <h3 className="text-sm font-medium text-content">
-                {item?.title}
-              </h3>
+              <h3 className="text-sm font-medium text-content">{item?.title}</h3>
             </Link>
             <span
               className={cn(
-                "rounded-full border px-2.5 py-0.5 text-xs font-medium",
-                status.className,
+                'rounded-full border px-2.5 py-0.5 text-xs font-medium',
+                status.className
               )}
             >
               {status.label}
@@ -58,9 +58,7 @@ export function HistoryBidCard({ bid, didWin }: HistoryBidCardProps) {
           </div>
           <div className="mt-1 flex items-center gap-2 text-sm">
             <span className="text-content-tertiary">Your bid:</span>
-            <span className="font-bold text-content">
-              {formatNaira(bid.amount)}
-            </span>
+            <span className="font-bold text-content">{formatNaira(bid.amount)}</span>
             {sellerName && (
               <>
                 <span className="text-content-tertiary">&middot;</span>
@@ -69,9 +67,7 @@ export function HistoryBidCard({ bid, didWin }: HistoryBidCardProps) {
             )}
           </div>
         </div>
-        <span className="shrink-0 text-sm text-content-tertiary">
-          {bidDate}
-        </span>
+        <span className="shrink-0 text-sm text-content-tertiary">{bidDate}</span>
       </div>
 
       {/* Mobile */}
@@ -83,21 +79,17 @@ export function HistoryBidCard({ bid, didWin }: HistoryBidCardProps) {
           <div className="min-w-0 flex-1">
             <span
               className={cn(
-                "mb-1 inline-block rounded-full border px-2 py-0.5 text-xs font-medium",
-                status.className,
+                'mb-1 inline-block rounded-full border px-2 py-0.5 text-xs font-medium',
+                status.className
               )}
             >
               {status.label}
             </span>
             <Link href={itemUrl}>
-              <h3 className="line-clamp-2 text-sm font-medium text-content">
-                {item?.title}
-              </h3>
+              <h3 className="line-clamp-2 text-sm font-medium text-content">{item?.title}</h3>
             </Link>
             <div className="mt-1 flex items-center gap-2 text-sm">
-              <span className="font-bold text-content">
-                {formatNaira(bid.amount)}
-              </span>
+              <span className="font-bold text-content">{formatNaira(bid.amount)}</span>
               {sellerName && (
                 <>
                   <span className="text-content-tertiary">&middot;</span>

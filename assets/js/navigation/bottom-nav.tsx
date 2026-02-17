@@ -1,28 +1,28 @@
-import { usePage } from "@inertiajs/react";
-import { Home, Gavel, Heart, Store, Settings } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { AuthLink } from "@/features/auth";
+import { usePage } from '@inertiajs/react';
+import { Home, Gavel, Heart, Store, Settings } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { AuthLink } from '@/features/auth';
 
 const tabs = [
-  { label: "Home", href: "/", icon: Home, auth: false },
-  { label: "Bids", href: "/bids", icon: Gavel, auth: true },
-  { label: "Watchlist", href: "/watchlist", icon: Heart, auth: true },
-  { label: "Store", href: "/store", icon: Store, auth: true },
-  { label: "Settings", href: "/settings", icon: Settings, auth: true },
+  { label: 'Home', href: '/', icon: Home, auth: false },
+  { label: 'Bids', href: '/bids', icon: Gavel, auth: true },
+  { label: 'Watchlist', href: '/watchlist', icon: Heart, auth: true },
+  { label: 'Store', href: '/store', icon: Store, auth: true },
+  { label: 'Settings', href: '/settings', icon: Settings, auth: true },
 ];
 
 export function BottomNav() {
   const { url } = usePage();
 
   const isActive = (href: string) => {
-    if (href === "/") return url === "/";
+    if (href === '/') return url === '/';
     return url.startsWith(href);
   };
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-subtle bg-surface lg:hidden">
       <div className="flex h-[72px] items-center justify-around px-4">
-        {tabs.map((tab) => {
+        {tabs.map(tab => {
           const active = isActive(tab.href);
           const Icon = tab.icon;
           return (
@@ -31,14 +31,12 @@ export function BottomNav() {
               href={tab.href}
               auth={tab.auth}
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-2 text-[10px]",
-                active ? "text-primary-600" : "text-content-tertiary"
+                'flex flex-col items-center gap-1 px-3 py-2 text-[10px]',
+                active ? 'text-primary-600' : 'text-content-tertiary'
               )}
             >
               <Icon className="size-5" strokeWidth={active ? 2.5 : 2} />
-              <span className={cn("font-medium", active && "font-semibold")}>
-                {tab.label}
-              </span>
+              <span className={cn('font-medium', active && 'font-semibold')}>{tab.label}</span>
             </AuthLink>
           );
         })}

@@ -1,17 +1,11 @@
-import { Link, usePage } from "@inertiajs/react";
-import {
-  Package,
-  Wallet,
-  Store,
-  Headset,
-  ChevronRight,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Link, usePage } from '@inertiajs/react';
+import { Package, Wallet, Store, Headset, ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const navItems = [
-  { label: "Listings", href: "/store/listings", icon: Package },
-  { label: "Payments", href: "/store/payments", icon: Wallet },
-  { label: "Store Profile", href: "/store/profile", icon: Store },
+  { label: 'Listings', href: '/store/listings', icon: Package },
+  { label: 'Payments', href: '/store/payments', icon: Wallet },
+  { label: 'Store Profile', href: '/store/profile', icon: Store },
 ];
 
 interface StoreLayoutProps {
@@ -28,17 +22,15 @@ export function StoreLayout({ title, children }: StoreLayoutProps) {
       <div className="px-4 pt-4 lg:hidden">
         <div className="rounded-lg border border-surface-muted bg-surface-secondary p-1">
           <div className="flex">
-            {navItems.map((item) => {
+            {navItems.map(item => {
               const isActive = url.startsWith(item.href);
               return (
                 <Link
                   key={item.label}
                   href={item.href}
                   className={cn(
-                    "flex-1 rounded-md px-3 py-2 text-center text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-surface text-content shadow-sm"
-                      : "text-content-tertiary",
+                    'flex-1 rounded-md px-3 py-2 text-center text-sm font-medium transition-colors',
+                    isActive ? 'bg-surface text-content shadow-sm' : 'text-content-tertiary'
                   )}
                 >
                   {item.label}
@@ -54,17 +46,17 @@ export function StoreLayout({ title, children }: StoreLayoutProps) {
         {/* Sidebar */}
         <aside className="w-[240px] shrink-0">
           <nav className="space-y-1">
-            {navItems.map((item) => {
+            {navItems.map(item => {
               const isActive = url.startsWith(item.href);
               return (
                 <Link
                   key={item.label}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                     isActive
-                      ? "bg-primary-600/10 text-primary-600"
-                      : "text-content-tertiary hover:text-content",
+                      ? 'bg-primary-600/10 text-primary-600'
+                      : 'text-content-tertiary hover:text-content'
                   )}
                 >
                   <item.icon className="size-5" />

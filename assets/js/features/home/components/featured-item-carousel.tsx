@@ -36,7 +36,7 @@ function WatchButton({
       }}
       className={`flex items-center gap-2 rounded-full border px-6 py-2.5 text-sm font-medium transition-colors ${
         isWatchlisted
-          ? 'border-red-200 bg-red-50 text-red-600'
+          ? 'border-red-200 bg-red-50 text-red-600 dark:border-red-800 dark:bg-red-950 dark:text-red-400'
           : 'border-strong bg-surface text-content hover:bg-surface-muted'
       }`}
     >

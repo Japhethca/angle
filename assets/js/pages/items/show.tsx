@@ -1,24 +1,18 @@
-import { Head, Link } from "@inertiajs/react";
-import {
-  ArrowLeft,
-  Share2,
-  Heart,
-  ChevronRight,
-  Eye,
-} from "lucide-react";
-import type { ItemDetail, HomepageItemCard } from "@/ash_rpc";
-import { formatNaira } from "@/lib/format";
-import { CountdownTimer } from "@/shared/components/countdown-timer";
+import { Head, Link } from '@inertiajs/react';
+import { ArrowLeft, Share2, Heart, ChevronRight, Eye } from 'lucide-react';
+import type { ItemDetail, HomepageItemCard } from '@/ash_rpc';
+import { formatNaira } from '@/lib/format';
+import { CountdownTimer } from '@/shared/components/countdown-timer';
 import {
   ConditionBadge,
   ItemImageGallery,
   ItemDetailTabs,
   SellerCard,
   SimilarItems,
-} from "@/features/items";
-import { BidSection } from "@/features/bidding";
-import { useWatchlistToggle } from "@/features/watchlist/hooks/use-watchlist-toggle";
-import { toast } from "sonner";
+} from '@/features/items';
+import { BidSection } from '@/features/bidding';
+import { useWatchlistToggle } from '@/features/watchlist/hooks/use-watchlist-toggle';
+import { toast } from 'sonner';
 
 interface Seller {
   id: string;
@@ -33,17 +27,17 @@ interface ShowProps {
   watchlist_entry_id: string | null;
 }
 
-export default function Show({
-  item,
-  similar_items = [],
-  watchlist_entry_id = null,
-}: ShowProps) {
+export default function Show({ item, similar_items = [], watchlist_entry_id = null }: ShowProps) {
   const price = item.currentPrice || item.startingPrice;
-  const { isWatchlisted, toggle: toggleWatch, isPending: isWatchPending } = useWatchlistToggle({
+  const {
+    isWatchlisted,
+    toggle: toggleWatch,
+    isPending: isWatchPending,
+  } = useWatchlistToggle({
     itemId: item.id,
     watchlistEntryId: watchlist_entry_id,
-    onAdd: () => toast.success("Added to your watchlist"),
-    onRemove: () => toast.success("Removed from your watchlist"),
+    onAdd: () => toast.success('Added to your watchlist'),
+    onRemove: () => toast.success('Removed from your watchlist'),
   });
 
   return (
@@ -58,9 +52,7 @@ export default function Show({
         >
           <ArrowLeft className="size-4 text-content" />
         </button>
-        <span className="text-sm font-medium text-content">
-          {item.category?.name || "Item"}
-        </span>
+        <span className="text-sm font-medium text-content">{item.category?.name || 'Item'}</span>
         <div className="flex gap-2">
           <button className="flex size-9 items-center justify-center rounded-full border border-strong">
             <Share2 className="size-4 text-content" />
@@ -71,7 +63,7 @@ export default function Show({
             className="flex size-9 items-center justify-center rounded-full border border-strong"
           >
             <Heart
-              className={`size-4 ${isWatchlisted ? "fill-red-500 text-red-500" : "text-content"}`}
+              className={`size-4 ${isWatchlisted ? 'fill-red-500 text-red-500' : 'text-content'}`}
             />
           </button>
         </div>
@@ -86,9 +78,7 @@ export default function Show({
           <ChevronRight className="size-3" />
           {item.category && (
             <>
-              <span className="hover:text-content">
-                {item.category.name}
-              </span>
+              <span className="hover:text-content">{item.category.name}</span>
               <ChevronRight className="size-3" />
             </>
           )}
@@ -114,13 +104,9 @@ export default function Show({
               {/* Item header info */}
               <div className="space-y-3">
                 <ConditionBadge condition={item.condition} />
-                <h1 className="font-heading text-xl font-semibold text-content">
-                  {item.title}
-                </h1>
+                <h1 className="font-heading text-xl font-semibold text-content">{item.title}</h1>
                 <div className="flex items-center gap-3 text-xs text-content-tertiary">
-                  {item.endTime && (
-                    <CountdownTimer endTime={item.endTime} />
-                  )}
+                  {item.endTime && <CountdownTimer endTime={item.endTime} />}
                   {item.viewCount != null && item.viewCount > 0 && (
                     <span className="inline-flex items-center gap-1">
                       <Eye className="size-3" />
@@ -133,9 +119,7 @@ export default function Show({
               {/* Current price */}
               <div>
                 <p className="text-xs text-content-tertiary">Current Price</p>
-                <p className="text-2xl font-bold text-content">
-                  {formatNaira(price)}
-                </p>
+                <p className="text-2xl font-bold text-content">{formatNaira(price)}</p>
               </div>
 
               <BidSection
@@ -160,9 +144,7 @@ export default function Show({
           {/* Item header */}
           <div className="space-y-2">
             <ConditionBadge condition={item.condition} />
-            <h1 className="font-heading text-lg font-semibold text-content">
-              {item.title}
-            </h1>
+            <h1 className="font-heading text-lg font-semibold text-content">{item.title}</h1>
             <div className="flex items-center gap-3 text-xs text-content-tertiary">
               {item.endTime && <CountdownTimer endTime={item.endTime} />}
               {item.viewCount != null && item.viewCount > 0 && (
@@ -177,9 +159,7 @@ export default function Show({
           {/* Current price */}
           <div>
             <p className="text-xs text-content-tertiary">Current Price</p>
-            <p className="text-xl font-bold text-content">
-              {formatNaira(price)}
-            </p>
+            <p className="text-xl font-bold text-content">{formatNaira(price)}</p>
           </div>
 
           <BidSection

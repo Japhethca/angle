@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { Gavel, Play } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useState } from 'react';
+import { Gavel, Play } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ItemImageGalleryProps {
   title: string;
@@ -22,10 +22,8 @@ export function ItemImageGallery({ title }: ItemImageGalleryProps) {
               key={i}
               onClick={() => setActiveIndex(i)}
               className={cn(
-                "relative flex aspect-square items-center justify-center rounded-md bg-surface-muted transition-all",
-                activeIndex === i
-                  ? "ring-2 ring-primary-600"
-                  : "opacity-70 hover:opacity-100"
+                'relative flex aspect-square items-center justify-center rounded-md bg-surface-muted transition-all',
+                activeIndex === i ? 'ring-2 ring-primary-600' : 'opacity-70 hover:opacity-100'
               )}
             >
               <Gavel className="size-5 text-content-placeholder" />

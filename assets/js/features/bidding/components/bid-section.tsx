@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { Minus, Plus, Info, Heart, Share2 } from "lucide-react";
-import { useAuth } from "@/features/auth";
-import { useAshMutation } from "@/hooks/use-ash-query";
-import { makeBid, buildCSRFHeaders } from "@/ash_rpc";
-import { formatNaira } from "@/lib/format";
-import { router } from "@inertiajs/react";
-import { toast } from "sonner";
-import { ConfirmBidDialog } from "./confirm-bid-dialog";
+import { useState } from 'react';
+import { Minus, Plus, Info, Heart, Share2 } from 'lucide-react';
+import { useAuth } from '@/features/auth';
+import { useAshMutation } from '@/hooks/use-ash-query';
+import { makeBid, buildCSRFHeaders } from '@/ash_rpc';
+import { formatNaira } from '@/lib/format';
+import { router } from '@inertiajs/react';
+import { toast } from 'sonner';
+import { ConfirmBidDialog } from './confirm-bid-dialog';
 
 interface BidSectionProps {
   itemId: string;
@@ -35,9 +35,7 @@ export function BidSection({
 }: BidSectionProps) {
   const { authenticated } = useAuth();
   const increment = bidIncrement ? parseFloat(bidIncrement) : 1000;
-  const basePrice = currentPrice
-    ? parseFloat(currentPrice)
-    : parseFloat(startingPrice);
+  const basePrice = currentPrice ? parseFloat(currentPrice) : parseFloat(startingPrice);
   const [bidAmount, setBidAmount] = useState(basePrice + increment);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -46,29 +44,27 @@ export function BidSection({
       makeBid({
         input: {
           amount: amount.toString(),
-          bidType: "manual",
+          bidType: 'manual',
           itemId,
         },
-        fields: ["id", "amount"],
+        fields: ['id', 'amount'],
         headers: buildCSRFHeaders(),
       }),
     {
       onSuccess: () => {
         setConfirmOpen(false);
-        toast.success("Bid placed successfully!");
+        toast.success('Bid placed successfully!');
         router.reload();
       },
-      onError: (error) => {
-        toast.error(error.message || "Failed to place bid");
+      onError: error => {
+        toast.error(error.message || 'Failed to place bid');
       },
     }
   );
 
   const handlePlaceBid = () => {
     if (!authenticated) {
-      router.visit(
-        `/auth/login?return_to=${encodeURIComponent(window.location.pathname)}`
-      );
+      router.visit(`/auth/login?return_to=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
     setConfirmOpen(true);
@@ -98,7 +94,7 @@ export function BidSection({
       {/* Bid count */}
       {bidCount > 0 && (
         <p className="text-xs text-content-tertiary">
-          {bidCount} bid{bidCount !== 1 ? "s" : ""} so far
+          {bidCount} bid{bidCount !== 1 ? 's' : ''} so far
         </p>
       )}
 
@@ -132,7 +128,7 @@ export function BidSection({
 
       {/* Quick-add chips */}
       <div className="flex gap-2">
-        {QUICK_ADD_AMOUNTS.map((amount) => (
+        {QUICK_ADD_AMOUNTS.map(amount => (
           <button
             key={amount}
             onClick={() => handleQuickAdd(amount)}
@@ -149,7 +145,7 @@ export function BidSection({
         disabled={isPending}
         className="w-full rounded-full bg-primary-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-600/90 disabled:opacity-60"
       >
-        {isPending ? "Placing Bid..." : "Place Bid"}
+        {isPending ? 'Placing Bid...' : 'Place Bid'}
       </button>
 
       {/* Desktop: Watch & Share buttons */}
@@ -159,12 +155,12 @@ export function BidSection({
           disabled={isWatchPending}
           className={`flex flex-1 items-center justify-center gap-2 rounded-full border py-2 text-sm font-medium transition-colors ${
             isWatchlisted
-              ? "border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
-              : "border-strong text-content hover:bg-surface-inset"
+              ? 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100 dark:border-red-800 dark:bg-red-950 dark:text-red-400 dark:hover:bg-red-900'
+              : 'border-strong text-content hover:bg-surface-inset'
           }`}
         >
-          <Heart className={`size-4 ${isWatchlisted ? "fill-red-500 text-red-500" : ""}`} />
-          {isWatchlisted ? "Watching" : "Watch"}
+          <Heart className={`size-4 ${isWatchlisted ? 'fill-red-500 text-red-500' : ''}`} />
+          {isWatchlisted ? 'Watching' : 'Watch'}
         </button>
         <button className="flex flex-1 items-center justify-center gap-2 rounded-full border border-strong py-2 text-sm font-medium text-content transition-colors hover:bg-surface-inset">
           <Share2 className="size-4" />

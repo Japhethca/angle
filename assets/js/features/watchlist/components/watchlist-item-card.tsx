@@ -1,10 +1,10 @@
-import { Link, router } from "@inertiajs/react";
-import { Star, Gavel, Heart } from "lucide-react";
-import type { WatchlistItemCard as WatchlistItemCardType } from "@/ash_rpc";
-import { CountdownTimer } from "@/shared/components/countdown-timer";
-import { ConditionBadge } from "@/features/items";
-import { useWatchlistToggle } from "@/features/watchlist";
-import { formatNaira } from "@/lib/format";
+import { Link, router } from '@inertiajs/react';
+import { Star, Gavel, Heart } from 'lucide-react';
+import type { WatchlistItemCard as WatchlistItemCardType } from '@/ash_rpc';
+import { CountdownTimer } from '@/shared/components/countdown-timer';
+import { ConditionBadge } from '@/features/items';
+import { useWatchlistToggle } from '@/features/watchlist';
+import { formatNaira } from '@/lib/format';
 
 export type WatchlistItem = WatchlistItemCardType[number];
 
@@ -25,7 +25,7 @@ export function WatchlistItemCard({ item, watchlistEntryId }: WatchlistItemCardP
   const { isWatchlisted, isPending, toggle } = useWatchlistToggle({
     itemId: item.id,
     watchlistEntryId: watchlistEntryId ?? null,
-    onRemove: () => router.reload({ only: ["items", "watchlisted_map"] }),
+    onRemove: () => router.reload({ only: ['items', 'watchlisted_map'] }),
   });
 
   return (
@@ -40,14 +40,14 @@ export function WatchlistItemCard({ item, watchlistEntryId }: WatchlistItemCardP
         <button
           className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full border border-white/20 bg-black/20 backdrop-blur-sm transition-colors hover:bg-black/30"
           disabled={isPending}
-          onClick={(e) => {
+          onClick={e => {
             e.preventDefault();
             e.stopPropagation();
             toggle();
           }}
         >
           <Heart
-            className={`size-4 ${isWatchlisted ? "fill-red-500 text-red-500" : "text-white"}`}
+            className={`size-4 ${isWatchlisted ? 'fill-red-500 text-red-500' : 'text-white'}`}
           />
         </button>
       </Link>
@@ -57,36 +57,25 @@ export function WatchlistItemCard({ item, watchlistEntryId }: WatchlistItemCardP
         <div className="space-y-2">
           {/* Title */}
           <Link href={itemUrl}>
-            <h3 className="line-clamp-1 text-lg text-content lg:text-xl">
-              {item.title}
-            </h3>
+            <h3 className="line-clamp-1 text-lg text-content lg:text-xl">{item.title}</h3>
           </Link>
 
           {/* Price */}
-          <p className="text-lg font-bold text-content lg:text-xl">
-            {formatNaira(price)}
-          </p>
+          <p className="text-lg font-bold text-content lg:text-xl">{formatNaira(price)}</p>
 
           {/* Time left */}
-          {item.endTime && (
-            endingSoon ? (
+          {item.endTime &&
+            (endingSoon ? (
               <div className="inline-flex items-center gap-1.5 rounded-full bg-feedback-error-muted px-3 py-1 text-xs font-medium text-feedback-error">
                 <span>Time left: </span>
-                <CountdownTimer
-                  endTime={item.endTime}
-                  className="text-feedback-error"
-                />
+                <CountdownTimer endTime={item.endTime} className="text-feedback-error" />
               </div>
             ) : (
               <div className="flex items-center gap-1.5 text-sm text-content-tertiary">
                 <span>Time left:</span>
-                <CountdownTimer
-                  endTime={item.endTime}
-                  className="text-sm text-content"
-                />
+                <CountdownTimer endTime={item.endTime} className="text-sm text-content" />
               </div>
-            )
-          )}
+            ))}
 
           {/* Condition */}
           <div className="flex items-center gap-2">
@@ -98,15 +87,11 @@ export function WatchlistItemCard({ item, watchlistEntryId }: WatchlistItemCardP
           <div className="flex items-center gap-1 text-sm text-content-tertiary">
             {item.bidCount > 0 && (
               <span>
-                {item.bidCount} {item.bidCount === 1 ? "bid" : "bids"}
+                {item.bidCount} {item.bidCount === 1 ? 'bid' : 'bids'}
               </span>
             )}
-            {item.bidCount > 0 && item.watcherCount > 0 && (
-              <span>&middot;</span>
-            )}
-            {item.watcherCount > 0 && (
-              <span>{item.watcherCount} watching</span>
-            )}
+            {item.bidCount > 0 && item.watcherCount > 0 && <span>&middot;</span>}
+            {item.watcherCount > 0 && <span>{item.watcherCount} watching</span>}
           </div>
 
           {/* Vendor */}

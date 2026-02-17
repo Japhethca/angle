@@ -53,9 +53,9 @@ export function SellerCard({ seller }: SellerCardProps) {
         {/* Visit seller store */}
         <Link
           href={storeUrl}
-          className="flex size-8 items-center justify-center rounded-full transition-opacity bg-surface-emphasis hover:opacity-80"
+          className="flex size-8 items-center justify-center rounded-full bg-content transition-opacity hover:opacity-80"
         >
-          <ArrowRight className="size-4 text-content-tertiary" />
+          <ArrowRight className="size-4 text-surface" />
         </Link>
       </div>
     </div>

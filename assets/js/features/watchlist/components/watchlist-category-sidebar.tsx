@@ -1,7 +1,7 @@
-import { Link, router } from "@inertiajs/react";
-import { Gavel, Package, Headset } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Link, router } from '@inertiajs/react';
+import { Gavel, Package, Headset } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface Category {
   id: string;
@@ -33,7 +33,7 @@ export function WatchlistCategorySidebar({
     if (categoryId) {
       router.visit(`/watchlist?category=${categoryId}`);
     } else {
-      router.visit("/watchlist");
+      router.visit('/watchlist');
     }
   }
 
@@ -44,10 +44,10 @@ export function WatchlistCategorySidebar({
         type="button"
         onClick={() => handleCategoryClick(null)}
         className={cn(
-          "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+          'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
           isAllActive
-            ? "bg-primary-600/10 text-primary-600"
-            : "text-content-tertiary hover:text-content"
+            ? 'bg-primary-600/10 text-primary-600'
+            : 'text-content-tertiary hover:text-content'
         )}
       >
         <Gavel className="size-5" />
@@ -55,7 +55,7 @@ export function WatchlistCategorySidebar({
       </button>
 
       {/* Category list */}
-      {categories.map((category) => {
+      {categories.map(category => {
         const isActive = activeCategory === category.id;
         const Icon = getCategoryIcon(category.name);
 
@@ -65,10 +65,10 @@ export function WatchlistCategorySidebar({
             type="button"
             onClick={() => handleCategoryClick(category.id)}
             className={cn(
-              "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+              'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
               isActive
-                ? "bg-primary-600/10 text-primary-600"
-                : "text-content-tertiary hover:text-content"
+                ? 'bg-primary-600/10 text-primary-600'
+                : 'text-content-tertiary hover:text-content'
             )}
           >
             <Icon className="size-5" />

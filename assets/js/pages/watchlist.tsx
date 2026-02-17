@@ -1,11 +1,7 @@
-import { Head, router } from "@inertiajs/react";
-import { ChevronDown, Search, SlidersHorizontal } from "lucide-react";
-import type { WatchlistItemCard as WatchlistItemCardType } from "@/ash_rpc";
-import {
-  EmptyWatchlist,
-  WatchlistItemCard,
-  WatchlistCategorySidebar,
-} from "@/features/watchlist";
+import { Head, router } from '@inertiajs/react';
+import { ChevronDown, Search, SlidersHorizontal } from 'lucide-react';
+import type { WatchlistItemCard as WatchlistItemCardType } from '@/ash_rpc';
+import { EmptyWatchlist, WatchlistItemCard, WatchlistCategorySidebar } from '@/features/watchlist';
 
 interface Category {
   id: string;
@@ -39,22 +35,19 @@ export default function Watchlist({
     );
   }
 
-  const activeCategoryName =
-    categories.find((c) => c.id === active_category)?.name ?? "All";
+  const activeCategoryName = categories.find(c => c.id === active_category)?.name ?? 'All';
 
   const itemsContent =
     isEmpty && isFiltered ? (
       <div className="flex min-h-[40vh] flex-col items-center justify-center rounded-2xl border border-subtle bg-surface px-4 py-16">
         <Search className="mb-4 size-12 text-content-placeholder" />
-        <p className="text-base font-medium text-content">
-          No items found in this category
-        </p>
+        <p className="text-base font-medium text-content">No items found in this category</p>
         <p className="mt-1 text-sm text-content-tertiary">
           Try selecting a different category or browse all items.
         </p>
         <button
           type="button"
-          onClick={() => router.visit("/watchlist")}
+          onClick={() => router.visit('/watchlist')}
           className="mt-4 rounded-full border-[1.2px] border-content px-5 py-2 text-sm font-medium text-content transition-colors hover:bg-surface-muted"
         >
           View All
@@ -62,7 +55,7 @@ export default function Watchlist({
       </div>
     ) : (
       <div className="flex flex-col gap-10">
-        {items.map((item) => (
+        {items.map(item => (
           <WatchlistItemCard
             key={item.id}
             item={item}
@@ -79,10 +72,7 @@ export default function Watchlist({
       {/* Desktop: sidebar + content */}
       <div className="hidden lg:flex lg:gap-10 lg:px-10 lg:py-6">
         <aside className="w-[240px] shrink-0">
-          <WatchlistCategorySidebar
-            categories={categories}
-            activeCategory={active_category}
-          />
+          <WatchlistCategorySidebar categories={categories} activeCategory={active_category} />
         </aside>
 
         <div className="min-w-0 flex-1">
@@ -115,16 +105,12 @@ export default function Watchlist({
                     router.visit(`/watchlist?category=${categories[0].id}`);
                   }
                 } else {
-                  const currentIndex = categories.findIndex(
-                    (c) => c.id === active_category
-                  );
+                  const currentIndex = categories.findIndex(c => c.id === active_category);
                   const nextIndex = currentIndex + 1;
                   if (nextIndex < categories.length) {
-                    router.visit(
-                      `/watchlist?category=${categories[nextIndex].id}`
-                    );
+                    router.visit(`/watchlist?category=${categories[nextIndex].id}`);
                   } else {
-                    router.visit("/watchlist");
+                    router.visit('/watchlist');
                   }
                 }
               }}
