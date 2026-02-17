@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { Link } from "@inertiajs/react";
-import { ChevronLeft, ChevronRight, Gavel, Eye, Heart } from "lucide-react";
-import type { HomepageItemCard } from "@/ash_rpc";
-import { CountdownTimer } from "@/shared/components/countdown-timer";
-import { formatNaira } from "@/lib/format";
-import { useAuthGuard } from "@/features/auth";
-import { useWatchlistToggle } from "@/features/watchlist";
+import { useState } from 'react';
+import { Link } from '@inertiajs/react';
+import { ChevronLeft, ChevronRight, Gavel, Eye, Heart } from 'lucide-react';
+import type { HomepageItemCard } from '@/ash_rpc';
+import { CountdownTimer } from '@/shared/components/countdown-timer';
+import { formatNaira } from '@/lib/format';
+import { useAuthGuard } from '@/features/auth';
+import { useWatchlistToggle } from '@/features/watchlist';
 
 type Item = HomepageItemCard[number];
 
@@ -14,7 +14,13 @@ interface FeaturedItemCarouselProps {
   watchlistedMap?: Record<string, string>;
 }
 
-function WatchButton({ itemId, watchlistEntryId }: { itemId: string; watchlistEntryId: string | null }) {
+function WatchButton({
+  itemId,
+  watchlistEntryId,
+}: {
+  itemId: string;
+  watchlistEntryId: string | null;
+}) {
   const { guard, authenticated } = useAuthGuard();
   const { isWatchlisted, isPending, toggle } = useWatchlistToggle({ itemId, watchlistEntryId });
 
@@ -30,12 +36,12 @@ function WatchButton({ itemId, watchlistEntryId }: { itemId: string; watchlistEn
       }}
       className={`flex items-center gap-2 rounded-full border px-6 py-2.5 text-sm font-medium transition-colors ${
         isWatchlisted
-          ? "border-red-200 bg-red-50 text-red-600"
-          : "border-strong bg-surface text-content hover:bg-surface-muted"
+          ? 'border-red-200 bg-red-50 text-red-600'
+          : 'border-strong bg-surface text-content hover:bg-surface-muted'
       }`}
     >
-      <Heart className={`size-4 ${isWatchlisted ? "fill-red-500" : ""}`} />
-      {isWatchlisted ? "Watching" : "Watch"}
+      <Heart className={`size-4 ${isWatchlisted ? 'fill-red-500' : ''}`} />
+      {isWatchlisted ? 'Watching' : 'Watch'}
     </button>
   );
 }
@@ -58,10 +64,8 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
   const itemUrl = `/items/${activeItem.slug || activeItem.id}`;
   const price = activeItem.currentPrice || activeItem.startingPrice;
 
-  const goPrev = () =>
-    setCurrentIndex((i) => (i === 0 ? items.length - 1 : i - 1));
-  const goNext = () =>
-    setCurrentIndex((i) => (i === items.length - 1 ? 0 : i + 1));
+  const goPrev = () => setCurrentIndex(i => (i === 0 ? items.length - 1 : i - 1));
+  const goNext = () => setCurrentIndex(i => (i === items.length - 1 ? 0 : i + 1));
 
   return (
     <section className="bg-surface-muted">
@@ -78,13 +82,13 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
               {/* Navigation arrows */}
               <button
                 onClick={goPrev}
-                className="absolute left-4 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 shadow-md transition-colors hover:bg-white"
+                className="absolute left-4 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-surface-emphasis shadow-md transition-colors hover:bg-surface-muted"
               >
                 <ChevronLeft className="size-5 text-content" />
               </button>
               <button
                 onClick={goNext}
-                className="absolute right-4 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 shadow-md transition-colors hover:bg-white"
+                className="absolute right-4 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-surface-emphasis shadow-md transition-colors hover:bg-surface-muted"
               >
                 <ChevronRight className="size-5 text-content" />
               </button>
@@ -101,9 +105,7 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
                 <div className="flex items-center gap-3 text-sm text-content-tertiary">
                   <span>Uploaded 346</span>
                   <span>•</span>
-                  <span className="font-semibold text-content">
-                    {formatNaira(price)}
-                  </span>
+                  <span className="font-semibold text-content">{formatNaira(price)}</span>
                 </div>
                 {activeItem.endTime && (
                   <div className="flex items-center gap-2 text-sm text-content-tertiary">
@@ -124,7 +126,7 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
                 />
                 <Link
                   href={itemUrl}
-                  className="flex items-center gap-2 rounded-full bg-primary-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-600/90"
+                  className="flex items-center gap-2 rounded-full bg-primary-600 px-6 py-2.5 text-sm font-medium text-content transition-colors hover:bg-primary-600/90"
                 >
                   Bid
                   <ChevronRight className="size-4" />
@@ -145,13 +147,13 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
             <div className="absolute bottom-4 right-4 flex gap-2">
               <button
                 onClick={goPrev}
-                className="flex size-8 items-center justify-center rounded-full bg-white/80 shadow-md"
+                className="flex size-8 items-center justify-center rounded-full bg-content shadow-md"
               >
                 <ChevronLeft className="size-4 text-content" />
               </button>
               <button
                 onClick={goNext}
-                className="flex size-8 items-center justify-center rounded-full bg-white/80 shadow-md"
+                className="flex size-8 items-center justify-center rounded-full bg-content shadow-md"
               >
                 <ChevronRight className="size-4 text-content" />
               </button>
@@ -166,9 +168,7 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
               </h2>
             </Link>
             <div className="flex items-center gap-2 text-sm text-content-tertiary">
-              <span className="font-semibold text-content">
-                {formatNaira(price)}
-              </span>
+              <span className="font-semibold text-content">{formatNaira(price)}</span>
               {activeItem.endTime && (
                 <>
                   <span>•</span>
@@ -187,7 +187,7 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
               </div>
               <Link
                 href={itemUrl}
-                className="flex flex-1 items-center justify-center gap-2 rounded-full bg-primary-600 py-2.5 text-sm font-medium text-white"
+                className="flex flex-1 items-center justify-center gap-2 rounded-full bg-primary-600 py-2.5 text-sm font-medium text-content"
               >
                 Bid
                 <ChevronRight className="size-4" />
@@ -204,7 +204,7 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
                 className={`size-2 rounded-full transition-colors ${
-                  idx === currentIndex ? "bg-primary-600" : "bg-surface-emphasis"
+                  idx === currentIndex ? 'bg-primary-600' : 'bg-surface-emphasis'
                 }`}
               />
             ))}

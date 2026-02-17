@@ -14,15 +14,15 @@ export function ItemImageGallery({ title }: ItemImageGalleryProps) {
   return (
     <>
       {/* Desktop: side-by-side thumbnails + main image */}
-      <div className="hidden gap-3 lg:flex">
+      <div className="hidden gap-2.5 lg:flex">
         {/* Thumbnail strip */}
-        <div className="flex w-[72px] shrink-0 flex-col gap-2">
+        <div className="flex w-[64px] shrink-0 flex-col gap-1.5">
           {Array.from({ length: THUMBNAIL_COUNT }).map((_, i) => (
             <button
               key={i}
               onClick={() => setActiveIndex(i)}
               className={cn(
-                "relative flex aspect-square items-center justify-center rounded-lg bg-surface-muted transition-all",
+                "relative flex aspect-square items-center justify-center rounded-md bg-surface-muted transition-all",
                 activeIndex === i
                   ? "ring-2 ring-primary-600"
                   : "opacity-70 hover:opacity-100"
@@ -40,10 +40,8 @@ export function ItemImageGallery({ title }: ItemImageGalleryProps) {
         </div>
 
         {/* Main image */}
-        <div className="flex flex-1 items-center justify-center rounded-2xl bg-surface-muted">
-          <div className="flex aspect-square w-full items-center justify-center">
-            <Gavel className="size-24 text-content-placeholder" />
-          </div>
+        <div className="flex aspect-[4/3] max-h-[22rem] flex-1 items-center justify-center overflow-hidden rounded-xl bg-surface-muted">
+          <Gavel className="size-24 text-content-placeholder" />
         </div>
       </div>
 

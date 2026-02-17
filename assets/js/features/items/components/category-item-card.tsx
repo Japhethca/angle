@@ -1,10 +1,10 @@
-import { Link } from "@inertiajs/react";
-import { Heart, Clock, Gavel } from "lucide-react";
-import type { CategoryItemCard as CategoryItemCardType } from "@/ash_rpc";
-import { CountdownTimer } from "@/shared/components/countdown-timer";
-import { formatNaira } from "@/lib/format";
-import { useAuthGuard } from "@/features/auth";
-import { useWatchlistToggle } from "@/features/watchlist";
+import { Link } from '@inertiajs/react';
+import { Heart, Clock, Gavel } from 'lucide-react';
+import type { CategoryItemCard as CategoryItemCardType } from '@/ash_rpc';
+import { CountdownTimer } from '@/shared/components/countdown-timer';
+import { formatNaira } from '@/lib/format';
+import { useAuthGuard } from '@/features/auth';
+import { useWatchlistToggle } from '@/features/watchlist';
 
 export type CategoryItem = CategoryItemCardType[number];
 
@@ -33,9 +33,9 @@ export function CategoryItemCard({ item, watchlistEntryId = null }: CategoryItem
 
           {/* Watchlist heart */}
           <button
-            className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full border border-strong bg-white/80 backdrop-blur-sm transition-colors hover:bg-white"
+            className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full border border-strong bg-surface-muted backdrop-blur-sm transition-colors hover:bg-surface-emphasis"
             disabled={isPending}
-            onClick={(e) => {
+            onClick={e => {
               e.preventDefault();
               e.stopPropagation();
               if (authenticated) {
@@ -46,13 +46,13 @@ export function CategoryItemCard({ item, watchlistEntryId = null }: CategoryItem
             }}
           >
             <Heart
-              className={`size-4 ${isWatchlisted ? "fill-red-500 text-red-500" : "text-content-secondary"}`}
+              className={`size-4 ${isWatchlisted ? 'fill-red-500 text-red-500' : 'text-content-secondary'}`}
             />
           </button>
 
           {/* Almost gone badge */}
           {item.endTime && isEndingSoon(item.endTime) && (
-            <div className="absolute bottom-4 left-0 flex items-center gap-1.5 rounded-r-lg bg-feedback-error px-3 py-1.5 text-xs font-medium text-white">
+            <div className="absolute bottom-4 left-0 flex items-center gap-1.5 rounded-r-lg bg-feedback-error px-3 py-1.5 text-xs font-medium text-content">
               <Clock className="size-3" />
               Almost gone
             </div>
@@ -66,9 +66,7 @@ export function CategoryItemCard({ item, watchlistEntryId = null }: CategoryItem
           <Link href={itemUrl} className="min-w-0 flex-1">
             <h3 className="line-clamp-1 text-xl text-content-tertiary">{item.title}</h3>
           </Link>
-          <p className="shrink-0 text-xl font-bold text-content">
-            {formatNaira(price)}
-          </p>
+          <p className="shrink-0 text-xl font-bold text-content">{formatNaira(price)}</p>
         </div>
 
         <div className="flex items-center gap-2 text-xs">

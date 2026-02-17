@@ -10,7 +10,7 @@ export function SimilarItems({ items }: SimilarItemsProps) {
 
   return (
     <div>
-      <h2 className="mb-4 font-heading text-base font-medium text-content">
+      <h2 className="mb-3 font-heading text-base font-medium text-content">
         Similar Items
       </h2>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4">

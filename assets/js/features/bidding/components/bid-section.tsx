@@ -113,18 +113,18 @@ export function BidSection({
         <button
           onClick={handleDecrement}
           disabled={bidAmount - increment <= basePrice}
-          className="flex size-10 shrink-0 items-center justify-center rounded-full border border-strong transition-colors hover:bg-surface-inset disabled:opacity-40"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full border border-strong transition-colors hover:bg-surface-inset disabled:opacity-40"
         >
           <Minus className="size-4 text-content-secondary" />
         </button>
 
-        <div className="flex-1 rounded-xl bg-surface-muted px-4 py-3 text-center text-base font-semibold text-content">
+        <div className="flex-1 rounded-lg bg-surface-muted px-3 py-2.5 text-center text-base font-semibold text-content">
           {formatNaira(bidAmount)}
         </div>
 
         <button
           onClick={handleIncrement}
-          className="flex size-10 shrink-0 items-center justify-center rounded-full border border-strong transition-colors hover:bg-surface-inset"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full border border-strong transition-colors hover:bg-surface-inset"
         >
           <Plus className="size-4 text-content-secondary" />
         </button>
@@ -147,7 +147,7 @@ export function BidSection({
       <button
         onClick={handlePlaceBid}
         disabled={isPending}
-        className="w-full rounded-full bg-primary-600 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-primary-600/90 disabled:opacity-60"
+        className="w-full rounded-full bg-primary-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-600/90 disabled:opacity-60"
       >
         {isPending ? "Placing Bid..." : "Place Bid"}
       </button>
@@ -157,7 +157,7 @@ export function BidSection({
         <button
           onClick={onToggleWatch}
           disabled={isWatchPending}
-          className={`flex flex-1 items-center justify-center gap-2 rounded-full border py-2.5 text-sm font-medium transition-colors ${
+          className={`flex flex-1 items-center justify-center gap-2 rounded-full border py-2 text-sm font-medium transition-colors ${
             isWatchlisted
               ? "border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
               : "border-strong text-content hover:bg-surface-inset"
@@ -166,7 +166,7 @@ export function BidSection({
           <Heart className={`size-4 ${isWatchlisted ? "fill-red-500 text-red-500" : ""}`} />
           {isWatchlisted ? "Watching" : "Watch"}
         </button>
-        <button className="flex flex-1 items-center justify-center gap-2 rounded-full border border-strong py-2.5 text-sm font-medium text-content transition-colors hover:bg-surface-inset">
+        <button className="flex flex-1 items-center justify-center gap-2 rounded-full border border-strong py-2 text-sm font-medium text-content transition-colors hover:bg-surface-inset">
           <Share2 className="size-4" />
           Share
         </button>

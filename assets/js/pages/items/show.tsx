@@ -78,7 +78,7 @@ export default function Show({
       </div>
 
       {/* Desktop breadcrumb */}
-      <div className="hidden px-10 pt-6 lg:block">
+      <div className="hidden px-8 pt-5 lg:block">
         <nav className="flex items-center gap-1.5 text-xs text-content-tertiary">
           <Link href="/" className="hover:text-content">
             Home
@@ -97,11 +97,11 @@ export default function Show({
       </div>
 
       {/* Main content */}
-      <div className="px-4 py-4 lg:px-10 lg:py-6">
+      <div className="px-4 py-4 lg:px-8 lg:py-5">
         {/* Desktop: two-column layout */}
-        <div className="hidden gap-10 lg:flex">
+        <div className="hidden gap-8 lg:flex">
           {/* Left column */}
-          <div className="min-w-0 flex-1 space-y-8">
+          <div className="min-w-0 flex-1 space-y-6">
             <ItemImageGallery title={item.title} />
             <SellerCard seller={item.user} />
             <ItemDetailTabs description={item.description} />
@@ -109,8 +109,8 @@ export default function Show({
           </div>
 
           {/* Right column - sticky */}
-          <div className="w-[440px] shrink-0">
-            <div className="sticky top-24 space-y-5">
+          <div className="w-[400px] shrink-0">
+            <div className="sticky top-24 space-y-4">
               {/* Item header info */}
               <div className="space-y-3">
                 <ConditionBadge condition={item.condition} />
