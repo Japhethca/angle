@@ -8,6 +8,8 @@ defmodule AngleWeb.Plugs.Auth do
   import Inertia.Controller
   alias Angle.Accounts
 
+  require Ash.Query
+
   # Import verified routes for ~p sigil
   use Phoenix.VerifiedRoutes,
     endpoint: AngleWeb.Endpoint,
@@ -82,6 +84,7 @@ defmodule AngleWeb.Plugs.Auth do
           # Load user with roles and permissions
           user = user |> Ash.load!([:active_roles, :roles], domain: Accounts, authorize?: false)
           user_permissions = get_user_permissions(user)
+          avatar_url = get_avatar_url(user)
 
           conn
           |> Ash.PlugHelpers.set_actor(user)
@@ -92,7 +95,8 @@ defmodule AngleWeb.Plugs.Auth do
               email: user.email,
               confirmed_at: user.confirmed_at,
               roles: user.active_roles || [],
-              permissions: user_permissions
+              permissions: user_permissions,
+              avatar_url: avatar_url
             },
             authenticated: true
           })
@@ -133,6 +137,7 @@ defmodule AngleWeb.Plugs.Auth do
 
             # Get user's permissions through their roles
             user_permissions = get_user_permissions(user)
+            avatar_url = get_avatar_url(user)
 
             conn
             |> Ash.PlugHelpers.set_actor(user)
@@ -143,7 +148,8 @@ defmodule AngleWeb.Plugs.Auth do
                 email: user.email,
                 confirmed_at: user.confirmed_at,
                 roles: user.active_roles || [],
-                permissions: user_permissions
+                permissions: user_permissions,
+                avatar_url: avatar_url
               },
               authenticated: true
             })
@@ -179,6 +185,24 @@ defmodule AngleWeb.Plugs.Auth do
   # Private helper
   defp get_current_user_id(conn) do
     get_session(conn, :current_user_id)
+  end
+
+  # Get the user's avatar thumbnail URL, if one exists
+  defp get_avatar_url(user) do
+    case Angle.Media.Image
+         |> Ash.Query.for_read(:by_owner, %{owner_type: :user_avatar, owner_id: user.id},
+           authorize?: false
+         )
+         |> Ash.read!() do
+      [image | _] ->
+        case image.variants do
+          %{"thumbnail" => url} -> url
+          _ -> nil
+        end
+
+      _ ->
+        nil
+    end
   end
 
   # Get all permissions for a user through their roles

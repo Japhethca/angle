@@ -53,12 +53,13 @@ defmodule AngleWeb.StoreDashboardController do
 
   def profile(conn, _params) do
     user = conn.assigns.current_user
-    store_profile = load_store_profile(user)
+    {store_profile, logo_url} = load_store_profile_with_logo(user)
     category_summary = build_category_summary(user.id)
     reviews = load_seller_reviews(conn, user.id)
 
     conn
     |> assign_prop(:store_profile, store_profile)
+    |> assign_prop(:logo_url, logo_url)
     |> assign_prop(:category_summary, category_summary)
     |> assign_prop(:user, serialize_user(user))
     |> assign_prop(:reviews, reviews)
@@ -124,13 +125,36 @@ defmodule AngleWeb.StoreDashboardController do
     end
   end
 
-  defp load_store_profile(user) do
+  defp load_store_profile_with_logo(user) do
     case Angle.Accounts.StoreProfile
          |> Ash.Query.filter(user_id == ^user.id)
          |> Ash.read_one(authorize?: false) do
-      {:ok, nil} -> nil
-      {:ok, profile} -> serialize_store_profile(profile)
-      _ -> nil
+      {:ok, nil} ->
+        {nil, nil}
+
+      {:ok, profile} ->
+        logo_url = load_logo_url_for_profile(profile.id)
+        {serialize_store_profile(profile), logo_url}
+
+      _ ->
+        {nil, nil}
+    end
+  end
+
+  defp load_logo_url_for_profile(profile_id) do
+    case Angle.Media.Image
+         |> Ash.Query.for_read(:by_owner, %{owner_type: :store_logo, owner_id: profile_id},
+           authorize?: false
+         )
+         |> Ash.read!() do
+      [image | _] ->
+        case image.variants do
+          %{"thumbnail" => url} -> url
+          _ -> nil
+        end
+
+      _ ->
+        nil
     end
   end
 

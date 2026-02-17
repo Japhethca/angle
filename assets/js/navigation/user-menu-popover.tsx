@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { User } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { useAuth } from "@/features/auth";
 import { UserMenuContent } from "./user-menu-content";
 
 const CLOSE_DELAY = 150;
 
 export function UserMenuPopover() {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const closeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -35,7 +37,15 @@ export function UserMenuPopover() {
             aria-label="User menu"
             className="flex size-10 items-center justify-center rounded-lg text-content-secondary transition-colors hover:bg-surface-muted"
           >
-            <User className="size-5" />
+            {user?.avatar_url ? (
+              <img
+                src={user.avatar_url}
+                alt=""
+                className="size-9 rounded-full object-cover"
+              />
+            ) : (
+              <User className="size-5" />
+            )}
           </button>
         </PopoverTrigger>
       </div>
