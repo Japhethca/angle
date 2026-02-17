@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import type { ImageData } from "@/lib/image-url";
 import { StoreLogoSection } from "./store-logo-section";
 import { StoreVerificationSection } from "./store-verification-section";
 
@@ -56,9 +57,10 @@ interface StoreFormProps {
     address: string | null;
     delivery_preference: string | null;
   } | null;
+  logoImages: ImageData[];
 }
 
-export function StoreForm({ userId, storeProfile }: StoreFormProps) {
+export function StoreForm({ userId, storeProfile, logoImages }: StoreFormProps) {
   const {
     register,
     handleSubmit,
@@ -109,7 +111,7 @@ export function StoreForm({ userId, storeProfile }: StoreFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Store Logo */}
-      <StoreLogoSection />
+      <StoreLogoSection storeProfileId={storeProfile?.id ?? null} logoImages={logoImages} />
 
       {/* Form Fields */}
       <div className="space-y-5">
