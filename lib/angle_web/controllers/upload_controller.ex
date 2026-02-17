@@ -93,40 +93,25 @@ defmodule AngleWeb.UploadController do
     user = conn.assigns.current_user
 
     with {:ok, item_uuid} <- parse_uuid(item_id),
-         :ok <- verify_ownership(user, :item, item_uuid) do
-      # Load all images to reorder
-      loaded_images =
-        Enum.map(image_ids, fn id ->
-          {:ok, image} = get_image(id)
-          image
-        end)
+         :ok <- verify_ownership(user, :item, item_uuid),
+         {:ok, loaded_images} <- load_images_by_ids(image_ids) do
+      case reorder_images_in_transaction(loaded_images, user) do
+        {:ok, images} ->
+          conn
+          |> put_status(200)
+          |> json(%{images: Enum.map(images, &serialize_image/1)})
 
-      # First pass: set all positions to negative temporaries to avoid unique constraint conflicts
-      Enum.with_index(loaded_images, fn image, idx ->
-        image
-        |> Ash.Changeset.for_update(:reorder, %{position: -(idx + 1)}, actor: user)
-        |> Ash.update!()
-      end)
-
-      # Second pass: set to actual desired positions
-      images =
-        loaded_images
-        |> Enum.with_index()
-        |> Enum.map(fn {image, position} ->
-          # Re-fetch to get updated record
-          {:ok, fresh_image} = get_image(image.id)
-
-          fresh_image
-          |> Ash.Changeset.for_update(:reorder, %{position: position}, actor: user)
-          |> Ash.update!()
-        end)
-
-      conn
-      |> put_status(200)
-      |> json(%{images: Enum.map(images, &serialize_image/1)})
+        {:error, reason} ->
+          conn
+          |> put_status(422)
+          |> json(%{error: format_error(reason)})
+      end
     else
       {:error, :invalid_uuid} ->
         conn |> put_status(422) |> json(%{error: "Invalid item ID"})
+
+      {:error, :not_found} ->
+        conn |> put_status(404) |> json(%{error: "Image not found"})
 
       {:error, :forbidden} ->
         conn |> put_status(403) |> json(%{error: "Not authorized"})
@@ -187,13 +172,11 @@ defmodule AngleWeb.UploadController do
   defp check_image_limit(owner_type, _owner_id) when owner_type in @single_image_types, do: :ok
 
   defp check_image_limit(:item, owner_id) do
-    count =
+    query =
       Media.Image
-      |> Ash.Query.for_read(:by_owner, %{owner_type: :item, owner_id: owner_id},
-        authorize?: false
-      )
-      |> Ash.read!()
-      |> length()
+      |> Ash.Query.filter(owner_type == :item and owner_id == ^owner_id)
+
+    count = Ash.count!(query, authorize?: false)
 
     if count < @max_item_images, do: :ok, else: {:error, :image_limit_reached}
   end
@@ -277,6 +260,37 @@ defmodule AngleWeb.UploadController do
   defp storage_prefix(:item, owner_id), do: "items/#{owner_id}"
   defp storage_prefix(:user_avatar, owner_id), do: "avatars/#{owner_id}"
   defp storage_prefix(:store_logo, owner_id), do: "logos/#{owner_id}"
+
+  defp load_images_by_ids(image_ids) do
+    Enum.reduce_while(image_ids, {:ok, []}, fn id, {:ok, acc} ->
+      case get_image(id) do
+        {:ok, image} -> {:cont, {:ok, acc ++ [image]}}
+        {:error, :not_found} -> {:halt, {:error, :not_found}}
+      end
+    end)
+  end
+
+  defp reorder_images_in_transaction(loaded_images, user) do
+    Angle.Repo.transaction(fn ->
+      # First pass: set all positions to negative temporaries to avoid unique constraint conflicts
+      Enum.with_index(loaded_images, fn image, idx ->
+        image
+        |> Ash.Changeset.for_update(:reorder, %{position: -(idx + 1)}, actor: user)
+        |> Ash.update!()
+      end)
+
+      # Second pass: set to actual desired positions
+      loaded_images
+      |> Enum.with_index()
+      |> Enum.map(fn {image, position} ->
+        {:ok, fresh_image} = get_image(image.id)
+
+        fresh_image
+        |> Ash.Changeset.for_update(:reorder, %{position: position}, actor: user)
+        |> Ash.update!()
+      end)
+    end)
+  end
 
   defp get_image(id) do
     case Ash.get(Media.Image, id, authorize?: false) do

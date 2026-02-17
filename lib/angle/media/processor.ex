@@ -12,7 +12,14 @@ defmodule Angle.Media.Processor do
     {:full, 1200, 90}
   ]
 
-  def validate_file(_path, mime_type) when mime_type in @accepted_types, do: :ok
+  def validate_file(path, mime_type) when mime_type in @accepted_types do
+    # Don't trust client-supplied Content-Type alone; verify actual file bytes
+    case Image.open(path) do
+      {:ok, _image} -> :ok
+      {:error, _} -> {:error, :invalid_type}
+    end
+  end
+
   def validate_file(_path, _mime_type), do: {:error, :invalid_type}
 
   def validate_file_size(size) when size <= @max_file_size, do: :ok

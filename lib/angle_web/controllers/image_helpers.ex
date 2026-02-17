@@ -43,7 +43,10 @@ defmodule AngleWeb.ImageHelpers do
 
   def load_item_images(_), do: []
 
-  defp serialize_image(img) do
+  @doc """
+  Serializes an image record to a map suitable for JSON/Inertia props.
+  """
+  def serialize_image(img) do
     %{
       "id" => img.id,
       "variants" => img.variants,

@@ -3,6 +3,8 @@ defmodule AngleWeb.SettingsController do
 
   require Ash.Query
 
+  alias AngleWeb.ImageHelpers
+
   def index(conn, _params) do
     conn
     |> assign_prop(:user, user_profile_data(conn))
@@ -18,15 +20,7 @@ defmodule AngleWeb.SettingsController do
         authorize?: false
       )
       |> Ash.read!()
-      |> Enum.map(fn img ->
-        %{
-          "id" => img.id,
-          "variants" => img.variants,
-          "position" => img.position,
-          "width" => img.width,
-          "height" => img.height
-        }
-      end)
+      |> Enum.map(&ImageHelpers.serialize_image/1)
 
     conn
     |> assign_prop(:user, user_profile_data(conn))
@@ -101,15 +95,7 @@ defmodule AngleWeb.SettingsController do
             authorize?: false
           )
           |> Ash.read!()
-          |> Enum.map(fn img ->
-            %{
-              "id" => img.id,
-              "variants" => img.variants,
-              "position" => img.position,
-              "width" => img.width,
-              "height" => img.height
-            }
-          end)
+          |> Enum.map(&ImageHelpers.serialize_image/1)
       end
 
     conn

@@ -3,16 +3,11 @@ defmodule Angle.Media.Image do
     otp_app: :angle,
     domain: Angle.Media,
     data_layer: AshPostgres.DataLayer,
-    authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshTypescript.Resource]
+    authorizers: [Ash.Policy.Authorizer]
 
   postgres do
     table "images"
     repo Angle.Repo
-  end
-
-  typescript do
-    type_name "Image"
   end
 
   actions do

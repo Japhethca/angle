@@ -4,6 +4,7 @@ defmodule Angle.Media.ProcessorTest do
   alias Angle.Media.Processor
 
   @fixture_path "test/support/fixtures"
+  @test_image Path.join(@fixture_path, "test_image.jpg")
 
   setup_all do
     File.mkdir_p!(@fixture_path)
@@ -51,19 +52,29 @@ defmodule Angle.Media.ProcessorTest do
 
   describe "validate_file/2" do
     test "accepts jpeg" do
-      assert :ok = Processor.validate_file("test.jpg", "image/jpeg")
+      assert :ok = Processor.validate_file(@test_image, "image/jpeg")
     end
 
     test "accepts png" do
-      assert :ok = Processor.validate_file("test.png", "image/png")
+      assert :ok = Processor.validate_file(@test_image, "image/png")
     end
 
     test "accepts webp" do
-      assert :ok = Processor.validate_file("test.webp", "image/webp")
+      assert :ok = Processor.validate_file(@test_image, "image/webp")
     end
 
     test "rejects unsupported types" do
-      assert {:error, :invalid_type} = Processor.validate_file("test.gif", "image/gif")
+      assert {:error, :invalid_type} = Processor.validate_file(@test_image, "image/gif")
+    end
+
+    test "rejects non-image files" do
+      # Create a temporary text file that claims to be an image
+      tmp_path = Path.join(System.tmp_dir!(), "fake_image.jpg")
+      File.write!(tmp_path, "not an image")
+
+      assert {:error, :invalid_type} = Processor.validate_file(tmp_path, "image/jpeg")
+
+      File.rm(tmp_path)
     end
   end
 
