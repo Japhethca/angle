@@ -123,6 +123,7 @@ export function ListingWizard({ categories, storeProfile }: ListingWizardProps) 
       )}
       {state.currentStep === 2 && (
         <AuctionInfoStep
+          draftItemId={state.draftItemId!}
           defaultValues={state.auctionInfo}
           onNext={handleAuctionInfoNext}
           onBack={handleBack}

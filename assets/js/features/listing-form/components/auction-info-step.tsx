@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Info } from "lucide-react";
+import { toast } from "sonner";
+import { updateDraftItem, buildCSRFHeaders } from "@/ash_rpc";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -20,12 +23,14 @@ import {
 import { auctionInfoSchema, type AuctionInfoData } from "../schemas/listing-form-schema";
 
 interface AuctionInfoStepProps {
+  draftItemId: string;
   defaultValues: AuctionInfoData;
   onNext: (data: AuctionInfoData) => void;
   onBack: () => void;
 }
 
-export function AuctionInfoStep({ defaultValues, onNext, onBack }: AuctionInfoStepProps) {
+export function AuctionInfoStep({ draftItemId, defaultValues, onNext, onBack }: AuctionInfoStepProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
     handleSubmit,
@@ -36,8 +41,34 @@ export function AuctionInfoStep({ defaultValues, onNext, onBack }: AuctionInfoSt
     defaultValues,
   });
 
+  const onSubmit = async (data: AuctionInfoData) => {
+    setIsSubmitting(true);
+    try {
+      const result = await updateDraftItem({
+        identity: draftItemId,
+        input: {
+          id: draftItemId,
+          startingPrice: data.startingPrice,
+          reservePrice: data.reservePrice || undefined,
+          attributes: { _auctionDuration: data.auctionDuration },
+        },
+        headers: buildCSRFHeaders(),
+      });
+
+      if (!result.success) {
+        throw new Error(result.errors.map((e: any) => e.message).join("; "));
+      }
+
+      onNext(data);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to save auction info");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(onNext)} className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Starting Price + Reserve Price side-by-side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Starting Price */}
@@ -121,9 +152,10 @@ export function AuctionInfoStep({ defaultValues, onNext, onBack }: AuctionInfoSt
       {/* Buttons */}
       <Button
         type="submit"
+        disabled={isSubmitting}
         className="w-auto px-10 rounded-full bg-primary-600 text-white hover:bg-primary-600/90"
       >
-        Next
+        {isSubmitting ? "Saving..." : "Next"}
       </Button>
     </form>
   );
