@@ -99,10 +99,12 @@ defmodule Angle.Inventory.Item do
 
     update :update_draft do
       description "Update an existing item in draft status"
+      require_atomic? false
 
       accept @draft_fields
 
       argument :id, :uuid, allow_nil?: false
+      change {Angle.Inventory.Item.MergeAttributes, []}
     end
 
     update :publish_item do
