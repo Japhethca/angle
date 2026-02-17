@@ -298,7 +298,9 @@ defmodule AngleWeb.UploadController do
   defp reorder_images_in_transaction(loaded_images, user) do
     Angle.Repo.transaction(fn ->
       # First pass: set all positions to negative temporaries to avoid unique constraint conflicts
-      Enum.with_index(loaded_images, fn image, idx ->
+      loaded_images
+      |> Enum.with_index()
+      |> Enum.each(fn {image, idx} ->
         image
         |> Ash.Changeset.for_update(:reorder, %{position: -(idx + 1)}, actor: user)
         |> Ash.update!()

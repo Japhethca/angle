@@ -98,7 +98,7 @@ config :ex_aws,
 
 config :ex_aws, :s3,
   scheme: "https://",
-  host: System.get_env("R2_ENDPOINT", "localhost"),
+  host: System.get_env("R2_ENDPOINT", "localhost") |> String.replace(~r{^https?://}, ""),
   region: "auto"
 
 config :angle, Angle.Media,
