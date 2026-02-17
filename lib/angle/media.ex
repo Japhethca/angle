@@ -3,6 +3,10 @@ defmodule Angle.Media do
     otp_app: :angle,
     extensions: [AshTypescript.Rpc]
 
+  typescript_rpc do
+    resource Angle.Media.Image
+  end
+
   resources do
     resource Angle.Media.Image
   end

@@ -296,6 +296,40 @@ export type StoreProfileAttributesOnlySchema = {
 };
 
 
+// Image Schema
+export type ImageResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "ownerType" | "ownerId" | "storageKey" | "variants" | "position" | "fileSize" | "mimeType" | "width" | "height";
+  id: UUID;
+  ownerType: "item" | "user_avatar" | "store_logo";
+  ownerId: UUID;
+  storageKey: string;
+  variants: Record<string, any>;
+  position: number;
+  fileSize: number;
+  mimeType: string;
+  width: number;
+  height: number;
+};
+
+
+
+export type ImageAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "ownerType" | "ownerId" | "storageKey" | "variants" | "position" | "fileSize" | "mimeType" | "width" | "height";
+  id: UUID;
+  ownerType: "item" | "user_avatar" | "store_logo";
+  ownerId: UUID;
+  storageKey: string;
+  variants: Record<string, any>;
+  position: number;
+  fileSize: number;
+  mimeType: string;
+  width: number;
+  height: number;
+};
+
+
 // AngleAccountsNotificationPreferences Schema
 export type AngleAccountsNotificationPreferencesResourceSchema = {
   __type: "Resource";
@@ -998,6 +1032,90 @@ export type StoreProfileFilterInput = {
   user?: UserFilterInput;
 
 };
+export type ImageFilterInput = {
+  and?: Array<ImageFilterInput>;
+  or?: Array<ImageFilterInput>;
+  not?: Array<ImageFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  ownerType?: {
+    eq?: "item" | "user_avatar" | "store_logo";
+    notEq?: "item" | "user_avatar" | "store_logo";
+    in?: Array<"item" | "user_avatar" | "store_logo">;
+  };
+
+  ownerId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  storageKey?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  variants?: {
+    eq?: Record<string, any>;
+    notEq?: Record<string, any>;
+    in?: Array<Record<string, any>>;
+  };
+
+  position?: {
+    eq?: number;
+    notEq?: number;
+    greaterThan?: number;
+    greaterThanOrEqual?: number;
+    lessThan?: number;
+    lessThanOrEqual?: number;
+    in?: Array<number>;
+  };
+
+  fileSize?: {
+    eq?: number;
+    notEq?: number;
+    greaterThan?: number;
+    greaterThanOrEqual?: number;
+    lessThan?: number;
+    lessThanOrEqual?: number;
+    in?: Array<number>;
+  };
+
+  mimeType?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  width?: {
+    eq?: number;
+    notEq?: number;
+    greaterThan?: number;
+    greaterThanOrEqual?: number;
+    lessThan?: number;
+    lessThanOrEqual?: number;
+    in?: Array<number>;
+  };
+
+  height?: {
+    eq?: number;
+    notEq?: number;
+    greaterThan?: number;
+    greaterThanOrEqual?: number;
+    lessThan?: number;
+    lessThanOrEqual?: number;
+    in?: Array<number>;
+  };
+
+
+
+};
 export type AngleAccountsNotificationPreferencesFilterInput = {
   and?: Array<AngleAccountsNotificationPreferencesFilterInput>;
   or?: Array<AngleAccountsNotificationPreferencesFilterInput>;
@@ -1677,55 +1795,6 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
-// User Typed Queries
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
-
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
-
-
-
-// Bid Typed Queries
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export type ActiveBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }]>>;
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export const activeBidCardFields = ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }] satisfies ListBidsFields;
-
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }]>>;
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
-
-
-
 // Category Typed Queries
 /**
  * Typed query for Category
@@ -1911,6 +1980,55 @@ export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "r
  * @typedQuery true
  */
 export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
+
+
+
+// Bid Typed Queries
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export type ActiveBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }]>>;
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export const activeBidCardFields = ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }] satisfies ListBidsFields;
+
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }]>>;
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
+
+
+
+// User Typed Queries
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
+
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
 
 
 
