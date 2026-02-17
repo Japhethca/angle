@@ -1,14 +1,17 @@
 import { Head } from "@inertiajs/react";
+import { ListingWizard, type Category } from "@/features/listing-form/components/listing-wizard";
 
-export default function NewItem() {
+interface NewItemPageProps {
+  categories: Category[];
+  storeProfile: { deliveryPreference: string | null } | null;
+}
+
+export default function NewItem({ categories, storeProfile }: NewItemPageProps) {
   return (
     <>
-      <Head title="Sell Item" />
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-content">Sell Item</h1>
-          <p className="mt-2 text-sm text-content-tertiary">Coming soon</p>
-        </div>
+      <Head title="List An Item" />
+      <div className="mx-auto max-w-2xl px-4 py-6 lg:max-w-3xl">
+        <ListingWizard categories={categories} storeProfile={storeProfile} />
       </div>
     </>
   );
