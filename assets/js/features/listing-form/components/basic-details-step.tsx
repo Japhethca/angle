@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronDown, Upload } from "lucide-react";
@@ -53,6 +53,12 @@ export function BasicDetailsStep({
   const [customFeatures, setCustomFeatures] = useState<string[]>(defaultValues.customFeatures);
   const [selectedImages, setSelectedImages] = useState<File[]>(defaultImages);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Memoize object URLs and revoke on cleanup to prevent memory leaks
+  const imageUrls = useMemo(() => selectedImages.map((f) => URL.createObjectURL(f)), [selectedImages]);
+  useEffect(() => {
+    return () => imageUrls.forEach((url) => URL.revokeObjectURL(url));
+  }, [imageUrls]);
 
   const {
     register,
@@ -276,7 +282,7 @@ export function BasicDetailsStep({
             {selectedImages.map((file, idx) => (
               <div key={idx} className="group relative aspect-square overflow-hidden rounded-md bg-surface-muted">
                 <img
-                  src={URL.createObjectURL(file)}
+                  src={imageUrls[idx]}
                   alt=""
                   className="size-full object-cover"
                 />
@@ -340,14 +346,16 @@ async function uploadImages(itemId: string, files: File[]) {
       body: formData,
     });
 
-    if (res.ok) {
-      const data = await res.json();
-      uploaded.push({
-        id: data.image.id,
-        position: data.image.position,
-        variants: data.image.variants,
-      });
+    if (!res.ok) {
+      throw new Error(`Failed to upload image ${i + 1}`);
     }
+
+    const data = await res.json();
+    uploaded.push({
+      id: data.image.id,
+      position: data.image.position,
+      variants: data.image.variants,
+    });
   }
 
   return uploaded;
