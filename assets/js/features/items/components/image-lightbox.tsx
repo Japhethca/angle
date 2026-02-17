@@ -56,7 +56,7 @@ export function ImageLightbox({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="flex h-screen max-h-screen w-screen max-w-none flex-col gap-0 rounded-none border-none bg-black/95 p-0"
+        className="flex h-screen max-h-screen w-screen max-w-none sm:max-w-none flex-col gap-0 rounded-none border-none bg-black/95 p-0 top-0 left-0 translate-x-0 translate-y-0"
         showCloseButton={false}
         overlayClassName="bg-black/90"
       >
