@@ -1,7 +1,7 @@
-import { router } from "@inertiajs/react";
-import { Gavel, Package, LifeBuoy } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Link, router } from '@inertiajs/react';
+import { Gavel, Package, Headset } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface Category {
   id: string;
@@ -33,63 +33,58 @@ export function WatchlistCategorySidebar({
     if (categoryId) {
       router.visit(`/watchlist?category=${categoryId}`);
     } else {
-      router.visit("/watchlist");
+      router.visit('/watchlist');
     }
   }
 
   return (
-    <nav className="flex h-full flex-col rounded-xl bg-surface py-6 shadow-[0px_1px_2px_rgba(0,0,0,0.08)] dark:shadow-black/10">
-      <div className="flex flex-col gap-1 px-3">
-        {/* All option */}
-        <button
-          type="button"
-          onClick={() => handleCategoryClick(null)}
-          className={cn(
-            "flex items-center gap-2 rounded-lg px-4 py-2 text-left text-base font-medium transition-colors",
-            isAllActive
-              ? "bg-[rgba(253,224,204,0.4)] dark:bg-primary-600/20 text-primary-800 dark:text-primary-400"
-              : "text-content-tertiary hover:bg-surface-muted hover:text-content"
-          )}
-        >
-          <Gavel className="size-5" />
-          All
-        </button>
+    <nav className="space-y-1">
+      {/* All option */}
+      <button
+        type="button"
+        onClick={() => handleCategoryClick(null)}
+        className={cn(
+          'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+          isAllActive
+            ? 'bg-primary-600/10 text-primary-600'
+            : 'text-content-tertiary hover:text-content'
+        )}
+      >
+        <Gavel className="size-5" />
+        All
+      </button>
 
-        {/* Category list */}
-        {categories.map((category) => {
-          const isActive = activeCategory === category.id;
-          const Icon = getCategoryIcon(category.name);
+      {/* Category list */}
+      {categories.map(category => {
+        const isActive = activeCategory === category.id;
+        const Icon = getCategoryIcon(category.name);
 
-          return (
-            <button
-              key={category.id}
-              type="button"
-              onClick={() => handleCategoryClick(category.id)}
-              className={cn(
-                "flex items-center gap-2 rounded-lg px-4 py-2 text-left text-base font-medium transition-colors",
-                isActive
-                  ? "bg-[rgba(253,224,204,0.4)] dark:bg-primary-600/20 text-primary-800 dark:text-primary-400"
-                  : "text-content-tertiary hover:bg-surface-muted hover:text-content"
-              )}
-            >
-              <Icon className="size-5" />
-              {category.name}
-            </button>
-          );
-        })}
-      </div>
+        return (
+          <button
+            key={category.id}
+            type="button"
+            onClick={() => handleCategoryClick(category.id)}
+            className={cn(
+              'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+              isActive
+                ? 'bg-primary-600/10 text-primary-600'
+                : 'text-content-tertiary hover:text-content'
+            )}
+          >
+            <Icon className="size-5" />
+            {category.name}
+          </button>
+        );
+      })}
 
       {/* Support link */}
-      <div className="mt-auto px-3 pt-8">
-        <button
-          type="button"
-          onClick={() => router.visit("/support")}
-          className="flex items-center gap-2 rounded-lg px-4 py-2 text-base font-medium text-content-tertiary transition-colors hover:bg-surface-muted hover:text-content"
-        >
-          <LifeBuoy className="size-5" />
-          Support
-        </button>
-      </div>
+      <Link
+        href="/settings/support"
+        className="mt-6 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-content-tertiary transition-colors hover:text-content"
+      >
+        <Headset className="size-5" />
+        Support
+      </Link>
     </nav>
   );
 }

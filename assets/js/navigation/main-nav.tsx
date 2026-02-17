@@ -56,7 +56,7 @@ export function MainNav({ navCategories }: MainNavProps) {
               href="/"
               className={
                 isActive('/')
-                  ? 'border-b-2 border-primary-1000 pb-1 text-sm font-medium text-primary-1000'
+                  ? 'border-b-2 border-primary-1000 dark:border-primary-600 pb-1 text-sm font-medium text-primary-1000 dark:text-primary-600'
                   : 'text-sm text-content-secondary transition-colors hover:text-content'
               }
             >
@@ -70,7 +70,7 @@ export function MainNav({ navCategories }: MainNavProps) {
                   <NavigationMenuTrigger
                     className={
                       isCategoriesActive
-                        ? 'h-auto rounded-none border-b-2 border-primary-1000 bg-transparent p-0 pb-1 text-sm font-medium text-primary-1000 shadow-none hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent'
+                        ? 'h-auto rounded-none border-b-2 border-primary-1000 dark:border-primary-600 bg-transparent p-0 pb-1 text-sm font-medium text-primary-1000 dark:text-primary-600 shadow-none hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent'
                         : 'h-auto rounded-none bg-transparent p-0 text-sm font-normal text-content-secondary shadow-none transition-colors hover:bg-transparent hover:text-content focus:bg-transparent data-[state=open]:bg-transparent'
                     }
                   >
@@ -84,20 +84,22 @@ export function MainNav({ navCategories }: MainNavProps) {
             </NavigationMenu>
 
             {/* Remaining nav links */}
-            {visibleLinks.filter(link => link.href !== '/').map(link => (
-              <AuthLink
-                key={link.href}
-                href={link.href}
-                auth={link.auth}
-                className={
-                  isActive(link.href)
-                    ? 'border-b-2 border-primary-1000 pb-1 text-sm font-medium text-primary-1000'
-                    : 'text-sm text-content-secondary transition-colors hover:text-content'
-                }
-              >
-                {link.label}
-              </AuthLink>
-            ))}
+            {visibleLinks
+              .filter(link => link.href !== '/')
+              .map(link => (
+                <AuthLink
+                  key={link.href}
+                  href={link.href}
+                  auth={link.auth}
+                  className={
+                    isActive(link.href)
+                      ? 'border-b-2 border-primary-1000 dark:border-primary-600 pb-1 text-sm font-medium text-primary-1000 dark:text-primary-600'
+                      : 'text-sm text-content-secondary transition-colors hover:text-content'
+                  }
+                >
+                  {link.label}
+                </AuthLink>
+              ))}
           </div>
         </div>
 
@@ -154,7 +156,11 @@ export function MainNav({ navCategories }: MainNavProps) {
             <SheetContent side="right" className="w-full bg-surface sm:w-[300px]">
               <SheetHeader>
                 <SheetTitle>
-                  <img src="/images/logo.svg" alt="Angle" className="h-8 dark:brightness-0 dark:invert" />
+                  <img
+                    src="/images/logo.svg"
+                    alt="Angle"
+                    className="h-8 dark:brightness-0 dark:invert"
+                  />
                 </SheetTitle>
               </SheetHeader>
 

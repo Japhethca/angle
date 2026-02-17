@@ -1,17 +1,16 @@
-import { Link } from "@inertiajs/react";
-import { MessageCircle, Star } from "lucide-react";
-import type { WonOrderCard as WonOrderCardType } from "@/ash_rpc";
-import { formatNaira } from "@/lib/format";
-import { cn } from "@/lib/utils";
-import { ReviewForm } from "./review-form";
+import { Link } from '@inertiajs/react';
+import { MessageCircle, Star } from 'lucide-react';
+import type { WonOrderCard as WonOrderCardType } from '@/ash_rpc';
+import { formatNaira } from '@/lib/format';
+import { cn } from '@/lib/utils';
+import { ReviewForm } from './review-form';
 
 type OrderItem = WonOrderCardType[number];
 
 function isWithinEditWindow(insertedAt: string): boolean {
   const created = new Date(insertedAt);
   const now = new Date();
-  const diffDays =
-    (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
+  const diffDays = (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
   return diffDays <= 7;
 }
 
@@ -34,35 +33,37 @@ interface WonBidCardProps {
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   payment_pending: {
-    label: "Payment pending",
-    className: "bg-amber-50 text-amber-700 border-amber-200",
+    label: 'Payment pending',
+    className:
+      'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-400',
   },
   paid: {
-    label: "Awaiting delivery",
-    className: "bg-green-50 text-green-700 border-green-200",
+    label: 'Awaiting delivery',
+    className:
+      'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-400',
   },
   dispatched: {
-    label: "Awaiting delivery",
-    className: "bg-green-50 text-green-700 border-green-200",
+    label: 'Awaiting delivery',
+    className:
+      'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-400',
   },
   completed: {
-    label: "Completed",
-    className: "bg-green-50 text-green-700 border-green-200",
+    label: 'Completed',
+    className:
+      'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-400',
   },
   cancelled: {
-    label: "Cancelled",
-    className: "bg-red-50 text-red-700 border-red-200",
+    label: 'Cancelled',
+    className:
+      'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400',
   },
 };
 
-function getWhatsAppUrl(
-  phone: string | null,
-  itemTitle: string,
-): string | null {
+function getWhatsAppUrl(phone: string | null, itemTitle: string): string | null {
   if (!phone) return null;
-  const cleanPhone = phone.replace(/[^0-9+]/g, "");
+  const cleanPhone = phone.replace(/[^0-9+]/g, '');
   const message = encodeURIComponent(
-    `Hi, I won the auction for "${itemTitle}" on Angle. I'd like to arrange delivery.`,
+    `Hi, I won the auction for "${itemTitle}" on Angle. I'd like to arrange delivery.`
   );
   return `https://wa.me/${cleanPhone}?text=${message}`;
 }
@@ -79,10 +80,7 @@ export function WonBidCard({
   onCloseReviewForm,
 }: WonBidCardProps) {
   const status = statusConfig[order.status] || statusConfig.payment_pending;
-  const whatsAppUrl = getWhatsAppUrl(
-    order.seller?.whatsappNumber || null,
-    order.item?.title || "",
-  );
+  const whatsAppUrl = getWhatsAppUrl(order.seller?.whatsappNumber || null, order.item?.title || '');
 
   return (
     <>
@@ -98,23 +96,19 @@ export function WonBidCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
             <Link href={`/items/${order.item?.slug || order.item?.id}`}>
-              <h3 className="text-sm font-medium text-content">
-                {order.item?.title}
-              </h3>
+              <h3 className="text-sm font-medium text-content">{order.item?.title}</h3>
             </Link>
             <span
               className={cn(
-                "rounded-full border px-2.5 py-0.5 text-xs font-medium",
-                status.className,
+                'rounded-full border px-2.5 py-0.5 text-xs font-medium',
+                status.className
               )}
             >
               {status.label}
             </span>
           </div>
           <div className="mt-1 flex items-center gap-2 text-sm">
-            <span className="font-bold text-content">
-              {formatNaira(order.amount)}
-            </span>
+            <span className="font-bold text-content">{formatNaira(order.amount)}</span>
             <span className="text-content-tertiary">&middot;</span>
             <span className="text-content-tertiary">
               {order.seller?.username || order.seller?.fullName}
@@ -123,7 +117,7 @@ export function WonBidCard({
         </div>
 
         <div className="flex items-center gap-3">
-          {whatsAppUrl && order.status !== "payment_pending" && (
+          {whatsAppUrl && order.status !== 'payment_pending' && (
             <a
               href={whatsAppUrl}
               target="_blank"
@@ -133,46 +127,43 @@ export function WonBidCard({
               <MessageCircle className="size-5 text-content-tertiary" />
             </a>
           )}
-          {order.status === "payment_pending" && onPay && (
+          {order.status === 'payment_pending' && onPay && (
             <button
               onClick={() => onPay(order.id)}
               disabled={payPending}
               className="rounded-full bg-primary-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
             >
-              {payPending ? "Processing..." : "Pay"}
+              {payPending ? 'Processing...' : 'Pay'}
             </button>
           )}
-          {order.status === "dispatched" && onConfirmReceipt && (
+          {order.status === 'dispatched' && onConfirmReceipt && (
             <button
               onClick={() => onConfirmReceipt(order.id)}
               disabled={confirmPending}
               className="rounded-full bg-primary-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
             >
-              {confirmPending ? "Confirming..." : "Confirm Receipt"}
+              {confirmPending ? 'Confirming...' : 'Confirm Receipt'}
             </button>
           )}
-          {order.status === "completed" &&
-            !review &&
-            !showReviewForm &&
-            onReview && (
-              <button
-                onClick={() => onReview(order.id)}
-                className="rounded-full border border-primary-600 px-5 py-2 text-sm font-medium text-primary-600 hover:bg-primary-50"
-              >
-                Leave Review
-              </button>
-            )}
-          {order.status === "completed" && review && !showReviewForm && (
+          {order.status === 'completed' && !review && !showReviewForm && onReview && (
+            <button
+              onClick={() => onReview(order.id)}
+              className="rounded-full border border-primary-600 px-5 py-2 text-sm font-medium text-primary-600 hover:bg-primary-50"
+            >
+              Leave Review
+            </button>
+          )}
+          {order.status === 'completed' && review && !showReviewForm && (
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-0.5">
-                {[1, 2, 3, 4, 5].map((star) => (
+                {[1, 2, 3, 4, 5].map(star => (
                   <Star
                     key={star}
                     className={cn(
-                      "size-4",
+                      'size-4',
                       star <= review.rating
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-surface-emphasis",
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : 'text-surface-emphasis'
                     )}
                   />
                 ))}
@@ -202,21 +193,17 @@ export function WonBidCard({
           <div className="min-w-0 flex-1">
             <span
               className={cn(
-                "mb-1 inline-block rounded-full border px-2 py-0.5 text-xs font-medium",
-                status.className,
+                'mb-1 inline-block rounded-full border px-2 py-0.5 text-xs font-medium',
+                status.className
               )}
             >
               {status.label}
             </span>
             <Link href={`/items/${order.item?.slug || order.item?.id}`}>
-              <h3 className="line-clamp-2 text-sm font-medium text-content">
-                {order.item?.title}
-              </h3>
+              <h3 className="line-clamp-2 text-sm font-medium text-content">{order.item?.title}</h3>
             </Link>
             <div className="mt-1 flex items-center gap-2 text-sm">
-              <span className="font-bold text-content">
-                {formatNaira(order.amount)}
-              </span>
+              <span className="font-bold text-content">{formatNaira(order.amount)}</span>
               <span className="text-content-tertiary">&middot;</span>
               <span className="text-content-tertiary">
                 {order.seller?.username || order.seller?.fullName}
@@ -225,16 +212,16 @@ export function WonBidCard({
           </div>
         </div>
 
-        {order.status === "payment_pending" && onPay && (
+        {order.status === 'payment_pending' && onPay && (
           <button
             onClick={() => onPay(order.id)}
             disabled={payPending}
             className="w-full rounded-full bg-primary-600 py-3 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
           >
-            {payPending ? "Processing..." : "Pay"}
+            {payPending ? 'Processing...' : 'Pay'}
           </button>
         )}
-        {order.status === "dispatched" && onConfirmReceipt && (
+        {order.status === 'dispatched' && onConfirmReceipt && (
           <div className="flex items-center gap-3">
             {whatsAppUrl && (
               <a
@@ -251,32 +238,29 @@ export function WonBidCard({
               disabled={confirmPending}
               className="flex-1 rounded-full bg-primary-600 py-3 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
             >
-              {confirmPending ? "Confirming..." : "Confirm Receipt"}
+              {confirmPending ? 'Confirming...' : 'Confirm Receipt'}
             </button>
           </div>
         )}
-        {order.status === "completed" &&
-          !review &&
-          !showReviewForm &&
-          onReview && (
-            <button
-              onClick={() => onReview(order.id)}
-              className="w-full rounded-full border border-primary-600 py-3 text-sm font-medium text-primary-600 hover:bg-primary-50"
-            >
-              Leave Review
-            </button>
-          )}
-        {order.status === "completed" && review && !showReviewForm && (
+        {order.status === 'completed' && !review && !showReviewForm && onReview && (
+          <button
+            onClick={() => onReview(order.id)}
+            className="w-full rounded-full border border-primary-600 py-3 text-sm font-medium text-primary-600 hover:bg-primary-50"
+          >
+            Leave Review
+          </button>
+        )}
+        {order.status === 'completed' && review && !showReviewForm && (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-0.5">
-              {[1, 2, 3, 4, 5].map((star) => (
+              {[1, 2, 3, 4, 5].map(star => (
                 <Star
                   key={star}
                   className={cn(
-                    "size-4",
+                    'size-4',
                     star <= review.rating
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-surface-emphasis",
+                      ? 'fill-yellow-400 text-yellow-400'
+                      : 'text-surface-emphasis'
                   )}
                 />
               ))}

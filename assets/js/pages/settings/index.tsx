@@ -1,35 +1,46 @@
-import { useEffect } from "react";
-import { Head, Link, router } from "@inertiajs/react";
-import { User, ChevronRight, Store, Shield, CreditCard, Bell, SlidersHorizontal, Scale, HelpCircle, LogOut } from "lucide-react";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import type { SettingsUser } from "@/features/settings";
+import { useEffect } from 'react';
+import { Head, Link, router } from '@inertiajs/react';
+import {
+  User,
+  ChevronRight,
+  Store,
+  Shield,
+  CreditCard,
+  Bell,
+  SlidersHorizontal,
+  Scale,
+  Headset,
+  LogOut,
+} from 'lucide-react';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import type { SettingsUser } from '@/features/settings';
 
 interface SettingsIndexProps {
   user: SettingsUser;
 }
 
 const menuItems = [
-  { label: "Store", icon: Store, href: "/settings/store" },
-  { label: "Security", icon: Shield, href: "/settings/security" },
-  { label: "Payments", icon: CreditCard, href: "/settings/payments" },
-  { label: "Notifications", icon: Bell, href: "/settings/notifications" },
-  { label: "Preferences", icon: SlidersHorizontal, href: "/settings/preferences" },
-  { label: "Legal", icon: Scale, href: "/settings/legal" },
-  { label: "Support", icon: HelpCircle, href: "/settings/support" },
+  { label: 'Store', icon: Store, href: '/settings/store' },
+  { label: 'Security', icon: Shield, href: '/settings/security' },
+  { label: 'Payments', icon: CreditCard, href: '/settings/payments' },
+  { label: 'Notifications', icon: Bell, href: '/settings/notifications' },
+  { label: 'Preferences', icon: SlidersHorizontal, href: '/settings/preferences' },
+  { label: 'Legal', icon: Scale, href: '/settings/legal' },
+  { label: 'Support', icon: Headset, href: '/settings/support' },
 ];
 
 export default function SettingsIndex({ user }: SettingsIndexProps) {
-  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
 
   // Desktop: redirect to account page
   useEffect(() => {
     if (isDesktop) {
-      router.visit("/settings/account", { replace: true });
+      router.visit('/settings/account', { replace: true });
     }
   }, [isDesktop]);
 
   const handleLogout = () => {
-    router.post("/auth/logout");
+    router.post('/auth/logout');
   };
 
   return (
@@ -50,7 +61,7 @@ export default function SettingsIndex({ user }: SettingsIndexProps) {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1">
               <p className="truncate text-sm font-medium text-content">
-                {user.full_name || "Set up your profile"}
+                {user.full_name || 'Set up your profile'}
               </p>
               <ChevronRight className="size-4 shrink-0 text-content-tertiary" />
             </div>
@@ -60,7 +71,7 @@ export default function SettingsIndex({ user }: SettingsIndexProps) {
 
         {/* Menu items */}
         <div className="space-y-1">
-          {menuItems.map((item) => (
+          {menuItems.map(item => (
             <Link
               key={item.label}
               href={item.href}
