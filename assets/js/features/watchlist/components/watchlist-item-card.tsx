@@ -38,7 +38,7 @@ export function WatchlistItemCard({ item, watchlistEntryId }: WatchlistItemCardP
           </div>
         </div>
         <button
-          className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full border border-white/30 bg-white/20 backdrop-blur-sm transition-colors hover:bg-white/40"
+          className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full border border-white/20 bg-black/20 backdrop-blur-sm transition-colors hover:bg-black/30"
           disabled={isPending}
           onClick={(e) => {
             e.preventDefault();
