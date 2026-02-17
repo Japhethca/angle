@@ -14,17 +14,17 @@
 
 ---
 
-## Task 1: Backend — Add listing_form_category typed query + codegen
+## Task 1: Backend — Add listing_form_category typed query + OptionSet RPC + codegen
 
-The `nav_category` typed query only loads `[:id, :name, :slug]` — it doesn't include `attributeSchema`. We need a new typed query that loads categories with their `attribute_schema` for the listing form's category picker.
+The `nav_category` typed query only loads `[:id, :name, :slug]` — it doesn't include `attributeSchema`. We need a new typed query that loads categories with their `attribute_schema` for the listing form's category picker. We also need to expose `OptionSet` via RPC so the frontend can lazy-load option values for category fields that reference option sets.
 
 **Files:**
 - Modify: `lib/angle/catalog.ex:10-27`
 - Regenerate: `assets/js/ash_rpc.ts`
 
-**Step 1: Add the typed query**
+**Step 1: Add the typed query and OptionSet RPC**
 
-In `lib/angle/catalog.ex`, add a new typed query inside the `resource Angle.Catalog.Category` block (after the existing `nav_category` query at line 25):
+In `lib/angle/catalog.ex`, add a new typed query inside the `resource Angle.Catalog.Category` block (after the existing `nav_category` query at line 25), and add a new `resource` block for OptionSet:
 
 ```elixir
 typed_query :listing_form_category, :top_level do
@@ -34,19 +34,31 @@ typed_query :listing_form_category, :top_level do
 end
 ```
 
+After the Category resource block (but still inside `typescript_rpc do`), add:
+
+```elixir
+resource Angle.Catalog.OptionSet do
+  rpc_action :list_option_sets, :read_with_values
+end
+```
+
+This exposes a `listOptionSets()` function in `ash_rpc.ts` that returns option sets with their `option_set_values` loaded. The frontend will call it with a slug filter to lazy-load dropdown options: `listOptionSets({ filter: { slug: { in: ["phone-storage", "ram-sizes"] } } })`.
+
 **Step 2: Run codegen**
 
 ```bash
 mix ash_typescript.codegen
 ```
 
-Verify that `assets/js/ash_rpc.ts` now contains `listingFormCategoryFields` and the `ListingFormCategory` type.
+Verify that `assets/js/ash_rpc.ts` now contains:
+- `listingFormCategoryFields` and the `ListingFormCategory` type
+- `listOptionSets` function and `OptionSetResourceSchema` type (with nested `optionSetValues`)
 
 **Step 3: Commit**
 
 ```bash
 git add lib/angle/catalog.ex assets/js/ash_rpc.ts
-git commit -m "feat: add listing_form_category typed query with attributeSchema"
+git commit -m "feat: add listing_form_category typed query and OptionSet RPC"
 ```
 
 ---
@@ -124,122 +136,305 @@ git commit -m "feat: load categories and store profile in items/new controller"
 
 ---
 
-## Task 3: Backend — Seed category attribute_schema data
+## Task 3: Backend — Seed option sets + category attribute_schema data
 
-Categories need `attribute_schema` populated so the listing form can render category-specific fields. Create a seed script.
+Two things need seeding: (1) option sets with their values (for dropdown fields), and (2) category `attribute_schema` data that references those option sets via `optionSetSlug`.
+
+**Important:** The existing subcategory names in the DB are: Smartphones, Laptops, Audio & Headphones, Gaming, Cameras (under Electronics); Men's Clothing, Women's Clothing, Shoes, Bags & Accessories, Watches (under Fashion); Paintings, Sculptures, Photography, Digital Art (under Art); Cars, Motorcycles, Boats, Parts & Accessories (under Vehicles); Coins & Currency, Trading Cards, Stamps, Memorabilia, Antiques (under Collectibles); Rings, Necklaces, Bracelets, Earrings (under Jewelry); Living Room, Bedroom, Office, Outdoor (under Furniture); Fitness Equipment, Outdoor Sports, Team Sports, Cycling (under Sports).
 
 **Files:**
-- Create: `priv/repo/seeds/category_schemas.exs`
+- Create: `priv/repo/seeds/option_sets_and_schemas.exs`
 
 **Step 1: Create the seed script**
 
 ```elixir
-# priv/repo/seeds/category_schemas.exs
+# priv/repo/seeds/option_sets_and_schemas.exs
 #
-# Run: mix run priv/repo/seeds/category_schemas.exs
+# Run: mix run priv/repo/seeds/option_sets_and_schemas.exs
 #
-# Populates attribute_schema for existing categories.
-# Safe to run multiple times (uses Ash update).
+# Creates option sets with values, then populates attribute_schema
+# for existing categories. Safe to run multiple times.
 
-alias Angle.Catalog.Category
+alias Angle.Catalog.{Category, OptionSet}
+
+require Ash.Query
+
+# ── Part 1: Seed option sets ──────────────────────────────────────────
+
+option_sets = [
+  %{
+    name: "Phone Storage",
+    slug: "phone-storage",
+    description: "Storage capacity options for smartphones",
+    values: [
+      %{value: "32GB", label: "32GB", sort_order: 1},
+      %{value: "64GB", label: "64GB", sort_order: 2},
+      %{value: "128GB", label: "128GB", sort_order: 3},
+      %{value: "256GB", label: "256GB", sort_order: 4},
+      %{value: "512GB", label: "512GB", sort_order: 5},
+      %{value: "1TB", label: "1TB", sort_order: 6}
+    ]
+  },
+  %{
+    name: "Laptop RAM",
+    slug: "laptop-ram",
+    description: "RAM options for laptops",
+    values: [
+      %{value: "4GB", label: "4GB", sort_order: 1},
+      %{value: "8GB", label: "8GB", sort_order: 2},
+      %{value: "16GB", label: "16GB", sort_order: 3},
+      %{value: "32GB", label: "32GB", sort_order: 4},
+      %{value: "64GB", label: "64GB", sort_order: 5}
+    ]
+  },
+  %{
+    name: "Laptop Storage",
+    slug: "laptop-storage",
+    description: "Storage options for laptops",
+    values: [
+      %{value: "128GB SSD", label: "128GB SSD", sort_order: 1},
+      %{value: "256GB SSD", label: "256GB SSD", sort_order: 2},
+      %{value: "512GB SSD", label: "512GB SSD", sort_order: 3},
+      %{value: "1TB SSD", label: "1TB SSD", sort_order: 4},
+      %{value: "2TB SSD", label: "2TB SSD", sort_order: 5},
+      %{value: "1TB HDD", label: "1TB HDD", sort_order: 6}
+    ]
+  },
+  %{
+    name: "Screen Size",
+    slug: "screen-size",
+    description: "Screen size options",
+    values: [
+      %{value: "13\"", label: "13\"", sort_order: 1},
+      %{value: "14\"", label: "14\"", sort_order: 2},
+      %{value: "15\"", label: "15\"", sort_order: 3},
+      %{value: "16\"", label: "16\"", sort_order: 4},
+      %{value: "17\"", label: "17\"", sort_order: 5}
+    ]
+  },
+  %{
+    name: "Item Condition Grade",
+    slug: "condition-grade",
+    description: "Detailed condition grades for collectibles",
+    values: [
+      %{value: "Mint", label: "Mint", sort_order: 1},
+      %{value: "Near Mint", label: "Near Mint", sort_order: 2},
+      %{value: "Excellent", label: "Excellent", sort_order: 3},
+      %{value: "Very Good", label: "Very Good", sort_order: 4},
+      %{value: "Good", label: "Good", sort_order: 5},
+      %{value: "Fair", label: "Fair", sort_order: 6},
+      %{value: "Poor", label: "Poor", sort_order: 7}
+    ]
+  },
+  %{
+    name: "Clothing Size",
+    slug: "clothing-size",
+    description: "Standard clothing sizes",
+    values: [
+      %{value: "XS", label: "XS", sort_order: 1},
+      %{value: "S", label: "S", sort_order: 2},
+      %{value: "M", label: "M", sort_order: 3},
+      %{value: "L", label: "L", sort_order: 4},
+      %{value: "XL", label: "XL", sort_order: 5},
+      %{value: "XXL", label: "XXL", sort_order: 6}
+    ]
+  },
+  %{
+    name: "Shoe Size (US)",
+    slug: "shoe-size-us",
+    description: "US shoe sizes",
+    values: [
+      %{value: "6", label: "US 6", sort_order: 1},
+      %{value: "7", label: "US 7", sort_order: 2},
+      %{value: "8", label: "US 8", sort_order: 3},
+      %{value: "9", label: "US 9", sort_order: 4},
+      %{value: "10", label: "US 10", sort_order: 5},
+      %{value: "11", label: "US 11", sort_order: 6},
+      %{value: "12", label: "US 12", sort_order: 7},
+      %{value: "13", label: "US 13", sort_order: 8}
+    ]
+  },
+  %{
+    name: "Gaming Storage",
+    slug: "gaming-storage",
+    description: "Storage options for gaming consoles",
+    values: [
+      %{value: "256GB", label: "256GB", sort_order: 1},
+      %{value: "512GB", label: "512GB", sort_order: 2},
+      %{value: "825GB", label: "825GB", sort_order: 3},
+      %{value: "1TB", label: "1TB", sort_order: 4},
+      %{value: "2TB", label: "2TB", sort_order: 5}
+    ]
+  }
+]
+
+for os <- option_sets do
+  case OptionSet
+       |> Ash.Query.filter(slug == ^os.slug)
+       |> Ash.read_one(authorize?: false) do
+    {:ok, nil} ->
+      OptionSet
+      |> Ash.Changeset.for_create(:create_with_values, %{
+        name: os.name,
+        slug: os.slug,
+        description: os.description,
+        values: os.values
+      }, authorize?: false)
+      |> Ash.create!()
+
+      IO.puts("Created option set: #{os.name}")
+
+    {:ok, _existing} ->
+      IO.puts("Option set already exists, skipping: #{os.name}")
+
+    _ ->
+      IO.puts("Error checking option set: #{os.name}")
+  end
+end
+
+# ── Part 2: Seed category attribute_schema ────────────────────────────
+#
+# Fields with `optionSetSlug` will render as <Select> dropdowns,
+# lazy-loaded from the OptionSet RPC. Fields without it render as
+# free text <Input>.
 
 schemas = %{
   "Smartphones" => %{
     "fields" => [
       %{"name" => "Model", "type" => "string", "required" => true},
-      %{"name" => "Storage", "type" => "string"},
+      %{"name" => "Storage", "type" => "string", "optionSetSlug" => "phone-storage"},
       %{"name" => "Color", "type" => "string"},
       %{"name" => "Display", "type" => "string"},
       %{"name" => "Chip", "type" => "string"},
       %{"name" => "Camera", "type" => "string"},
-      %{"name" => "Battery", "type" => "string"},
-      %{"name" => "Connectivity", "type" => "string"}
-    ]
-  },
-  "Tablets & iPads" => %{
-    "fields" => [
-      %{"name" => "Model", "type" => "string", "required" => true},
-      %{"name" => "Storage", "type" => "string"},
-      %{"name" => "Screen Size", "type" => "string"},
-      %{"name" => "Connectivity", "type" => "string"}
+      %{"name" => "Battery", "type" => "string"}
     ]
   },
   "Laptops" => %{
     "fields" => [
       %{"name" => "Brand & Model", "type" => "string", "required" => true},
       %{"name" => "Processor", "type" => "string"},
-      %{"name" => "RAM", "type" => "string"},
-      %{"name" => "Storage", "type" => "string"},
-      %{"name" => "Screen Size", "type" => "string"},
+      %{"name" => "RAM", "type" => "string", "optionSetSlug" => "laptop-ram"},
+      %{"name" => "Storage", "type" => "string", "optionSetSlug" => "laptop-storage"},
+      %{"name" => "Screen Size", "type" => "string", "optionSetSlug" => "screen-size"},
       %{"name" => "Graphics", "type" => "string"}
     ]
   },
-  "Gaming Consoles & Accessories" => %{
+  "Audio & Headphones" => %{
+    "fields" => [
+      %{"name" => "Brand & Model", "type" => "string", "required" => true},
+      %{"name" => "Type", "type" => "string"},
+      %{"name" => "Connectivity", "type" => "string"},
+      %{"name" => "Driver Size", "type" => "string"}
+    ]
+  },
+  "Gaming" => %{
     "fields" => [
       %{"name" => "Console/Accessory", "type" => "string", "required" => true},
       %{"name" => "Model", "type" => "string"},
-      %{"name" => "Storage", "type" => "string"},
+      %{"name" => "Storage", "type" => "string", "optionSetSlug" => "gaming-storage"},
       %{"name" => "Included Accessories", "type" => "string"}
     ]
   },
-  "Smartwatches & Wearables" => %{
+  "Cameras" => %{
     "fields" => [
       %{"name" => "Brand & Model", "type" => "string", "required" => true},
-      %{"name" => "Display Type", "type" => "string"},
-      %{"name" => "Battery Life", "type" => "string"},
-      %{"name" => "Connectivity", "type" => "string"}
+      %{"name" => "Type", "type" => "string"},
+      %{"name" => "Megapixels", "type" => "string"},
+      %{"name" => "Lens Mount", "type" => "string"}
     ]
   },
-  "Smart Home Devices" => %{
-    "fields" => [
-      %{"name" => "Device Type", "type" => "string", "required" => true},
-      %{"name" => "Brand", "type" => "string"},
-      %{"name" => "Connectivity", "type" => "string"}
-    ]
-  },
-  "Traditional Clothing & Textiles" => %{
+  "Men's Clothing" => %{
     "fields" => [
       %{"name" => "Type", "type" => "string", "required" => true},
-      %{"name" => "Origin/Region", "type" => "string"},
+      %{"name" => "Size", "type" => "string", "optionSetSlug" => "clothing-size"},
       %{"name" => "Material", "type" => "string"},
-      %{"name" => "Size", "type" => "string"}
+      %{"name" => "Brand", "type" => "string"}
     ]
   },
-  "Handmade Crafts" => %{
+  "Women's Clothing" => %{
     "fields" => [
-      %{"name" => "Craft Type", "type" => "string", "required" => true},
+      %{"name" => "Type", "type" => "string", "required" => true},
+      %{"name" => "Size", "type" => "string", "optionSetSlug" => "clothing-size"},
       %{"name" => "Material", "type" => "string"},
-      %{"name" => "Origin", "type" => "string"},
-      %{"name" => "Dimensions", "type" => "string"}
+      %{"name" => "Brand", "type" => "string"}
     ]
   },
-  "Televisions & Screens" => %{
+  "Shoes" => %{
     "fields" => [
       %{"name" => "Brand & Model", "type" => "string", "required" => true},
-      %{"name" => "Screen Size", "type" => "string"},
-      %{"name" => "Resolution", "type" => "string"},
-      %{"name" => "Display Type", "type" => "string"}
+      %{"name" => "Size", "type" => "string", "optionSetSlug" => "shoe-size-us"},
+      %{"name" => "Color", "type" => "string"},
+      %{"name" => "Material", "type" => "string"}
     ]
   },
-  "Vintage Coins & Currency" => %{
+  "Watches" => %{
+    "fields" => [
+      %{"name" => "Brand & Model", "type" => "string", "required" => true},
+      %{"name" => "Movement", "type" => "string"},
+      %{"name" => "Case Size", "type" => "string"},
+      %{"name" => "Material", "type" => "string"}
+    ]
+  },
+  "Coins & Currency" => %{
     "fields" => [
       %{"name" => "Type", "type" => "string", "required" => true},
       %{"name" => "Year/Period", "type" => "string"},
       %{"name" => "Country of Origin", "type" => "string"},
-      %{"name" => "Grade/Condition", "type" => "string"}
+      %{"name" => "Grade", "type" => "string", "optionSetSlug" => "condition-grade"}
     ]
   },
-  "Refrigerators & Freezers" => %{
+  "Trading Cards" => %{
     "fields" => [
-      %{"name" => "Brand & Model", "type" => "string", "required" => true},
-      %{"name" => "Capacity", "type" => "string"},
-      %{"name" => "Type", "type" => "string"},
-      %{"name" => "Energy Rating", "type" => "string"}
+      %{"name" => "Card Name", "type" => "string", "required" => true},
+      %{"name" => "Set/Series", "type" => "string"},
+      %{"name" => "Grade", "type" => "string", "optionSetSlug" => "condition-grade"},
+      %{"name" => "Year", "type" => "string"}
+    ]
+  },
+  "Antiques" => %{
+    "fields" => [
+      %{"name" => "Item Type", "type" => "string", "required" => true},
+      %{"name" => "Origin", "type" => "string"},
+      %{"name" => "Age/Period", "type" => "string"},
+      %{"name" => "Material", "type" => "string"}
+    ]
+  },
+  "Paintings" => %{
+    "fields" => [
+      %{"name" => "Artist", "type" => "string"},
+      %{"name" => "Medium", "type" => "string"},
+      %{"name" => "Dimensions", "type" => "string"},
+      %{"name" => "Year", "type" => "string"}
+    ]
+  },
+  "Sculptures" => %{
+    "fields" => [
+      %{"name" => "Artist", "type" => "string"},
+      %{"name" => "Material", "type" => "string", "required" => true},
+      %{"name" => "Dimensions", "type" => "string"},
+      %{"name" => "Weight", "type" => "string"}
+    ]
+  },
+  "Cars" => %{
+    "fields" => [
+      %{"name" => "Make & Model", "type" => "string", "required" => true},
+      %{"name" => "Year", "type" => "string", "required" => true},
+      %{"name" => "Mileage", "type" => "string"},
+      %{"name" => "Transmission", "type" => "string"},
+      %{"name" => "Fuel Type", "type" => "string"}
+    ]
+  },
+  "Motorcycles" => %{
+    "fields" => [
+      %{"name" => "Make & Model", "type" => "string", "required" => true},
+      %{"name" => "Year", "type" => "string"},
+      %{"name" => "Engine Size", "type" => "string"},
+      %{"name" => "Mileage", "type" => "string"}
     ]
   }
 }
 
-# Update categories that exist in the DB
 for {name, schema} <- schemas do
   case Category
        |> Ash.Query.filter(name == ^name)
@@ -256,20 +451,22 @@ for {name, schema} <- schemas do
   end
 end
 
-IO.puts("\nDone seeding category schemas.")
+IO.puts("\nDone seeding option sets and category schemas.")
 ```
 
 **Step 2: Run the seed**
 
 ```bash
-mix run priv/repo/seeds/category_schemas.exs
+mix run priv/repo/seeds/option_sets_and_schemas.exs
 ```
+
+Verify all option sets created and category schemas updated (no "not found" messages for the subcategory names listed above).
 
 **Step 3: Commit**
 
 ```bash
-git add priv/repo/seeds/category_schemas.exs
-git commit -m "feat: add category attribute_schema seed data for listing form"
+git add priv/repo/seeds/option_sets_and_schemas.exs
+git commit -m "feat: seed option sets and category attribute_schema for listing form"
 ```
 
 ---
@@ -488,6 +685,7 @@ interface CategoryField {
   name: string;
   type: string;
   required?: boolean;
+  optionSetSlug?: string;
 }
 
 interface Subcategory {
@@ -907,16 +1105,30 @@ The largest form step: title, description, category picker, dynamic category fie
 
 **Step 1: Create the category fields renderer**
 
-Create `assets/js/features/listing-form/components/category-fields.tsx`:
+Create `assets/js/features/listing-form/components/category-fields.tsx`.
+
+This component renders dynamic form fields from a category's `attribute_schema`. Fields with an `optionSetSlug` property are rendered as `<Select>` dropdowns, lazy-loaded from the OptionSet RPC. Fields without it render as free-text `<Input>`.
 
 ```tsx
+import { useMemo } from "react";
+import { Loader2 } from "lucide-react";
+import { listOptionSets, buildCSRFHeaders } from "@/ash_rpc";
+import { useAshQuery } from "@/hooks/use-ash-query";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface CategoryField {
   name: string;
   type: string;
   required?: boolean;
+  optionSetSlug?: string;
 }
 
 interface CategoryFieldsProps {
@@ -926,6 +1138,38 @@ interface CategoryFieldsProps {
 }
 
 export function CategoryFields({ fields, values, onChange }: CategoryFieldsProps) {
+  // Collect all unique optionSetSlugs referenced by the fields
+  const slugs = useMemo(
+    () => [...new Set(fields.map((f) => f.optionSetSlug).filter(Boolean))] as string[],
+    [fields]
+  );
+
+  // Lazy-load all referenced option sets in one query
+  const { data: optionSets, isLoading: optionSetsLoading } = useAshQuery(
+    ["optionSets", ...slugs],
+    () =>
+      listOptionSets({
+        fields: ["id", "slug", { optionSetValues: ["value", "label", "sortOrder", "isActive"] }],
+        filter: { slug: { in: slugs } },
+        headers: buildCSRFHeaders(),
+      }),
+    { enabled: slugs.length > 0 }
+  );
+
+  // Build a lookup: slug -> sorted values
+  const optionsBySlug = useMemo(() => {
+    const map: Record<string, Array<{ value: string; label: string }>> = {};
+    if (!optionSets) return map;
+
+    for (const os of optionSets) {
+      const activeValues = (os.optionSetValues || [])
+        .filter((v: any) => v.isActive !== false)
+        .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+      map[os.slug] = activeValues;
+    }
+    return map;
+  }, [optionSets]);
+
   if (fields.length === 0) return null;
 
   return (
@@ -938,12 +1182,40 @@ export function CategoryFields({ fields, values, onChange }: CategoryFieldsProps
               {field.name}
               {field.required && <span className="text-feedback-error"> *</span>}
             </Label>
-            <Input
-              id={`attr-${field.name}`}
-              placeholder={`Enter ${field.name.toLowerCase()}`}
-              value={values[field.name] || ""}
-              onChange={(e) => onChange(field.name, e.target.value)}
-            />
+
+            {field.optionSetSlug ? (
+              // Dropdown from option set
+              optionSetsLoading ? (
+                <div className="flex h-10 items-center gap-2 rounded-md border border-input px-3">
+                  <Loader2 className="size-3.5 animate-spin text-content-tertiary" />
+                  <span className="text-xs text-content-tertiary">Loading options...</span>
+                </div>
+              ) : (
+                <Select
+                  value={values[field.name] || ""}
+                  onValueChange={(v) => onChange(field.name, v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={`Select ${field.name.toLowerCase()}`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(optionsBySlug[field.optionSetSlug] || []).map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )
+            ) : (
+              // Free text input
+              <Input
+                id={`attr-${field.name}`}
+                placeholder={`Enter ${field.name.toLowerCase()}`}
+                value={values[field.name] || ""}
+                onChange={(e) => onChange(field.name, e.target.value)}
+              />
+            )}
           </div>
         ))}
       </div>
