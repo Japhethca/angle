@@ -63,11 +63,11 @@ defmodule Angle.Media.Image do
     end
 
     policy action(:destroy) do
-      authorize_if actor_present()
+      authorize_if Angle.Media.Checks.ImageOwner
     end
 
     policy action(:reorder) do
-      authorize_if actor_present()
+      authorize_if Angle.Media.Checks.ImageOwner
     end
   end
 
