@@ -61,6 +61,13 @@ defmodule AngleWeb.Router do
     forward "/", Absinthe.Plug, schema: Module.concat(["AngleWeb.GraphqlSchema"])
   end
 
+  # Protected item routes (must be before /items/:slug to avoid slug capturing "new")
+  scope "/", AngleWeb do
+    pipe_through [:browser, :require_auth]
+
+    get "/items/new", ItemsController, :new
+  end
+
   # Public routes
   scope "/", AngleWeb do
     pipe_through :browser
@@ -108,7 +115,6 @@ defmodule AngleWeb.Router do
     get "/dashboard", DashboardController, :index
     get "/bids", BidsController, :index
     get "/watchlist", WatchlistController, :index
-    get "/items/new", ItemsController, :new
     get "/profile", ProfileController, :show
     get "/store", StoreDashboardController, :index
     get "/store/listings", StoreDashboardController, :listings
