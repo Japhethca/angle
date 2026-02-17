@@ -83,7 +83,7 @@ if config_env() == :prod do
 
   config :ex_aws, :s3,
     scheme: "https://",
-    host: System.fetch_env!("R2_ENDPOINT"),
+    host: System.fetch_env!("R2_ENDPOINT") |> String.replace(~r{^https?://}, ""),
     region: "auto"
 
   config :angle, Angle.Media,
