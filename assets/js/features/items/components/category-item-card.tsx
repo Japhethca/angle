@@ -1,12 +1,14 @@
-import { Link } from '@inertiajs/react';
-import { Heart, Clock, Gavel } from 'lucide-react';
-import type { CategoryItemCard as CategoryItemCardType } from '@/ash_rpc';
-import { CountdownTimer } from '@/shared/components/countdown-timer';
-import { formatNaira } from '@/lib/format';
-import { useAuthGuard } from '@/features/auth';
-import { useWatchlistToggle } from '@/features/watchlist';
+import { Link } from "@inertiajs/react";
+import { Heart, Clock, Gavel } from "lucide-react";
+import type { CategoryItemCard as CategoryItemCardType } from "@/ash_rpc";
+import type { ImageData } from "@/lib/image-url";
+import { ResponsiveImage } from "@/components/image-upload";
+import { CountdownTimer } from "@/shared/components/countdown-timer";
+import { formatNaira } from "@/lib/format";
+import { useAuthGuard } from "@/features/auth";
+import { useWatchlistToggle } from "@/features/watchlist";
 
-export type CategoryItem = CategoryItemCardType[number];
+export type CategoryItem = CategoryItemCardType[number] & { coverImage?: ImageData | null };
 
 interface CategoryItemCardProps {
   item: CategoryItem;
@@ -27,9 +29,17 @@ export function CategoryItemCard({ item, watchlistEntryId = null }: CategoryItem
       <Link href={itemUrl} className="block">
         {/* Image */}
         <div className="relative aspect-square overflow-hidden rounded-2xl bg-surface-muted sm:aspect-[9/10]">
-          <div className="flex h-full items-center justify-center text-content-placeholder">
-            <Gavel className="size-16" />
-          </div>
+          {item.coverImage ? (
+            <ResponsiveImage
+              image={item.coverImage}
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              alt={item.title}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-content-placeholder">
+              <Gavel className="size-16" />
+            </div>
+          )}
 
           {/* Watchlist heart */}
           <button

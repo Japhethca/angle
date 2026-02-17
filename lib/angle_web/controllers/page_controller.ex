@@ -1,18 +1,27 @@
 defmodule AngleWeb.PageController do
   use AngleWeb, :controller
 
+  alias AngleWeb.ImageHelpers
+
   @published_filter %{publication_status: "published"}
 
   @spec home(Plug.Conn.t(), any()) :: Plug.Conn.t()
   def home(conn, _params) do
-    featured_items = run_item_query(conn, @published_filter, nil, %{limit: 5})
-    recommended_items = run_item_query(conn, @published_filter, nil, %{limit: 8})
+    featured_items =
+      run_item_query(conn, @published_filter, nil, %{limit: 5})
+      |> ImageHelpers.attach_cover_images()
+
+    recommended_items =
+      run_item_query(conn, @published_filter, nil, %{limit: 8})
+      |> ImageHelpers.attach_cover_images()
 
     ending_soon_items =
       run_item_query(conn, @published_filter, "++end_time", %{limit: 8})
+      |> ImageHelpers.attach_cover_images()
 
     hot_items =
       run_item_query(conn, @published_filter, "--view_count", %{limit: 8})
+      |> ImageHelpers.attach_cover_images()
 
     categories = run_category_query(conn)
 

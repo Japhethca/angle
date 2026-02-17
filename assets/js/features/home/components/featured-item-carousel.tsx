@@ -1,13 +1,15 @@
-import { useState } from 'react';
-import { Link } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight, Gavel, Eye, Heart } from 'lucide-react';
-import type { HomepageItemCard } from '@/ash_rpc';
-import { CountdownTimer } from '@/shared/components/countdown-timer';
-import { formatNaira } from '@/lib/format';
-import { useAuthGuard } from '@/features/auth';
-import { useWatchlistToggle } from '@/features/watchlist';
+import { useState } from "react";
+import { Link } from "@inertiajs/react";
+import { ChevronLeft, ChevronRight, Gavel, Eye, Heart } from "lucide-react";
+import type { HomepageItemCard } from "@/ash_rpc";
+import type { ImageData } from "@/lib/image-url";
+import { ResponsiveImage } from "@/components/image-upload";
+import { CountdownTimer } from "@/shared/components/countdown-timer";
+import { formatNaira } from "@/lib/format";
+import { useAuthGuard } from "@/features/auth";
+import { useWatchlistToggle } from "@/features/watchlist";
 
-type Item = HomepageItemCard[number];
+type Item = HomepageItemCard[number] & { coverImage?: ImageData | null };
 
 interface FeaturedItemCarouselProps {
   items: Item[];
@@ -75,9 +77,18 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
           <div className="relative">
             {/* Large product image area */}
             <div className="relative mx-auto aspect-[16/7] max-w-full overflow-hidden rounded-2xl bg-surface-secondary">
-              <div className="flex h-full items-center justify-center text-content-placeholder">
-                <Gavel className="size-24" />
-              </div>
+              {activeItem.coverImage ? (
+                <ResponsiveImage
+                  image={activeItem.coverImage}
+                  sizes="100vw"
+                  alt={activeItem.title}
+                  loading="eager"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-content-placeholder">
+                  <Gavel className="size-24" />
+                </div>
+              )}
 
               {/* Navigation arrows */}
               <button
@@ -139,9 +150,18 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
         {/* Mobile layout */}
         <div className="lg:hidden">
           <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-surface-secondary">
-            <div className="flex h-full items-center justify-center text-content-placeholder">
-              <Gavel className="size-16" />
-            </div>
+            {activeItem.coverImage ? (
+              <ResponsiveImage
+                image={activeItem.coverImage}
+                sizes="100vw"
+                alt={activeItem.title}
+                loading="eager"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center text-content-placeholder">
+                <Gavel className="size-16" />
+              </div>
+            )}
 
             {/* Arrows at bottom */}
             <div className="absolute bottom-4 right-4 flex gap-2">

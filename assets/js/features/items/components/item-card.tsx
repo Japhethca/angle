@@ -1,12 +1,14 @@
-import { Link } from '@inertiajs/react';
-import { Heart, Clock, Gavel, ArrowRight } from 'lucide-react';
-import type { HomepageItemCard } from '@/ash_rpc';
-import { CountdownTimer } from '@/shared/components/countdown-timer';
-import { formatNaira } from '@/lib/format';
-import { useAuthGuard, AuthLink } from '@/features/auth';
-import { useWatchlistToggle } from '@/features/watchlist';
+import { Link } from "@inertiajs/react";
+import { Heart, Clock, Gavel, ArrowRight } from "lucide-react";
+import type { HomepageItemCard } from "@/ash_rpc";
+import type { ImageData } from "@/lib/image-url";
+import { ResponsiveImage } from "@/components/image-upload";
+import { CountdownTimer } from "@/shared/components/countdown-timer";
+import { formatNaira } from "@/lib/format";
+import { useAuthGuard, AuthLink } from "@/features/auth";
+import { useWatchlistToggle } from "@/features/watchlist";
 
-type ItemCardItem = HomepageItemCard[number];
+type ItemCardItem = HomepageItemCard[number] & { coverImage?: ImageData | null };
 
 interface ItemCardProps {
   item: ItemCardItem;
@@ -28,10 +30,18 @@ export function ItemCard({ item, badge, watchlistEntryId = null }: ItemCardProps
       <Link href={itemUrl} className="block">
         {/* Image area */}
         <div className="relative aspect-[9/10] overflow-hidden rounded-2xl bg-surface-muted lg:aspect-[9/10]">
-          {/* Placeholder */}
-          <div className="flex h-full items-center justify-center text-content-placeholder">
-            <Gavel className="size-12 lg:size-16" />
-          </div>
+          {/* Image or placeholder */}
+          {item.coverImage ? (
+            <ResponsiveImage
+              image={item.coverImage}
+              sizes="(max-width: 640px) 85vw, (max-width: 1024px) 320px, 432px"
+              alt={item.title}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-content-placeholder">
+              <Gavel className="size-12 lg:size-16" />
+            </div>
+          )}
 
           {/* Watchlist heart */}
           <button

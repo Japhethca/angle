@@ -2,6 +2,8 @@ defmodule AngleWeb.ItemsController do
   use AngleWeb, :controller
   require Ash.Query
 
+  alias AngleWeb.ImageHelpers
+
   @published_filter %{publication_status: "published"}
 
   def new(conn, _params) do
@@ -15,9 +17,15 @@ defmodule AngleWeb.ItemsController do
       {:ok, item} ->
         similar_items =
           load_similar_items(conn, item["id"], item["category"] && item["category"]["id"])
+          |> ImageHelpers.attach_cover_images()
 
         seller = load_seller(conn, item["createdById"])
-        item = Map.put(item, "user", seller)
+        images = ImageHelpers.load_item_images(item["id"])
+
+        item =
+          item
+          |> Map.put("user", seller)
+          |> Map.put("images", images)
 
         conn
         |> assign_prop(:item, item)

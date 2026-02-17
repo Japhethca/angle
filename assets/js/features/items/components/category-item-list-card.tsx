@@ -1,5 +1,6 @@
 import { Link } from "@inertiajs/react";
 import { Heart, Clock, Gavel } from "lucide-react";
+import { ResponsiveImage } from "@/components/image-upload";
 import { CountdownTimer } from "@/shared/components/countdown-timer";
 import { formatNaira } from "@/lib/format";
 import { useAuthGuard } from "@/features/auth";
@@ -25,9 +26,17 @@ export function CategoryItemListCard({ item, watchlistEntryId = null }: Category
       {/* Thumbnail */}
       <Link href={itemUrl} className="shrink-0">
         <div className="relative size-[100px] overflow-hidden rounded-lg bg-surface-muted">
-          <div className="flex h-full items-center justify-center text-content-placeholder">
-            <Gavel className="size-8" />
-          </div>
+          {item.coverImage ? (
+            <ResponsiveImage
+              image={item.coverImage}
+              sizes="100px"
+              alt={item.title}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-content-placeholder">
+              <Gavel className="size-8" />
+            </div>
+          )}
         </div>
       </Link>
 

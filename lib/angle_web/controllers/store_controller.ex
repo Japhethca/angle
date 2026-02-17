@@ -2,6 +2,8 @@ defmodule AngleWeb.StoreController do
   use AngleWeb, :controller
   require Ash.Query
 
+  alias AngleWeb.ImageHelpers
+
   @items_per_page 20
 
   @valid_tabs ~w(auctions history reviews)
@@ -16,10 +18,12 @@ defmodule AngleWeb.StoreController do
       seller ->
         tab = validate_tab(params["tab"])
         category_summary = build_category_summary(seller["id"])
+        logo_url = load_seller_logo_url(seller["id"])
 
         conn =
           conn
           |> assign_prop(:seller, seller)
+          |> assign_prop(:logo_url, logo_url)
           |> assign_prop(:category_summary, category_summary)
           |> assign_prop(:active_tab, tab)
           |> assign_prop(:watchlisted_map, load_watchlisted_map(conn))
@@ -40,6 +44,8 @@ defmodule AngleWeb.StoreController do
                 "history" -> load_seller_items(conn, seller["id"], :history)
                 _ -> load_seller_items(conn, seller["id"], :active)
               end
+
+            items = ImageHelpers.attach_cover_images(items)
 
             conn
             |> assign_prop(:items, items)
@@ -100,6 +106,34 @@ defmodule AngleWeb.StoreController do
     case AshTypescript.Rpc.run_typed_query(:angle, :seller_review_card, params, conn) do
       %{"success" => true, "data" => data} -> extract_results(data)
       _ -> []
+    end
+  end
+
+  defp load_seller_logo_url(seller_id) do
+    case Angle.Accounts.StoreProfile
+         |> Ash.Query.filter(user_id == ^seller_id)
+         |> Ash.read_one(authorize?: false) do
+      {:ok, nil} ->
+        nil
+
+      {:ok, profile} ->
+        case Angle.Media.Image
+             |> Ash.Query.for_read(:by_owner, %{owner_type: :store_logo, owner_id: profile.id},
+               authorize?: false
+             )
+             |> Ash.read!() do
+          [image | _] ->
+            case image.variants do
+              %{"thumbnail" => url} -> url
+              _ -> nil
+            end
+
+          _ ->
+            nil
+        end
+
+      _ ->
+        nil
     end
   end
 
