@@ -99,7 +99,7 @@ defmodule AngleWeb.UploadController do
 
     with {:ok, item_uuid} <- parse_uuid(item_id),
          :ok <- verify_ownership(user, :item, item_uuid),
-         {:ok, loaded_images} <- load_images_by_ids(image_ids) do
+         {:ok, loaded_images} <- load_images_by_ids(image_ids, :item, item_uuid) do
       case reorder_images_in_transaction(loaded_images, user) do
         {:ok, images} ->
           conn
@@ -275,13 +275,24 @@ defmodule AngleWeb.UploadController do
   defp storage_prefix(:user_avatar, owner_id), do: "avatars/#{owner_id}"
   defp storage_prefix(:store_logo, owner_id), do: "logos/#{owner_id}"
 
-  defp load_images_by_ids(image_ids) do
+  defp load_images_by_ids(image_ids, expected_owner_type, expected_owner_id) do
     Enum.reduce_while(image_ids, {:ok, []}, fn id, {:ok, acc} ->
       case get_image(id) do
-        {:ok, image} -> {:cont, {:ok, acc ++ [image]}}
-        {:error, :not_found} -> {:halt, {:error, :not_found}}
+        {:ok, image} ->
+          if image.owner_type == expected_owner_type and image.owner_id == expected_owner_id do
+            {:cont, {:ok, [image | acc]}}
+          else
+            {:halt, {:error, :forbidden}}
+          end
+
+        {:error, :not_found} ->
+          {:halt, {:error, :not_found}}
       end
     end)
+    |> case do
+      {:ok, images} -> {:ok, Enum.reverse(images)}
+      error -> error
+    end
   end
 
   defp reorder_images_in_transaction(loaded_images, user) do

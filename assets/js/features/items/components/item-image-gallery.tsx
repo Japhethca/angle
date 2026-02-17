@@ -172,10 +172,11 @@ export function ItemImageGallery({ title, images = [] }: ItemImageGalleryProps) 
 
       {/* Mobile: full-width single image with dots */}
       <div className="lg:hidden">
-        <div
+        <button
+          type="button"
           {...mobileSwipe}
           onClick={() => openLightbox(mobileIndex)}
-          className="w-full cursor-pointer"
+          className="w-full"
         >
           <div className="aspect-[4/3] overflow-hidden rounded-2xl bg-surface-muted">
             <ResponsiveImage
@@ -185,7 +186,7 @@ export function ItemImageGallery({ title, images = [] }: ItemImageGalleryProps) 
               loading="eager"
             />
           </div>
-        </div>
+        </button>
 
         {images.length > 1 && (
           <div className="mt-3 flex justify-center gap-1.5">
@@ -193,7 +194,10 @@ export function ItemImageGallery({ title, images = [] }: ItemImageGalleryProps) 
               <button
                 type="button"
                 key={img.id}
-                onClick={() => openLightbox(idx)}
+                onClick={() => {
+                  setMobileIndex(idx);
+                  openLightbox(idx);
+                }}
                 className={cn(
                   "size-2 rounded-full transition-colors",
                   idx === mobileIndex ? "bg-primary-600" : "bg-surface-emphasis"
