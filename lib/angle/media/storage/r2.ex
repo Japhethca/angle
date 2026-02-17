@@ -10,7 +10,7 @@ defmodule Angle.Media.Storage.R2 do
     body = File.read!(local_path)
 
     bucket()
-    |> ExAws.S3.put_object(remote_key, body, content_type: content_type, acl: :public_read)
+    |> ExAws.S3.put_object(remote_key, body, content_type: content_type)
     |> ExAws.request()
     |> case do
       {:ok, _} -> :ok

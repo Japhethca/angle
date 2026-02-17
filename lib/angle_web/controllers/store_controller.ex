@@ -113,27 +113,9 @@ defmodule AngleWeb.StoreController do
     case Angle.Accounts.StoreProfile
          |> Ash.Query.filter(user_id == ^seller_id)
          |> Ash.read_one(authorize?: false) do
-      {:ok, nil} ->
-        nil
-
-      {:ok, profile} ->
-        case Angle.Media.Image
-             |> Ash.Query.for_read(:by_owner, %{owner_type: :store_logo, owner_id: profile.id},
-               authorize?: false
-             )
-             |> Ash.read!() do
-          [image | _] ->
-            case image.variants do
-              %{"thumbnail" => url} -> url
-              _ -> nil
-            end
-
-          _ ->
-            nil
-        end
-
-      _ ->
-        nil
+      {:ok, nil} -> nil
+      {:ok, profile} -> ImageHelpers.load_owner_thumbnail_url(:store_logo, profile.id)
+      _ -> nil
     end
   end
 

@@ -187,22 +187,9 @@ defmodule AngleWeb.Plugs.Auth do
     get_session(conn, :current_user_id)
   end
 
-  # Get the user's avatar thumbnail URL, if one exists
+  # Get the user's avatar thumbnail URL, using the shared helper
   defp get_avatar_url(user) do
-    case Angle.Media.Image
-         |> Ash.Query.for_read(:by_owner, %{owner_type: :user_avatar, owner_id: user.id},
-           authorize?: false
-         )
-         |> Ash.read!() do
-      [image | _] ->
-        case image.variants do
-          %{"thumbnail" => url} -> url
-          _ -> nil
-        end
-
-      _ ->
-        nil
-    end
+    AngleWeb.ImageHelpers.load_owner_thumbnail_url(:user_avatar, user.id)
   end
 
   # Get all permissions for a user through their roles

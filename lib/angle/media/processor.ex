@@ -4,6 +4,7 @@ defmodule Angle.Media.Processor do
   """
 
   @max_file_size 10 * 1024 * 1024
+  @max_pixel_dimension 8192
   @accepted_types ~w(image/jpeg image/png image/webp)
 
   @variants [
@@ -15,8 +16,17 @@ defmodule Angle.Media.Processor do
   def validate_file(path, mime_type) when mime_type in @accepted_types do
     # Don't trust client-supplied Content-Type alone; verify actual file bytes
     case Image.open(path) do
-      {:ok, _image} -> :ok
-      {:error, _} -> {:error, :invalid_type}
+      {:ok, image} ->
+        {width, height, _bands} = Image.shape(image)
+
+        if width > @max_pixel_dimension or height > @max_pixel_dimension do
+          {:error, :dimensions_too_large}
+        else
+          :ok
+        end
+
+      {:error, _} ->
+        {:error, :invalid_type}
     end
   end
 

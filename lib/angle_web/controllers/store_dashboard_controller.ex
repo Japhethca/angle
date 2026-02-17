@@ -142,20 +142,7 @@ defmodule AngleWeb.StoreDashboardController do
   end
 
   defp load_logo_url_for_profile(profile_id) do
-    case Angle.Media.Image
-         |> Ash.Query.for_read(:by_owner, %{owner_type: :store_logo, owner_id: profile_id},
-           authorize?: false
-         )
-         |> Ash.read!() do
-      [image | _] ->
-        case image.variants do
-          %{"thumbnail" => url} -> url
-          _ -> nil
-        end
-
-      _ ->
-        nil
-    end
+    AngleWeb.ImageHelpers.load_owner_thumbnail_url(:store_logo, profile_id)
   end
 
   defp build_category_summary(user_id) do

@@ -49,6 +49,11 @@ defmodule AngleWeb.UploadController do
       {:error, :invalid_type} ->
         conn |> put_status(422) |> json(%{error: "Invalid file type. Accepted: JPEG, PNG, WebP"})
 
+      {:error, :dimensions_too_large} ->
+        conn
+        |> put_status(422)
+        |> json(%{error: "Image dimensions too large. Maximum 8192x8192 pixels"})
+
       {:error, :file_too_large} ->
         conn |> put_status(422) |> json(%{error: "File too large. Maximum 10MB"})
 
@@ -215,26 +220,15 @@ defmodule AngleWeb.UploadController do
   defp process_and_store(upload, owner_type, owner_id, user) do
     storage_prefix = storage_prefix(owner_type, owner_id)
 
-    with {:ok, variant_result} <- Processor.generate_variants(upload.path) do
-      # Upload variants to storage
-      variant_urls =
-        for {variant_name, local_path} <- variant_result,
-            variant_name in [:thumbnail, :medium, :full],
-            into: %{} do
-          remote_key = "#{storage_prefix}/#{variant_name}.webp"
-          :ok = Storage.upload(local_path, remote_key, "image/webp")
-          {to_string(variant_name), Storage.url(remote_key)}
-        end
-
-      # Upload original
-      original_key = "#{storage_prefix}/original#{Path.extname(upload.filename)}"
-      :ok = Storage.upload(upload.path, original_key, upload.content_type)
-
+    with {:ok, variant_result} <- Processor.generate_variants(upload.path),
+         {:ok, variant_urls} <- upload_variants(variant_result, storage_prefix),
+         original_key = "#{storage_prefix}/original#{Path.extname(upload.filename)}",
+         :ok <- Storage.upload(upload.path, original_key, upload.content_type) do
       # Clean up temp files
       Processor.cleanup(variant_result)
 
       position = next_position(owner_type, owner_id)
-      file_size = File.stat!(upload.path).size
+      {:ok, %{size: file_size}} = File.stat(upload.path)
 
       # Create DB record
       Media.Image
@@ -254,7 +248,27 @@ defmodule AngleWeb.UploadController do
         actor: user
       )
       |> Ash.create()
+    else
+      {:error, _} = error ->
+        Processor.cleanup(%{})
+        error
     end
+  end
+
+  defp upload_variants(variant_result, storage_prefix) do
+    variant_result
+    |> Enum.filter(fn {name, _} -> name in [:thumbnail, :medium, :full] end)
+    |> Enum.reduce_while({:ok, %{}}, fn {variant_name, local_path}, {:ok, acc} ->
+      remote_key = "#{storage_prefix}/#{variant_name}.webp"
+
+      case Storage.upload(local_path, remote_key, "image/webp") do
+        :ok ->
+          {:cont, {:ok, Map.put(acc, to_string(variant_name), Storage.url(remote_key))}}
+
+        {:error, reason} ->
+          {:halt, {:error, {:storage_upload_failed, reason}}}
+      end
+    end)
   end
 
   defp storage_prefix(:item, owner_id), do: "items/#{owner_id}"
@@ -313,23 +327,27 @@ defmodule AngleWeb.UploadController do
   end
 
   defp delete_image_from_storage(image) do
-    # Delete original
-    Storage.delete(image.storage_key)
+    require Logger
+    base_url = Application.get_env(:angle, Angle.Media)[:base_url]
 
-    # Delete variants
-    Enum.each(image.variants, fn {_name, url} ->
-      # Extract key from URL
-      config = Application.get_env(:angle, Angle.Media)
-      base_url = config[:base_url]
+    keys =
+      [image.storage_key] ++
+        Enum.map(image.variants, fn {_name, url} ->
+          if String.starts_with?(url, base_url) do
+            String.replace_prefix(url, "#{base_url}/", "")
+          else
+            url
+          end
+        end)
 
-      key =
-        if String.starts_with?(url, base_url) do
-          String.replace_prefix(url, "#{base_url}/", "")
-        else
-          url
-        end
+    Enum.each(keys, fn key ->
+      case Storage.delete(key) do
+        :ok ->
+          :ok
 
-      Storage.delete(key)
+        {:error, reason} ->
+          Logger.warning("Failed to delete storage key #{key}: #{inspect(reason)}")
+      end
     end)
   end
 
@@ -341,8 +359,7 @@ defmodule AngleWeb.UploadController do
       "variants" => image.variants,
       "position" => image.position,
       "width" => image.width,
-      "height" => image.height,
-      "storage_key" => image.storage_key
+      "height" => image.height
     }
   end
 

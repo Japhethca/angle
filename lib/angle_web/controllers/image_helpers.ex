@@ -44,6 +44,28 @@ defmodule AngleWeb.ImageHelpers do
   def load_item_images(_), do: []
 
   @doc """
+  Returns the thumbnail URL for a given owner, or nil if no image exists.
+  Used for avatars, store logos, or any single-image owner type.
+  """
+  @spec load_owner_thumbnail_url(atom(), String.t()) :: String.t() | nil
+  def load_owner_thumbnail_url(owner_type, owner_id) do
+    case Angle.Media.Image
+         |> Ash.Query.for_read(:by_owner, %{owner_type: owner_type, owner_id: owner_id},
+           authorize?: false
+         )
+         |> Ash.read!() do
+      [image | _] ->
+        case image.variants do
+          %{"thumbnail" => url} -> url
+          _ -> nil
+        end
+
+      _ ->
+        nil
+    end
+  end
+
+  @doc """
   Serializes an image record to a map suitable for JSON/Inertia props.
   """
   def serialize_image(img) do

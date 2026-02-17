@@ -19,10 +19,8 @@ export interface ImageData {
  * Returns the full URL for an image variant.
  * Variant URLs are stored as absolute URLs by the server.
  */
-export function imageUrl(image: ImageData, variant: ImageVariant = "medium"): string {
-  const url = image.variants[variant];
-  if (!url) return "";
-  return url;
+export function imageUrl(image: ImageData, variant: ImageVariant = "medium"): string | undefined {
+  return image.variants[variant] || undefined;
 }
 
 /**
