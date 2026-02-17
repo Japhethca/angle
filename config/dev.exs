@@ -90,3 +90,26 @@ config :swoosh, :api_client, false
 config :angle,
        :paystack_secret_key,
        System.get_env("PAYSTACK_SECRET_KEY") || "sk_test_your_paystack_secret_key"
+
+# R2 credentials for dev (set in .env or shell)
+config :ex_aws,
+  access_key_id: System.get_env("R2_ACCESS_KEY_ID", "test"),
+  secret_access_key: System.get_env("R2_SECRET_ACCESS_KEY", "test")
+
+config :ex_aws, :s3,
+  scheme: "https://",
+  host: System.get_env("R2_ENDPOINT", "localhost"),
+  region: "auto"
+
+config :angle, Angle.Media,
+  storage_module:
+    if(System.get_env("R2_ACCESS_KEY_ID"),
+      do: Angle.Media.Storage.R2,
+      else: Angle.Media.Storage.Local
+    ),
+  bucket: System.get_env("R2_BUCKET", "angle-images-dev"),
+  base_url:
+    if(System.get_env("R2_ACCESS_KEY_ID"),
+      do: System.get_env("IMAGE_BASE_URL", "https://images.example.com"),
+      else: "http://localhost:#{System.get_env("PORT", "4111")}/uploads"
+    )

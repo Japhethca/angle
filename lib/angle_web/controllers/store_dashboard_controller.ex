@@ -53,12 +53,13 @@ defmodule AngleWeb.StoreDashboardController do
 
   def profile(conn, _params) do
     user = conn.assigns.current_user
-    store_profile = load_store_profile(user)
+    {store_profile, logo_url} = load_store_profile_with_logo(user)
     category_summary = build_category_summary(user.id)
     reviews = load_seller_reviews(conn, user.id)
 
     conn
     |> assign_prop(:store_profile, store_profile)
+    |> assign_prop(:logo_url, logo_url)
     |> assign_prop(:category_summary, category_summary)
     |> assign_prop(:user, serialize_user(user))
     |> assign_prop(:reviews, reviews)
@@ -124,14 +125,24 @@ defmodule AngleWeb.StoreDashboardController do
     end
   end
 
-  defp load_store_profile(user) do
+  defp load_store_profile_with_logo(user) do
     case Angle.Accounts.StoreProfile
          |> Ash.Query.filter(user_id == ^user.id)
          |> Ash.read_one(authorize?: false) do
-      {:ok, nil} -> nil
-      {:ok, profile} -> serialize_store_profile(profile)
-      _ -> nil
+      {:ok, nil} ->
+        {nil, nil}
+
+      {:ok, profile} ->
+        logo_url = load_logo_url_for_profile(profile.id)
+        {serialize_store_profile(profile), logo_url}
+
+      _ ->
+        {nil, nil}
     end
+  end
+
+  defp load_logo_url_for_profile(profile_id) do
+    AngleWeb.ImageHelpers.load_owner_thumbnail_url(:store_logo, profile_id)
   end
 
   defp build_category_summary(user_id) do

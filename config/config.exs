@@ -110,7 +110,14 @@ config :spark,
 config :angle,
   ecto_repos: [Angle.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [Angle.Bidding, Angle.Catalog, Angle.Inventory, Angle.Accounts, Angle.Payments]
+  ash_domains: [
+    Angle.Bidding,
+    Angle.Catalog,
+    Angle.Inventory,
+    Angle.Accounts,
+    Angle.Payments,
+    Angle.Media
+  ]
 
 # Configures the endpoint
 config :angle, AngleWeb.Endpoint,
@@ -185,6 +192,15 @@ if Mix.env() == :dev do
       ]
     ]
 end
+
+# Cloudflare R2 (S3-compatible) for image storage
+config :ex_aws,
+  json_codec: Jason,
+  region: "auto"
+
+config :angle, Angle.Media,
+  bucket: "angle-images",
+  base_url: "https://images.angle.ng"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

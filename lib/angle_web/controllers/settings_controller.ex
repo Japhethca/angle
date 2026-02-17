@@ -3,6 +3,8 @@ defmodule AngleWeb.SettingsController do
 
   require Ash.Query
 
+  alias AngleWeb.ImageHelpers
+
   def index(conn, _params) do
     conn
     |> assign_prop(:user, user_profile_data(conn))
@@ -10,8 +12,19 @@ defmodule AngleWeb.SettingsController do
   end
 
   def account(conn, _params) do
+    user = conn.assigns.current_user
+
+    avatar_images =
+      Angle.Media.Image
+      |> Ash.Query.for_read(:by_owner, %{owner_type: :user_avatar, owner_id: user.id},
+        authorize?: false
+      )
+      |> Ash.read!()
+      |> Enum.map(&ImageHelpers.serialize_image/1)
+
     conn
     |> assign_prop(:user, user_profile_data(conn))
+    |> assign_prop(:avatar_images, avatar_images)
     |> render_inertia("settings/account")
   end
 
@@ -71,9 +84,24 @@ defmodule AngleWeb.SettingsController do
       |> Ash.Query.filter(user_id == ^user.id)
       |> Ash.read_one!(authorize?: false)
 
+    logo_images =
+      case store_profile do
+        nil ->
+          []
+
+        profile ->
+          Angle.Media.Image
+          |> Ash.Query.for_read(:by_owner, %{owner_type: :store_logo, owner_id: profile.id},
+            authorize?: false
+          )
+          |> Ash.read!()
+          |> Enum.map(&ImageHelpers.serialize_image/1)
+      end
+
     conn
     |> assign_prop(:user, user_profile_data(conn))
     |> assign_prop(:store_profile, store_profile_data(store_profile))
+    |> assign_prop(:logo_images, logo_images)
     |> render_inertia("settings/store")
   end
 

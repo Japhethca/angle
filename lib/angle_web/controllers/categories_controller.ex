@@ -1,6 +1,8 @@
 defmodule AngleWeb.CategoriesController do
   use AngleWeb, :controller
 
+  alias AngleWeb.ImageHelpers
+
   @items_per_page 20
 
   def index(conn, _params) do
@@ -22,6 +24,7 @@ defmodule AngleWeb.CategoriesController do
         all_ids = [category["id"] | subcategory_ids]
 
         {items, has_more} = load_items_by_category(conn, all_ids)
+        items = ImageHelpers.attach_cover_images(items)
 
         conn
         |> assign_prop(:category, category)
@@ -45,6 +48,7 @@ defmodule AngleWeb.CategoriesController do
 
         if subcategory do
           {items, has_more} = load_items_by_category(conn, [subcategory["id"]])
+          items = ImageHelpers.attach_cover_images(items)
 
           conn
           |> assign_prop(:category, category)

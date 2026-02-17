@@ -77,6 +77,19 @@ if config_env() == :prod do
       System.get_env("PAYSTACK_SECRET_KEY") ||
         raise("Missing environment variable `PAYSTACK_SECRET_KEY`!")
 
+  config :ex_aws,
+    access_key_id: System.fetch_env!("R2_ACCESS_KEY_ID"),
+    secret_access_key: System.fetch_env!("R2_SECRET_ACCESS_KEY")
+
+  config :ex_aws, :s3,
+    scheme: "https://",
+    host: System.fetch_env!("R2_ENDPOINT"),
+    region: "auto"
+
+  config :angle, Angle.Media,
+    bucket: System.fetch_env!("R2_BUCKET"),
+    base_url: System.fetch_env!("IMAGE_BASE_URL")
+
   # ## SSL Support
   #
   # To get SSL working, you will need to add the `https` key

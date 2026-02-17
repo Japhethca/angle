@@ -1,4 +1,6 @@
 import { Gavel, X } from "lucide-react";
+import type { ImageData } from "@/lib/image-url";
+import { ResponsiveImage } from "@/components/image-upload";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
@@ -22,6 +24,7 @@ interface ConfirmBidDialogProps {
   isPending: boolean;
   itemTitle: string;
   bidAmount: string;
+  coverImage?: ImageData | null;
 }
 
 function ItemPreview({
@@ -71,6 +74,7 @@ function DesktopDialog({
   isPending,
   itemTitle,
   bidAmount,
+  coverImage,
 }: ConfirmBidDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -90,9 +94,17 @@ function DesktopDialog({
         </DialogClose>
 
         <div className="flex gap-8">
-          {/* Image placeholder */}
-          <div className="flex flex-1 items-center justify-center rounded-lg bg-surface-muted">
-            <Gavel className="size-16 text-content-placeholder" />
+          {/* Item image */}
+          <div className="flex flex-1 items-center justify-center overflow-hidden rounded-lg bg-surface-muted">
+            {coverImage ? (
+              <ResponsiveImage
+                image={coverImage}
+                sizes="400px"
+                alt={itemTitle}
+              />
+            ) : (
+              <Gavel className="size-16 text-content-placeholder" />
+            )}
           </div>
 
           {/* Details */}
@@ -120,6 +132,7 @@ function MobileDrawer({
   isPending,
   itemTitle,
   bidAmount,
+  coverImage,
 }: ConfirmBidDialogProps) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -142,9 +155,19 @@ function MobileDrawer({
           </DrawerClose>
         </div>
 
-        {/* Image placeholder */}
-        <div className="flex aspect-[4/3] w-full items-center justify-center rounded-xl bg-surface-muted">
-          <Gavel className="size-12 text-content-placeholder" />
+        {/* Item image */}
+        <div className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-surface-muted">
+          {coverImage ? (
+            <ResponsiveImage
+              image={coverImage}
+              sizes="100vw"
+              alt={itemTitle}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <Gavel className="size-12 text-content-placeholder" />
+            </div>
+          )}
         </div>
 
         <div className="mt-4">

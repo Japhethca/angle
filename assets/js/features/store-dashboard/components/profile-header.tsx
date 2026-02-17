@@ -7,9 +7,10 @@ interface ProfileHeaderProps {
   username: string | null;
   avgRating?: number | null;
   reviewCount?: number;
+  logoUrl?: string | null;
 }
 
-export function ProfileHeader({ storeName, username, avgRating, reviewCount }: ProfileHeaderProps) {
+export function ProfileHeader({ storeName, username, avgRating, reviewCount, logoUrl }: ProfileHeaderProps) {
   const handleShare = async () => {
     const storeUrl = `${window.location.origin}/store/${username || ""}`;
     try {
@@ -25,8 +26,16 @@ export function ProfileHeader({ storeName, username, avgRating, reviewCount }: P
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-4">
           {/* Avatar */}
-          <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-surface-muted">
-            <Store className="size-8 text-content-placeholder" />
+          <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted">
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt=""
+                className="size-full object-cover"
+              />
+            ) : (
+              <Store className="size-8 text-content-placeholder" />
+            )}
           </div>
 
           <div>

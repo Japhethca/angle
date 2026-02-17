@@ -37,6 +37,7 @@ interface UserData {
 
 interface StoreProfileProps {
   store_profile: StoreProfileData | null;
+  logo_url: string | null;
   category_summary: CategorySummary[];
   user: UserData;
   reviews?: Array<{
@@ -50,6 +51,7 @@ interface StoreProfileProps {
 
 export default function StoreProfile({
   store_profile: storeProfile,
+  logo_url: logoUrl = null,
   category_summary: categorySummary = [],
   user,
   reviews,
@@ -66,6 +68,7 @@ export default function StoreProfile({
             username={user?.username || null}
             avgRating={user?.avgRating}
             reviewCount={user?.reviewCount}
+            logoUrl={logoUrl}
           />
           <ProfileDetails
             user={user}

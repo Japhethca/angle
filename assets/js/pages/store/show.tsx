@@ -43,6 +43,7 @@ interface CategorySummary {
 
 interface StoreShowProps {
   seller: Seller;
+  logo_url: string | null;
   items: SellerItem[];
   has_more: boolean;
   category_summary: CategorySummary[];
@@ -78,6 +79,7 @@ function formatJoinDate(dateStr: string): string {
 
 export default function StoreShow({
   seller,
+  logo_url: logoUrl = null,
   items: initialItems = [],
   has_more: initialHasMore = false,
   category_summary: categorySummary = [],
@@ -315,8 +317,16 @@ export default function StoreShow({
           {/* Seller info */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
             {/* Avatar */}
-            <div className="flex size-20 shrink-0 items-center justify-center rounded-full bg-surface-muted">
-              <User className="size-10 text-content-placeholder" />
+            <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted">
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  alt=""
+                  className="size-full object-cover"
+                />
+              ) : (
+                <User className="size-10 text-content-placeholder" />
+              )}
             </div>
 
             <div className="space-y-3">

@@ -1,8 +1,16 @@
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Share2, Heart, ChevronRight, Eye } from 'lucide-react';
-import type { ItemDetail, HomepageItemCard } from '@/ash_rpc';
-import { formatNaira } from '@/lib/format';
-import { CountdownTimer } from '@/shared/components/countdown-timer';
+import { Head, Link } from "@inertiajs/react";
+import {
+  ArrowLeft,
+  Share2,
+  Heart,
+  ChevronRight,
+  Eye,
+} from "lucide-react";
+import type { ItemDetail, HomepageItemCard } from "@/ash_rpc";
+import type { ImageData } from "@/lib/image-url";
+import { coverImage as getCoverImage } from "@/lib/image-url";
+import { formatNaira } from "@/lib/format";
+import { CountdownTimer } from "@/shared/components/countdown-timer";
 import {
   ConditionBadge,
   ItemImageGallery,
@@ -22,13 +30,15 @@ interface Seller {
 }
 
 interface ShowProps {
-  item: ItemDetail[number] & { user: Seller | null };
+  item: ItemDetail[number] & { user: Seller | null; images?: ImageData[] };
   similar_items: HomepageItemCard;
   watchlist_entry_id: string | null;
 }
 
 export default function Show({ item, similar_items = [], watchlist_entry_id = null }: ShowProps) {
   const price = item.currentPrice || item.startingPrice;
+  const itemImages = item.images || [];
+  const itemCoverImage = getCoverImage(itemImages);
   const {
     isWatchlisted,
     toggle: toggleWatch,
@@ -91,8 +101,8 @@ export default function Show({ item, similar_items = [], watchlist_entry_id = nu
         {/* Desktop: two-column layout */}
         <div className="hidden gap-8 lg:flex">
           {/* Left column */}
-          <div className="min-w-0 flex-1 space-y-6">
-            <ItemImageGallery title={item.title} />
+          <div className="min-w-0 flex-1 space-y-8">
+            <ItemImageGallery title={item.title} images={itemImages} />
             <SellerCard seller={item.user} />
             <ItemDetailTabs description={item.description} />
             <SimilarItems items={similar_items} />
@@ -132,6 +142,7 @@ export default function Show({ item, similar_items = [], watchlist_entry_id = nu
                 isWatchlisted={isWatchlisted}
                 onToggleWatch={toggleWatch}
                 isWatchPending={isWatchPending}
+                coverImage={itemCoverImage}
               />
             </div>
           </div>
@@ -139,7 +150,7 @@ export default function Show({ item, similar_items = [], watchlist_entry_id = nu
 
         {/* Mobile: single-column stacked layout */}
         <div className="space-y-6 lg:hidden">
-          <ItemImageGallery title={item.title} />
+          <ItemImageGallery title={item.title} images={itemImages} />
 
           {/* Item header */}
           <div className="space-y-2">
@@ -172,6 +183,7 @@ export default function Show({ item, similar_items = [], watchlist_entry_id = nu
             isWatchlisted={isWatchlisted}
             onToggleWatch={toggleWatch}
             isWatchPending={isWatchPending}
+            coverImage={itemCoverImage}
           />
 
           <ItemDetailTabs description={item.description} />

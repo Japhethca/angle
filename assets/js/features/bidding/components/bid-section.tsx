@@ -1,12 +1,13 @@
-import { useState } from 'react';
-import { Minus, Plus, Info, Heart, Share2 } from 'lucide-react';
-import { useAuth } from '@/features/auth';
-import { useAshMutation } from '@/hooks/use-ash-query';
-import { makeBid, buildCSRFHeaders } from '@/ash_rpc';
-import { formatNaira } from '@/lib/format';
-import { router } from '@inertiajs/react';
-import { toast } from 'sonner';
-import { ConfirmBidDialog } from './confirm-bid-dialog';
+import { useState } from "react";
+import { Minus, Plus, Info, Heart, Share2 } from "lucide-react";
+import { useAuth } from "@/features/auth";
+import { useAshMutation } from "@/hooks/use-ash-query";
+import { makeBid, buildCSRFHeaders } from "@/ash_rpc";
+import type { ImageData } from "@/lib/image-url";
+import { formatNaira } from "@/lib/format";
+import { router } from "@inertiajs/react";
+import { toast } from "sonner";
+import { ConfirmBidDialog } from "./confirm-bid-dialog";
 
 interface BidSectionProps {
   itemId: string;
@@ -18,6 +19,7 @@ interface BidSectionProps {
   isWatchlisted?: boolean;
   onToggleWatch?: () => void;
   isWatchPending?: boolean;
+  coverImage?: ImageData | null;
 }
 
 const QUICK_ADD_AMOUNTS = [1000, 5000, 10000];
@@ -32,6 +34,7 @@ export function BidSection({
   isWatchlisted = false,
   onToggleWatch,
   isWatchPending = false,
+  coverImage,
 }: BidSectionProps) {
   const { authenticated } = useAuth();
   const increment = bidIncrement ? parseFloat(bidIncrement) : 1000;
@@ -175,6 +178,7 @@ export function BidSection({
         isPending={isPending}
         itemTitle={itemTitle}
         bidAmount={formatNaira(bidAmount)}
+        coverImage={coverImage}
       />
     </div>
   );

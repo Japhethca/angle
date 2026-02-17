@@ -3,10 +3,15 @@ defmodule AngleWeb.WatchlistController do
 
   require Ash.Query
 
+  alias AngleWeb.ImageHelpers
+
   def index(conn, params) do
     category_id = params["category"]
 
-    all_items = load_watchlist_items(conn)
+    all_items =
+      load_watchlist_items(conn)
+      |> ImageHelpers.attach_cover_images()
+
     categories = extract_categories(all_items)
     items = filter_by_category(all_items, category_id)
     watchlisted_map = load_watchlisted_map(conn)

@@ -1,12 +1,14 @@
-import { Link, router } from '@inertiajs/react';
-import { Star, Gavel, Heart } from 'lucide-react';
-import type { WatchlistItemCard as WatchlistItemCardType } from '@/ash_rpc';
-import { CountdownTimer } from '@/shared/components/countdown-timer';
-import { ConditionBadge } from '@/features/items';
-import { useWatchlistToggle } from '@/features/watchlist';
-import { formatNaira } from '@/lib/format';
+import { Link, router } from "@inertiajs/react";
+import { Star, Gavel, Heart } from "lucide-react";
+import type { WatchlistItemCard as WatchlistItemCardType } from "@/ash_rpc";
+import type { ImageData } from "@/lib/image-url";
+import { ResponsiveImage } from "@/components/image-upload";
+import { CountdownTimer } from "@/shared/components/countdown-timer";
+import { ConditionBadge } from "@/features/items";
+import { useWatchlistToggle } from "@/features/watchlist";
+import { formatNaira } from "@/lib/format";
 
-export type WatchlistItem = WatchlistItemCardType[number];
+export type WatchlistItem = WatchlistItemCardType[number] & { coverImage?: ImageData | null };
 
 interface WatchlistItemCardProps {
   item: WatchlistItem;
@@ -33,9 +35,17 @@ export function WatchlistItemCard({ item, watchlistEntryId }: WatchlistItemCardP
       {/* Image */}
       <Link href={itemUrl} className="relative shrink-0">
         <div className="aspect-square w-full overflow-hidden rounded-2xl bg-surface-muted lg:h-[304px] lg:w-[304px]">
-          <div className="flex h-full items-center justify-center text-content-placeholder">
-            <Gavel className="size-12 lg:size-16" />
-          </div>
+          {item.coverImage ? (
+            <ResponsiveImage
+              image={item.coverImage}
+              sizes="(max-width: 1024px) 100vw, 304px"
+              alt={item.title}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-content-placeholder">
+              <Gavel className="size-12 lg:size-16" />
+            </div>
+          )}
         </div>
         <button
           className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full border border-white/20 bg-black/20 backdrop-blur-sm transition-colors hover:bg-black/30"

@@ -21,6 +21,7 @@ export interface User {
   confirmed_at: string | null;
   roles: string[];
   permissions: string[];
+  avatar_url: string | null;
 }
 
 export interface AuthState {

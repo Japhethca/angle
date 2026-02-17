@@ -9,6 +9,7 @@ import { updateProfile, buildCSRFHeaders } from "@/ash_rpc";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import type { ImageData } from "@/lib/image-url";
 import { ProfileImageSection } from "./profile-image-section";
 import { VerificationSection } from "./verification-section";
 import { QuickSignInSection } from "./quick-sign-in-section";
@@ -29,9 +30,10 @@ interface AccountFormProps {
     phone_number: string | null;
     location: string | null;
   };
+  avatarImages: ImageData[];
 }
 
-export function AccountForm({ user }: AccountFormProps) {
+export function AccountForm({ user, avatarImages }: AccountFormProps) {
   const {
     register,
     handleSubmit,
@@ -75,7 +77,7 @@ export function AccountForm({ user }: AccountFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Profile Image */}
-      <ProfileImageSection />
+      <ProfileImageSection userId={user.id} avatarImages={avatarImages} />
 
       {/* Form Fields */}
       <div className="space-y-5">

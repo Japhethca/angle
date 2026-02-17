@@ -1,7 +1,7 @@
 import { Link, router } from "@inertiajs/react";
 import { ChevronRight, LogOut } from "lucide-react";
 import { useAuth } from "@/features/auth";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface UserMenuContentProps {
   onNavigate?: () => void;
@@ -27,6 +27,9 @@ export function UserMenuContent({ onNavigate }: UserMenuContentProps) {
       {/* User details */}
       <div className="flex flex-col items-center gap-2">
         <Avatar className="size-20">
+          {user.avatar_url && (
+            <AvatarImage src={user.avatar_url} alt="" />
+          )}
           <AvatarFallback className="bg-[#ffe7cc] text-2xl font-medium text-[#a34400]">
             {getInitials(user.full_name)}
           </AvatarFallback>
