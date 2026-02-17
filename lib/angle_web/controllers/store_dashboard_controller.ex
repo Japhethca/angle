@@ -58,7 +58,7 @@ defmodule AngleWeb.StoreDashboardController do
         |> assign_prop(:item, item)
         |> assign_prop(:images, images)
         |> assign_prop(:categories, categories)
-        |> assign_prop(:storeProfile, store_profile_data)
+        |> assign_prop(:store_profile, store_profile_data)
         |> assign_prop(:step, step)
         |> render_inertia("store/listings/edit")
 
@@ -352,7 +352,10 @@ defmodule AngleWeb.StoreDashboardController do
   end
 
   defp load_draft_item(conn, id, user_id) do
-    params = %{filter: %{id: id, created_by_id: user_id}, page: %{limit: 1}}
+    params = %{
+      filter: %{id: id, created_by_id: user_id, publication_status: "draft"},
+      page: %{limit: 1}
+    }
 
     case AshTypescript.Rpc.run_typed_query(:angle, :item_detail, params, conn) do
       %{"success" => true, "data" => data} ->
@@ -371,13 +374,10 @@ defmodule AngleWeb.StoreDashboardController do
   end
 
   defp serialize_preview_seller(user) do
-    user = Ash.load!(user, [:avg_rating, :review_count], authorize?: false)
-
     %{
       "id" => user.id,
       "fullName" => user.full_name,
-      "username" => user.username,
-      "publishedItemCount" => nil
+      "username" => user.username
     }
   end
 end

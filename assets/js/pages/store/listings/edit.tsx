@@ -11,7 +11,7 @@ interface EditPageProps {
   item: ItemDetail[number];
   images: ImageData[];
   categories: Category[];
-  storeProfile: { deliveryPreference: string | null } | null;
+  store_profile: { deliveryPreference: string | null } | null;
   step: number;
 }
 
@@ -19,7 +19,7 @@ export default function EditPage({
   item,
   images,
   categories,
-  storeProfile,
+  store_profile,
   step,
 }: EditPageProps) {
   const attrs = (item.attributes || {}) as Record<string, string>;
@@ -66,7 +66,7 @@ export default function EditPage({
       <StoreLayout title="Edit Listing">
         <ListingWizard
           categories={categories}
-          storeProfile={storeProfile}
+          storeProfile={store_profile}
           initialData={initialData}
         />
       </StoreLayout>

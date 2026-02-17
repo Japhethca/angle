@@ -18,7 +18,7 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
       <div className="hidden md:flex items-center gap-0">
         {STEPS.map((step, index) => {
           const isCompleted = currentStep > step.number;
-          const isActive = currentStep === step.number || (currentStep === 4 && step.number === 3);
+          const isActive = currentStep === step.number;
           const isLast = index === STEPS.length - 1;
 
           return (
@@ -66,7 +66,7 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
       {/* Mobile: progress bar */}
       <div className="md:hidden">
         <div className="flex gap-1.5">
-          {[1, 2, 3, 4].map((step) => (
+          {[1, 2, 3].map((step) => (
             <div
               key={step}
               className={cn(

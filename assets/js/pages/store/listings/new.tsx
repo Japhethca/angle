@@ -4,15 +4,15 @@ import { StoreLayout } from "@/features/store-dashboard";
 
 interface NewItemPageProps {
   categories: Category[];
-  storeProfile: { deliveryPreference: string | null } | null;
+  store_profile: { deliveryPreference: string | null } | null;
 }
 
-export default function NewItem({ categories, storeProfile }: NewItemPageProps) {
+export default function NewItem({ categories, store_profile }: NewItemPageProps) {
   return (
     <>
       <Head title="List An Item" />
       <StoreLayout title="List An Item">
-        <ListingWizard categories={categories} storeProfile={storeProfile} />
+        <ListingWizard categories={categories} storeProfile={store_profile} />
       </StoreLayout>
     </>
   );

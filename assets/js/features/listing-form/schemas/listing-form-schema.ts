@@ -15,7 +15,10 @@ export const auctionInfoSchema = z.object({
     (val) => !isNaN(Number(val)) && Number(val) > 0,
     "Must be a positive number"
   ),
-  reservePrice: z.string().optional().default(""),
+  reservePrice: z.string().optional().default("").refine(
+    (val) => val === "" || (!isNaN(Number(val)) && Number(val) > 0),
+    "Must be a positive number"
+  ),
   auctionDuration: z.enum(["24h", "3d", "7d"]),
 });
 
@@ -28,7 +31,7 @@ export type AuctionInfoData = z.infer<typeof auctionInfoSchema>;
 export type LogisticsData = z.infer<typeof logisticsSchema>;
 
 export type ListingFormState = {
-  currentStep: 1 | 2 | 3 | 4;
+  currentStep: 1 | 2 | 3;
   draftItemId: string | null;
   basicDetails: BasicDetailsData;
   auctionInfo: AuctionInfoData;
@@ -40,7 +43,7 @@ export type ListingFormState = {
 };
 
 export type ListingFormAction =
-  | { type: "SET_STEP"; step: 1 | 2 | 3 | 4 }
+  | { type: "SET_STEP"; step: 1 | 2 | 3 }
   | { type: "SET_DRAFT_ID"; id: string }
   | { type: "SET_BASIC_DETAILS"; data: BasicDetailsData }
   | { type: "SET_AUCTION_INFO"; data: AuctionInfoData }

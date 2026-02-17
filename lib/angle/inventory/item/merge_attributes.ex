@@ -1,6 +1,6 @@
 defmodule Angle.Inventory.Item.MergeAttributes do
   @moduledoc """
-  Ash change that merges incoming attributes with existing ones
+  Ash change that shallow-merges incoming attributes with existing ones
   instead of replacing the entire map. Only runs when attributes
   is actually being changed, to avoid unnecessary DB writes.
   """
