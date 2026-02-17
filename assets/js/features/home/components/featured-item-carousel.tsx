@@ -126,7 +126,7 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
                 />
                 <Link
                   href={itemUrl}
-                  className="flex items-center gap-2 rounded-full bg-primary-600 px-6 py-2.5 text-sm font-medium text-content transition-colors hover:bg-primary-600/90"
+                  className="flex items-center gap-2 rounded-full bg-primary-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-600/90"
                 >
                   Bid
                   <ChevronRight className="size-4" />
@@ -147,13 +147,13 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
             <div className="absolute bottom-4 right-4 flex gap-2">
               <button
                 onClick={goPrev}
-                className="flex size-8 items-center justify-center rounded-full bg-content shadow-md"
+                className="flex size-8 items-center justify-center rounded-full bg-surface/80 shadow-md backdrop-blur-sm"
               >
                 <ChevronLeft className="size-4 text-content" />
               </button>
               <button
                 onClick={goNext}
-                className="flex size-8 items-center justify-center rounded-full bg-content shadow-md"
+                className="flex size-8 items-center justify-center rounded-full bg-surface/80 shadow-md backdrop-blur-sm"
               >
                 <ChevronRight className="size-4 text-content" />
               </button>
@@ -187,7 +187,7 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
               </div>
               <Link
                 href={itemUrl}
-                className="flex flex-1 items-center justify-center gap-2 rounded-full bg-primary-600 py-2.5 text-sm font-medium text-content"
+                className="flex flex-1 items-center justify-center gap-2 rounded-full bg-primary-600 py-2.5 text-sm font-medium text-white"
               >
                 Bid
                 <ChevronRight className="size-4" />

@@ -52,7 +52,7 @@ export function CategoryItemCard({ item, watchlistEntryId = null }: CategoryItem
 
           {/* Almost gone badge */}
           {item.endTime && isEndingSoon(item.endTime) && (
-            <div className="absolute bottom-4 left-0 flex items-center gap-1.5 rounded-r-lg bg-feedback-error px-3 py-1.5 text-xs font-medium text-content">
+            <div className="absolute bottom-4 left-0 flex items-center gap-1.5 rounded-r-lg bg-feedback-error px-3 py-1.5 text-xs font-medium text-white">
               <Clock className="size-3" />
               Almost gone
             </div>
