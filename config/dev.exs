@@ -102,5 +102,6 @@ config :ex_aws, :s3,
   region: "auto"
 
 config :angle, Angle.Media,
+  storage_module: Angle.Media.Storage.Local,
   bucket: System.get_env("R2_BUCKET", "angle-images-dev"),
-  base_url: System.get_env("IMAGE_BASE_URL", "http://localhost:4000/uploads")
+  base_url: "http://localhost:#{System.get_env("PORT", "4111")}/uploads"
