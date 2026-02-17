@@ -10,7 +10,7 @@ import {
   Bell,
   SlidersHorizontal,
   Scale,
-  HelpCircle,
+  Headset,
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -23,7 +23,7 @@ const settingsMenuItems = [
   { label: "Notifications", href: "/settings/notifications", icon: Bell },
   { label: "Preferences", href: "/settings/preferences", icon: SlidersHorizontal },
   { label: "Legal", href: "/settings/legal", icon: Scale },
-  { label: "Support", href: "/settings/support", icon: HelpCircle },
+  { label: "Support", href: "/settings/support", icon: Headset },
 ];
 
 interface SettingsLayoutProps {
