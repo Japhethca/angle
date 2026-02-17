@@ -38,17 +38,38 @@ export interface Category {
   categories: Subcategory[];
 }
 
+interface InitialWizardData {
+  draftItemId: string;
+  basicDetails: BasicDetailsData;
+  auctionInfo: AuctionInfoData;
+  logistics: LogisticsData;
+  uploadedImages: ListingFormState["uploadedImages"];
+  step: 1 | 2 | 3;
+}
+
 interface ListingWizardProps {
   categories: Category[];
   storeProfile: { deliveryPreference: string | null } | null;
+  initialData?: InitialWizardData;
 }
 
-export function ListingWizard({ categories, storeProfile }: ListingWizardProps) {
+export function ListingWizard({ categories, storeProfile, initialData }: ListingWizardProps) {
   const defaultDelivery = mapDeliveryPreference(storeProfile?.deliveryPreference);
 
   const [state, dispatch] = useReducer(listingFormReducer, {
     ...initialFormState,
-    logistics: { deliveryPreference: defaultDelivery },
+    ...(initialData
+      ? {
+          currentStep: initialData.step,
+          draftItemId: initialData.draftItemId,
+          basicDetails: initialData.basicDetails,
+          auctionInfo: initialData.auctionInfo,
+          logistics: initialData.logistics,
+          uploadedImages: initialData.uploadedImages,
+        }
+      : {
+          logistics: { deliveryPreference: defaultDelivery },
+        }),
   });
 
   const handleBasicDetailsNext = useCallback((data: BasicDetailsData, draftId: string, uploadedImages: ListingFormState["uploadedImages"]) => {
