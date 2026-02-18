@@ -218,7 +218,8 @@ defmodule AngleWeb.UploadController do
   end
 
   defp process_and_store(upload, owner_type, owner_id, user) do
-    storage_prefix = storage_prefix(owner_type, owner_id)
+    image_id = Ecto.UUID.generate()
+    storage_prefix = "#{storage_prefix(owner_type, owner_id)}/#{image_id}"
 
     with {:ok, variant_result} <- Processor.generate_variants(upload.path),
          {:ok, variant_urls} <- upload_variants(variant_result, storage_prefix),
