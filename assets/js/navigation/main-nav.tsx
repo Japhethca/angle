@@ -105,22 +105,24 @@ export function MainNav({ navCategories }: MainNavProps) {
 
         {/* Desktop right section */}
         <div className="hidden items-center gap-3 lg:flex">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              const q = (formData.get('q') as string)?.trim();
-              if (q) router.get('/search', { q });
-            }}
-            className="relative"
-          >
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-content-placeholder" />
-            <input
-              name="q"
-              placeholder="Search for an item..."
-              className="h-10 w-[358px] rounded-lg bg-surface-muted pl-10 pr-4 text-sm text-content placeholder:text-content-placeholder outline-none"
-            />
-          </form>
+          {!url.startsWith('/search') && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const q = (formData.get('q') as string)?.trim();
+                if (q) router.get('/search', { q });
+              }}
+              className="relative"
+            >
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-content-placeholder" />
+              <input
+                name="q"
+                placeholder="Search for an item..."
+                className="h-10 w-[358px] rounded-lg bg-surface-muted pl-10 pr-4 text-sm text-content placeholder:text-content-placeholder outline-none"
+              />
+            </form>
+          )}
 
           {authenticated ? (
             <>

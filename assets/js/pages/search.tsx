@@ -166,8 +166,15 @@ export default function SearchPage({
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search for items..."
-            className="h-12 w-full rounded-xl bg-surface-muted pl-12 pr-4 text-base text-content placeholder:text-content-placeholder outline-none"
+            className="h-12 w-full rounded-xl bg-surface-muted pl-12 pr-24 text-base text-content placeholder:text-content-placeholder outline-none"
           />
+          <Button
+            type="submit"
+            size="sm"
+            className="absolute right-2 top-1/2 -translate-y-1/2"
+          >
+            Search
+          </Button>
         </form>
 
         {/* Filter bar */}
