@@ -14,6 +14,7 @@ import {
 import { CategoryMegaMenu, type NavCategory } from './category-mega-menu';
 import { UserMenuPopover } from './user-menu-popover';
 import { UserMenuContent } from './user-menu-content';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 interface MainNavProps {
   navCategories: NavCategory[];
@@ -123,6 +124,7 @@ export function MainNav({ navCategories }: MainNavProps) {
             </>
           ) : (
             <>
+              <ThemeToggle />
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/auth/login">Sign In</Link>
               </Button>
@@ -168,17 +170,22 @@ export function MainNav({ navCategories }: MainNavProps) {
                 {authenticated ? (
                   <UserMenuContent onNavigate={() => setMobileOpen(false)} />
                 ) : (
-                  <div className="flex flex-col gap-2">
-                    <Button variant="outline" asChild>
-                      <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
-                        Sign In
-                      </Link>
-                    </Button>
-                    <Button className="bg-primary-600 text-white hover:bg-primary-600/90" asChild>
-                      <Link href="/auth/register" onClick={() => setMobileOpen(false)}>
-                        Sign Up
-                      </Link>
-                    </Button>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex justify-center">
+                      <ThemeToggle />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Button variant="outline" asChild>
+                        <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
+                          Sign In
+                        </Link>
+                      </Button>
+                      <Button className="bg-primary-600 text-white hover:bg-primary-600/90" asChild>
+                        <Link href="/auth/register" onClick={() => setMobileOpen(false)}>
+                          Sign Up
+                        </Link>
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>

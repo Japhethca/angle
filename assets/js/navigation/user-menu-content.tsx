@@ -1,7 +1,8 @@
 import { Link, router } from "@inertiajs/react";
-import { ChevronRight, LogOut } from "lucide-react";
+import { ChevronRight, LogOut, User, Store, CreditCard } from "lucide-react";
 import { useAuth } from "@/features/auth";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface UserMenuContentProps {
   onNavigate?: () => void;
@@ -18,12 +19,18 @@ function getInitials(name: string | null): string {
     .slice(0, 2);
 }
 
+const menuItems = [
+  { label: "Account", href: "/settings/account", icon: User },
+  { label: "Store", href: "/store", icon: Store },
+  { label: "Payments", href: "/settings/payments", icon: CreditCard },
+];
+
 export function UserMenuContent({ onNavigate }: UserMenuContentProps) {
   const { user } = useAuth();
   if (!user) return null;
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-6">
       {/* User details */}
       <div className="flex flex-col items-center gap-2">
         <Avatar className="size-20">
@@ -40,28 +47,43 @@ export function UserMenuContent({ onNavigate }: UserMenuContentProps) {
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex flex-col gap-4">
-        <Link
-          href="/settings/account"
-          className="flex items-center justify-between text-base text-content transition-colors hover:text-content-secondary"
-          onClick={onNavigate}
-        >
-          Settings
-          <ChevronRight className="size-5" />
-        </Link>
-        <button
-          type="button"
-          className="flex w-full items-center justify-between text-base text-content-tertiary transition-colors hover:text-content-secondary"
-          onClick={() => {
-            onNavigate?.();
-            router.post("/auth/logout");
-          }}
-        >
-          Log out
-          <LogOut className="size-5" />
-        </button>
+      {/* Theme toggle */}
+      <div className="flex justify-center">
+        <ThemeToggle />
       </div>
+
+      {/* Navigation links */}
+      <div className="flex flex-col gap-4">
+        {menuItems.map(({ label, href, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            className="flex items-center justify-between text-base text-content transition-colors hover:text-content-secondary"
+            onClick={onNavigate}
+          >
+            <span className="flex items-center gap-3">
+              <Icon className="size-5 text-content-tertiary" />
+              {label}
+            </span>
+            <ChevronRight className="size-5 text-content-tertiary" />
+          </Link>
+        ))}
+      </div>
+
+      {/* Log out */}
+      <button
+        type="button"
+        className="flex w-full items-center justify-between text-base text-content-tertiary transition-colors hover:text-content-secondary"
+        onClick={() => {
+          onNavigate?.();
+          router.post("/auth/logout");
+        }}
+      >
+        <span className="flex items-center gap-3">
+          <LogOut className="size-5" />
+          Log out
+        </span>
+      </button>
     </div>
   );
 }

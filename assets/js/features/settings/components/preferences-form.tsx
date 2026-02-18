@@ -9,12 +9,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { useTheme } from "@/hooks/use-theme";
+import { useTheme, type ThemeOption } from "@/hooks/use-theme";
 import { ThemeCard } from "./theme-card";
 
 export function PreferencesForm() {
   const { theme, setTheme } = useTheme();
-  const [selectedTheme, setSelectedTheme] = useState(theme);
+  const [selectedTheme, setSelectedTheme] = useState<ThemeOption>(theme);
 
   // Sync selectedTheme when ThemeProvider corrects after hydration
   useEffect(() => {
@@ -51,6 +51,7 @@ export function PreferencesForm() {
         <h3 className="font-heading text-base font-medium text-content-secondary">Theme</h3>
         <div className="flex gap-4 lg:gap-8">
           <ThemeCard variant="light" selected={selectedTheme === "light"} onClick={() => setSelectedTheme("light")} />
+          <ThemeCard variant="system" selected={selectedTheme === "system"} onClick={() => setSelectedTheme("system")} />
           <ThemeCard variant="dark" selected={selectedTheme === "dark"} onClick={() => setSelectedTheme("dark")} />
         </div>
       </div>
