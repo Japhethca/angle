@@ -3,6 +3,8 @@ defmodule AngleWeb.BidsController do
 
   import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1]
 
+  alias AngleWeb.ImageHelpers
+
   def index(conn, params) do
     tab = Map.get(params, "tab", "active")
     user = conn.assigns.current_user
@@ -28,6 +30,7 @@ defmodule AngleWeb.BidsController do
         %{"success" => true, "data" => data} -> extract_results(data)
         _ -> []
       end
+      |> ImageHelpers.attach_nested_cover_images("item")
 
     conn
     |> assign_prop(:bids, bids)
@@ -43,6 +46,7 @@ defmodule AngleWeb.BidsController do
         %{"success" => true, "data" => data} -> extract_results(data)
         _ -> []
       end
+      |> ImageHelpers.attach_nested_cover_images("item")
 
     # Load existing reviews for the buyer's orders
     order_ids = Enum.map(orders, fn o -> o["id"] end)
@@ -86,6 +90,7 @@ defmodule AngleWeb.BidsController do
         %{"success" => true, "data" => data} -> extract_results(data)
         _ -> []
       end
+      |> ImageHelpers.attach_nested_cover_images("item")
 
     # Load won item IDs so frontend can determine outcome
     orders = Angle.Bidding.list_buyer_won_item_ids!(actor: user, authorize?: false)

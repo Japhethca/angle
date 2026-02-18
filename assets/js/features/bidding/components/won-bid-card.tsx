@@ -1,6 +1,8 @@
 import { Link } from '@inertiajs/react';
-import { MessageCircle, Star } from 'lucide-react';
+import { Gavel, MessageCircle, Star } from 'lucide-react';
 import type { WonOrderCard as WonOrderCardType } from '@/ash_rpc';
+import { ResponsiveImage } from '@/components/image-upload';
+import type { ImageData } from '@/lib/image-url';
 import { formatNaira } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { ReviewForm } from './review-form';
@@ -90,7 +92,15 @@ export function WonBidCard({
           href={`/items/${order.item?.slug || order.item?.id}`}
           className="block size-20 shrink-0"
         >
-          <div className="size-full rounded-lg bg-surface-muted" />
+          <div className="size-full overflow-hidden rounded-lg bg-surface-muted">
+            {order.item?.coverImage ? (
+              <ResponsiveImage image={order.item.coverImage as ImageData} sizes="80px" alt={order.item?.title || ""} />
+            ) : (
+              <div className="flex h-full items-center justify-center text-content-placeholder">
+                <Gavel className="size-6" />
+              </div>
+            )}
+          </div>
         </Link>
 
         <div className="min-w-0 flex-1">
@@ -188,7 +198,15 @@ export function WonBidCard({
             href={`/items/${order.item?.slug || order.item?.id}`}
             className="block size-20 shrink-0"
           >
-            <div className="size-full rounded-lg bg-surface-muted" />
+            <div className="size-full overflow-hidden rounded-lg bg-surface-muted">
+              {order.item?.coverImage ? (
+                <ResponsiveImage image={order.item.coverImage as ImageData} sizes="80px" alt={order.item?.title || ""} />
+              ) : (
+                <div className="flex h-full items-center justify-center text-content-placeholder">
+                  <Gavel className="size-6" />
+                </div>
+              )}
+            </div>
           </Link>
           <div className="min-w-0 flex-1">
             <span

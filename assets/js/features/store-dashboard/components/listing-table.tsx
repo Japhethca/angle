@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, Check } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, Check, Gavel } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SellerDashboardCard } from "@/ash_rpc";
+import { ResponsiveImage } from "@/components/image-upload";
+import type { ImageData } from "@/lib/image-url";
 import { ListingActionsMenu } from "./listing-actions-menu";
 import { formatCurrency } from "../utils";
 
-type Item = SellerDashboardCard[number];
+type Item = SellerDashboardCard[number] & { coverImage?: ImageData | null };
 
 function formatTimeLeft(endTime: string | null | undefined): string {
   if (!endTime) return "--";
@@ -197,7 +199,15 @@ export function ListingTable({ items, sort, dir, status, perPage, onNavigate }: 
               <tr key={item.id} className="transition-colors hover:bg-surface-secondary/50">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <div className="size-10 shrink-0 rounded-lg bg-surface-muted" />
+                    <div className="size-10 shrink-0 overflow-hidden rounded-lg bg-surface-muted">
+                      {item.coverImage ? (
+                        <ResponsiveImage image={item.coverImage as ImageData} sizes="40px" alt={item.title || ""} />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-content-placeholder">
+                          <Gavel className="size-4" />
+                        </div>
+                      )}
+                    </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-content">
                         {item.title}

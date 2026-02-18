@@ -5,6 +5,8 @@ defmodule AngleWeb.StoreDashboardController do
 
   import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1, build_category_summary: 1]
 
+  alias AngleWeb.ImageHelpers
+
   @valid_statuses ~w(all active ended draft)
   @valid_per_page [10, 25, 50]
   @default_per_page 10
@@ -79,6 +81,7 @@ defmodule AngleWeb.StoreDashboardController do
     dir = validate_sort_dir(params["dir"])
 
     {items, total} = load_seller_items(conn, status, page, per_page, sort, dir)
+    items = ImageHelpers.attach_cover_images(items)
     stats = load_seller_stats(conn)
     total_pages = max(1, ceil(total / per_page))
 
