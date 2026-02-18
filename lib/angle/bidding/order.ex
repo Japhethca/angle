@@ -79,6 +79,11 @@ defmodule Angle.Bidding.Order do
       change set_attribute(:status, :completed)
       change set_attribute(:completed_at, &DateTime.utc_now/0)
     end
+
+    read :buyer_won_item_ids do
+      filter expr(buyer_id == ^actor(:id))
+      prepare build(select: [:item_id])
+    end
   end
 
   policies do
@@ -109,6 +114,10 @@ defmodule Angle.Bidding.Order do
 
     policy action(:confirm_receipt) do
       authorize_if expr(buyer_id == ^actor(:id))
+    end
+
+    policy action(:buyer_won_item_ids) do
+      authorize_if always()
     end
   end
 

@@ -51,6 +51,11 @@ defmodule Angle.Bidding.Review do
       argument :order_id, :uuid, allow_nil?: false
       filter expr(order_id == ^arg(:order_id))
     end
+
+    read :by_order_ids do
+      argument :order_ids, {:array, :uuid}, allow_nil?: false
+      filter expr(order_id in ^arg(:order_ids))
+    end
   end
 
   policies do
@@ -62,7 +67,7 @@ defmodule Angle.Bidding.Review do
       authorize_if expr(reviewer_id == ^actor(:id))
     end
 
-    policy action([:read, :by_seller, :for_order]) do
+    policy action([:read, :by_seller, :for_order, :by_order_ids]) do
       authorize_if always()
     end
   end

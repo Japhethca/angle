@@ -160,7 +160,15 @@ defmodule Angle.Bidding do
 
   resources do
     resource Angle.Bidding.Bid
-    resource Angle.Bidding.Order
-    resource Angle.Bidding.Review
+
+    resource Angle.Bidding.Order do
+      define :get_order, action: :read, get_by: [:id]
+      define :pay_order, action: :pay_order
+      define :list_buyer_won_item_ids, action: :buyer_won_item_ids
+    end
+
+    resource Angle.Bidding.Review do
+      define :list_reviews_by_order_ids, action: :by_order_ids, args: [:order_ids]
+    end
   end
 end
