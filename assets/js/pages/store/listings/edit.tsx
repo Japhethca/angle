@@ -38,7 +38,7 @@ export default function EditPage({
       ),
       customFeatures: attrs._customFeatures
         ? attrs._customFeatures.split("|||")
-        : ["", "", ""],
+        : [],
     },
     auctionInfo: {
       startingPrice: item.startingPrice || "",
@@ -75,7 +75,15 @@ export default function EditPage({
   );
 }
 
-/** Check if the stored category_id is a subcategory or top-level and set IDs accordingly. */
+/**
+ * Resolve whether the stored category_id is a top-level or subcategory.
+ *
+ * In this form, `categoryId` always holds the ID sent to Ash as `category_id`
+ * (i.e. the subcategory ID when a subcategory is selected — matching the
+ * behavior of `handleCategorySelect` which sets `categoryId = subId || parentId`).
+ * `subcategoryId` is set only when the stored ID is a subcategory, enabling
+ * `findCategoryName` and `categoryFields` to locate it in the tree.
+ */
 function resolveCategory(
   categories: Category[],
   storedId: string,
@@ -93,6 +101,5 @@ function resolveCategory(
     }
   }
 
-  // Fallback: treat as top-level
   return { categoryId: storedId, subcategoryId: "" };
 }

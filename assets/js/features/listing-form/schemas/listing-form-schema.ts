@@ -1,5 +1,14 @@
 import { z } from "zod";
 
+export interface CategoryField {
+  name: string;
+  type: string;
+  required?: boolean;
+  description?: string | null;
+  optionSetSlug?: string | null;
+  options?: string[] | null;
+}
+
 export const basicDetailsSchema = z.object({
   title: z.string().min(1, "Title is required").max(200),
   description: z.string().optional().default(""),
@@ -64,7 +73,7 @@ export const initialFormState: ListingFormState = {
     subcategoryId: "",
     condition: "used",
     attributes: {},
-    customFeatures: ["", "", ""],
+    customFeatures: [],
   },
   auctionInfo: {
     startingPrice: "",

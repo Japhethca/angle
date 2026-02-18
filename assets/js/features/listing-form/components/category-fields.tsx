@@ -11,15 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-interface CategoryField {
-  name: string;
-  type: string;
-  required?: boolean;
-  description?: string | null;
-  optionSetSlug?: string | null;
-  options?: string[] | null;
-}
+import type { CategoryField } from "../schemas/listing-form-schema";
 
 interface CategoryFieldsProps {
   fields: CategoryField[];

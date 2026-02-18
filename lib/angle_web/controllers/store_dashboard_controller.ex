@@ -355,18 +355,15 @@ defmodule AngleWeb.StoreDashboardController do
     end
   end
 
+  # Uses code interface instead of run_typed_query — only a single field is needed,
+  # no typed query exists for this use case, and the result is trivially serialized.
   defp load_store_profile(conn) do
     case conn.assigns[:current_user] do
       nil ->
         nil
 
       user ->
-        case Angle.Accounts.StoreProfile
-             |> Ash.Query.filter(user_id == ^user.id)
-             |> Ash.read_one(authorize?: false) do
-          {:ok, nil} ->
-            nil
-
+        case Angle.Accounts.get_store_profile_by_user(user.id) do
           {:ok, profile} ->
             %{"deliveryPreference" => profile.delivery_preference}
 

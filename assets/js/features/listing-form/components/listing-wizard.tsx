@@ -12,16 +12,8 @@ import {
   type BasicDetailsData,
   type AuctionInfoData,
   type LogisticsData,
+  type CategoryField,
 } from "../schemas/listing-form-schema";
-
-interface CategoryField {
-  name: string;
-  type: string;
-  required?: boolean;
-  description?: string | null;
-  optionSetSlug?: string | null;
-  options?: string[] | null;
-}
 
 interface Subcategory {
   id: string;

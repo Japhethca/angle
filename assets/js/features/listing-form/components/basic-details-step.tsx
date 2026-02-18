@@ -386,33 +386,32 @@ export function BasicDetailsStep({
 
 async function uploadImages(itemId: string, files: File[]) {
   const csrfToken = getPhoenixCSRFToken();
-  const uploaded: Array<{ id: string; position: number; variants: Record<string, string> }> = [];
+  const headers: Record<string, string> = csrfToken ? { "X-CSRF-Token": csrfToken } : {};
 
-  for (let i = 0; i < files.length; i++) {
+  const uploadOne = async (file: File, index: number) => {
     const formData = new FormData();
-    formData.append("file", files[i]);
+    formData.append("file", file);
     formData.append("owner_type", "item");
     formData.append("owner_id", itemId);
 
-    const res = await fetch("/uploads", {
-      method: "POST",
-      headers: csrfToken ? { "X-CSRF-Token": csrfToken } : {},
-      body: formData,
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to upload image ${i + 1}`);
-    }
+    const res = await fetch("/uploads", { method: "POST", headers, body: formData });
+    if (!res.ok) throw new Error(`Failed to upload image ${index + 1}`);
 
     const data = await res.json();
-    uploaded.push({
-      id: data.id,
-      position: data.position,
-      variants: data.variants,
-    });
+    return { id: data.id as string, position: data.position as number, variants: data.variants as Record<string, string> };
+  };
+
+  // Upload up to 3 at a time
+  const concurrency = 3;
+  const results: Array<{ id: string; position: number; variants: Record<string, string> }> = [];
+
+  for (let i = 0; i < files.length; i += concurrency) {
+    const batch = files.slice(i, i + concurrency);
+    const batchResults = await Promise.all(batch.map((file, j) => uploadOne(file, i + j)));
+    results.push(...batchResults);
   }
 
-  return uploaded;
+  return results;
 }
 
 function findCategoryName(categories: Category[], catId: string, subId: string): string {

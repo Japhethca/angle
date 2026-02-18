@@ -113,6 +113,13 @@ defmodule Angle.Inventory.Item do
 
       change set_attribute(:publication_status, :published)
       change {Angle.Inventory.Item.ScheduleEndAuction, []}
+
+      # Strip _auctionDuration from attributes — start_time/end_time are now canonical
+      change fn changeset, _context ->
+        attrs = Ash.Changeset.get_attribute(changeset, :attributes) || %{}
+        cleaned = Map.delete(attrs, "_auctionDuration")
+        Ash.Changeset.force_change_attribute(changeset, :attributes, cleaned)
+      end
     end
 
     update :end_auction do

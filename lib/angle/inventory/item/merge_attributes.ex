@@ -9,13 +9,25 @@ defmodule Angle.Inventory.Item.MergeAttributes do
 
   When only system keys are sent (steps 2/3), a simple merge preserves
   all existing keys.
+
+  System keys are restricted to an allowlist to prevent arbitrary injection.
   """
   use Ash.Resource.Change
+
+  @allowed_system_keys MapSet.new([
+                         "_auctionDuration",
+                         "_deliveryPreference",
+                         "_customFeatures"
+                       ])
 
   @impl true
   def change(changeset, _opts, _context) do
     if Ash.Changeset.changing_attribute?(changeset, :attributes) do
-      new_attrs = Ash.Changeset.get_attribute(changeset, :attributes)
+      new_attrs =
+        changeset
+        |> Ash.Changeset.get_attribute(:attributes)
+        |> reject_unknown_system_keys()
+
       existing = Map.get(changeset.data, :attributes) || %{}
 
       has_user_keys? =
@@ -36,5 +48,11 @@ defmodule Angle.Inventory.Item.MergeAttributes do
     else
       changeset
     end
+  end
+
+  defp reject_unknown_system_keys(attrs) do
+    Map.reject(attrs, fn {key, _val} ->
+      String.starts_with?(key, "_") and key not in @allowed_system_keys
+    end)
   end
 end
