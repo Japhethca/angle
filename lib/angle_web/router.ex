@@ -108,10 +108,13 @@ defmodule AngleWeb.Router do
     get "/dashboard", DashboardController, :index
     get "/bids", BidsController, :index
     get "/watchlist", WatchlistController, :index
-    get "/items/new", ItemsController, :new
     get "/profile", ProfileController, :show
     get "/store", StoreDashboardController, :index
     get "/store/listings", StoreDashboardController, :listings
+    get "/store/listings/new", StoreDashboardController, :new
+    get "/store/listings/:id/preview", StoreDashboardController, :preview
+    get "/store/listings/:id/edit", StoreDashboardController, :edit
+    delete "/store/listings/:id", StoreDashboardController, :delete_item
     get "/store/payments", StoreDashboardController, :payments
     get "/store/profile", StoreDashboardController, :profile
     get "/settings", SettingsController, :index

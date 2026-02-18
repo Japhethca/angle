@@ -54,6 +54,9 @@ defmodule Angle.Accounts do
     resource Angle.Accounts.Permission
     resource Angle.Accounts.RolePermission
     resource Angle.Accounts.Otp
-    resource Angle.Accounts.StoreProfile
+
+    resource Angle.Accounts.StoreProfile do
+      define :get_store_profile_by_user, action: :read, get_by: [:user_id]
+    end
   end
 end

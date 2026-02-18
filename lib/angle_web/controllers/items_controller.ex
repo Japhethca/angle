@@ -6,10 +6,6 @@ defmodule AngleWeb.ItemsController do
 
   @published_filter %{publication_status: "published"}
 
-  def new(conn, _params) do
-    render_inertia(conn, "items/new")
-  end
-
   def show(conn, %{"slug" => slug_or_id}) do
     filter = build_item_filter(slug_or_id)
 

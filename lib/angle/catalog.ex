@@ -23,6 +23,31 @@ defmodule Angle.Catalog do
         ts_fields_const_name "navCategoryFields"
         fields [:id, :name, :slug, categories: [:id, :name, :slug]]
       end
+
+      typed_query :listing_form_category, :top_level do
+        ts_result_type_name "ListingFormCategory"
+        ts_fields_const_name "listingFormCategoryFields"
+
+        fields [
+          :id,
+          :name,
+          :slug,
+          attribute_schema: [:name, :type, :required, :description, :option_set_slug, :options],
+          categories: [
+            :id,
+            :name,
+            :slug,
+            attribute_schema: [:name, :type, :required, :description, :option_set_slug, :options]
+          ]
+        ]
+      end
+    end
+
+    resource Angle.Catalog.OptionSet do
+      rpc_action :list_option_sets, :read_with_values
+    end
+
+    resource Angle.Catalog.OptionSetValue do
     end
   end
 

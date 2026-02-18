@@ -1,19 +1,25 @@
 import { useRef, useEffect, useState } from "react";
+import { router } from "@inertiajs/react";
 import { MoreVertical, Share2, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface ListingActionsMenuProps {
+  id: string;
   slug: string;
+  publicationStatus: string | null | undefined;
 }
 
-export function ListingActionsMenu({ slug }: ListingActionsMenuProps) {
+export function ListingActionsMenu({ id, slug, publicationStatus }: ListingActionsMenuProps) {
   const [open, setOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setOpen(false);
+        setConfirmDelete(false);
       }
     }
 
@@ -25,6 +31,8 @@ export function ListingActionsMenu({ slug }: ListingActionsMenuProps) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [open]);
+
+  const isDraft = publicationStatus === "draft";
 
   const handleShare = async () => {
     const url = `${window.location.origin}/items/${slug}`;
@@ -38,19 +46,33 @@ export function ListingActionsMenu({ slug }: ListingActionsMenuProps) {
   };
 
   const handleEdit = () => {
-    toast.info("Coming soon");
     setOpen(false);
+    router.visit(`/store/listings/${id}/edit`);
   };
 
   const handleDelete = () => {
-    toast.info("Coming soon");
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      return;
+    }
+    if (isDeleting) return;
+
+    setIsDeleting(true);
     setOpen(false);
+    setConfirmDelete(false);
+    router.delete(`/store/listings/${id}`, {
+      preserveScroll: true,
+      onFinish: () => setIsDeleting(false),
+    });
   };
 
   return (
     <div ref={menuRef} className="relative">
       <button
-        onClick={() => setOpen(!open)}
+        onClick={() => {
+          setOpen(!open);
+          setConfirmDelete(false);
+        }}
         className="flex size-8 items-center justify-center rounded-lg text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content"
       >
         <MoreVertical className="size-4" />
@@ -65,19 +87,26 @@ export function ListingActionsMenu({ slug }: ListingActionsMenuProps) {
             <Share2 className="size-4" />
             Share
           </button>
-          <button
-            onClick={handleEdit}
-            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-secondary transition-colors hover:bg-surface-secondary"
-          >
-            <Pencil className="size-4" />
-            Edit
-          </button>
+          {isDraft && (
+            <button
+              onClick={handleEdit}
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-secondary transition-colors hover:bg-surface-secondary"
+            >
+              <Pencil className="size-4" />
+              Edit
+            </button>
+          )}
           <button
             onClick={handleDelete}
-            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-feedback-error transition-colors hover:bg-surface-secondary"
+            disabled={isDeleting}
+            className={
+              confirmDelete
+                ? "flex w-full items-center gap-2 rounded px-3 py-2 text-sm font-medium text-feedback-error bg-feedback-error/10 transition-colors"
+                : "flex w-full items-center gap-2 px-3 py-2 text-sm text-feedback-error transition-colors hover:bg-surface-secondary"
+            }
           >
             <Trash2 className="size-4" />
-            Delete
+            {confirmDelete ? "Confirm Delete" : "Delete"}
           </button>
         </div>
       )}

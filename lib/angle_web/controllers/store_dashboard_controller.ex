@@ -2,6 +2,7 @@ defmodule AngleWeb.StoreDashboardController do
   use AngleWeb, :controller
 
   require Ash.Query
+  require Logger
 
   @valid_statuses ~w(all active ended draft)
   @valid_per_page [10, 25, 50]
@@ -13,6 +14,60 @@ defmodule AngleWeb.StoreDashboardController do
 
   def index(conn, _params) do
     redirect(conn, to: ~p"/store/listings")
+  end
+
+  def new(conn, _params) do
+    categories = load_listing_form_categories(conn)
+    store_profile = load_store_profile(conn)
+
+    conn
+    |> assign_prop(:categories, categories)
+    |> assign_prop(:store_profile, store_profile)
+    |> render_inertia("store/listings/new")
+  end
+
+  def preview(conn, %{"id" => id}) do
+    user = conn.assigns.current_user
+
+    case load_draft_item(conn, id, user.id) do
+      {:ok, item, images} ->
+        seller = serialize_preview_seller(user)
+
+        conn
+        |> assign_prop(:item, item)
+        |> assign_prop(:images, images)
+        |> assign_prop(:seller, seller)
+        |> render_inertia("store/listings/preview")
+
+      :not_found ->
+        conn
+        |> put_flash(:error, "Draft not found")
+        |> redirect(to: ~p"/store/listings")
+    end
+  end
+
+  def edit(conn, %{"id" => id} = params) do
+    user = conn.assigns.current_user
+    step = parse_positive_int(params["step"], 1)
+
+    case load_draft_item(conn, id, user.id) do
+      {:ok, item, images} ->
+        categories = load_listing_form_categories(conn)
+        store_profile_data = load_store_profile(conn)
+
+        conn
+        |> assign_prop(:item, item)
+        |> assign_prop(:images, images)
+        |> assign_prop(:categories, categories)
+        |> assign_prop(:store_profile, store_profile_data)
+        |> assign_prop(:step, step)
+        |> render_inertia("store/listings/edit")
+
+      :not_found ->
+        conn
+        |> put_flash(:error, "Draft not found")
+        |> redirect(to: ~p"/store/listings")
+    end
   end
 
   def listings(conn, params) do
@@ -49,6 +104,30 @@ defmodule AngleWeb.StoreDashboardController do
     |> assign_prop(:orders, orders)
     |> assign_prop(:balance, balance)
     |> render_inertia("store/payments")
+  end
+
+  def delete_item(conn, %{"id" => id}) do
+    user = conn.assigns.current_user
+
+    with {:ok, item} <- Angle.Inventory.get_item(id, actor: user),
+         :ok <- Angle.Inventory.destroy_item(item, actor: user) do
+      conn
+      |> put_flash(:success, "Item deleted successfully")
+      |> redirect(to: ~p"/store/listings")
+    else
+      {:error, reason} ->
+        if not_found_error?(reason) do
+          conn
+          |> put_flash(:error, "Item not found")
+          |> redirect(to: ~p"/store/listings")
+        else
+          Logger.warning("Failed to delete item #{id}: #{inspect(reason)}")
+
+          conn
+          |> put_flash(:error, "Failed to delete item")
+          |> redirect(to: ~p"/store/listings")
+        end
+    end
   end
 
   def profile(conn, _params) do
@@ -268,4 +347,65 @@ defmodule AngleWeb.StoreDashboardController do
   defp extract_results(data) when is_list(data), do: data
   defp extract_results(%{"results" => results}) when is_list(results), do: results
   defp extract_results(_), do: []
+
+  defp load_listing_form_categories(conn) do
+    case AshTypescript.Rpc.run_typed_query(:angle, :listing_form_category, %{}, conn) do
+      %{"success" => true, "data" => data} -> extract_results(data)
+      _ -> []
+    end
+  end
+
+  # Uses code interface instead of run_typed_query — only a single field is needed,
+  # no typed query exists for this use case, and the result is trivially serialized.
+  defp load_store_profile(conn) do
+    case conn.assigns[:current_user] do
+      nil ->
+        nil
+
+      user ->
+        case Angle.Accounts.get_store_profile_by_user(user.id) do
+          {:ok, profile} ->
+            %{"deliveryPreference" => profile.delivery_preference}
+
+          _ ->
+            nil
+        end
+    end
+  end
+
+  defp load_draft_item(conn, id, user_id) do
+    params = %{
+      filter: %{id: id, created_by_id: user_id, publication_status: "draft"},
+      page: %{limit: 1}
+    }
+
+    case AshTypescript.Rpc.run_typed_query(:angle, :item_detail, params, conn) do
+      %{"success" => true, "data" => data} ->
+        case extract_results(data) do
+          [item | _] ->
+            images = AngleWeb.ImageHelpers.load_item_images(id)
+            {:ok, item, images}
+
+          _ ->
+            :not_found
+        end
+
+      _ ->
+        :not_found
+    end
+  end
+
+  defp serialize_preview_seller(user) do
+    %{
+      "id" => user.id,
+      "fullName" => user.full_name,
+      "username" => user.username
+    }
+  end
+
+  defp not_found_error?(%Ash.Error.Invalid{errors: errors}) do
+    Enum.any?(errors, &match?(%Ash.Error.Query.NotFound{}, &1))
+  end
+
+  defp not_found_error?(_), do: false
 end

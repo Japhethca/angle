@@ -10,3 +10,4 @@ export { ItemForm } from "./components/item-form";
 export { CategoryItemCard } from "./components/category-item-card";
 export type { CategoryItem } from "./components/category-item-card";
 export { CategoryItemListCard } from "./components/category-item-list-card";
+export { ItemDetailLayout } from "./components/item-detail-layout";

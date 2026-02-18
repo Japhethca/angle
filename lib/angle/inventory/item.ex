@@ -99,10 +99,12 @@ defmodule Angle.Inventory.Item do
 
     update :update_draft do
       description "Update an existing item in draft status"
+      require_atomic? false
 
       accept @draft_fields
 
       argument :id, :uuid, allow_nil?: false
+      change {Angle.Inventory.Item.MergeAttributes, []}
     end
 
     update :publish_item do
@@ -111,6 +113,13 @@ defmodule Angle.Inventory.Item do
 
       change set_attribute(:publication_status, :published)
       change {Angle.Inventory.Item.ScheduleEndAuction, []}
+
+      # Strip _auctionDuration from attributes — start_time/end_time are now canonical
+      change fn changeset, _context ->
+        attrs = Ash.Changeset.get_attribute(changeset, :attributes) || %{}
+        cleaned = Map.delete(attrs, "_auctionDuration")
+        Ash.Changeset.force_change_attribute(changeset, :attributes, cleaned)
+      end
     end
 
     update :end_auction do
@@ -358,7 +367,6 @@ defmodule Angle.Inventory.Item do
 
     attribute :attributes, :map do
       allow_nil? false
-      generated? true
       public? true
       default %{}
     end

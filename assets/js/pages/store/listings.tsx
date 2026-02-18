@@ -139,7 +139,7 @@ export default function StoreListings({
               Item Listings
             </h2>
             <Link
-              href="/items/new"
+              href="/store/listings/new"
               className="hidden items-center gap-2 rounded-full bg-primary-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700 lg:inline-flex"
             >
               <Plus className="size-4" />
@@ -204,7 +204,7 @@ export default function StoreListings({
 
         {/* Mobile FAB */}
         <Link
-          href="/items/new"
+          href="/store/listings/new"
           className="fixed bottom-20 right-4 z-20 flex size-14 items-center justify-center rounded-full bg-primary-600 text-white shadow-lg transition-transform hover:scale-105 lg:hidden"
         >
           <Plus className="size-6" />

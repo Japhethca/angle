@@ -65,10 +65,9 @@ defmodule Angle.Catalog.Category do
       public? true
     end
 
-    attribute :attribute_schema, :map do
+    attribute :attribute_schema, {:array, Angle.Catalog.CategoryField} do
       allow_nil? false
-      default %{}
-      generated? true
+      default []
       public? true
     end
 
