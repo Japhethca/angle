@@ -1,5 +1,11 @@
 defmodule AngleWeb.SearchControllerTest do
-  use AngleWeb.ConnCase
+  use AngleWeb.ConnCase, async: true
+
+  defp publish_item(item) do
+    item
+    |> Ash.Changeset.for_update(:publish_item, %{}, authorize?: false)
+    |> Ash.update!()
+  end
 
   describe "GET /search" do
     test "renders search page with empty query", %{conn: conn} do
@@ -10,11 +16,8 @@ defmodule AngleWeb.SearchControllerTest do
 
     test "renders search page with query param", %{conn: conn} do
       user = create_user()
-
-      item =
-        create_item(%{title: "Searchable Widget", created_by_id: user.id})
-
-      Ash.update!(item, %{}, action: :publish_item, authorize?: false)
+      item = create_item(%{title: "Searchable Widget", created_by_id: user.id})
+      publish_item(item)
 
       conn = get(conn, ~p"/search?q=Widget")
       response = html_response(conn, 200)

@@ -9,7 +9,7 @@ defmodule AngleWeb.SearchController do
 
   def index(conn, params) do
     query = params["q"] |> to_string() |> String.trim()
-    category = params["category"]
+    category = validate_uuid(params["category"])
     condition = validate_enum(params["condition"], ~w(new used refurbished))
     sale_type = validate_enum(params["sale_type"], ~w(auction buy_now hybrid))
 
@@ -140,6 +140,17 @@ defmodule AngleWeb.SearchController do
   end
 
   defp parse_positive_int(_, default), do: default
+
+  defp validate_uuid(nil), do: nil
+
+  defp validate_uuid(value) when is_binary(value) do
+    case Ecto.UUID.cast(value) do
+      {:ok, uuid} -> uuid
+      :error -> nil
+    end
+  end
+
+  defp validate_uuid(_), do: nil
 
   defp maybe_put(map, _key, nil), do: map
   defp maybe_put(map, key, value), do: Map.put(map, key, value)

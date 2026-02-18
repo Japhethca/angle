@@ -73,6 +73,11 @@ export default function StoreListings({
   // Search filter
   const [searchInput, setSearchInput] = useState(search || "");
 
+  // Sync search input when prop changes (e.g. browser back/forward)
+  useEffect(() => {
+    setSearchInput(search || "");
+  }, [search]);
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       const trimmed = searchInput.trim();
@@ -81,6 +86,7 @@ export default function StoreListings({
       }
     }, 300);
     return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: only debounce on input changes, other deps trigger full page reload
   }, [searchInput]);
 
   // Mobile "Load More" state
