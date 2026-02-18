@@ -23,7 +23,7 @@ defmodule AngleWeb.AuthController do
   end
 
   def do_login(conn, %{"email" => email, "password" => password}) do
-    case Angle.Accounts.User.sign_in_with_password(%{email: email, password: password}) do
+    case Angle.Accounts.sign_in_with_password(%{email: email, password: password}) do
       {:ok, %{user: user, metadata: %{token: token}}} ->
         {conn, redirect_to} = AuthPlug.pop_return_to(conn, ~p"/")
 
@@ -68,7 +68,7 @@ defmodule AngleWeb.AuthController do
       phone_number: Map.get(params, "phone_number")
     }
 
-    case Angle.Accounts.User.register_with_password(register_params) do
+    case Angle.Accounts.register_with_password(register_params) do
       {:ok, %{user: user, metadata: %{token: token}}} ->
         conn
         |> put_session(:current_user_id, user.id)
@@ -99,7 +99,7 @@ defmodule AngleWeb.AuthController do
 
   def do_forgot_password(conn, %{"email" => email}) do
     # This action always succeeds to prevent email enumeration
-    Angle.Accounts.User.request_password_reset_with_password(%{email: email})
+    Angle.Accounts.request_password_reset_with_password(%{email: email})
 
     conn
     |> put_flash(
@@ -129,7 +129,7 @@ defmodule AngleWeb.AuthController do
          {:ok, user} <-
            Angle.Accounts.get_user(user_id, authorize?: false),
          {:ok, reset_user} <-
-           Angle.Accounts.User.password_reset_with_password(
+           Angle.Accounts.password_reset_with_password(
              user,
              %{
                reset_token: token,

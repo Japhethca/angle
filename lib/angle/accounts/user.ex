@@ -62,22 +62,6 @@ defmodule Angle.Accounts.User do
     type_name "User"
   end
 
-  code_interface do
-    domain Angle.Accounts
-    define :get_by_subject
-    define :change_password
-    define :sign_in_with_password
-    define :sign_in_with_token
-    define :register_with_password
-    define :request_password_reset_token
-    define :request_password_reset_with_password
-    define :password_reset_with_password
-    define :get_by_email
-
-    define :assign_role
-    define :remove_role
-  end
-
   actions do
     defaults [:read]
 
@@ -102,9 +86,7 @@ defmodule Angle.Accounts.User do
 
       # Auto-assign default "bidder" role after registration
       change after_action(fn _changeset, user, _context ->
-               case Angle.Accounts.User.assign_role(user, %{role_name: "bidder"},
-                      authorize?: false
-                    ) do
+               case Angle.Accounts.assign_role(user, %{role_name: "bidder"}, authorize?: false) do
                  {:ok, _} -> {:ok, user}
                  {:error, _} -> {:ok, user}
                end
@@ -238,9 +220,7 @@ defmodule Angle.Accounts.User do
 
       # Auto-assign default "bidder" role after registration
       change after_action(fn _changeset, user, _context ->
-               case Angle.Accounts.User.assign_role(user, %{role_name: "bidder"},
-                      authorize?: false
-                    ) do
+               case Angle.Accounts.assign_role(user, %{role_name: "bidder"}, authorize?: false) do
                  {:ok, _} -> {:ok, user}
                  {:error, _} -> {:ok, user}
                end

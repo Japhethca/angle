@@ -79,7 +79,7 @@ defmodule AngleWeb.Plugs.Auth do
     auth_token = get_session(conn, :auth_token)
 
     if auth_token != nil do
-      case Accounts.User.get_by_subject(%{subject: auth_token}) do
+      case Accounts.get_by_subject(%{subject: auth_token}) do
         {:ok, user} ->
           # Load user with roles and permissions
           user = user |> Ash.load!([:active_roles, :roles], domain: Accounts, authorize?: false)
@@ -171,7 +171,7 @@ defmodule AngleWeb.Plugs.Auth do
   """
   def validate_api_token(conn, _opts) do
     with ["Bearer " <> token] <- get_req_header(conn, "authorization"),
-         {:ok, user} <- Accounts.User.get_by_subject(%{subject: token}) do
+         {:ok, user} <- Accounts.get_by_subject(%{subject: token}) do
       assign(conn, :current_user, user)
     else
       _ ->
