@@ -224,7 +224,7 @@ export function ListingTable({ items, sort, dir, status, perPage, onNavigate }: 
                   <StatusBadge status={item.auctionStatus} />
                 </td>
                 <td className="px-4 py-3">
-                  <ListingActionsMenu slug={item.slug || item.id} />
+                  <ListingActionsMenu id={item.id} slug={item.slug || item.id} publicationStatus={item.publicationStatus} />
                 </td>
               </tr>
             ))

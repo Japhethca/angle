@@ -48,7 +48,7 @@ export function ListingCard({ item }: ListingCardProps) {
             {item.viewCount ?? 0} Views {"\u2022"} {item.bidCount ?? 0} Bids {"\u2022"} {item.watcherCount ?? 0} Watchers
           </p>
         </div>
-        <ListingActionsMenu slug={item.slug || item.id} />
+        <ListingActionsMenu id={item.id} slug={item.slug || item.id} publicationStatus={item.publicationStatus} />
       </div>
       <div className="mt-3">
         <StatusBadge status={item.auctionStatus} />

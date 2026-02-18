@@ -164,7 +164,11 @@ defmodule Angle.Inventory do
   end
 
   resources do
-    resource Angle.Inventory.Item
+    resource Angle.Inventory.Item do
+      define :get_item, action: :read, get_by: [:id]
+      define :destroy_item, action: :destroy
+    end
+
     resource Angle.Inventory.ItemActivity
     resource Angle.Inventory.WatchlistItem
   end

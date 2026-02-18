@@ -2,6 +2,7 @@ defmodule AngleWeb.StoreDashboardController do
   use AngleWeb, :controller
 
   require Ash.Query
+  require Logger
 
   @valid_statuses ~w(all active ended draft)
   @valid_per_page [10, 25, 50]
@@ -103,6 +104,30 @@ defmodule AngleWeb.StoreDashboardController do
     |> assign_prop(:orders, orders)
     |> assign_prop(:balance, balance)
     |> render_inertia("store/payments")
+  end
+
+  def delete_item(conn, %{"id" => id}) do
+    user = conn.assigns.current_user
+
+    with {:ok, item} <- Angle.Inventory.get_item(id, actor: user),
+         :ok <- Angle.Inventory.destroy_item(item, actor: user) do
+      conn
+      |> put_flash(:success, "Item deleted successfully")
+      |> redirect(to: ~p"/store/listings")
+    else
+      {:error, reason} ->
+        if not_found_error?(reason) do
+          conn
+          |> put_flash(:error, "Item not found")
+          |> redirect(to: ~p"/store/listings")
+        else
+          Logger.warning("Failed to delete item #{id}: #{inspect(reason)}")
+
+          conn
+          |> put_flash(:error, "Failed to delete item")
+          |> redirect(to: ~p"/store/listings")
+        end
+    end
   end
 
   def profile(conn, _params) do
@@ -380,4 +405,10 @@ defmodule AngleWeb.StoreDashboardController do
       "username" => user.username
     }
   end
+
+  defp not_found_error?(%Ash.Error.Invalid{errors: errors}) do
+    Enum.any?(errors, &match?(%Ash.Error.Query.NotFound{}, &1))
+  end
+
+  defp not_found_error?(_), do: false
 end
