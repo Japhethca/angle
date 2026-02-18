@@ -4,7 +4,7 @@ defmodule AngleWeb.StoreDashboardController do
   require Ash.Query
   require Logger
 
-  import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1]
+  import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1, build_category_summary: 1]
 
   @valid_statuses ~w(all active ended draft)
   @valid_per_page [10, 25, 50]
@@ -224,26 +224,6 @@ defmodule AngleWeb.StoreDashboardController do
 
   defp load_logo_url_for_profile(profile_id) do
     AngleWeb.ImageHelpers.load_owner_thumbnail_url(:store_logo, profile_id)
-  end
-
-  defp build_category_summary(user_id) do
-    item_query =
-      Angle.Inventory.Item
-      |> Ash.Query.filter(created_by_id == ^user_id and publication_status == :published)
-
-    Angle.Catalog.Category
-    |> Ash.Query.aggregate(:item_count, :count, :items, query: item_query, default: 0)
-    |> Ash.read!(authorize?: false)
-    |> Enum.filter(fn cat -> cat.aggregates[:item_count] > 0 end)
-    |> Enum.sort_by(fn cat -> -cat.aggregates[:item_count] end)
-    |> Enum.map(fn cat ->
-      %{
-        "id" => cat.id,
-        "name" => cat.name,
-        "slug" => cat.slug,
-        "count" => cat.aggregates[:item_count]
-      }
-    end)
   end
 
   defp compute_stats(items) do
