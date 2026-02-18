@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import { Search, Bell, Menu } from 'lucide-react';
 import { useAuth, AuthLink } from '@/features/auth';
 import { Button } from '@/components/ui/button';
@@ -105,14 +105,22 @@ export function MainNav({ navCategories }: MainNavProps) {
 
         {/* Desktop right section */}
         <div className="hidden items-center gap-3 lg:flex">
-          <div className="relative">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const q = (formData.get('q') as string)?.trim();
+              if (q) router.get('/search', { q });
+            }}
+            className="relative"
+          >
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-content-placeholder" />
             <input
+              name="q"
               placeholder="Search for an item..."
               className="h-10 w-[358px] rounded-lg bg-surface-muted pl-10 pr-4 text-sm text-content placeholder:text-content-placeholder outline-none"
-              disabled
             />
-          </div>
+          </form>
 
           {authenticated ? (
             <>
@@ -139,7 +147,10 @@ export function MainNav({ navCategories }: MainNavProps) {
 
         {/* Mobile right section — unchanged */}
         <div className="flex items-center gap-2 lg:hidden">
-          <button className="flex size-9 items-center justify-center rounded-lg bg-surface-muted text-content-secondary">
+          <button
+            onClick={() => router.get('/search')}
+            className="flex size-9 items-center justify-center rounded-lg bg-surface-muted text-content-secondary"
+          >
             <Search className="size-[18px]" />
           </button>
           {authenticated && (
