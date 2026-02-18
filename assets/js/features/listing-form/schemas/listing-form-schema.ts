@@ -51,7 +51,8 @@ export type ListingFormAction =
   | { type: "SET_SELECTED_IMAGES"; files: File[] }
   | { type: "SET_UPLOADED_IMAGES"; images: ListingFormState["uploadedImages"] }
   | { type: "SET_SUBMITTING"; value: boolean }
-  | { type: "SET_PUBLISHED"; value: boolean };
+  | { type: "SET_PUBLISHED"; value: boolean }
+  | { type: "REMOVE_UPLOADED_IMAGE"; id: string };
 
 export const initialFormState: ListingFormState = {
   currentStep: 1,
@@ -102,6 +103,8 @@ export function listingFormReducer(
       return { ...state, isSubmitting: action.value };
     case "SET_PUBLISHED":
       return { ...state, isPublished: action.value };
+    case "REMOVE_UPLOADED_IMAGE":
+      return { ...state, uploadedImages: state.uploadedImages.filter((img) => img.id !== action.id) };
     default:
       return state;
   }

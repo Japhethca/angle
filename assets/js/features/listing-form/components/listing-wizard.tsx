@@ -79,6 +79,10 @@ export function ListingWizard({ categories, storeProfile, initialData }: Listing
     dispatch({ type: "SET_STEP", step: 2 });
   }, []);
 
+  const handleDeleteImage = useCallback((imageId: string) => {
+    dispatch({ type: "REMOVE_UPLOADED_IMAGE", id: imageId });
+  }, []);
+
   const handleAuctionInfoNext = useCallback((data: AuctionInfoData) => {
     dispatch({ type: "SET_AUCTION_INFO", data });
     dispatch({ type: "SET_STEP", step: 3 });
@@ -127,6 +131,7 @@ export function ListingWizard({ categories, storeProfile, initialData }: Listing
           draftItemId={state.draftItemId}
           uploadedImages={state.uploadedImages}
           onNext={handleBasicDetailsNext}
+          onDeleteImage={handleDeleteImage}
         />
       )}
       {state.currentStep === 2 && (

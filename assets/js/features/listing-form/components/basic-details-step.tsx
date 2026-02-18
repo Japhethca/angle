@@ -32,6 +32,7 @@ interface BasicDetailsStepProps {
   draftItemId: string | null;
   uploadedImages: ListingFormState["uploadedImages"];
   onNext: (data: BasicDetailsData, draftId: string, uploadedImages: ListingFormState["uploadedImages"]) => void;
+  onDeleteImage: (imageId: string) => void;
 }
 
 export function BasicDetailsStep({
@@ -41,6 +42,7 @@ export function BasicDetailsStep({
   draftItemId,
   uploadedImages: existingUploaded,
   onNext,
+  onDeleteImage,
 }: BasicDetailsStepProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [categoryName, setCategoryName] = useState(() => {
@@ -118,6 +120,25 @@ export function BasicDetailsStep({
   const removeSelectedImage = useCallback((index: number) => {
     setSelectedImages((prev) => prev.filter((_, i) => i !== index));
   }, []);
+
+  const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
+
+  const handleDeleteUploadedImage = useCallback(async (imageId: string) => {
+    setDeletingImageId(imageId);
+    try {
+      const csrfToken = getPhoenixCSRFToken();
+      const res = await fetch(`/uploads/${imageId}`, {
+        method: "DELETE",
+        headers: csrfToken ? { "X-CSRF-Token": csrfToken } : {},
+      });
+      if (!res.ok) throw new Error("Failed to delete image");
+      onDeleteImage(imageId);
+    } catch {
+      toast.error("Failed to delete image");
+    } finally {
+      setDeletingImageId(null);
+    }
+  }, [onDeleteImage]);
 
   const onSubmit = async (data: BasicDetailsData) => {
     setIsSubmitting(true);
@@ -272,12 +293,20 @@ export function BasicDetailsStep({
         {existingUploaded.length > 0 && (
           <div className="grid grid-cols-4 gap-2">
             {existingUploaded.map((img) => (
-              <div key={img.id} className="aspect-square overflow-hidden rounded-md bg-surface-muted">
+              <div key={img.id} className="group relative aspect-square overflow-hidden rounded-md bg-surface-muted">
                 <img
                   src={img.variants.thumbnail || img.variants.original}
                   alt=""
                   className="size-full object-cover"
                 />
+                <button
+                  type="button"
+                  disabled={deletingImageId === img.id}
+                  onClick={() => handleDeleteUploadedImage(img.id)}
+                  className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-black/60 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 disabled:opacity-50"
+                >
+                  {deletingImageId === img.id ? "..." : "\u00d7"}
+                </button>
               </div>
             ))}
           </div>
