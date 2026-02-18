@@ -303,7 +303,7 @@ export function BasicDetailsStep({
                   type="button"
                   disabled={deletingImageId === img.id}
                   onClick={() => handleDeleteUploadedImage(img.id)}
-                  className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-black/60 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 disabled:opacity-50"
+                  className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-black/60 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 [@media(hover:none)]:opacity-100 disabled:opacity-50"
                 >
                   {deletingImageId === img.id ? "..." : "\u00d7"}
                 </button>
@@ -325,7 +325,7 @@ export function BasicDetailsStep({
                 <button
                   type="button"
                   onClick={() => removeSelectedImage(idx)}
-                  className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-black/60 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
+                  className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-black/60 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 [@media(hover:none)]:opacity-100"
                 >
                   &times;
                 </button>

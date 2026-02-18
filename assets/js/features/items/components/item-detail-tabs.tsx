@@ -21,7 +21,7 @@ export function ItemDetailTabs({ description, attributes }: ItemDetailTabsProps)
   // Category-specific attributes (non-underscore-prefixed, non-empty)
   const categoryAttrs = Object.entries(attrs)
     .filter(([key, val]) => !key.startsWith("_") && val)
-    .map(([key, val]) => ({ key, value: val }));
+    .map(([key, val]) => ({ key: humanizeKey(key), value: val }));
 
   // Custom features from _customFeatures
   const customFeatures = attrs._customFeatures
@@ -31,6 +31,7 @@ export function ItemDetailTabs({ description, attributes }: ItemDetailTabsProps)
   const hasFeatures = categoryAttrs.length > 0 || customFeatures.length > 0;
 
   return (
+
     <>
       {/* Desktop: tabbed layout */}
       <div className="hidden lg:block">
@@ -195,4 +196,11 @@ export function ItemDetailTabs({ description, attributes }: ItemDetailTabsProps)
       </div>
     </>
   );
+}
+
+function humanizeKey(key: string): string {
+  return key
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
