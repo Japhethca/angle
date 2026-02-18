@@ -4,6 +4,8 @@ defmodule AngleWeb.StoreDashboardController do
   require Ash.Query
   require Logger
 
+  import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1]
+
   @valid_statuses ~w(all active ended draft)
   @valid_per_page [10, 25, 50]
   @default_per_page 10
@@ -343,10 +345,6 @@ defmodule AngleWeb.StoreDashboardController do
 
   defp parse_positive_int(val, _default) when is_integer(val) and val > 0, do: val
   defp parse_positive_int(_, default), do: default
-
-  defp extract_results(data) when is_list(data), do: data
-  defp extract_results(%{"results" => results}) when is_list(results), do: results
-  defp extract_results(_), do: []
 
   defp load_listing_form_categories(conn) do
     case AshTypescript.Rpc.run_typed_query(:angle, :listing_form_category, %{}, conn) do

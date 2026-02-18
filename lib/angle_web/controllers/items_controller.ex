@@ -2,6 +2,8 @@ defmodule AngleWeb.ItemsController do
   use AngleWeb, :controller
   require Ash.Query
 
+  import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1]
+
   alias AngleWeb.ImageHelpers
 
   @published_filter %{publication_status: "published"}
@@ -95,10 +97,6 @@ defmodule AngleWeb.ItemsController do
   end
 
   defp load_similar_items(_conn, _current_item_id, _category_id), do: []
-
-  defp extract_results(data) when is_list(data), do: data
-  defp extract_results(%{"results" => results}) when is_list(results), do: results
-  defp extract_results(_), do: []
 
   defp load_watchlist_entry_id(conn, item_id) when is_binary(item_id) do
     case conn.assigns[:current_user] do

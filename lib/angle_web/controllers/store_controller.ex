@@ -2,6 +2,8 @@ defmodule AngleWeb.StoreController do
   use AngleWeb, :controller
   require Ash.Query
 
+  import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1]
+
   alias AngleWeb.ImageHelpers
 
   @items_per_page 20
@@ -151,10 +153,6 @@ defmodule AngleWeb.StoreController do
         |> Map.new(fn entry -> {entry.item_id, entry.id} end)
     end
   end
-
-  defp extract_results(data) when is_list(data), do: data
-  defp extract_results(%{"results" => results}) when is_list(results), do: results
-  defp extract_results(_), do: []
 
   defp uuid?(string) do
     case Ecto.UUID.cast(string) do

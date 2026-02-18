@@ -3,6 +3,8 @@ defmodule AngleWeb.BidsController do
 
   require Ash.Query
 
+  import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1]
+
   def index(conn, params) do
     tab = Map.get(params, "tab", "active")
     user = conn.assigns.current_user
@@ -103,8 +105,4 @@ defmodule AngleWeb.BidsController do
     |> assign_prop(:tab, "history")
     |> render_inertia("bids")
   end
-
-  defp extract_results(data) when is_list(data), do: data
-  defp extract_results(%{"results" => results}) when is_list(results), do: results
-  defp extract_results(_), do: []
 end

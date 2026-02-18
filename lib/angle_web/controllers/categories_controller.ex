@@ -1,6 +1,8 @@
 defmodule AngleWeb.CategoriesController do
   use AngleWeb, :controller
 
+  import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1]
+
   alias AngleWeb.ImageHelpers
 
   @items_per_page 20
@@ -120,8 +122,4 @@ defmodule AngleWeb.CategoriesController do
         |> Map.new(fn entry -> {entry.item_id, entry.id} end)
     end
   end
-
-  defp extract_results(data) when is_list(data), do: data
-  defp extract_results(%{"results" => results}) when is_list(results), do: results
-  defp extract_results(_), do: []
 end
