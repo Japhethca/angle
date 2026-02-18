@@ -112,12 +112,12 @@ export default function Show({ item, similar_items = [], watchlist_entry_id = nu
         contentSections={
           <>
             <SellerCard seller={item.user} />
-            <ItemDetailTabs description={item.description} />
+            <ItemDetailTabs description={item.description} attributes={item.attributes} />
           </>
         }
         mobileContentSections={
           <>
-            <ItemDetailTabs description={item.description} />
+            <ItemDetailTabs description={item.description} attributes={item.attributes} />
             <SellerCard seller={item.user} />
           </>
         }
