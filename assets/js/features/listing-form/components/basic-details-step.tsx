@@ -106,6 +106,7 @@ export function BasicDetailsStep({
 
   const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
+    e.target.value = "";
     const total = selectedImages.length + existingUploaded.length + files.length;
     if (total > 10) {
       toast.error("Maximum 10 images allowed");
