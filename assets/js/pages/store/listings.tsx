@@ -161,7 +161,7 @@ export default function StoreListings({
             <h2 className="text-lg font-semibold text-content">
               Item Listings
             </h2>
-            <div className="relative order-last w-full sm:order-none sm:w-auto">
+            <div className="relative order-last w-full sm:order-none sm:ml-auto sm:w-auto">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-content-placeholder" />
               <input
                 value={searchInput}
