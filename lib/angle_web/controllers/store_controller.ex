@@ -1,6 +1,5 @@
 defmodule AngleWeb.StoreController do
   use AngleWeb, :controller
-  require Ash.Query
 
   import AngleWeb.Helpers.QueryHelpers,
     only: [extract_results: 1, load_watchlisted_map: 1, build_category_summary: 1]
@@ -113,9 +112,7 @@ defmodule AngleWeb.StoreController do
   end
 
   defp load_seller_logo_url(seller_id) do
-    case Angle.Accounts.StoreProfile
-         |> Ash.Query.filter(user_id == ^seller_id)
-         |> Ash.read_one(authorize?: false) do
+    case Angle.Accounts.get_store_profile_by_user(seller_id) do
       {:ok, nil} -> nil
       {:ok, profile} -> ImageHelpers.load_owner_thumbnail_url(:store_logo, profile.id)
       _ -> nil

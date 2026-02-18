@@ -1,6 +1,5 @@
 defmodule AngleWeb.ItemsController do
   use AngleWeb, :controller
-  require Ash.Query
 
   import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1]
 
@@ -104,13 +103,15 @@ defmodule AngleWeb.ItemsController do
         nil
 
       user ->
-        Angle.Inventory.WatchlistItem
-        |> Ash.Query.for_read(:by_user, %{}, actor: user)
-        |> Ash.Query.filter(item_id == ^item_id)
-        |> Ash.read!(authorize?: false)
-        |> case do
-          [entry | _] -> entry.id
-          _ -> nil
+        case Angle.Inventory.list_watchlist_by_user(actor: user, authorize?: false) do
+          {:ok, entries} ->
+            case Enum.find(entries, fn e -> e.item_id == item_id end) do
+              nil -> nil
+              entry -> entry.id
+            end
+
+          _ ->
+            nil
         end
     end
   end

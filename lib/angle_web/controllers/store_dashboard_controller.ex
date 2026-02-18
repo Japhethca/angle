@@ -1,7 +1,6 @@
 defmodule AngleWeb.StoreDashboardController do
   use AngleWeb, :controller
 
-  require Ash.Query
   require Logger
 
   import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1, build_category_summary: 1]
@@ -207,9 +206,7 @@ defmodule AngleWeb.StoreDashboardController do
   end
 
   defp load_store_profile_with_logo(user) do
-    case Angle.Accounts.StoreProfile
-         |> Ash.Query.filter(user_id == ^user.id)
-         |> Ash.read_one(authorize?: false) do
+    case Angle.Accounts.get_store_profile_by_user(user.id) do
       {:ok, nil} ->
         {nil, nil}
 

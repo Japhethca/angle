@@ -78,9 +78,7 @@ defmodule AngleWeb.UploadController do
       delete_image_from_storage(image)
 
       # Delete DB record
-      image
-      |> Ash.Changeset.for_destroy(:destroy, %{}, actor: user)
-      |> Ash.destroy!()
+      Angle.Media.destroy_image!(image, actor: user)
 
       send_resp(conn, 204, "")
     else
@@ -144,7 +142,7 @@ defmodule AngleWeb.UploadController do
   defp parse_uuid(_), do: {:error, :invalid_uuid}
 
   defp verify_ownership(user, :item, owner_id) do
-    case Ash.get(Angle.Inventory.Item, owner_id, authorize?: false) do
+    case Angle.Inventory.get_item(owner_id, authorize?: false) do
       {:ok, item} ->
         if item.created_by_id == user.id, do: :ok, else: {:error, :forbidden}
 
@@ -158,7 +156,7 @@ defmodule AngleWeb.UploadController do
   end
 
   defp verify_ownership(user, :store_logo, owner_id) do
-    case Ash.get(Angle.Accounts.StoreProfile, owner_id, authorize?: false) do
+    case Angle.Accounts.get_store_profile(owner_id, authorize?: false) do
       {:ok, profile} ->
         if profile.user_id == user.id, do: :ok, else: {:error, :forbidden}
 
@@ -187,12 +185,7 @@ defmodule AngleWeb.UploadController do
   end
 
   defp next_position(owner_type, owner_id) do
-    images =
-      Media.Image
-      |> Ash.Query.for_read(:by_owner, %{owner_type: owner_type, owner_id: owner_id},
-        authorize?: false
-      )
-      |> Ash.read!()
+    {:ok, images} = Angle.Media.list_images_by_owner(owner_type, owner_id, authorize?: false)
 
     case images do
       [] -> 0
@@ -201,19 +194,11 @@ defmodule AngleWeb.UploadController do
   end
 
   defp delete_existing_images(owner_type, owner_id, user) do
-    images =
-      Media.Image
-      |> Ash.Query.for_read(:by_owner, %{owner_type: owner_type, owner_id: owner_id},
-        authorize?: false
-      )
-      |> Ash.read!()
+    {:ok, images} = Angle.Media.list_images_by_owner(owner_type, owner_id, authorize?: false)
 
     Enum.each(images, fn image ->
       delete_image_from_storage(image)
-
-      image
-      |> Ash.Changeset.for_destroy(:destroy, %{}, actor: user)
-      |> Ash.destroy!()
+      Angle.Media.destroy_image!(image, actor: user)
     end)
   end
 
@@ -232,9 +217,7 @@ defmodule AngleWeb.UploadController do
       {:ok, %{size: file_size}} = File.stat(upload.path)
 
       # Create DB record
-      Media.Image
-      |> Ash.Changeset.for_create(
-        :create,
+      Angle.Media.create_image(
         %{
           owner_type: owner_type,
           owner_id: owner_id,
@@ -248,7 +231,6 @@ defmodule AngleWeb.UploadController do
         },
         actor: user
       )
-      |> Ash.create()
     else
       {:error, _} = error ->
         Processor.cleanup(%{})
@@ -302,9 +284,7 @@ defmodule AngleWeb.UploadController do
       loaded_images
       |> Enum.with_index()
       |> Enum.each(fn {image, idx} ->
-        image
-        |> Ash.Changeset.for_update(:reorder, %{position: -(idx + 1)}, actor: user)
-        |> Ash.update!()
+        Angle.Media.reorder_image!(image, %{position: -(idx + 1)}, actor: user)
       end)
 
       # Second pass: set to actual desired positions
@@ -312,16 +292,13 @@ defmodule AngleWeb.UploadController do
       |> Enum.with_index()
       |> Enum.map(fn {image, position} ->
         {:ok, fresh_image} = get_image(image.id)
-
-        fresh_image
-        |> Ash.Changeset.for_update(:reorder, %{position: position}, actor: user)
-        |> Ash.update!()
+        Angle.Media.reorder_image!(fresh_image, %{position: position}, actor: user)
       end)
     end)
   end
 
   defp get_image(id) do
-    case Ash.get(Media.Image, id, authorize?: false) do
+    case Angle.Media.get_image(id, authorize?: false) do
       {:ok, image} -> {:ok, image}
       {:error, _} -> {:error, :not_found}
     end

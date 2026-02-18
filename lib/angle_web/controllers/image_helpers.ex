@@ -4,8 +4,6 @@ defmodule AngleWeb.ImageHelpers do
   loaded from AshTypescript typed queries.
   """
 
-  require Ash.Query
-
   @doc """
   Given a list of items (maps with "id" keys), loads the cover image
   (position 0) for each item and merges it as a "coverImage" key.
@@ -16,11 +14,10 @@ defmodule AngleWeb.ImageHelpers do
   def attach_cover_images(items) when is_list(items) do
     item_ids = Enum.map(items, fn item -> item["id"] end)
 
+    {:ok, images} = Angle.Media.list_cover_images(item_ids, authorize?: false)
+
     cover_images =
-      Angle.Media.Image
-      |> Ash.Query.filter(owner_type == :item and owner_id in ^item_ids and position == 0)
-      |> Ash.read!(authorize?: false)
-      |> Map.new(fn img ->
+      Map.new(images, fn img ->
         {img.owner_id, serialize_image(img)}
       end)
 
@@ -35,10 +32,8 @@ defmodule AngleWeb.ImageHelpers do
   """
   @spec load_item_images(String.t()) :: list(map())
   def load_item_images(item_id) when is_binary(item_id) do
-    Angle.Media.Image
-    |> Ash.Query.for_read(:by_owner, %{owner_type: :item, owner_id: item_id}, authorize?: false)
-    |> Ash.read!()
-    |> Enum.map(&serialize_image/1)
+    {:ok, images} = Angle.Media.list_images_by_owner(:item, item_id, authorize?: false)
+    Enum.map(images, &serialize_image/1)
   end
 
   def load_item_images(_), do: []
@@ -49,11 +44,9 @@ defmodule AngleWeb.ImageHelpers do
   """
   @spec load_owner_thumbnail_url(atom(), String.t()) :: String.t() | nil
   def load_owner_thumbnail_url(owner_type, owner_id) do
-    case Angle.Media.Image
-         |> Ash.Query.for_read(:by_owner, %{owner_type: owner_type, owner_id: owner_id},
-           authorize?: false
-         )
-         |> Ash.read!() do
+    {:ok, images} = Angle.Media.list_images_by_owner(owner_type, owner_id, authorize?: false)
+
+    case images do
       [image | _] ->
         case image.variants do
           %{"thumbnail" => url} -> url
