@@ -136,7 +136,7 @@ The application is organized into four main Ash domains in `lib/angle/`:
 ### Adding a New Feature (Checklist)
 
 1. Define or update Ash resource with actions
-2. Regenerate `ash_rpc.ts` (`mix ash_typescript.generate`)
+2. Regenerate `ash_rpc.ts` (`mix ash_typescript.codegen`)
 3. Create Phoenix controller that loads data and renders Inertia page
 4. Add route in `router.ex`
 5. Create React page in `assets/js/pages/`
@@ -154,6 +154,11 @@ The application is organized into four main Ash domains in `lib/angle/`:
 Before attempting to use any of these packages or to discover if you should use them, review their 
 usage rules to understand the correct patterns, conventions, and best practices.
 <!-- usage-rules-header-end -->
+
+## Ash Framework Patterns (Project-Specific)
+_Domain interfaces, business logic placement, controller patterns, and cross-domain communication_
+
+[Ash Framework Patterns & Guidelines](rules/ash_patterns.md)
 
 <!-- ash_authentication-start -->
 ## ash_authentication usage
