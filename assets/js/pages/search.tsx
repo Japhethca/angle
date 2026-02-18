@@ -18,6 +18,32 @@ type SearchItem = SearchItemCard[number] & { coverImage?: ImageData | null };
 
 const ALL = "__all__";
 
+const SORT_OPTIONS = [
+  { value: "relevance", label: "Relevance" },
+  { value: "price_asc", label: "Price: Low to High" },
+  { value: "price_desc", label: "Price: High to Low" },
+  { value: "newest", label: "Newest" },
+  { value: "ending_soon", label: "Ending Soon" },
+] as const;
+
+const CONDITION_OPTIONS = [
+  { value: "new", label: "New" },
+  { value: "used", label: "Used" },
+  { value: "refurbished", label: "Refurbished" },
+] as const;
+
+const SALE_TYPE_OPTIONS = [
+  { value: "auction", label: "Auction" },
+  { value: "buy_now", label: "Buy Now" },
+  { value: "hybrid", label: "Hybrid" },
+] as const;
+
+const AUCTION_STATUS_OPTIONS = [
+  { value: "active", label: "Active" },
+  { value: "scheduled", label: "Scheduled" },
+  { value: "ended", label: "Ended" },
+] as const;
+
 interface SearchFilters {
   category: string | null;
   condition: string | null;
@@ -166,11 +192,9 @@ export default function SearchPage({
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="relevance">Relevance</SelectItem>
-              <SelectItem value="price_asc">Price: Low to High</SelectItem>
-              <SelectItem value="price_desc">Price: High to Low</SelectItem>
-              <SelectItem value="newest">Newest</SelectItem>
-              <SelectItem value="ending_soon">Ending Soon</SelectItem>
+              {SORT_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
@@ -223,9 +247,9 @@ export default function SearchPage({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={ALL}>Any Condition</SelectItem>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="used">Used</SelectItem>
-                <SelectItem value="refurbished">Refurbished</SelectItem>
+                {CONDITION_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
@@ -241,9 +265,9 @@ export default function SearchPage({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={ALL}>Any Type</SelectItem>
-                <SelectItem value="auction">Auction</SelectItem>
-                <SelectItem value="buy_now">Buy Now</SelectItem>
-                <SelectItem value="hybrid">Hybrid</SelectItem>
+                {SALE_TYPE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
@@ -290,9 +314,9 @@ export default function SearchPage({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={ALL}>Any Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="scheduled">Scheduled</SelectItem>
-                <SelectItem value="ended">Ended</SelectItem>
+                {AUCTION_STATUS_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
