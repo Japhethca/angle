@@ -35,6 +35,8 @@ defmodule Angle.Inventory.Item do
   alias Angle.Inventory.Item.ItemStatus
   alias Angle.Inventory.Item.PublicationStatus
 
+  require Ash.Query
+
   postgres do
     table "items"
     repo Angle.Repo
@@ -196,8 +198,8 @@ defmodule Angle.Inventory.Item do
             query
 
           search ->
-            search = String.trim(search)
-            Ash.Query.filter(query, expr(contains(title, ^search)))
+            pattern = "%" <> String.trim(search) <> "%"
+            Ash.Query.filter(query, expr(fragment("title ILIKE ?", ^pattern)))
         end
       end
 
