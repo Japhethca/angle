@@ -40,6 +40,7 @@ defmodule AngleWeb.ImageHelpers do
       records
       |> Enum.map(fn record -> get_in(record, [item_key, "id"]) end)
       |> Enum.reject(&is_nil/1)
+      |> Enum.uniq()
 
     if item_ids == [] do
       records
