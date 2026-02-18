@@ -1,7 +1,7 @@
 defmodule AngleWeb.WatchlistController do
   use AngleWeb, :controller
 
-  require Ash.Query
+  import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1, load_watchlisted_map: 1]
 
   alias AngleWeb.ImageHelpers
 
@@ -46,21 +46,4 @@ defmodule AngleWeb.WatchlistController do
       get_in(item, ["category", "id"]) == category_id
     end)
   end
-
-  defp load_watchlisted_map(conn) do
-    case conn.assigns[:current_user] do
-      nil ->
-        %{}
-
-      user ->
-        Angle.Inventory.WatchlistItem
-        |> Ash.Query.for_read(:by_user, %{}, actor: user)
-        |> Ash.read!(authorize?: false)
-        |> Map.new(fn entry -> {entry.item_id, entry.id} end)
-    end
-  end
-
-  defp extract_results(data) when is_list(data), do: data
-  defp extract_results(%{"results" => results}) when is_list(results), do: results
-  defp extract_results(_), do: []
 end

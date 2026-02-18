@@ -1,9 +1,6 @@
 defmodule AngleWeb.PaymentsController do
   use AngleWeb, :controller
 
-  alias Angle.Payments.PaymentMethod
-  alias Angle.Payments.PayoutMethod
-
   @paystack Application.compile_env(:angle, :paystack_client, Angle.Payments.Paystack)
 
   # ₦50 in kobo — small charge to verify card ownership
@@ -53,8 +50,8 @@ defmodule AngleWeb.PaymentsController do
   def delete_payment_method(conn, %{"id" => id}) do
     user = conn.assigns.current_user
 
-    with {:ok, method} <- Ash.get(PaymentMethod, id, actor: user),
-         :ok <- Ash.destroy(method, actor: user) do
+    with {:ok, method} <- Angle.Payments.get_payment_method(id, actor: user),
+         :ok <- Angle.Payments.destroy_payment_method(method, actor: user) do
       json(conn, %{success: true})
     else
       {:error, _} ->
@@ -106,8 +103,8 @@ defmodule AngleWeb.PaymentsController do
   def delete_payout_method(conn, %{"id" => id}) do
     user = conn.assigns.current_user
 
-    with {:ok, method} <- Ash.get(PayoutMethod, id, actor: user),
-         :ok <- Ash.destroy(method, actor: user) do
+    with {:ok, method} <- Angle.Payments.get_payout_method(id, actor: user),
+         :ok <- Angle.Payments.destroy_payout_method(method, actor: user) do
       json(conn, %{success: true})
     else
       {:error, _} ->
@@ -128,7 +125,7 @@ defmodule AngleWeb.PaymentsController do
   def pay_order(conn, %{"order_id" => order_id}) do
     user = conn.assigns.current_user
 
-    with {:ok, order} <- Ash.get(Angle.Bidding.Order, order_id, actor: user),
+    with {:ok, order} <- Angle.Bidding.get_order(order_id, actor: user),
          :ok <- validate_order_status(order, :payment_pending),
          {:ok, data} <-
            @paystack.initialize_transaction(to_string(user.email), order_amount_in_kobo(order)) do
@@ -160,13 +157,11 @@ defmodule AngleWeb.PaymentsController do
   def verify_order_payment(conn, %{"reference" => reference, "order_id" => order_id}) do
     user = conn.assigns.current_user
 
-    with {:ok, order} <- Ash.get(Angle.Bidding.Order, order_id, actor: user),
+    with {:ok, order} <- Angle.Bidding.get_order(order_id, actor: user),
          {:ok, transaction} <- @paystack.verify_transaction(reference),
          :ok <- validate_payment_success(transaction),
          {:ok, _updated_order} <-
-           order
-           |> Ash.Changeset.for_update(:pay_order, %{payment_reference: reference}, actor: user)
-           |> Ash.update() do
+           Angle.Bidding.pay_order(order, %{payment_reference: reference}, actor: user) do
       json(conn, %{success: true})
     else
       {:error, reason} when is_binary(reason) ->
@@ -196,9 +191,7 @@ defmodule AngleWeb.PaymentsController do
   defp validate_transaction(_), do: {:error, "Transaction was not successful"}
 
   defp create_payment_method(user, %{reference: reference, authorization: auth}) do
-    PaymentMethod
-    |> Ash.Changeset.for_create(
-      :create,
+    Angle.Payments.create_payment_method(
       %{
         card_type: auth.card_type,
         last_four: auth.last4,
@@ -211,7 +204,6 @@ defmodule AngleWeb.PaymentsController do
       },
       actor: user
     )
-    |> Ash.create()
   end
 
   defp create_payout_method(
@@ -222,9 +214,7 @@ defmodule AngleWeb.PaymentsController do
          account_name,
          recipient_code
        ) do
-    PayoutMethod
-    |> Ash.Changeset.for_create(
-      :create,
+    Angle.Payments.create_payout_method(
       %{
         bank_name: bank_name,
         bank_code: bank_code,
@@ -235,7 +225,6 @@ defmodule AngleWeb.PaymentsController do
       },
       actor: user
     )
-    |> Ash.create()
   end
 
   defp error_message(%Ash.Error.Invalid{errors: errors}) do

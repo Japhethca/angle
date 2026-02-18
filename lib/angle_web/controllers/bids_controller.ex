@@ -1,7 +1,7 @@
 defmodule AngleWeb.BidsController do
   use AngleWeb, :controller
 
-  require Ash.Query
+  import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1]
 
   def index(conn, params) do
     tab = Map.get(params, "tab", "active")
@@ -49,11 +49,9 @@ defmodule AngleWeb.BidsController do
 
     reviews_by_order =
       if order_ids != [] do
-        Angle.Bidding.Review
-        |> Ash.Query.filter(order_id in ^order_ids)
-        |> Ash.Query.select([:id, :order_id, :rating, :comment, :inserted_at])
-        |> Ash.read!(authorize?: false)
-        |> Map.new(fn r ->
+        reviews = Angle.Bidding.list_reviews_by_order_ids!(order_ids, authorize?: false)
+
+        Map.new(reviews, fn r ->
           {r.order_id,
            %{
              "id" => r.id,
@@ -90,12 +88,8 @@ defmodule AngleWeb.BidsController do
       end
 
     # Load won item IDs so frontend can determine outcome
-    won_item_ids =
-      Angle.Bidding.Order
-      |> Ash.Query.filter(buyer_id == ^user.id)
-      |> Ash.Query.select([:item_id])
-      |> Ash.read!(authorize?: false)
-      |> Enum.map(& &1.item_id)
+    orders = Angle.Bidding.list_buyer_won_item_ids!(actor: user, authorize?: false)
+    won_item_ids = Enum.map(orders, & &1.item_id)
 
     conn
     |> assign_prop(:bids, bids)
@@ -103,8 +97,4 @@ defmodule AngleWeb.BidsController do
     |> assign_prop(:tab, "history")
     |> render_inertia("bids")
   end
-
-  defp extract_results(data) when is_list(data), do: data
-  defp extract_results(%{"results" => results}) when is_list(results), do: results
-  defp extract_results(_), do: []
 end

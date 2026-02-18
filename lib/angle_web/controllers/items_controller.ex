@@ -1,6 +1,7 @@
 defmodule AngleWeb.ItemsController do
   use AngleWeb, :controller
-  require Ash.Query
+
+  import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1, load_watchlisted_map: 1]
 
   alias AngleWeb.ImageHelpers
 
@@ -96,25 +97,9 @@ defmodule AngleWeb.ItemsController do
 
   defp load_similar_items(_conn, _current_item_id, _category_id), do: []
 
-  defp extract_results(data) when is_list(data), do: data
-  defp extract_results(%{"results" => results}) when is_list(results), do: results
-  defp extract_results(_), do: []
-
   defp load_watchlist_entry_id(conn, item_id) when is_binary(item_id) do
-    case conn.assigns[:current_user] do
-      nil ->
-        nil
-
-      user ->
-        Angle.Inventory.WatchlistItem
-        |> Ash.Query.for_read(:by_user, %{}, actor: user)
-        |> Ash.Query.filter(item_id == ^item_id)
-        |> Ash.read!(authorize?: false)
-        |> case do
-          [entry | _] -> entry.id
-          _ -> nil
-        end
-    end
+    watchlisted_map = load_watchlisted_map(conn)
+    Map.get(watchlisted_map, item_id)
   end
 
   defp load_watchlist_entry_id(_conn, _item_id), do: nil

@@ -48,7 +48,23 @@ defmodule Angle.Accounts do
 
   resources do
     resource Angle.Accounts.Token
-    resource Angle.Accounts.User
+
+    resource Angle.Accounts.User do
+      define :get_user, action: :read, get_by: [:id]
+      define :confirm_user, action: :confirm
+      define :get_by_subject
+      define :change_password
+      define :sign_in_with_password
+      define :sign_in_with_token
+      define :register_with_password
+      define :request_password_reset_token
+      define :request_password_reset_with_password
+      define :password_reset_with_password
+      define :get_by_email
+      define :assign_role
+      define :remove_role
+    end
+
     resource Angle.Accounts.UserRole
     resource Angle.Accounts.Role
     resource Angle.Accounts.Permission
@@ -57,6 +73,7 @@ defmodule Angle.Accounts do
 
     resource Angle.Accounts.StoreProfile do
       define :get_store_profile_by_user, action: :read, get_by: [:user_id]
+      define :get_store_profile, action: :read, get_by: [:id]
     end
   end
 end

@@ -1,8 +1,9 @@
 defmodule AngleWeb.StoreDashboardController do
   use AngleWeb, :controller
 
-  require Ash.Query
   require Logger
+
+  import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1, build_category_summary: 1]
 
   @valid_statuses ~w(all active ended draft)
   @valid_per_page [10, 25, 50]
@@ -205,9 +206,7 @@ defmodule AngleWeb.StoreDashboardController do
   end
 
   defp load_store_profile_with_logo(user) do
-    case Angle.Accounts.StoreProfile
-         |> Ash.Query.filter(user_id == ^user.id)
-         |> Ash.read_one(authorize?: false) do
+    case Angle.Accounts.get_store_profile_by_user(user.id, not_found_error?: false) do
       {:ok, nil} ->
         {nil, nil}
 
@@ -222,26 +221,6 @@ defmodule AngleWeb.StoreDashboardController do
 
   defp load_logo_url_for_profile(profile_id) do
     AngleWeb.ImageHelpers.load_owner_thumbnail_url(:store_logo, profile_id)
-  end
-
-  defp build_category_summary(user_id) do
-    item_query =
-      Angle.Inventory.Item
-      |> Ash.Query.filter(created_by_id == ^user_id and publication_status == :published)
-
-    Angle.Catalog.Category
-    |> Ash.Query.aggregate(:item_count, :count, :items, query: item_query, default: 0)
-    |> Ash.read!(authorize?: false)
-    |> Enum.filter(fn cat -> cat.aggregates[:item_count] > 0 end)
-    |> Enum.sort_by(fn cat -> -cat.aggregates[:item_count] end)
-    |> Enum.map(fn cat ->
-      %{
-        "id" => cat.id,
-        "name" => cat.name,
-        "slug" => cat.slug,
-        "count" => cat.aggregates[:item_count]
-      }
-    end)
   end
 
   defp compute_stats(items) do
@@ -344,10 +323,6 @@ defmodule AngleWeb.StoreDashboardController do
   defp parse_positive_int(val, _default) when is_integer(val) and val > 0, do: val
   defp parse_positive_int(_, default), do: default
 
-  defp extract_results(data) when is_list(data), do: data
-  defp extract_results(%{"results" => results}) when is_list(results), do: results
-  defp extract_results(_), do: []
-
   defp load_listing_form_categories(conn) do
     case AshTypescript.Rpc.run_typed_query(:angle, :listing_form_category, %{}, conn) do
       %{"success" => true, "data" => data} -> extract_results(data)
@@ -363,8 +338,8 @@ defmodule AngleWeb.StoreDashboardController do
         nil
 
       user ->
-        case Angle.Accounts.get_store_profile_by_user(user.id) do
-          {:ok, profile} ->
+        case Angle.Accounts.get_store_profile_by_user(user.id, not_found_error?: false) do
+          {:ok, profile} when not is_nil(profile) ->
             %{"deliveryPreference" => profile.delivery_preference}
 
           _ ->

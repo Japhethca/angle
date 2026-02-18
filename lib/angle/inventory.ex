@@ -170,6 +170,9 @@ defmodule Angle.Inventory do
     end
 
     resource Angle.Inventory.ItemActivity
-    resource Angle.Inventory.WatchlistItem
+
+    resource Angle.Inventory.WatchlistItem do
+      define :list_watchlist_by_user, action: :by_user
+    end
   end
 end

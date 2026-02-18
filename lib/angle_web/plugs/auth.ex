@@ -8,8 +8,6 @@ defmodule AngleWeb.Plugs.Auth do
   import Inertia.Controller
   alias Angle.Accounts
 
-  require Ash.Query
-
   # Import verified routes for ~p sigil
   use Phoenix.VerifiedRoutes,
     endpoint: AngleWeb.Endpoint,
@@ -79,7 +77,7 @@ defmodule AngleWeb.Plugs.Auth do
     auth_token = get_session(conn, :auth_token)
 
     if auth_token != nil do
-      case Accounts.User.get_by_subject(%{subject: auth_token}) do
+      case Accounts.get_by_subject(%{subject: auth_token}) do
         {:ok, user} ->
           # Load user with roles and permissions
           user = user |> Ash.load!([:active_roles, :roles], domain: Accounts, authorize?: false)
@@ -125,7 +123,7 @@ defmodule AngleWeb.Plugs.Auth do
         })
 
       user_id ->
-        case Ash.get(Accounts.User, user_id, domain: Accounts, authorize?: false) do
+        case Accounts.get_user(user_id, authorize?: false) do
           {:ok, user} ->
             # Load user with roles and permissions
             user =
@@ -171,7 +169,7 @@ defmodule AngleWeb.Plugs.Auth do
   """
   def validate_api_token(conn, _opts) do
     with ["Bearer " <> token] <- get_req_header(conn, "authorization"),
-         {:ok, user} <- Accounts.User.get_by_subject(%{subject: token}) do
+         {:ok, user} <- Accounts.get_by_subject(%{subject: token}) do
       assign(conn, :current_user, user)
     else
       _ ->

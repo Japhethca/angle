@@ -1,6 +1,8 @@
 defmodule AngleWeb.StoreController do
   use AngleWeb, :controller
-  require Ash.Query
+
+  import AngleWeb.Helpers.QueryHelpers,
+    only: [extract_results: 1, load_watchlisted_map: 1, build_category_summary: 1]
 
   alias AngleWeb.ImageHelpers
 
@@ -110,51 +112,12 @@ defmodule AngleWeb.StoreController do
   end
 
   defp load_seller_logo_url(seller_id) do
-    case Angle.Accounts.StoreProfile
-         |> Ash.Query.filter(user_id == ^seller_id)
-         |> Ash.read_one(authorize?: false) do
+    case Angle.Accounts.get_store_profile_by_user(seller_id, not_found_error?: false) do
       {:ok, nil} -> nil
       {:ok, profile} -> ImageHelpers.load_owner_thumbnail_url(:store_logo, profile.id)
       _ -> nil
     end
   end
-
-  defp build_category_summary(seller_id) do
-    item_query =
-      Angle.Inventory.Item
-      |> Ash.Query.filter(created_by_id == ^seller_id and publication_status == :published)
-
-    Angle.Catalog.Category
-    |> Ash.Query.aggregate(:item_count, :count, :items, query: item_query, default: 0)
-    |> Ash.read!(authorize?: false)
-    |> Enum.filter(fn cat -> cat.aggregates[:item_count] > 0 end)
-    |> Enum.sort_by(fn cat -> -cat.aggregates[:item_count] end)
-    |> Enum.map(fn cat ->
-      %{
-        "id" => cat.id,
-        "name" => cat.name,
-        "slug" => cat.slug,
-        "count" => cat.aggregates[:item_count]
-      }
-    end)
-  end
-
-  defp load_watchlisted_map(conn) do
-    case conn.assigns[:current_user] do
-      nil ->
-        %{}
-
-      user ->
-        Angle.Inventory.WatchlistItem
-        |> Ash.Query.for_read(:by_user, %{}, actor: user)
-        |> Ash.read!(authorize?: false)
-        |> Map.new(fn entry -> {entry.item_id, entry.id} end)
-    end
-  end
-
-  defp extract_results(data) when is_list(data), do: data
-  defp extract_results(%{"results" => results}) when is_list(results), do: results
-  defp extract_results(_), do: []
 
   defp uuid?(string) do
     case Ecto.UUID.cast(string) do

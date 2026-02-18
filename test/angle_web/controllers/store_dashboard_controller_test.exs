@@ -120,7 +120,7 @@ defmodule AngleWeb.StoreDashboardControllerTest do
     defp create_seller(seller_role) do
       user = create_user()
 
-      Angle.Accounts.User.assign_role(user, %{role_name: seller_role.name}, authorize?: false)
+      Angle.Accounts.assign_role(user, %{role_name: seller_role.name}, authorize?: false)
 
       user
     end

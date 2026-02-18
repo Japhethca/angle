@@ -48,6 +48,14 @@ defmodule Angle.Media.Image do
       prepare build(sort: [position: :asc])
     end
 
+    read :cover_images do
+      argument :item_ids, {:array, :uuid} do
+        allow_nil? false
+      end
+
+      filter expr(owner_type == :item and owner_id in ^arg(:item_ids) and position == 0)
+    end
+
     update :reorder do
       accept [:position]
     end

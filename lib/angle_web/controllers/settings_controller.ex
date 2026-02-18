@@ -1,8 +1,6 @@
 defmodule AngleWeb.SettingsController do
   use AngleWeb, :controller
 
-  require Ash.Query
-
   alias AngleWeb.ImageHelpers
 
   def index(conn, _params) do
@@ -14,13 +12,10 @@ defmodule AngleWeb.SettingsController do
   def account(conn, _params) do
     user = conn.assigns.current_user
 
-    avatar_images =
-      Angle.Media.Image
-      |> Ash.Query.for_read(:by_owner, %{owner_type: :user_avatar, owner_id: user.id},
-        authorize?: false
-      )
-      |> Ash.read!()
-      |> Enum.map(&ImageHelpers.serialize_image/1)
+    {:ok, avatar_images} =
+      Angle.Media.list_images_by_owner(:user_avatar, user.id, authorize?: false)
+
+    avatar_images = Enum.map(avatar_images, &ImageHelpers.serialize_image/1)
 
     conn
     |> assign_prop(:user, user_profile_data(conn))
@@ -37,15 +32,11 @@ defmodule AngleWeb.SettingsController do
   def payments(conn, _params) do
     user = conn.assigns.current_user
 
-    payment_methods =
-      Angle.Payments.PaymentMethod
-      |> Ash.read!(action: :list_by_user, actor: user)
-      |> Enum.map(&payment_method_data/1)
+    {:ok, payment_methods} = Angle.Payments.list_payment_methods(actor: user)
+    payment_methods = Enum.map(payment_methods, &payment_method_data/1)
 
-    payout_methods =
-      Angle.Payments.PayoutMethod
-      |> Ash.read!(action: :list_by_user, actor: user)
-      |> Enum.map(&payout_method_data/1)
+    {:ok, payout_methods} = Angle.Payments.list_payout_methods(actor: user)
+    payout_methods = Enum.map(payout_methods, &payout_method_data/1)
 
     conn
     |> assign_prop(:user, user_payments_data(conn))
@@ -79,10 +70,8 @@ defmodule AngleWeb.SettingsController do
   def store(conn, _params) do
     user = conn.assigns.current_user
 
-    store_profile =
-      Angle.Accounts.StoreProfile
-      |> Ash.Query.filter(user_id == ^user.id)
-      |> Ash.read_one!(authorize?: false)
+    {:ok, store_profile} =
+      Angle.Accounts.get_store_profile_by_user(user.id, not_found_error?: false)
 
     logo_images =
       case store_profile do
@@ -90,12 +79,10 @@ defmodule AngleWeb.SettingsController do
           []
 
         profile ->
-          Angle.Media.Image
-          |> Ash.Query.for_read(:by_owner, %{owner_type: :store_logo, owner_id: profile.id},
-            authorize?: false
-          )
-          |> Ash.read!()
-          |> Enum.map(&ImageHelpers.serialize_image/1)
+          {:ok, images} =
+            Angle.Media.list_images_by_owner(:store_logo, profile.id, authorize?: false)
+
+          Enum.map(images, &ImageHelpers.serialize_image/1)
       end
 
     conn

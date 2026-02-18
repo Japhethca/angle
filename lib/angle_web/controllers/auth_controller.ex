@@ -23,7 +23,7 @@ defmodule AngleWeb.AuthController do
   end
 
   def do_login(conn, %{"email" => email, "password" => password}) do
-    case Angle.Accounts.User.sign_in_with_password(%{email: email, password: password}) do
+    case Angle.Accounts.sign_in_with_password(%{email: email, password: password}) do
       {:ok, %{user: user, metadata: %{token: token}}} ->
         {conn, redirect_to} = AuthPlug.pop_return_to(conn, ~p"/")
 
@@ -68,7 +68,7 @@ defmodule AngleWeb.AuthController do
       phone_number: Map.get(params, "phone_number")
     }
 
-    case Angle.Accounts.User.register_with_password(register_params) do
+    case Angle.Accounts.register_with_password(register_params) do
       {:ok, %{user: user, metadata: %{token: token}}} ->
         conn
         |> put_session(:current_user_id, user.id)
@@ -99,7 +99,7 @@ defmodule AngleWeb.AuthController do
 
   def do_forgot_password(conn, %{"email" => email}) do
     # This action always succeeds to prevent email enumeration
-    Angle.Accounts.User.request_password_reset_with_password(%{email: email})
+    Angle.Accounts.request_password_reset_with_password(%{email: email})
 
     conn
     |> put_flash(
@@ -127,12 +127,9 @@ defmodule AngleWeb.AuthController do
     with {:ok, %{"sub" => "user?id=" <> user_id}, _resource} <-
            AshAuthentication.Jwt.verify(token, Angle.Accounts.User),
          {:ok, user} <-
-           Ash.get(Angle.Accounts.User, user_id,
-             domain: Angle.Accounts,
-             authorize?: false
-           ),
+           Angle.Accounts.get_user(user_id, authorize?: false),
          {:ok, reset_user} <-
-           Angle.Accounts.User.password_reset_with_password(
+           Angle.Accounts.password_reset_with_password(
              user,
              %{
                reset_token: token,
@@ -179,7 +176,7 @@ defmodule AngleWeb.AuthController do
   defp confirm_user_with_token(conn, token) do
     with {:ok, claims} <- verify_confirmation_token(token),
          {:ok, user_id} <- extract_user_id_from_claims(claims),
-         {:ok, user} <- Ash.get(Angle.Accounts.User, user_id, domain: Angle.Accounts),
+         {:ok, user} <- Angle.Accounts.get_user(user_id),
          {:ok, confirmed_user} <- confirm_user_account(user, token) do
       # Successfully confirmed - log in the user and generate new session
       {conn, redirect_to} = AuthPlug.pop_return_to(conn, ~p"/dashboard")
@@ -243,11 +240,7 @@ defmodule AngleWeb.AuthController do
 
   # Helper function to confirm user account with better error handling
   defp confirm_user_account(user, token) do
-    case Ash.update(user, %{confirm: token},
-           action: :confirm,
-           domain: Angle.Accounts,
-           authorize?: false
-         ) do
+    case Angle.Accounts.confirm_user(user, %{confirm: token}, authorize?: false) do
       {:ok, confirmed_user} ->
         {:ok, confirmed_user}
 
@@ -317,11 +310,9 @@ defmodule AngleWeb.AuthController do
     else
       with {:ok, otp} <- Angle.Accounts.OtpHelper.verify_code(code, user_id),
            {:ok, user} <-
-             Ash.get(Angle.Accounts.User, user_id, domain: Angle.Accounts, authorize?: false),
+             Angle.Accounts.get_user(user_id, authorize?: false),
            {:ok, _confirmed_user} <-
-             Ash.update(user, %{confirm: otp.confirmation_token},
-               action: :confirm,
-               domain: Angle.Accounts,
+             Angle.Accounts.confirm_user(user, %{confirm: otp.confirmation_token},
                authorize?: false
              ) do
         {conn, redirect_to} = AuthPlug.pop_return_to(conn, ~p"/dashboard")
@@ -376,9 +367,11 @@ defmodule AngleWeb.AuthController do
 
   defp send_confirmation_otp(user_id) do
     with {:ok, user} <-
-           Ash.get(Angle.Accounts.User, user_id, domain: Angle.Accounts, authorize?: false) do
+           Angle.Accounts.get_user(user_id, authorize?: false) do
       if is_nil(user.confirmed_at) do
         strategy = AshAuthentication.Info.strategy!(Angle.Accounts.User, :confirm_new_user)
+
+        # AshAuthentication pattern: build changeset to generate confirmation token without executing update
         changeset = Ash.Changeset.for_update(user, :confirm, %{}, domain: Angle.Accounts)
 
         case AshAuthentication.AddOn.Confirmation.confirmation_token(strategy, changeset, user) do
