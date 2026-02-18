@@ -271,9 +271,6 @@ export function BasicDetailsStep({
         </div>
       </div>
 
-      {/* Features */}
-      <FeatureFields features={customFeatures} onChange={setCustomFeatures} />
-
       {/* Category-specific fields */}
       {categoryFields.length > 0 && (
         <CategoryFields
@@ -284,6 +281,9 @@ export function BasicDetailsStep({
           }
         />
       )}
+
+      {/* Features */}
+      <FeatureFields features={customFeatures} onChange={setCustomFeatures} />
 
       {/* Photo upload */}
       <div className="space-y-3">
