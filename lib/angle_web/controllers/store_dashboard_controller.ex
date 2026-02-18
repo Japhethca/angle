@@ -79,8 +79,10 @@ defmodule AngleWeb.StoreDashboardController do
     per_page = validate_per_page(params["per_page"])
     sort = validate_sort_field(params["sort"])
     dir = validate_sort_dir(params["dir"])
+    search = params["search"] |> to_string() |> String.trim()
+    search = if search == "", do: nil, else: search
 
-    {items, total} = load_seller_items(conn, status, page, per_page, sort, dir)
+    {items, total} = load_seller_items(conn, status, page, per_page, sort, dir, search)
     items = ImageHelpers.attach_cover_images(items)
     stats = load_seller_stats(conn)
     total_pages = max(1, ceil(total / per_page))
@@ -97,6 +99,7 @@ defmodule AngleWeb.StoreDashboardController do
     |> assign_prop(:status, status)
     |> assign_prop(:sort, sort)
     |> assign_prop(:dir, dir)
+    |> assign_prop(:search, search)
     |> render_inertia("store/listings")
   end
 
@@ -149,11 +152,15 @@ defmodule AngleWeb.StoreDashboardController do
     |> render_inertia("store/profile")
   end
 
-  defp load_seller_items(conn, status, page, per_page, sort, dir) do
+  defp load_seller_items(conn, status, page, per_page, sort, dir, search) do
     offset = (page - 1) * per_page
 
+    input =
+      %{status_filter: status, sort_field: sort, sort_dir: dir}
+      |> then(fn m -> if search, do: Map.put(m, :query, search), else: m end)
+
     params = %{
-      input: %{status_filter: status, sort_field: sort, sort_dir: dir},
+      input: input,
       page: %{limit: per_page, offset: offset, count: true}
     }
 

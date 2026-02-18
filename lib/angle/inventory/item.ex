@@ -166,6 +166,8 @@ defmodule Angle.Inventory.Item do
         constraints one_of: [:asc, :desc]
       end
 
+      argument :query, :string
+
       filter expr(created_by_id == ^actor(:id))
 
       filter expr(
@@ -184,6 +186,20 @@ defmodule Angle.Inventory.Item do
                  end
                end
              )
+
+      prepare fn query, _context ->
+        case Ash.Query.get_argument(query, :query) do
+          nil ->
+            query
+
+          "" ->
+            query
+
+          search ->
+            search = String.trim(search)
+            Ash.Query.filter(query, expr(contains(title, ^search)))
+        end
+      end
 
       prepare fn query, _context ->
         field = Ash.Query.get_argument(query, :sort_field) || :inserted_at
