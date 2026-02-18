@@ -1,7 +1,7 @@
 defmodule AngleWeb.SearchController do
   use AngleWeb, :controller
 
-  import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1]
+  import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1, load_watchlisted_map: 1]
 
   alias AngleWeb.ImageHelpers
 
@@ -68,6 +68,7 @@ defmodule AngleWeb.SearchController do
       sort: sort
     })
     |> assign_prop(:categories, categories)
+    |> assign_prop(:watchlisted_map, load_watchlisted_map(conn))
     |> render_inertia("search")
   end
 

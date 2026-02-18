@@ -62,7 +62,7 @@ export default function SearchPage({
   const [showFilters, setShowFilters] = useState(false);
   const [localMinPrice, setLocalMinPrice] = useState(filters.min_price || "");
   const [localMaxPrice, setLocalMaxPrice] = useState(filters.max_price || "");
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   // Sync local price state when filters change from server
   useEffect(() => {
