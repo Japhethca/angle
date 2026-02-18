@@ -155,6 +155,28 @@ defmodule Angle.Inventory do
           %{category: [:id, :name]}
         ]
       end
+
+      typed_query :search_item_card, :search do
+        ts_result_type_name "SearchItemCard"
+        ts_fields_const_name "searchItemCardFields"
+
+        fields [
+          :id,
+          :title,
+          :slug,
+          :description,
+          :starting_price,
+          :current_price,
+          :end_time,
+          :auction_status,
+          :condition,
+          :sale_type,
+          :location,
+          :view_count,
+          :bid_count,
+          %{category: [:id, :name, :slug]}
+        ]
+      end
     end
 
     resource Angle.Inventory.WatchlistItem do
