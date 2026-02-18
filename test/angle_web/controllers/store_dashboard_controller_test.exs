@@ -208,6 +208,213 @@ defmodule AngleWeb.StoreDashboardControllerTest do
     end
   end
 
+  describe "GET /store/listings with status filter" do
+    setup do
+      user = create_user()
+
+      # Create items with different statuses.
+      # publication_status and auction_status are generated? true,
+      # so we set them via Ecto after creation.
+      active_item =
+        create_item(%{title: "Active Item", created_by_id: user.id})
+        |> set_statuses(:published, :active)
+
+      ended_item =
+        create_item(%{title: "Ended Item", created_by_id: user.id})
+        |> set_statuses(:published, :ended)
+
+      draft_item =
+        create_item(%{title: "Draft Item", created_by_id: user.id})
+        |> set_statuses(:draft, :pending)
+
+      %{
+        user: user,
+        active_item: active_item,
+        ended_item: ended_item,
+        draft_item: draft_item
+      }
+    end
+
+    test "returns 200 with status=active", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/store/listings?status=active")
+
+      assert html_response(conn, 200) =~ "store/listings"
+    end
+
+    test "returns 200 with status=ended", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/store/listings?status=ended")
+
+      assert html_response(conn, 200) =~ "store/listings"
+    end
+
+    test "returns 200 with status=draft", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/store/listings?status=draft")
+
+      assert html_response(conn, 200) =~ "store/listings"
+    end
+
+    test "returns 200 with status=all (default)", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/store/listings?status=all")
+
+      assert html_response(conn, 200) =~ "store/listings"
+    end
+
+    test "invalid status falls back to default", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/store/listings?status=invalid")
+
+      assert html_response(conn, 200) =~ "store/listings"
+    end
+  end
+
+  describe "GET /store/listings with sort params" do
+    setup do
+      user = create_user()
+      create_item(%{title: "Item A", created_by_id: user.id, starting_price: Decimal.new("5.00")})
+
+      create_item(%{
+        title: "Item B",
+        created_by_id: user.id,
+        starting_price: Decimal.new("20.00")
+      })
+
+      %{user: user}
+    end
+
+    test "returns 200 with sort=inserted_at&dir=asc", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/store/listings?sort=inserted_at&dir=asc")
+
+      assert html_response(conn, 200) =~ "store/listings"
+    end
+
+    test "returns 200 with sort=current_price&dir=desc", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/store/listings?sort=current_price&dir=desc")
+
+      assert html_response(conn, 200) =~ "store/listings"
+    end
+
+    test "returns 200 with sort=bid_count&dir=asc", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/store/listings?sort=bid_count&dir=asc")
+
+      assert html_response(conn, 200) =~ "store/listings"
+    end
+
+    test "returns 200 with sort=view_count&dir=desc", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/store/listings?sort=view_count&dir=desc")
+
+      assert html_response(conn, 200) =~ "store/listings"
+    end
+
+    test "returns 200 with sort=watcher_count&dir=asc", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/store/listings?sort=watcher_count&dir=asc")
+
+      assert html_response(conn, 200) =~ "store/listings"
+    end
+
+    test "invalid sort field falls back to default", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/store/listings?sort=invalid_field&dir=asc")
+
+      assert html_response(conn, 200) =~ "store/listings"
+    end
+
+    test "invalid sort direction falls back to default", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/store/listings?sort=inserted_at&dir=invalid")
+
+      assert html_response(conn, 200) =~ "store/listings"
+    end
+  end
+
+  describe "GET /store/listings with combined params" do
+    setup do
+      user = create_user()
+
+      create_item(%{
+        title: "Active Cheap",
+        created_by_id: user.id,
+        starting_price: Decimal.new("5.00")
+      })
+      |> set_statuses(:published, :active)
+
+      create_item(%{
+        title: "Active Expensive",
+        created_by_id: user.id,
+        starting_price: Decimal.new("50.00")
+      })
+      |> set_statuses(:published, :active)
+
+      create_item(%{
+        title: "Ended Item",
+        created_by_id: user.id,
+        starting_price: Decimal.new("30.00")
+      })
+      |> set_statuses(:published, :ended)
+
+      %{user: user}
+    end
+
+    test "returns 200 with status + sort + dir combined", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/store/listings?status=active&sort=current_price&dir=asc")
+
+      assert html_response(conn, 200) =~ "store/listings"
+    end
+
+    test "returns 200 with status + sort + dir + search combined", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/store/listings?status=active&sort=inserted_at&dir=desc&search=Cheap")
+
+      assert html_response(conn, 200) =~ "store/listings"
+    end
+
+    test "returns 200 with per_page param", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/store/listings?per_page=25&sort=bid_count&dir=desc")
+
+      assert html_response(conn, 200) =~ "store/listings"
+    end
+  end
+
   describe "GET /store/profile" do
     test "returns 200 for authenticated user", %{conn: conn} do
       user = create_user()
@@ -219,5 +426,16 @@ defmodule AngleWeb.StoreDashboardControllerTest do
 
       assert html_response(conn, 200) =~ "store/profile"
     end
+  end
+
+  # Helper to set publication_status and auction_status on items.
+  # These fields are generated? true so they aren't accepted by create actions.
+  defp set_statuses(item, pub_status, auction_status) do
+    item
+    |> Ecto.Changeset.change(%{
+      publication_status: pub_status,
+      auction_status: auction_status
+    })
+    |> Angle.Repo.update!()
   end
 end

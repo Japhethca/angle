@@ -156,7 +156,11 @@ defmodule AngleWeb.StoreDashboardController do
     offset = (page - 1) * per_page
 
     input =
-      %{status_filter: status, sort_field: sort, sort_dir: dir}
+      %{
+        status_filter: String.to_existing_atom(status),
+        sort_field: String.to_existing_atom(sort),
+        sort_dir: String.to_existing_atom(dir)
+      }
       |> then(fn m -> if search, do: Map.put(m, :query, search), else: m end)
 
     params = %{
