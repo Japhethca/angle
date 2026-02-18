@@ -360,7 +360,6 @@ defmodule Angle.Inventory.Item do
 
     attribute :attributes, :map do
       allow_nil? false
-      generated? true
       public? true
       default %{}
     end

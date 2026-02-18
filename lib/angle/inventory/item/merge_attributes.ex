@@ -1,8 +1,14 @@
 defmodule Angle.Inventory.Item.MergeAttributes do
   @moduledoc """
-  Ash change that shallow-merges incoming attributes with existing ones
-  instead of replacing the entire map. Only runs when attributes
-  is actually being changed, to avoid unnecessary DB writes.
+  Ash change that merges incoming attributes with existing ones.
+
+  When the incoming map contains user-visible keys (no underscore prefix),
+  all existing user-visible keys are replaced while system keys (underscore-
+  prefixed like `_auctionDuration`) are preserved. This handles category
+  changes in step 1 where old category attributes must be cleared.
+
+  When only system keys are sent (steps 2/3), a simple merge preserves
+  all existing keys.
   """
   use Ash.Resource.Change
 
@@ -11,7 +17,21 @@ defmodule Angle.Inventory.Item.MergeAttributes do
     if Ash.Changeset.changing_attribute?(changeset, :attributes) do
       new_attrs = Ash.Changeset.get_attribute(changeset, :attributes)
       existing = Map.get(changeset.data, :attributes) || %{}
-      merged = Map.merge(existing, new_attrs)
+
+      has_user_keys? =
+        Enum.any?(new_attrs, fn {key, _val} -> not String.starts_with?(key, "_") end)
+
+      merged =
+        if has_user_keys? do
+          # Replace user-visible attrs, preserve system fields from existing
+          existing_system =
+            Map.filter(existing, fn {key, _val} -> String.starts_with?(key, "_") end)
+
+          Map.merge(existing_system, new_attrs)
+        else
+          Map.merge(existing, new_attrs)
+        end
+
       Ash.Changeset.force_change_attribute(changeset, :attributes, merged)
     else
       changeset

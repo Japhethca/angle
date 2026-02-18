@@ -3,7 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronDown, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { createDraftItem, buildCSRFHeaders, getPhoenixCSRFToken } from "@/ash_rpc";
+import { createDraftItem, updateDraftItem, buildCSRFHeaders, getPhoenixCSRFToken } from "@/ash_rpc";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -162,7 +162,7 @@ export function BasicDetailsStep({
           input: {
             title: data.title,
             description: data.description || undefined,
-            startingPrice: "1", // Placeholder, will be updated in Step 4
+            startingPrice: "1", // Placeholder, will be updated in Step 2
             categoryId: data.categoryId || undefined,
             condition: data.condition,
             attributes: mergedAttributes,
@@ -176,6 +176,24 @@ export function BasicDetailsStep({
         }
 
         itemId = result.data.id;
+      } else {
+        // Update existing draft with latest basic details
+        const result = await updateDraftItem({
+          identity: itemId,
+          input: {
+            id: itemId,
+            title: data.title,
+            description: data.description || undefined,
+            categoryId: data.categoryId || undefined,
+            condition: data.condition,
+            attributes: mergedAttributes,
+          },
+          headers: buildCSRFHeaders(),
+        });
+
+        if (!result.success) {
+          throw new Error(result.errors.map((e) => e.message).join("; "));
+        }
       }
 
       // Upload images
