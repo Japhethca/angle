@@ -23,14 +23,15 @@ export default function EditPage({
   step,
 }: EditPageProps) {
   const attrs = (item.attributes || {}) as Record<string, string>;
+  const resolved = resolveCategory(categories, item.category?.id || "");
 
   const initialData = {
     draftItemId: item.id,
     basicDetails: {
       title: item.title || "",
       description: item.description || "",
-      categoryId: item.category?.id || "",
-      subcategoryId: "",
+      categoryId: resolved.categoryId,
+      subcategoryId: resolved.subcategoryId,
       condition: (item.condition as "new" | "used" | "refurbished") || "used",
       attributes: Object.fromEntries(
         Object.entries(attrs).filter(([key]) => !key.startsWith("_")),
@@ -72,4 +73,26 @@ export default function EditPage({
       </StoreLayout>
     </>
   );
+}
+
+/** Check if the stored category_id is a subcategory or top-level and set IDs accordingly. */
+function resolveCategory(
+  categories: Category[],
+  storedId: string,
+): { categoryId: string; subcategoryId: string } {
+  if (!storedId) return { categoryId: "", subcategoryId: "" };
+
+  for (const cat of categories) {
+    if (cat.id === storedId) {
+      return { categoryId: storedId, subcategoryId: "" };
+    }
+    for (const sub of cat.categories) {
+      if (sub.id === storedId) {
+        return { categoryId: storedId, subcategoryId: storedId };
+      }
+    }
+  }
+
+  // Fallback: treat as top-level
+  return { categoryId: storedId, subcategoryId: "" };
 }
