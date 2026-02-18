@@ -51,6 +51,7 @@ export function PreferencesForm() {
         <h3 className="font-heading text-base font-medium text-content-secondary">Theme</h3>
         <div className="flex gap-4 lg:gap-8">
           <ThemeCard variant="light" selected={selectedTheme === "light"} onClick={() => setSelectedTheme("light")} />
+          <ThemeCard variant="system" selected={selectedTheme === "system"} onClick={() => setSelectedTheme("system")} />
           <ThemeCard variant="dark" selected={selectedTheme === "dark"} onClick={() => setSelectedTheme("dark")} />
         </div>
       </div>
