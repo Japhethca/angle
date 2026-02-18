@@ -202,6 +202,52 @@ defmodule Angle.Inventory.Item do
       pagination offset?: true, required?: false
     end
 
+    read :search do
+      description "Full-text search across published items with optional filters"
+
+      argument :query, :string, allow_nil?: false
+
+      argument :category_id, :uuid do
+        description "Filter by category"
+      end
+
+      argument :condition, :atom do
+        constraints one_of: [:new, :used, :refurbished]
+      end
+
+      argument :min_price, :decimal
+      argument :max_price, :decimal
+
+      argument :sale_type, :atom do
+        constraints one_of: [:auction, :buy_now, :hybrid]
+      end
+
+      argument :auction_status, :atom do
+        constraints one_of: [:pending, :scheduled, :active, :ended, :sold]
+      end
+
+      argument :sort_by, :atom do
+        default :relevance
+        constraints one_of: [:relevance, :price_asc, :price_desc, :newest, :ending_soon]
+      end
+
+      filter expr(publication_status == :published)
+
+      filter expr(is_nil(^arg(:category_id)) or category_id == ^arg(:category_id))
+      filter expr(is_nil(^arg(:condition)) or condition == ^arg(:condition))
+      filter expr(is_nil(^arg(:sale_type)) or sale_type == ^arg(:sale_type))
+      filter expr(is_nil(^arg(:auction_status)) or auction_status == ^arg(:auction_status))
+
+      filter expr(
+               (is_nil(^arg(:min_price)) or current_price >= ^arg(:min_price)) and
+                 (is_nil(^arg(:max_price)) or current_price <= ^arg(:max_price))
+             )
+
+      prepare {Angle.Inventory.Item.SearchPreparation, []}
+
+      pagination offset?: true, required?: false
+    end
+
     read :by_seller do
       argument :seller_id, :uuid, allow_nil?: false
 
