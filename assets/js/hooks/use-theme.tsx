@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useState } from "react";
 
-type ThemeOption = "light" | "dark" | "system";
+export type ThemeOption = "light" | "dark" | "system";
 type ResolvedTheme = "light" | "dark";
 
 interface ThemeContextValue {

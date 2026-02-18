@@ -1,7 +1,8 @@
+import { type ThemeOption } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
 
 interface ThemeCardProps {
-  variant: "light" | "dark" | "system";
+  variant: ThemeOption;
   selected: boolean;
   onClick: () => void;
 }
@@ -11,7 +12,7 @@ export function ThemeCard({ variant, selected, onClick }: ThemeCardProps) {
   const isSystem = variant === "system";
 
   return (
-    <button type="button" onClick={onClick} className="flex flex-1 flex-col items-center gap-2">
+    <button type="button" onClick={onClick} aria-pressed={selected} className="flex flex-1 flex-col items-center gap-2">
       <div
         className={cn(
           "w-full rounded-lg border-2 p-1",

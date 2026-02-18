@@ -1,8 +1,6 @@
 import { Sun, Moon, Monitor } from "lucide-react";
-import { useTheme } from "@/hooks/use-theme";
+import { useTheme, type ThemeOption } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
-
-type ThemeOption = "light" | "system" | "dark";
 
 const options: { value: ThemeOption; icon: typeof Sun; label: string }[] = [
   { value: "light", icon: Sun, label: "Light" },
@@ -35,7 +33,6 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
               ? "bg-surface text-content shadow-sm"
               : "text-content-tertiary hover:text-content-secondary"
           )}
-          aria-label={label}
         >
           <Icon className="size-3.5" />
           {label}

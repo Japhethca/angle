@@ -9,12 +9,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { useTheme } from "@/hooks/use-theme";
+import { useTheme, type ThemeOption } from "@/hooks/use-theme";
 import { ThemeCard } from "./theme-card";
 
 export function PreferencesForm() {
   const { theme, setTheme } = useTheme();
-  const [selectedTheme, setSelectedTheme] = useState(theme);
+  const [selectedTheme, setSelectedTheme] = useState<ThemeOption>(theme);
 
   // Sync selectedTheme when ThemeProvider corrects after hydration
   useEffect(() => {
