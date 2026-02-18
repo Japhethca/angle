@@ -158,7 +158,7 @@ usage rules to understand the correct patterns, conventions, and best practices.
 ## Ash Framework Patterns (Project-Specific)
 _Domain interfaces, business logic placement, controller patterns, and cross-domain communication_
 
-[Ash Framework Patterns & Guidelines](rules/ash_patterns.md)
+[Ash Framework Patterns & Guidelines](docs/rules/ash_patterns.md)
 
 <!-- ash_authentication-start -->
 ## ash_authentication usage
