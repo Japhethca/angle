@@ -125,7 +125,7 @@ defmodule AngleWeb.Plugs.Auth do
         })
 
       user_id ->
-        case Ash.get(Accounts.User, user_id, domain: Accounts, authorize?: false) do
+        case Accounts.get_user(user_id, authorize?: false) do
           {:ok, user} ->
             # Load user with roles and permissions
             user =
