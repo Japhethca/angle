@@ -32,6 +32,20 @@ defmodule AngleWeb.StoreDashboardControllerTest do
     end
   end
 
+  describe "GET /store/listings with search param" do
+    test "returns 200 with search param", %{conn: conn} do
+      user = create_user()
+      create_item(%{title: "Searchable Widget", created_by_id: user.id})
+
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/store/listings?search=Widget")
+
+      assert html_response(conn, 200) =~ "store/listings"
+    end
+  end
+
   describe "GET /store/payments" do
     test "returns 200 for authenticated user", %{conn: conn} do
       user = create_user()

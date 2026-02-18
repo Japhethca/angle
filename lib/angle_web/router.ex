@@ -70,6 +70,7 @@ defmodule AngleWeb.Router do
     get "/categories", CategoriesController, :index
     get "/categories/:slug", CategoriesController, :show
     get "/categories/:slug/:sub_slug", CategoriesController, :show_subcategory
+    get "/search", SearchController, :index
     get "/terms", PageController, :terms
     get "/privacy", PageController, :privacy
     post "/rpc/run", AshTypescriptRpcController, :run

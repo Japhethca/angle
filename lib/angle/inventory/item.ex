@@ -35,6 +35,8 @@ defmodule Angle.Inventory.Item do
   alias Angle.Inventory.Item.ItemStatus
   alias Angle.Inventory.Item.PublicationStatus
 
+  require Ash.Query
+
   postgres do
     table "items"
     repo Angle.Repo
@@ -166,6 +168,8 @@ defmodule Angle.Inventory.Item do
         constraints one_of: [:asc, :desc]
       end
 
+      argument :query, :string
+
       filter expr(created_by_id == ^actor(:id))
 
       filter expr(
@@ -186,6 +190,20 @@ defmodule Angle.Inventory.Item do
              )
 
       prepare fn query, _context ->
+        case Ash.Query.get_argument(query, :query) do
+          nil ->
+            query
+
+          "" ->
+            query
+
+          search ->
+            pattern = "%" <> String.trim(search) <> "%"
+            Ash.Query.filter(query, expr(fragment("title ILIKE ?", ^pattern)))
+        end
+      end
+
+      prepare fn query, _context ->
         field = Ash.Query.get_argument(query, :sort_field) || :inserted_at
         dir = Ash.Query.get_argument(query, :sort_dir) || :desc
         Ash.Query.sort(query, [{field, dir}])
@@ -198,6 +216,52 @@ defmodule Angle.Inventory.Item do
       argument :category_ids, {:array, :uuid}, allow_nil?: false
 
       filter expr(category_id in ^arg(:category_ids) and publication_status == :published)
+
+      pagination offset?: true, required?: false
+    end
+
+    read :search do
+      description "Full-text search across published items with optional filters"
+
+      argument :query, :string, allow_nil?: false
+
+      argument :category_id, :uuid do
+        description "Filter by category"
+      end
+
+      argument :condition, :atom do
+        constraints one_of: [:new, :used, :refurbished]
+      end
+
+      argument :min_price, :decimal
+      argument :max_price, :decimal
+
+      argument :sale_type, :atom do
+        constraints one_of: [:auction, :buy_now, :hybrid]
+      end
+
+      argument :auction_status, :atom do
+        constraints one_of: [:pending, :scheduled, :active, :ended, :sold]
+      end
+
+      argument :sort_by, :atom do
+        default :relevance
+        constraints one_of: [:relevance, :price_asc, :price_desc, :newest, :ending_soon]
+      end
+
+      filter expr(publication_status == :published)
+
+      filter expr(is_nil(^arg(:category_id)) or category_id == ^arg(:category_id))
+      filter expr(is_nil(^arg(:condition)) or condition == ^arg(:condition))
+      filter expr(is_nil(^arg(:sale_type)) or sale_type == ^arg(:sale_type))
+      filter expr(is_nil(^arg(:auction_status)) or auction_status == ^arg(:auction_status))
+
+      filter expr(
+               (is_nil(^arg(:min_price)) or current_price >= ^arg(:min_price)) and
+                 (is_nil(^arg(:max_price)) or current_price <= ^arg(:max_price))
+             )
+
+      prepare {Angle.Inventory.Item.SearchPreparation, []}
 
       pagination offset?: true, required?: false
     end

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Head, Link, router } from "@inertiajs/react";
-import { Eye, Heart, Gavel, Banknote, Plus, Package, Loader2 } from "lucide-react";
+import { Eye, Heart, Gavel, Banknote, Plus, Package, Loader2, Search } from "lucide-react";
 import type { SellerDashboardCard } from "@/ash_rpc";
 import {
   StoreLayout,
@@ -35,6 +35,7 @@ interface StoreListingsProps {
   status: string;
   sort: string;
   dir: string;
+  search: string | null;
 }
 
 function navigate(params: Record<string, string | number>) {
@@ -58,6 +59,7 @@ export default function StoreListings({
   status = "all",
   sort = "inserted_at",
   dir = "desc",
+  search = null,
 }: StoreListingsProps) {
   const defaultStats: Stats = {
     total_views: 0,
@@ -67,6 +69,25 @@ export default function StoreListings({
   };
   const s = stats || defaultStats;
   const p = pagination || { page: 1, per_page: 10, total: 0, total_pages: 1 };
+
+  // Search filter
+  const [searchInput, setSearchInput] = useState(search || "");
+
+  // Sync search input when prop changes (e.g. browser back/forward)
+  useEffect(() => {
+    setSearchInput(search || "");
+  }, [search]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const trimmed = searchInput.trim();
+      if (trimmed !== (search || "")) {
+        navigate({ status, sort, dir, per_page: p.per_page, ...(trimmed ? { search: trimmed } : {}) } as Record<string, string | number>);
+      }
+    }, 300);
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: only debounce on input changes, other deps trigger full page reload
+  }, [searchInput]);
 
   // Mobile "Load More" state
   const [mobileItems, setMobileItems] = useState<Item[]>(items);
@@ -94,14 +115,16 @@ export default function StoreListings({
 
   function loadMore() {
     setMobileLoading(true);
+    const params: Record<string, string | number> = {
+      status,
+      sort,
+      dir,
+      page: p.page + 1,
+      per_page: p.per_page,
+    };
+    if (search) params.search = search;
     const query = Object.fromEntries(
-      Object.entries({
-        status,
-        sort,
-        dir,
-        page: p.page + 1,
-        per_page: p.per_page,
-      }).filter(
+      Object.entries(params).filter(
         ([k, v]) =>
           !(k === "status" && v === "all") &&
           !(k === "page" && v === 1) &&
@@ -134,10 +157,19 @@ export default function StoreListings({
 
         {/* Item listings section */}
         <div className="mt-8">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-lg font-semibold text-content">
               Item Listings
             </h2>
+            <div className="relative order-last w-full sm:order-none sm:ml-auto sm:w-auto">
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-content-placeholder" />
+              <input
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Filter listings..."
+                className="h-9 w-full rounded-lg bg-surface-muted pl-9 pr-4 text-sm text-content placeholder:text-content-placeholder outline-none sm:w-64"
+              />
+            </div>
             <Link
               href="/store/listings/new"
               className="hidden items-center gap-2 rounded-full bg-primary-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700 lg:inline-flex"
