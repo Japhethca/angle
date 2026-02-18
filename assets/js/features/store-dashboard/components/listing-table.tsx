@@ -7,7 +7,7 @@ import type { ImageData } from "@/lib/image-url";
 import { ListingActionsMenu } from "./listing-actions-menu";
 import { formatCurrency } from "../utils";
 
-type Item = SellerDashboardCard[number];
+type Item = SellerDashboardCard[number] & { coverImage?: ImageData | null };
 
 function formatTimeLeft(endTime: string | null | undefined): string {
   if (!endTime) return "--";
@@ -200,8 +200,8 @@ export function ListingTable({ items, sort, dir, status, perPage, onNavigate }: 
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <div className="size-10 shrink-0 overflow-hidden rounded-lg bg-surface-muted">
-                      {(item as any).coverImage ? (
-                        <ResponsiveImage image={(item as any).coverImage as ImageData} sizes="40px" alt={item.title || ""} />
+                      {item.coverImage ? (
+                        <ResponsiveImage image={item.coverImage as ImageData} sizes="40px" alt={item.title || ""} />
                       ) : (
                         <div className="flex h-full items-center justify-center text-content-placeholder">
                           <Gavel className="size-4" />
