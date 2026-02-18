@@ -1,5 +1,8 @@
 import { Link } from '@inertiajs/react';
+import { Gavel } from 'lucide-react';
 import type { HistoryBidCard as HistoryBidCardType } from '@/ash_rpc';
+import { ResponsiveImage } from '@/components/image-upload';
+import type { ImageData } from '@/lib/image-url';
 import { formatNaira } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
@@ -40,7 +43,15 @@ export function HistoryBidCard({ bid, didWin }: HistoryBidCardProps) {
       {/* Desktop */}
       <div className="hidden items-center gap-4 border-b border-default py-4 lg:flex">
         <Link href={itemUrl} className="block size-20 shrink-0">
-          <div className="size-full rounded-lg bg-surface-muted" />
+          <div className="size-full overflow-hidden rounded-lg bg-surface-muted">
+            {item?.coverImage ? (
+              <ResponsiveImage image={item.coverImage as ImageData} sizes="80px" alt={item?.title || ""} />
+            ) : (
+              <div className="flex h-full items-center justify-center text-content-placeholder">
+                <Gavel className="size-6" />
+              </div>
+            )}
+          </div>
         </Link>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
@@ -74,7 +85,15 @@ export function HistoryBidCard({ bid, didWin }: HistoryBidCardProps) {
       <div className="space-y-2 rounded-xl border border-default p-4 lg:hidden">
         <div className="flex items-start gap-3">
           <Link href={itemUrl} className="block size-20 shrink-0">
-            <div className="size-full rounded-lg bg-surface-muted" />
+            <div className="size-full overflow-hidden rounded-lg bg-surface-muted">
+              {item?.coverImage ? (
+                <ResponsiveImage image={item.coverImage as ImageData} sizes="80px" alt={item?.title || ""} />
+              ) : (
+                <div className="flex h-full items-center justify-center text-content-placeholder">
+                  <Gavel className="size-6" />
+                </div>
+              )}
+            </div>
           </Link>
           <div className="min-w-0 flex-1">
             <span
