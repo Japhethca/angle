@@ -8,32 +8,22 @@ defmodule Angle.Repo.Migrations.MigrateResources2 do
   use Ecto.Migration
 
   def up do
-    # The column is currently :map (jsonb) and needs to become {:array, :map} (jsonb[]).
-    # PostgreSQL cannot auto-cast jsonb -> jsonb[], so we use raw SQL.
-    # Step 1: Drop the existing default (which is a jsonb value)
-    execute "ALTER TABLE categories ALTER COLUMN attribute_schema DROP DEFAULT"
-
-    # Step 2: Change the column type from jsonb to jsonb[]
+    # attribute_schema changed from :map (single JSON object) to {:array, :map}
+    # (JSON array of objects). Column stays jsonb — only data and default change.
     execute """
-    ALTER TABLE categories
-      ALTER COLUMN attribute_schema TYPE jsonb[]
-        USING CASE
-          WHEN attribute_schema IS NULL THEN ARRAY[]::jsonb[]
-          ELSE ARRAY[]::jsonb[]
-        END
+    UPDATE categories
+    SET attribute_schema = '[]'::jsonb
+    WHERE jsonb_typeof(attribute_schema) = 'object'
     """
 
-    # Step 3: Set the new default as an empty PostgreSQL array
-    execute "ALTER TABLE categories ALTER COLUMN attribute_schema SET DEFAULT ARRAY[]::jsonb[]"
+    execute "ALTER TABLE categories ALTER COLUMN attribute_schema SET DEFAULT '[]'::jsonb"
   end
 
   def down do
-    execute "ALTER TABLE categories ALTER COLUMN attribute_schema DROP DEFAULT"
-
     execute """
-    ALTER TABLE categories
-      ALTER COLUMN attribute_schema TYPE jsonb
-        USING COALESCE(to_jsonb(attribute_schema), '{}'::jsonb)
+    UPDATE categories
+    SET attribute_schema = '{}'::jsonb
+    WHERE jsonb_typeof(attribute_schema) = 'array'
     """
 
     execute "ALTER TABLE categories ALTER COLUMN attribute_schema SET DEFAULT '{}'::jsonb"
