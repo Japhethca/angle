@@ -1,7 +1,7 @@
 defmodule AngleWeb.ItemsController do
   use AngleWeb, :controller
 
-  import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1]
+  import AngleWeb.Helpers.QueryHelpers, only: [extract_results: 1, load_watchlisted_map: 1]
 
   alias AngleWeb.ImageHelpers
 
@@ -98,22 +98,8 @@ defmodule AngleWeb.ItemsController do
   defp load_similar_items(_conn, _current_item_id, _category_id), do: []
 
   defp load_watchlist_entry_id(conn, item_id) when is_binary(item_id) do
-    case conn.assigns[:current_user] do
-      nil ->
-        nil
-
-      user ->
-        case Angle.Inventory.list_watchlist_by_user(actor: user, authorize?: false) do
-          {:ok, entries} ->
-            case Enum.find(entries, fn e -> e.item_id == item_id end) do
-              nil -> nil
-              entry -> entry.id
-            end
-
-          _ ->
-            nil
-        end
-    end
+    watchlisted_map = load_watchlisted_map(conn)
+    Map.get(watchlisted_map, item_id)
   end
 
   defp load_watchlist_entry_id(_conn, _item_id), do: nil

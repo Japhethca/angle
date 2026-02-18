@@ -49,7 +49,7 @@ defmodule AngleWeb.BidsController do
 
     reviews_by_order =
       if order_ids != [] do
-        {:ok, reviews} = Angle.Bidding.list_reviews_by_order_ids(order_ids, authorize?: false)
+        reviews = Angle.Bidding.list_reviews_by_order_ids!(order_ids, authorize?: false)
 
         Map.new(reviews, fn r ->
           {r.order_id,
@@ -88,7 +88,7 @@ defmodule AngleWeb.BidsController do
       end
 
     # Load won item IDs so frontend can determine outcome
-    {:ok, orders} = Angle.Bidding.list_buyer_won_item_ids(actor: user, authorize?: false)
+    orders = Angle.Bidding.list_buyer_won_item_ids!(actor: user, authorize?: false)
     won_item_ids = Enum.map(orders, & &1.item_id)
 
     conn

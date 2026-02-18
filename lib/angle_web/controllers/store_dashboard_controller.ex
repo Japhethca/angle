@@ -206,7 +206,7 @@ defmodule AngleWeb.StoreDashboardController do
   end
 
   defp load_store_profile_with_logo(user) do
-    case Angle.Accounts.get_store_profile_by_user(user.id) do
+    case Angle.Accounts.get_store_profile_by_user(user.id, not_found_error?: false) do
       {:ok, nil} ->
         {nil, nil}
 
@@ -338,8 +338,8 @@ defmodule AngleWeb.StoreDashboardController do
         nil
 
       user ->
-        case Angle.Accounts.get_store_profile_by_user(user.id) do
-          {:ok, profile} ->
+        case Angle.Accounts.get_store_profile_by_user(user.id, not_found_error?: false) do
+          {:ok, profile} when not is_nil(profile) ->
             %{"deliveryPreference" => profile.delivery_preference}
 
           _ ->

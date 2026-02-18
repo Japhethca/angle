@@ -112,7 +112,7 @@ defmodule AngleWeb.StoreController do
   end
 
   defp load_seller_logo_url(seller_id) do
-    case Angle.Accounts.get_store_profile_by_user(seller_id) do
+    case Angle.Accounts.get_store_profile_by_user(seller_id, not_found_error?: false) do
       {:ok, nil} -> nil
       {:ok, profile} -> ImageHelpers.load_owner_thumbnail_url(:store_logo, profile.id)
       _ -> nil

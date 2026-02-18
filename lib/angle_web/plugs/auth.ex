@@ -8,8 +8,6 @@ defmodule AngleWeb.Plugs.Auth do
   import Inertia.Controller
   alias Angle.Accounts
 
-  require Ash.Query
-
   # Import verified routes for ~p sigil
   use Phoenix.VerifiedRoutes,
     endpoint: AngleWeb.Endpoint,
