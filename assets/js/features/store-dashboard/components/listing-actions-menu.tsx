@@ -70,6 +70,7 @@ export function ListingActionsMenu({ id, slug, publicationStatus }: ListingActio
         )}
         <DropdownMenuItem
           onClick={handleDelete}
+          onSelect={(e) => { if (!confirmDelete) e.preventDefault(); }}
           disabled={isDeleting}
           className={confirmDelete ? "text-feedback-error bg-feedback-error/10" : "text-feedback-error"}
         >
