@@ -159,7 +159,9 @@ defmodule Angle.Bidding do
   end
 
   resources do
-    resource Angle.Bidding.Bid
+    resource Angle.Bidding.Bid do
+      define :make_bid, action: :make_bid
+    end
 
     resource Angle.Bidding.Order do
       define :get_order, action: :read, get_by: [:id]

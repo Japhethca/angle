@@ -117,12 +117,22 @@ defmodule Angle.Factory do
         title: Map.get(attrs, :title, "Item #{System.unique_integer([:positive])}"),
         description: Map.get(attrs, :description, "Test item description"),
         starting_price: Map.get(attrs, :starting_price, Decimal.new("10.00")),
-        created_by_id: created_by_id
+        created_by_id: created_by_id,
+        # Default end_time to 7 days in future for all items
+        end_time:
+          Map.get(attrs, :end_time, DateTime.add(DateTime.utc_now(), 7 * 24 * 60 * 60, :second))
       }
       |> maybe_put(:category_id, Map.get(attrs, :category_id))
       |> maybe_put(:slug, Map.get(attrs, :slug))
       |> maybe_put(:condition, Map.get(attrs, :condition))
       |> maybe_put(:sale_type, Map.get(attrs, :sale_type))
+      |> maybe_put(:auction_status, Map.get(attrs, :auction_status))
+      |> maybe_put(:publication_status, Map.get(attrs, :publication_status))
+      |> maybe_put(:start_time, Map.get(attrs, :start_time))
+      |> maybe_put(:current_price, Map.get(attrs, :current_price))
+      |> maybe_put(:reserve_price, Map.get(attrs, :reserve_price))
+      |> maybe_put(:extension_count, Map.get(attrs, :extension_count))
+      |> maybe_put(:original_end_time, Map.get(attrs, :original_end_time))
 
     Ash.create!(Angle.Inventory.Item, params, authorize?: false)
   end

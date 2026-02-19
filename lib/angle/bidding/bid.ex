@@ -17,7 +17,10 @@ defmodule Angle.Bidding.Bid do
 
   require Ash.Resource.Change.Builtins
   alias Angle.Bidding.Bid.BidType
-  alias Angle.Bidding.Bid.ValidateBidIsHigherThanCurrentPrice
+  alias Angle.Bidding.Bid.ValidateBidIncrement
+  alias Angle.Bidding.Bid.PreventSelfBidding
+  alias Angle.Bidding.Bid.AuctionMustBeActive
+  alias Angle.Bidding.Bid.CheckSoftCloseExtension
 
   graphql do
     type :bid
@@ -54,7 +57,12 @@ defmodule Angle.Bidding.Bid do
       # Auto-assign the bidder to current user
       change set_attribute(:user_id, actor(:id))
 
-      change {ValidateBidIsHigherThanCurrentPrice, []}
+      change {ValidateBidIncrement, []}
+      change {PreventSelfBidding, []}
+      change {AuctionMustBeActive, []}
+
+      # After successful bid, check if auction should be extended (soft close anti-sniping)
+      change {CheckSoftCloseExtension, []}
     end
   end
 
