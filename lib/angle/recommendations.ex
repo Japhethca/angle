@@ -9,5 +9,6 @@ defmodule Angle.Recommendations do
 
   resources do
     resource Angle.Recommendations.UserInterest
+    resource Angle.Recommendations.ItemSimilarity
   end
 end
