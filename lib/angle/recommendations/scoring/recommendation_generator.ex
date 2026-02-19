@@ -66,7 +66,7 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
 
   defp generate_recommendations(user_id, interests, limit) do
     top_categories = get_top_categories(interests, @top_categories_count)
-    interests_map = Map.new(interests, fn {cat, score, _} -> {cat, score} end)
+    interests_map = Map.new(interests, fn {cat, score, _count, _last} -> {cat, score} end)
 
     with {:ok, candidate_items} <- find_items_in_categories(user_id, top_categories) do
       recommendations =
@@ -83,9 +83,9 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
   # Get top N categories from interests
   defp get_top_categories(interests, count) do
     interests
-    |> Enum.sort_by(fn {_cat, score, _count} -> score end, :desc)
+    |> Enum.sort_by(fn {_cat, score, _count, _last} -> score end, :desc)
     |> Enum.take(count)
-    |> Enum.map(fn {cat, _score, _count} -> cat end)
+    |> Enum.map(fn {cat, _score, _count, _last} -> cat end)
   end
 
   # Find candidate items in top categories, excluding user's own items/bids/watchlist
@@ -95,7 +95,7 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
     |> Ash.Query.filter(publication_status == :published)
     |> Ash.Query.filter(auction_status in [:active, :scheduled, :pending])
     |> Ash.Query.filter(user_id != ^user_id)
-    |> Ash.Query.load([:bids, :watchers])
+    |> Ash.Query.load([:bids, :watchlist_items, :bid_count, :watcher_count])
     |> Ash.read(authorize?: false)
     |> case do
       {:ok, items} ->
@@ -119,7 +119,9 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
 
   # Check if user is watching item
   defp has_user_watching?(item, user_id) do
-    Enum.any?(item.watchers || [], fn watcher -> watcher.id == user_id end)
+    Enum.any?(item.watchlist_items || [], fn watchlist_item ->
+      watchlist_item.user_id == user_id
+    end)
   end
 
   # Score an item for a user based on category match, popularity, and recency
@@ -140,8 +142,8 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
 
   # Calculate popularity boost based on bid count and watcher count
   defp popularity_boost(item) do
-    bid_count = length(item.bids || [])
-    watcher_count = length(item.watchers || [])
+    bid_count = item.bid_count || 0
+    watcher_count = item.watcher_count || 0
 
     normalized =
       (bid_count + watcher_count * @watcher_multiplier) / @popularity_divisor
@@ -198,17 +200,17 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
   # Generate human-readable reason for recommendation
   defp generate_reason(item, interests_map) do
     category_score = Map.get(interests_map, item.category_id, 0.0)
-    watcher_count = length(item.watchers || [])
+    watcher_count = item.watcher_count || 0
 
     cond do
       category_score > 0.7 and watcher_count > 5 ->
-        "Highly popular in your favorite category"
+        "Popular in your favorite category"
 
       category_score > 0.7 ->
-        "Matches your interests"
+        "Based on your interest in this category"
 
       watcher_count > 10 ->
-        "Very popular item"
+        "Trending item"
 
       item.auction_status == :active and item.end_time != nil ->
         days_until_end = DateTime.diff(item.end_time, DateTime.utc_now(), :day)
@@ -216,7 +218,7 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
         if days_until_end < @recency_days_threshold do
           "Ending soon"
         else
-          "Currently active"
+          "Active auction"
         end
 
       true ->
