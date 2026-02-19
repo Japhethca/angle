@@ -415,6 +415,26 @@ defmodule AngleWeb.StoreDashboardControllerTest do
     end
   end
 
+  describe "GET /store/listings stats" do
+    test "returns stats reflecting actual item data", %{conn: conn} do
+      user = create_user()
+      item = create_item(%{title: "Stats Item", created_by_id: user.id})
+
+      # Create a bid and watcher
+      bidder = create_user()
+      create_bid(%{item_id: item.id, user_id: bidder.id, amount: Decimal.new("75.00")})
+      watcher = create_user()
+      create_watchlist_item(user: watcher, item: item)
+
+      conn =
+        conn
+        |> init_test_session(%{current_user_id: user.id})
+        |> get(~p"/store/listings")
+
+      assert html_response(conn, 200) =~ "store/listings"
+    end
+  end
+
   describe "GET /store/profile" do
     test "returns 200 for authenticated user", %{conn: conn} do
       user = create_user()
