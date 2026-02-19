@@ -9,6 +9,7 @@ defmodule AngleWeb.SearchController do
 
   def index(conn, params) do
     query = params["q"] |> to_string() |> String.trim()
+    filter_preset = validate_enum(params["filter"], ~w(ending-soon trending recommended))
     category = validate_uuid(params["category"])
     condition = validate_enum(params["condition"], ~w(new used refurbished))
     sale_type = validate_enum(params["sale_type"], ~w(auction buy_now hybrid))
@@ -19,14 +20,33 @@ defmodule AngleWeb.SearchController do
     min_price = parse_decimal(params["min_price"])
     max_price = parse_decimal(params["max_price"])
 
+    # Convert sort to atom (Ash expects atoms, not strings)
     sort =
-      validate_enum(params["sort"], ~w(relevance price_asc price_desc newest ending_soon)) ||
-        "relevance"
+      case filter_preset do
+        "ending-soon" ->
+          :ending_soon
+
+        "trending" ->
+          :view_count_desc
+
+        "recommended" ->
+          :newest
+
+        _ ->
+          sort_str =
+            validate_enum(
+              params["sort"],
+              ~w(relevance price_asc price_desc newest ending_soon view_count_desc)
+            ) || "relevance"
+
+          to_sort_atom(sort_str)
+      end
 
     page = parse_positive_int(params["page"], 1)
 
+    # Support browsing with filter only (no query required)
     {items, total} =
-      if query == "" do
+      if query == "" && filter_preset == nil do
         {[], 0}
       else
         load_search_results(
@@ -45,6 +65,7 @@ defmodule AngleWeb.SearchController do
         )
       end
 
+    # Pass filter_preset to frontend
     items = ImageHelpers.attach_cover_images(items)
     categories = load_filter_categories(conn)
     total_pages = if total > 0, do: max(1, ceil(total / @per_page)), else: 0
@@ -52,6 +73,7 @@ defmodule AngleWeb.SearchController do
     conn
     |> assign_prop(:items, items)
     |> assign_prop(:query, query)
+    |> assign_prop(:filter_preset, filter_preset)
     |> assign_prop(:pagination, %{
       page: page,
       per_page: @per_page,
@@ -65,7 +87,7 @@ defmodule AngleWeb.SearchController do
       auction_status: auction_status,
       min_price: min_price,
       max_price: max_price,
-      sort: sort
+      sort: Atom.to_string(sort)
     })
     |> assign_prop(:categories, categories)
     |> assign_prop(:watchlisted_map, load_watchlisted_map(conn))
@@ -151,6 +173,12 @@ defmodule AngleWeb.SearchController do
   end
 
   defp validate_uuid(_), do: nil
+
+  defp to_sort_atom(str) when is_binary(str) do
+    String.to_existing_atom(str)
+  rescue
+    ArgumentError -> :relevance
+  end
 
   defp maybe_put(map, _key, nil), do: map
   defp maybe_put(map, key, value), do: Map.put(map, key, value)

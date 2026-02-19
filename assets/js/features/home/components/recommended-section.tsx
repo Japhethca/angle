@@ -22,7 +22,7 @@ export function RecommendedSection({ items, watchlistedMap = {} }: RecommendedSe
           {heading}
         </h2>
         <Link
-          href="/categories"
+          href="/search?filter=recommended"
           className="text-sm font-medium text-primary-600 transition-colors hover:text-primary-700"
         >
           View All

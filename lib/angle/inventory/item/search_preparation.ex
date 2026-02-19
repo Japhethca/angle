@@ -10,21 +10,32 @@ defmodule Angle.Inventory.Item.SearchPreparation do
 
   @impl true
   def prepare(query, _opts, _context) do
-    case Ash.Query.get_argument(query, :query) do
-      nil ->
-        query
+    search_term = Ash.Query.get_argument(query, :query)
+    sort_by = Ash.Query.get_argument(query, :sort_by) || :relevance
 
-      "" ->
-        query
+    query =
+      case search_term do
+        nil ->
+          query
 
-      search_term ->
-        sanitized = sanitize_query(search_term)
-        sort_by = Ash.Query.get_argument(query, :sort_by) || :relevance
+        "" ->
+          query
 
-        query
-        |> apply_search_filter(sanitized)
-        |> apply_sort(sort_by, sanitized)
-    end
+        term ->
+          sanitized = sanitize_query(term)
+          apply_search_filter(query, sanitized)
+      end
+
+    # When no search term, can't use relevance sort (needs search term for fragment)
+    # Default to :newest for filter-only browsing
+    effective_sort =
+      if (is_nil(search_term) or search_term == "") and sort_by == :relevance do
+        :newest
+      else
+        sort_by
+      end
+
+    apply_sort(query, effective_sort, search_term || "")
   end
 
   defp apply_search_filter(query, search_term) do
@@ -66,6 +77,10 @@ defmodule Angle.Inventory.Item.SearchPreparation do
 
   defp apply_sort(query, :ending_soon, _search_term) do
     Ash.Query.sort(query, end_time: :asc_nils_last)
+  end
+
+  defp apply_sort(query, :view_count_desc, _search_term) do
+    Ash.Query.sort(query, view_count: :desc_nils_last)
   end
 
   defp apply_sort(query, _unknown, search_term) do
