@@ -8,7 +8,7 @@ interface SectionProps {
   background?: 'default' | 'muted' | 'dark' | 'gradient' | 'accent';
   className?: string;
   id?: string;
-  as?: 'section' | 'div';
+  as?: 'section' | 'div' | 'footer';
 }
 
 const BG_CLASSES = {
