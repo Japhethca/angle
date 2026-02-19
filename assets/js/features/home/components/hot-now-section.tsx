@@ -8,6 +8,7 @@ import { formatNaira } from "@/lib/format";
 import { ItemCard } from "@/features/items";
 import { useAuthGuard } from "@/features/auth";
 import { useWatchlistToggle } from "@/features/watchlist";
+import { Section } from "@/components/layouts";
 
 type Item = HomepageItemCard[number] & { coverImage?: ImageData | null };
 
@@ -81,14 +82,14 @@ function LargeTile({ item, watchlistEntryId }: { item: Item; watchlistEntryId: s
 export function HotNowSection({ items, watchlistedMap = {} }: HotNowSectionProps) {
   if (items.length === 0) {
     return (
-      <section className="px-4 py-10 lg:px-10 lg:py-12">
+      <Section className="py-10 lg:py-12">
         <h2 className="mb-6 font-heading text-2xl font-semibold text-content lg:text-[32px]">
           Hot Now
         </h2>
         <div className="flex h-48 items-center justify-center rounded-xl bg-surface-muted">
           <p className="text-sm text-content-tertiary">No hot items right now</p>
         </div>
-      </section>
+      </Section>
     );
   }
 
@@ -96,7 +97,7 @@ export function HotNowSection({ items, watchlistedMap = {} }: HotNowSectionProps
   const smallItems = rest.slice(0, 4);
 
   return (
-    <section className="px-4 py-10 lg:px-10 lg:py-12">
+    <Section className="py-10 lg:py-12">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="font-heading text-2xl font-semibold text-content lg:text-[32px]">
           Hot Now
@@ -128,7 +129,7 @@ export function HotNowSection({ items, watchlistedMap = {} }: HotNowSectionProps
       </div>
 
       {/* Mobile: horizontal scroll */}
-      <div className="scrollbar-hide flex gap-4 overflow-x-auto pb-4 lg:hidden">
+      <div className="scrollbar-hide -mx-4 flex gap-4 overflow-x-auto px-4 pb-4 lg:-mx-10 lg:px-10">
         {items.map((item) => (
           <ItemCard
             key={item.id}
@@ -138,6 +139,6 @@ export function HotNowSection({ items, watchlistedMap = {} }: HotNowSectionProps
           />
         ))}
       </div>
-    </section>
+    </Section>
   );
 }
