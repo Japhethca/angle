@@ -3,118 +3,135 @@ defmodule Angle.Recommendations.Scoring.SimilarityScorer do
   Computes similarity scores between items for "similar items" recommendations.
 
   Similarity formula:
-    similarity = (same_category ? 0.5 : 0.0) +
-                 (price_range_overlap ? 0.3 : 0.0) +
+    similarity = (same_category ? CATEGORY_WEIGHT : 0.0) +
+                 (price_range_overlap ? PRICE_WEIGHT : 0.0) +
                  collaborative_signal
 
-  Where collaborative_signal = min(shared_users / 20.0, 0.2)
+  Where collaborative_signal = min(shared_users / COLLABORATIVE_DIVISOR, COLLABORATIVE_CAP)
   """
 
   require Ash.Query
 
+  # Scoring weights and thresholds
+  @category_weight 0.5
+  @price_weight 0.3
+  @collaborative_cap 0.2
+  @collaborative_divisor 20.0
+  @price_range_threshold "0.5"
+  @min_similarity_score 0.3
+
   @doc """
   Compute similarity scores between source_item and a list of candidate items.
 
-  Returns list of {item, score, reason} tuples sorted by score desc.
+  Returns `{:ok, results}` where results is a list of `{item, score, reason}` tuples sorted by score desc,
+  or `{:error, reason}` if data retrieval fails.
   """
+  @spec compute_similarities(struct(), [struct()]) ::
+          {:ok, [{struct(), float(), atom()}]} | {:error, term()}
   def compute_similarities(source_item, candidate_items) do
-    candidate_items
-    |> Enum.reject(&(&1.id == source_item.id))
-    |> Enum.map(fn candidate ->
-      score = compute_similarity_score(source_item, candidate)
-      reason = determine_reason(source_item, candidate)
+    # Pre-compute source item's engaged users once to avoid N+1 queries
+    case get_engaged_users(source_item.id) do
+      {:ok, source_users} ->
+        results =
+          candidate_items
+          |> Enum.reject(&(&1.id == source_item.id))
+          |> Enum.map(fn candidate ->
+            category_score = compute_category_similarity(source_item, candidate)
+            price_score = compute_price_similarity(source_item, candidate)
 
-      {candidate, score, reason}
-    end)
-    |> Enum.filter(fn {_item, score, _reason} -> score > 0.3 end)
-    |> Enum.sort_by(fn {_item, score, _reason} -> score end, :desc)
-  end
+            # Compute collaborative score with source_users already fetched
+            collaborative_score =
+              case get_engaged_users(candidate.id) do
+                {:ok, candidate_users} ->
+                  compute_collaborative_similarity(source_users, candidate_users)
 
-  @doc """
-  Compute similarity score between two items.
-  """
-  def compute_similarity_score(item_a, item_b) do
-    category_score = category_similarity(item_a, item_b)
-    price_score = price_similarity(item_a, item_b)
-    collaborative_score = collaborative_similarity(item_a.id, item_b.id)
+                {:error, _reason} ->
+                  # If fetching candidate users fails, use 0 for collaborative score
+                  0.0
+              end
 
-    category_score + price_score + collaborative_score
-  end
+            score = category_score + price_score + collaborative_score
+            reason = determine_reason(category_score, price_score, collaborative_score)
 
-  @doc """
-  Category similarity: 0.5 if same category, 0.0 otherwise.
-  """
-  def category_similarity(item_a, item_b) do
-    if item_a.category_id == item_b.category_id, do: 0.5, else: 0.0
-  end
+            {candidate, score, reason}
+          end)
+          |> Enum.filter(fn {_item, score, _reason} -> score > @min_similarity_score end)
+          |> Enum.sort_by(fn {_item, score, _reason} -> score end, :desc)
 
-  @doc """
-  Price similarity: 0.3 if within 50% range, 0.0 otherwise.
-  """
-  def price_similarity(item_a, item_b) do
-    price_a = item_a.current_price
-    price_b = item_b.current_price
+        {:ok, results}
 
-    # Handle nil prices (items without set prices)
-    if is_nil(price_a) or is_nil(price_b) do
-      0.0
-    else
-      price_diff = Decimal.abs(Decimal.sub(price_a, price_b))
-      threshold = Decimal.mult(price_a, Decimal.new("0.5"))
-
-      # Include boundary: within 50% includes exactly 50%
-      if Decimal.compare(price_diff, threshold) in [:lt, :eq], do: 0.3, else: 0.0
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 
-  @doc """
-  Collaborative similarity: Users who engaged with both items.
+  # Private scoring helpers
 
-  Returns min(shared_users / 20.0, 0.2)
-  """
-  def collaborative_similarity(item_a_id, item_b_id) do
-    users_a = get_engaged_users(item_a_id)
-    users_b = get_engaged_users(item_b_id)
-
-    shared_count =
-      MapSet.intersection(users_a, users_b)
-      |> MapSet.size()
-
-    min(shared_count / 20.0, 0.2)
+  defp compute_category_similarity(item_a, item_b) do
+    if item_a.category_id == item_b.category_id, do: @category_weight, else: 0.0
   end
 
-  @doc """
-  Determine primary reason for similarity.
-  """
-  def determine_reason(item_a, item_b) do
+  defp compute_price_similarity(item_a, item_b) do
+    price_a = item_a.current_price
+    price_b = item_b.current_price
+
+    # Handle nil or zero prices
     cond do
-      item_a.category_id == item_b.category_id -> :same_category
-      price_similarity(item_a, item_b) > 0 -> :price_range
+      is_nil(price_a) or is_nil(price_b) ->
+        0.0
+
+      Decimal.eq?(price_a, Decimal.new(0)) and Decimal.eq?(price_b, Decimal.new(0)) ->
+        # Both zero-priced: consider similar
+        @price_weight
+
+      Decimal.eq?(price_a, Decimal.new(0)) or Decimal.eq?(price_b, Decimal.new(0)) ->
+        # One zero-priced, one not: not similar
+        0.0
+
+      true ->
+        # Use max price as basis for threshold to ensure symmetry
+        max_price = Decimal.max(price_a, price_b)
+        price_diff = Decimal.abs(Decimal.sub(price_a, price_b))
+        threshold = Decimal.mult(max_price, Decimal.new(@price_range_threshold))
+
+        # Include boundary: within 50% includes exactly 50%
+        if Decimal.compare(price_diff, threshold) in [:lt, :eq], do: @price_weight, else: 0.0
+    end
+  end
+
+  defp compute_collaborative_similarity(users_a, users_b) do
+    shared_count =
+      users_a
+      |> MapSet.intersection(users_b)
+      |> MapSet.size()
+
+    min(shared_count / @collaborative_divisor, @collaborative_cap)
+  end
+
+  defp determine_reason(category_score, price_score, collaborative_score) do
+    cond do
+      category_score > 0 -> :same_category
+      price_score > 0 -> :price_range
+      collaborative_score > 0 -> :collaborative
       true -> :collaborative
     end
   end
 
-  # Private helpers
-
   defp get_engaged_users(item_id) do
-    # Users who bid on this item
-    bidders =
-      Angle.Bidding.Bid
-      |> Ash.Query.filter(item_id == ^item_id)
-      |> Ash.Query.select([:user_id])
-      |> Ash.read!(authorize?: false)
-      |> Enum.map(& &1.user_id)
-      |> MapSet.new()
+    with {:ok, bidders_data} <-
+           Angle.Bidding.Bid
+           |> Ash.Query.filter(item_id == ^item_id)
+           |> Ash.Query.select([:user_id])
+           |> Ash.read(authorize?: false),
+         {:ok, watchers_data} <-
+           Angle.Inventory.WatchlistItem
+           |> Ash.Query.filter(item_id == ^item_id)
+           |> Ash.Query.select([:user_id])
+           |> Ash.read(authorize?: false) do
+      bidders = bidders_data |> Enum.map(& &1.user_id) |> MapSet.new()
+      watchers = watchers_data |> Enum.map(& &1.user_id) |> MapSet.new()
 
-    # Users who watchlisted this item
-    watchers =
-      Angle.Inventory.WatchlistItem
-      |> Ash.Query.filter(item_id == ^item_id)
-      |> Ash.Query.select([:user_id])
-      |> Ash.read!(authorize?: false)
-      |> Enum.map(& &1.user_id)
-      |> MapSet.new()
-
-    MapSet.union(bidders, watchers)
+      {:ok, MapSet.union(bidders, watchers)}
+    end
   end
 end
