@@ -52,17 +52,9 @@ defmodule Angle.Repo.Migrations.MigrateResources6 do
     create unique_index(:recommended_items, [:user_id, :item_id],
              name: "recommended_items_unique_user_item_index"
            )
-
-    create unique_index(:item_similarities, [:source_item_id, :similar_item_id],
-             name: "item_similarities_unique_source_similar_index"
-           )
   end
 
   def down do
-    drop_if_exists unique_index(:item_similarities, [:source_item_id, :similar_item_id],
-                     name: "item_similarities_unique_source_similar_index"
-                   )
-
     drop_if_exists unique_index(:recommended_items, [:user_id, :item_id],
                      name: "recommended_items_unique_user_item_index"
                    )
