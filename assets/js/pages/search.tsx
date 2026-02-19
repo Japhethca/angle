@@ -118,7 +118,10 @@ export default function SearchPage({
       if (merged.auction_status) params.auction_status = merged.auction_status;
       if (merged.min_price) params.min_price = merged.min_price;
       if (merged.max_price) params.max_price = merged.max_price;
-      if (merged.sort && merged.sort !== "relevance") params.sort = merged.sort;
+      // Always preserve sort when browsing without query, otherwise omit relevance default
+      if (merged.sort && (query === "" || merged.sort !== "relevance")) {
+        params.sort = merged.sort;
+      }
       if (newParams.page && newParams.page !== "1") params.page = newParams.page;
 
       router.get("/search", params, { preserveState: true });
@@ -331,7 +334,7 @@ export default function SearchPage({
         )}
 
         {/* Results grid */}
-        {query === "" && !filters.sort ? (
+        {query === "" && filters.sort === "relevance" ? (
           <div className="py-20 text-center text-content-secondary">
             <Search className="mx-auto mb-4 size-12 text-content-placeholder" />
             <p className="text-lg font-medium">Search for items</p>
@@ -341,7 +344,7 @@ export default function SearchPage({
           <div className="py-20 text-center text-content-secondary">
             <Search className="mx-auto mb-4 size-12 text-content-placeholder" />
             <p className="text-lg font-medium">
-              No items found for &quot;{query}&quot;
+              {query ? `No items found for "${query}"` : "No items found"}
             </p>
             <p className="text-sm">
               Try different keywords or adjust your filters
