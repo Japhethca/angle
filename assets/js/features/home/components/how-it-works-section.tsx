@@ -1,4 +1,5 @@
 import { Search, Gavel, Trophy } from "lucide-react";
+import { Section } from "@/components/layouts";
 
 const steps = [
   {
@@ -20,7 +21,7 @@ const steps = [
 
 export function HowItWorksSection() {
   return (
-    <section className="bg-surface-muted px-4 py-10 lg:px-10 lg:py-12">
+    <Section fullBleed background="muted" className="py-10 lg:py-12">
       <h2 className="mb-8 text-center font-heading text-2xl font-semibold text-content lg:text-[32px]">
         How It Works
       </h2>
@@ -35,6 +36,6 @@ export function HowItWorksSection() {
           </div>
         ))}
       </div>
-    </section>
+    </Section>
   );
 }

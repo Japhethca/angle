@@ -1,4 +1,5 @@
 import { Link } from "@inertiajs/react";
+import { Section } from "@/components/layouts";
 
 const categoryLinks = [
   { label: "Cultural Artifacts", href: "/categories" },
@@ -21,8 +22,13 @@ const legalLinks = [
 
 export function Footer() {
   return (
-    <footer className="hidden bg-[#060818] text-white dark:bg-surface-muted lg:block">
-      <div className="px-10 py-12">
+    <Section
+      fullBleed
+      background="dark"
+      className="hidden lg:block"
+      as="footer"
+    >
+      <div className="py-12">
         <div className="grid grid-cols-12 gap-8">
           {/* Branding */}
           <div className="col-span-4 space-y-4">
@@ -93,6 +99,6 @@ export function Footer() {
           </p>
         </div>
       </div>
-    </footer>
+    </Section>
   );
 }

@@ -1,6 +1,7 @@
 import { Link } from "@inertiajs/react";
 import { Grid3X3 } from "lucide-react";
 import type { HomepageCategory } from "@/ash_rpc";
+import { Section } from "@/components/layouts";
 
 type Category = HomepageCategory[number];
 
@@ -22,7 +23,7 @@ export function BrowseCategoriesSection({ categories }: BrowseCategoriesSectionP
   const displayCategories = categories.slice(0, 8);
 
   return (
-    <section className="px-4 py-10 lg:px-10 lg:py-12">
+    <Section className="py-10 lg:py-12">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="font-heading text-2xl font-semibold text-content lg:text-[32px]">
           Browse Categories
@@ -74,6 +75,6 @@ export function BrowseCategoriesSection({ categories }: BrowseCategoriesSectionP
           ))}
         </div>
       )}
-    </section>
+    </Section>
   );
 }

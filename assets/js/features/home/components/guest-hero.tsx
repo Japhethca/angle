@@ -1,16 +1,17 @@
 import { Link } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
+import { Section } from "@/components/layouts";
 
 export function GuestHero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary-600 to-primary-1000">
+    <Section fullBleed background="gradient" className="relative overflow-hidden">
       {/* Decorative background pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute left-1/4 top-1/4 size-64 rounded-full bg-primary-400 blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 size-48 rounded-full bg-primary-600 blur-3xl" />
       </div>
 
-      <div className="relative px-4 py-16 text-center lg:px-10 lg:py-24">
+      <div className="relative py-16 text-center lg:py-24">
         <h1 className="font-heading text-4xl font-bold text-white lg:text-6xl">
           Bid. Win. Own.
         </h1>
@@ -36,6 +37,6 @@ export function GuestHero() {
           </Button>
         </div>
       </div>
-    </section>
+    </Section>
   );
 }

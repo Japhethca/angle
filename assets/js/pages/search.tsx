@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Section } from "@/components/layouts/section";
 import type { SearchItemCard } from "@/ash_rpc";
 import type { ImageData } from "@/lib/image-url";
 
@@ -162,7 +163,7 @@ export default function SearchPage({
   return (
     <>
       <Head title={query ? `Search: ${query}` : "Search"} />
-      <div className="mx-auto max-w-7xl px-4 py-6 lg:px-10">
+      <Section className="py-6">
         {/* Search bar */}
         <form onSubmit={handleSearch} className="relative mb-6">
           <Search className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-content-placeholder" />
@@ -392,7 +393,7 @@ export default function SearchPage({
             )}
           </>
         )}
-      </div>
+      </Section>
     </>
   );
 }

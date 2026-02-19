@@ -3,6 +3,7 @@ import { listItems, homepageItemCardFields, buildCSRFHeaders } from "@/ash_rpc";
 import type { HomepageItemCard } from "@/ash_rpc";
 import { useAshQuery } from "@/hooks/use-ash-query";
 import { ItemCard } from "@/features/items";
+import { Section } from "@/components/layouts";
 
 type Item = HomepageItemCard[number];
 
@@ -31,7 +32,7 @@ export function EndingSoonSection({ initialItems, watchlistedMap = {} }: EndingS
   const items = Array.isArray(data) ? data : data?.results ?? initialItems;
 
   return (
-    <section className="px-4 py-10 lg:px-10 lg:py-12">
+    <Section className="py-10 lg:py-12">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="font-heading text-2xl font-semibold text-content lg:text-[32px]">
           Ending Soon
@@ -58,6 +59,6 @@ export function EndingSoonSection({ initialItems, watchlistedMap = {} }: EndingS
           ))}
         </div>
       )}
-    </section>
+    </Section>
   );
 }
