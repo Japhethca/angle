@@ -1,3 +1,4 @@
+import { Link } from "@inertiajs/react";
 import { Gavel } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SellerDashboardCard } from "@/ash_rpc";
@@ -10,8 +11,10 @@ type Item = SellerDashboardCard[number] & { coverImage?: ImageData | null };
 
 type StatusKey = "active" | "ended" | "sold" | "draft" | "pending" | "scheduled" | "paused" | "cancelled";
 
-function StatusBadge({ status }: { status: string | null | undefined }) {
-  const key = (status || "draft") as StatusKey;
+function StatusBadge({ publicationStatus, auctionStatus }: { publicationStatus: string | null | undefined; auctionStatus: string | null | undefined }) {
+  const key: StatusKey = publicationStatus === "draft"
+    ? "draft"
+    : (auctionStatus || "draft") as StatusKey;
   const config: Record<StatusKey, { label: string; className: string }> = {
     active: { label: "Active", className: "bg-feedback-success-muted text-feedback-success" },
     ended: { label: "Ended", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
@@ -51,9 +54,14 @@ export function ListingCard({ item }: ListingCardProps) {
         </div>
         <div className="flex min-w-0 flex-1 items-start justify-between">
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-sm font-medium text-content">
+            <Link
+              href={item.publicationStatus === "draft"
+                ? `/store/listings/${item.id}/preview`
+                : `/items/${item.slug || item.id}`}
+              className="truncate text-sm font-medium text-content hover:text-primary-600 hover:underline"
+            >
               {item.title}
-            </h3>
+            </Link>
             <p className="mt-1 text-sm text-content-secondary">
               Highest bid: {formatCurrency(item.currentPrice || item.startingPrice)}
             </p>
@@ -65,7 +73,7 @@ export function ListingCard({ item }: ListingCardProps) {
         </div>
       </div>
       <div className="mt-3">
-        <StatusBadge status={item.auctionStatus} />
+        <StatusBadge publicationStatus={item.publicationStatus} auctionStatus={item.auctionStatus} />
       </div>
     </div>
   );

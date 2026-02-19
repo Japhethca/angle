@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "@inertiajs/react";
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, Check, Gavel } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SellerDashboardCard } from "@/ash_rpc";
@@ -28,8 +29,10 @@ function formatTimeLeft(endTime: string | null | undefined): string {
 
 type StatusKey = "active" | "ended" | "sold" | "draft" | "pending" | "scheduled" | "paused" | "cancelled";
 
-function StatusBadge({ status }: { status: string | null | undefined }) {
-  const key = (status || "draft") as StatusKey;
+function StatusBadge({ publicationStatus, auctionStatus }: { publicationStatus: string | null | undefined; auctionStatus: string | null | undefined }) {
+  const key: StatusKey = publicationStatus === "draft"
+    ? "draft"
+    : (auctionStatus || "draft") as StatusKey;
   const config: Record<StatusKey, { label: string; className: string }> = {
     active: { label: "Active", className: "bg-feedback-success-muted text-feedback-success" },
     ended: { label: "Ended", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
@@ -209,9 +212,14 @@ export function ListingTable({ items, sort, dir, status, perPage, onNavigate }: 
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-content">
+                      <Link
+                        href={item.publicationStatus === "draft"
+                          ? `/store/listings/${item.id}/preview`
+                          : `/items/${item.slug || item.id}`}
+                        className="truncate text-sm font-medium text-content hover:text-primary-600 hover:underline"
+                      >
                         {item.title}
-                      </p>
+                      </Link>
                       <p className="text-xs text-content-placeholder">
                         {formatTimeLeft(item.endTime)}
                       </p>
@@ -231,7 +239,7 @@ export function ListingTable({ items, sort, dir, status, perPage, onNavigate }: 
                   {formatCurrency(item.currentPrice || item.startingPrice)}
                 </td>
                 <td className="px-4 py-3">
-                  <StatusBadge status={item.auctionStatus} />
+                  <StatusBadge publicationStatus={item.publicationStatus} auctionStatus={item.auctionStatus} />
                 </td>
                 <td className="px-4 py-3">
                   <ListingActionsMenu id={item.id} slug={item.slug || item.id} publicationStatus={item.publicationStatus} />
