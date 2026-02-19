@@ -30,6 +30,7 @@ defmodule Angle.Recommendations.Jobs.RefreshUserInterests do
   @active_user_days 30
   @batch_size 100
   @batch_sleep_ms 100
+  @log_prefix "[RefreshUserInterests]"
 
   @doc """
   Performs the user interest refresh job.
@@ -43,14 +44,13 @@ defmodule Angle.Recommendations.Jobs.RefreshUserInterests do
   """
   @spec perform(Oban.Job.t()) :: :ok | {:error, term()}
   @impl Oban.Worker
-  def perform(%Oban.Job{args: _args}) do
-    Logger.info("[RefreshUserInterests] Starting user interests refresh")
+  def perform(%Oban.Job{}) do
+    Logger.info("#{@log_prefix} Starting user interests refresh")
 
+    # TODO: Refactor to use domain code interfaces (Task 11) instead of direct Ash calls
     case fetch_active_users() do
       {:ok, active_users} ->
-        Logger.info(
-          "[RefreshUserInterests] Refreshing interests for #{length(active_users)} users"
-        )
+        Logger.info("#{@log_prefix} Refreshing interests for #{length(active_users)} users")
 
         # Process in batches
         active_users
@@ -60,11 +60,11 @@ defmodule Angle.Recommendations.Jobs.RefreshUserInterests do
           Process.sleep(@batch_sleep_ms)
         end)
 
-        Logger.info("[RefreshUserInterests] Complete")
+        Logger.info("#{@log_prefix} Complete")
         :ok
 
       {:error, reason} ->
-        Logger.error("[RefreshUserInterests] Failed to fetch active users: #{inspect(reason)}")
+        Logger.error("#{@log_prefix} Failed to fetch active users: #{inspect(reason)}")
         {:error, reason}
     end
   end
@@ -91,40 +91,28 @@ defmodule Angle.Recommendations.Jobs.RefreshUserInterests do
 
       {:error, reason} ->
         Logger.warning(
-          "[RefreshUserInterests] Failed to compute interests for user #{user.id}: #{inspect(reason)}"
+          "#{@log_prefix} Failed to compute interests for user #{user.id}: #{inspect(reason)}"
         )
     end
   end
 
   defp upsert_user_interest(user_id, category_id, score, count, last_interaction) do
+    # Use Ash's native upsert to avoid race conditions
     case Angle.Recommendations.UserInterest
-         |> Ash.Query.filter(user_id == ^user_id and category_id == ^category_id)
-         |> Ash.read_one(authorize?: false) do
-      {:ok, nil} ->
-        # Create new record
-        Angle.Recommendations.UserInterest
-        |> Ash.Changeset.for_create(:create, %{
-          user_id: user_id,
-          category_id: category_id,
-          interest_score: score,
-          interaction_count: count,
-          last_interaction_at: last_interaction
-        })
-        |> Ash.create(authorize?: false)
-
-      {:ok, existing} ->
-        # Update existing record
-        existing
-        |> Ash.Changeset.for_update(:update, %{
-          interest_score: score,
-          interaction_count: count,
-          last_interaction_at: last_interaction
-        })
-        |> Ash.update(authorize?: false)
+         |> Ash.Changeset.for_create(:upsert, %{
+           user_id: user_id,
+           category_id: category_id,
+           interest_score: score,
+           interaction_count: count,
+           last_interaction_at: last_interaction
+         })
+         |> Ash.create(authorize?: false) do
+      {:ok, _record} ->
+        :ok
 
       {:error, reason} ->
         Logger.warning(
-          "[RefreshUserInterests] Failed to read UserInterest for user #{user_id}, category #{category_id}: #{inspect(reason)}"
+          "#{@log_prefix} Failed to upsert UserInterest for user #{user_id}, category #{category_id}: #{inspect(reason)}"
         )
     end
   end

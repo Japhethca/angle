@@ -32,6 +32,19 @@ defmodule Angle.Recommendations.UserInterest do
       accept [:interest_score, :last_interaction_at, :interaction_count]
     end
 
+    create :upsert do
+      accept [:interest_score, :last_interaction_at, :interaction_count]
+      upsert? true
+      upsert_identity :unique_user_category
+      upsert_fields [:interest_score, :last_interaction_at, :interaction_count]
+
+      argument :user_id, :uuid, allow_nil?: false
+      argument :category_id, :uuid, allow_nil?: false
+
+      change set_attribute(:user_id, arg(:user_id))
+      change set_attribute(:category_id, arg(:category_id))
+    end
+
     destroy :destroy do
       primary? true
     end
