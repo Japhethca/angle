@@ -1,13 +1,23 @@
+import { cn } from "@/lib/utils";
+
 interface SectionProps {
   children: React.ReactNode;
   fullBleed?: boolean;
   constrain?: boolean;
-  maxWidth?: string;
+  maxWidth?: 'max-w-sm' | 'max-w-md' | 'max-w-lg' | 'max-w-xl' | 'max-w-2xl' | 'max-w-3xl' | 'max-w-4xl' | 'max-w-5xl' | 'max-w-6xl' | 'max-w-7xl' | 'max-w-full';
   background?: 'default' | 'muted' | 'dark' | 'gradient' | 'accent';
   className?: string;
   id?: string;
   as?: 'section' | 'div';
 }
+
+const BG_CLASSES = {
+  default: '',
+  muted: 'bg-surface-muted',
+  dark: 'bg-content text-background dark:bg-surface-muted dark:text-content',
+  gradient: 'bg-gradient-to-br from-primary-600 to-primary-1000',
+  accent: 'bg-primary-50 dark:bg-primary-950/30',
+} as const;
 
 export function Section({
   children,
@@ -19,18 +29,10 @@ export function Section({
   id,
   as: Component = 'section',
 }: SectionProps) {
-  const bgClasses = {
-    default: '',
-    muted: 'bg-surface-muted',
-    dark: 'bg-content text-background dark:bg-surface-muted dark:text-content',
-    gradient: 'bg-gradient-to-br from-primary-600 to-primary-1000',
-    accent: 'bg-primary-50 dark:bg-primary-950/30',
-  };
-
   if (fullBleed) {
     return (
-      <Component id={id} className={`${bgClasses[background]} ${className}`}>
-        <div className={`mx-auto ${maxWidth} px-4 lg:px-10`}>
+      <Component id={id} className={cn(BG_CLASSES[background], className)}>
+        <div className={cn('mx-auto px-4 lg:px-10', maxWidth)}>
           {children}
         </div>
       </Component>
@@ -41,7 +43,7 @@ export function Section({
     return (
       <Component
         id={id}
-        className={`mx-auto ${maxWidth} px-4 lg:px-10 ${bgClasses[background]} ${className}`}
+        className={cn('mx-auto px-4 lg:px-10', maxWidth, BG_CLASSES[background], className)}
       >
         {children}
       </Component>
@@ -49,7 +51,7 @@ export function Section({
   }
 
   return (
-    <Component id={id} className={`${bgClasses[background]} ${className}`}>
+    <Component id={id} className={cn(BG_CLASSES[background], className)}>
       {children}
     </Component>
   );
