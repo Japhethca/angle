@@ -1,4 +1,15 @@
 defmodule Angle.Recommendations.ItemSimilarity do
+  @moduledoc """
+  Stores pre-computed similarity scores between items.
+
+  Similarity is computed by SimilarityScorer using:
+  - Category match (weight: 0.5)
+  - Price range overlap (weight: 0.3)
+  - Collaborative signal from shared users (weight: 0.2)
+
+  Populated by ComputeItemSimilarity job (to be implemented).
+  """
+
   use Ash.Resource,
     domain: Angle.Recommendations,
     data_layer: AshPostgres.DataLayer,

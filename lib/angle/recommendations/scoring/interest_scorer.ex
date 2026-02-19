@@ -12,6 +12,9 @@ defmodule Angle.Recommendations.Scoring.InterestScorer do
     - 8-30 days: 0.7x
     - 31-90 days: 0.4x
     - 90+ days: 0.1x
+
+  TODO: Refactor to use domain code interfaces per Ash patterns instead of direct Ash calls.
+  Currently queries Bid and WatchlistItem directly - should use domain functions.
   """
 
   require Ash.Query

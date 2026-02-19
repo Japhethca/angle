@@ -8,6 +8,9 @@ defmodule Angle.Recommendations.Scoring.SimilarityScorer do
                  collaborative_signal
 
   Where collaborative_signal = min(shared_users / COLLABORATIVE_DIVISOR, COLLABORATIVE_CAP)
+
+  TODO: Refactor to use domain code interfaces per Ash patterns instead of direct Ash calls.
+  Currently queries Bid and WatchlistItem directly - should use domain functions.
   """
 
   require Ash.Query
@@ -30,38 +33,29 @@ defmodule Angle.Recommendations.Scoring.SimilarityScorer do
           {:ok, [{struct(), float(), atom()}]} | {:error, term()}
   def compute_similarities(source_item, candidate_items) do
     # Pre-compute source item's engaged users once to avoid N+1 queries
-    case get_engaged_users(source_item.id) do
-      {:ok, source_users} ->
-        results =
-          candidate_items
-          |> Enum.reject(&(&1.id == source_item.id))
-          |> Enum.map(fn candidate ->
-            category_score = compute_category_similarity(source_item, candidate)
-            price_score = compute_price_similarity(source_item, candidate)
+    with {:ok, source_users} <- get_engaged_users(source_item.id),
+         candidates <- Enum.reject(candidate_items, &(&1.id == source_item.id)),
+         candidate_ids <- Enum.map(candidates, & &1.id),
+         {:ok, all_candidate_users} <- get_engaged_users_batch(candidate_ids) do
+      results =
+        candidates
+        |> Enum.map(fn candidate ->
+          category_score = compute_category_similarity(source_item, candidate)
+          price_score = compute_price_similarity(source_item, candidate)
 
-            # Compute collaborative score with source_users already fetched
-            collaborative_score =
-              case get_engaged_users(candidate.id) do
-                {:ok, candidate_users} ->
-                  compute_collaborative_similarity(source_users, candidate_users)
+          # Get candidate users from batched results
+          candidate_users = Map.get(all_candidate_users, candidate.id, MapSet.new())
+          collaborative_score = compute_collaborative_similarity(source_users, candidate_users)
 
-                {:error, _reason} ->
-                  # If fetching candidate users fails, use 0 for collaborative score
-                  0.0
-              end
+          score = category_score + price_score + collaborative_score
+          reason = determine_reason(category_score, price_score, collaborative_score)
 
-            score = category_score + price_score + collaborative_score
-            reason = determine_reason(category_score, price_score, collaborative_score)
+          {candidate, score, reason}
+        end)
+        |> Enum.filter(fn {_item, score, _reason} -> score > @min_similarity_score end)
+        |> Enum.sort_by(fn {_item, score, _reason} -> score end, :desc)
 
-            {candidate, score, reason}
-          end)
-          |> Enum.filter(fn {_item, score, _reason} -> score > @min_similarity_score end)
-          |> Enum.sort_by(fn {_item, score, _reason} -> score end, :desc)
-
-        {:ok, results}
-
-      {:error, reason} ->
-        {:error, reason}
+      {:ok, results}
     end
   end
 
@@ -132,6 +126,42 @@ defmodule Angle.Recommendations.Scoring.SimilarityScorer do
       watchers = watchers_data |> Enum.map(& &1.user_id) |> MapSet.new()
 
       {:ok, MapSet.union(bidders, watchers)}
+    end
+  end
+
+  defp get_engaged_users_batch(item_ids) do
+    # Batch fetch engaged users for multiple items to avoid N+1 queries
+    with {:ok, bidders_data} <-
+           Angle.Bidding.Bid
+           |> Ash.Query.filter(item_id in ^item_ids)
+           |> Ash.Query.select([:item_id, :user_id])
+           |> Ash.read(authorize?: false),
+         {:ok, watchers_data} <-
+           Angle.Inventory.WatchlistItem
+           |> Ash.Query.filter(item_id in ^item_ids)
+           |> Ash.Query.select([:item_id, :user_id])
+           |> Ash.read(authorize?: false) do
+      # Group by item_id
+      bidders_by_item =
+        bidders_data
+        |> Enum.group_by(& &1.item_id, & &1.user_id)
+        |> Map.new(fn {item_id, user_ids} -> {item_id, MapSet.new(user_ids)} end)
+
+      watchers_by_item =
+        watchers_data
+        |> Enum.group_by(& &1.item_id, & &1.user_id)
+        |> Map.new(fn {item_id, user_ids} -> {item_id, MapSet.new(user_ids)} end)
+
+      # Merge bidders and watchers for each item
+      all_users_by_item =
+        item_ids
+        |> Map.new(fn item_id ->
+          bidders = Map.get(bidders_by_item, item_id, MapSet.new())
+          watchers = Map.get(watchers_by_item, item_id, MapSet.new())
+          {item_id, MapSet.union(bidders, watchers)}
+        end)
+
+      {:ok, all_users_by_item}
     end
   end
 end

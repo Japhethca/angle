@@ -17,31 +17,46 @@ defmodule Angle.Recommendations do
   end
 
   # Public API for serving recommendations
+  # TODO: Refactor to use code interfaces per Ash patterns instead of direct Ash calls
+
+  require Logger
 
   @doc """
   Get homepage recommendations for a user.
   Falls back to popular items if no personalized recommendations exist.
+
+  Always returns a list of items (may be empty on error).
   """
   def get_homepage_recommendations(user_id, opts \\ []) do
     limit = Keyword.get(opts, :limit, 20)
 
-    personalized =
-      RecommendedItem
-      |> Ash.Query.for_read(:by_user, %{user_id: user_id, limit: limit})
-      |> Ash.Query.load(:item)
-      |> Ash.read!()
-      |> Enum.map(& &1.item)
+    case RecommendedItem
+         |> Ash.Query.for_read(:by_user, %{user_id: user_id, limit: limit})
+         |> Ash.Query.load(:item)
+         |> Ash.read(authorize?: false) do
+      {:ok, recommended_items} ->
+        personalized = Enum.map(recommended_items, & &1.item)
 
-    if Enum.empty?(personalized) do
-      get_popular_items(limit: limit)
-    else
-      personalized
+        if Enum.empty?(personalized) do
+          get_popular_items(limit: limit)
+        else
+          personalized
+        end
+
+      {:error, error} ->
+        Logger.warning(
+          "Failed to fetch personalized recommendations for user #{user_id}: #{inspect(error)}"
+        )
+
+        get_popular_items(limit: limit)
     end
   end
 
   @doc """
   Get similar items for an item.
   Tries ETS cache first, falls back to database.
+
+  Always returns a list of items (may be empty on error).
   """
   def get_similar_items(item_id, opts \\ []) do
     limit = Keyword.get(opts, :limit, 8)
@@ -52,17 +67,26 @@ defmodule Angle.Recommendations do
 
       {:error, :not_found} ->
         # Cache miss - read from database
-        ItemSimilarity
-        |> Ash.Query.for_read(:by_source_item, %{source_item_id: item_id, limit: limit})
-        |> Ash.Query.load(:similar_item)
-        |> Ash.read!()
-        |> Enum.map(& &1.similar_item)
+        case ItemSimilarity
+             |> Ash.Query.for_read(:by_source_item, %{source_item_id: item_id, limit: limit})
+             |> Ash.Query.load(:similar_item)
+             |> Ash.read(authorize?: false) do
+          {:ok, similarities} ->
+            Enum.map(similarities, & &1.similar_item)
+
+          {:error, error} ->
+            Logger.warning("Failed to fetch similar items for item #{item_id}: #{inspect(error)}")
+
+            []
+        end
     end
   end
 
   @doc """
   Get popular items fallback.
   Tries ETS cache first, falls back to database query.
+
+  Always returns a list of items (may be empty on error).
   """
   def get_popular_items(opts \\ []) do
     limit = Keyword.get(opts, :limit, 20)
@@ -73,12 +97,19 @@ defmodule Angle.Recommendations do
 
       {:error, :not_found} ->
         # Cache miss - query database
-        Angle.Inventory.Item
-        |> Ash.Query.filter(publication_status == :published)
-        |> Ash.Query.load([:bid_count, :watcher_count])
-        |> Ash.Query.sort([{:bid_count, :desc}, {:watcher_count, :desc}])
-        |> Ash.Query.limit(limit)
-        |> Ash.read!()
+        case Angle.Inventory.Item
+             |> Ash.Query.filter(publication_status == :published)
+             |> Ash.Query.load([:bid_count, :watcher_count])
+             |> Ash.Query.sort([{:bid_count, :desc}, {:watcher_count, :desc}])
+             |> Ash.Query.limit(limit)
+             |> Ash.read(authorize?: false) do
+          {:ok, items} ->
+            items
+
+          {:error, error} ->
+            Logger.warning("Failed to fetch popular items: #{inspect(error)}")
+            []
+        end
     end
   end
 end

@@ -6,6 +6,9 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
   - Category match (60%)
   - Popularity (20%)
   - Recency (20%)
+
+  TODO: Refactor to use domain code interfaces per Ash patterns instead of direct Ash calls.
+  Currently queries Item directly - should use domain functions.
   """
 
   require Ash.Query
@@ -96,39 +99,18 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
 
   # Find candidate items in top categories, excluding user's own items/bids/watchlist
   defp find_items_in_categories(user_id, categories) do
+    # Use exists() filters to exclude items without loading full associations
+    # This is much more efficient than loading all bids/watchlist items
     Item
     |> Ash.Query.filter(category_id in ^categories)
     |> Ash.Query.filter(publication_status == :published)
     |> Ash.Query.filter(auction_status in [:active, :scheduled, :pending])
     |> Ash.Query.filter(created_by_id != ^user_id)
-    |> Ash.Query.load([:bids, :watchlist_items, :bid_count, :watcher_count])
+    |> Ash.Query.filter(not exists(bids, user_id == ^user_id))
+    |> Ash.Query.filter(not exists(watchlist_items, user_id == ^user_id))
+    |> Ash.Query.load([:bid_count, :watcher_count])
     # System-level query: bypasses authorization as this runs in recommendation context
     |> Ash.read(authorize?: false)
-    |> case do
-      {:ok, items} ->
-        # Filter out items user has bid on or is watching
-        filtered_items =
-          Enum.reject(items, fn item ->
-            has_user_bid?(item, user_id) or has_user_watching?(item, user_id)
-          end)
-
-        {:ok, filtered_items}
-
-      {:error, reason} ->
-        {:error, reason}
-    end
-  end
-
-  # Check if user has bid on item
-  defp has_user_bid?(item, user_id) do
-    Enum.any?(item.bids || [], fn bid -> bid.user_id == user_id end)
-  end
-
-  # Check if user is watching item
-  defp has_user_watching?(item, user_id) do
-    Enum.any?(item.watchlist_items || [], fn watchlist_item ->
-      watchlist_item.user_id == user_id
-    end)
   end
 
   # Score an item for a user based on category match, popularity, and recency

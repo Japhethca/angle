@@ -1,4 +1,15 @@
 defmodule Angle.Recommendations.UserInterest do
+  @moduledoc """
+  Tracks user interest scores per category based on their activity.
+
+  Interest scores are computed by InterestScorer using:
+  - Bid history (weight: 3.0)
+  - Watchlist activity (weight: 2.0)
+  - Time decay based on recency
+
+  Scores are normalized to 0.0-1.0 range, updated by RefreshUserInterests job.
+  """
+
   use Ash.Resource,
     domain: Angle.Recommendations,
     data_layer: AshPostgres.DataLayer,
