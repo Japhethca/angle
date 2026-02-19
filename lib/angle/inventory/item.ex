@@ -212,11 +212,6 @@ defmodule Angle.Inventory.Item do
       pagination offset?: true, required?: false
     end
 
-    read :my_listings_stats do
-      description "Aggregate stats for all items owned by the current user"
-      filter expr(created_by_id == ^actor(:id))
-    end
-
     read :by_category do
       argument :category_ids, {:array, :uuid}, allow_nil?: false
 
@@ -228,7 +223,7 @@ defmodule Angle.Inventory.Item do
     read :search do
       description "Full-text search across published items with optional filters"
 
-      argument :query, :string, allow_nil?: false
+      argument :query, :string, allow_nil?: true
 
       argument :category_id, :uuid do
         description "Filter by category"
@@ -251,7 +246,15 @@ defmodule Angle.Inventory.Item do
 
       argument :sort_by, :atom do
         default :relevance
-        constraints one_of: [:relevance, :price_asc, :price_desc, :newest, :ending_soon]
+
+        constraints one_of: [
+                      :relevance,
+                      :price_asc,
+                      :price_desc,
+                      :newest,
+                      :ending_soon,
+                      :view_count_desc
+                    ]
       end
 
       filter expr(publication_status == :published)

@@ -1,3 +1,4 @@
+import { Link } from "@inertiajs/react";
 import type { HomepageItemCard } from "@/ash_rpc";
 import { ItemCard } from "@/features/items";
 import { useAuth } from "@/features/auth";
@@ -9,25 +10,24 @@ interface RecommendedSectionProps {
   watchlistedMap?: Record<string, string>;
 }
 
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
-}
-
 export function RecommendedSection({ items, watchlistedMap = {} }: RecommendedSectionProps) {
-  const { authenticated, user } = useAuth();
+  const { authenticated } = useAuth();
 
-  const greeting = authenticated && user?.full_name
-    ? `${getGreeting()}, ${user.full_name}`
-    : "Recommended for You";
+  const heading = authenticated ? "Recommended for You" : "Popular Items";
 
   return (
     <section className="py-10 lg:py-12">
-      <h2 className="mb-6 px-4 font-heading text-2xl font-semibold text-content lg:px-10 lg:text-[32px]">
-        {greeting}
-      </h2>
+      <div className="mb-6 flex items-center justify-between px-4 lg:px-10">
+        <h2 className="font-heading text-2xl font-semibold text-content lg:text-[32px]">
+          {heading}
+        </h2>
+        <Link
+          href="/search?sort=newest"
+          className="text-sm font-medium text-primary-600 transition-colors hover:text-primary-700"
+        >
+          View All
+        </Link>
+      </div>
       {items.length === 0 ? (
         <div className="mx-4 flex h-48 items-center justify-center rounded-xl bg-surface-muted lg:mx-10">
           <p className="text-sm text-content-tertiary">No recommendations yet</p>

@@ -1,9 +1,15 @@
 import type { HomepageItemCard, HomepageCategory } from "@/ash_rpc";
+import { useAuth } from "@/features/auth";
 import {
   FeaturedItemCarousel,
-  RecommendedSection,
+  GuestHero,
+  HowItWorksSection,
+  SearchSection,
   EndingSoonSection,
+  RecommendedSection,
+  TrustStatsSection,
   HotNowSection,
+  SellCtaSection,
   BrowseCategoriesSection,
 } from "@/features/home";
 
@@ -24,12 +30,22 @@ export default function Home({
   categories = [],
   watchlisted_map = {},
 }: HomeProps) {
+  const { authenticated } = useAuth();
+
   return (
     <div>
-      <FeaturedItemCarousel items={featured_items} watchlistedMap={watchlisted_map} />
-      <RecommendedSection items={recommended_items} watchlistedMap={watchlisted_map} />
+      {authenticated ? (
+        <FeaturedItemCarousel items={featured_items} watchlistedMap={watchlisted_map} />
+      ) : (
+        <GuestHero />
+      )}
+      <HowItWorksSection />
+      <SearchSection categories={categories} />
       <EndingSoonSection initialItems={ending_soon_items} watchlistedMap={watchlisted_map} />
+      <RecommendedSection items={recommended_items} watchlistedMap={watchlisted_map} />
+      <TrustStatsSection />
       <HotNowSection items={hot_items} watchlistedMap={watchlisted_map} />
+      <SellCtaSection />
       <BrowseCategoriesSection categories={categories} />
     </div>
   );

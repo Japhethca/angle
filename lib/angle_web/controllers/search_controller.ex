@@ -19,14 +19,20 @@ defmodule AngleWeb.SearchController do
     min_price = parse_decimal(params["min_price"])
     max_price = parse_decimal(params["max_price"])
 
-    sort =
-      validate_enum(params["sort"], ~w(relevance price_asc price_desc newest ending_soon)) ||
-        "relevance"
+    # Convert sort to atom (Ash expects atoms, not strings)
+    sort_str =
+      validate_enum(
+        params["sort"],
+        ~w(relevance price_asc price_desc newest ending_soon view_count_desc)
+      ) || "relevance"
+
+    sort = to_sort_atom(sort_str)
 
     page = parse_positive_int(params["page"], 1)
 
+    # Support browsing with sort only (no query required)
     {items, total} =
-      if query == "" do
+      if query == "" && params["sort"] == nil do
         {[], 0}
       else
         load_search_results(
@@ -65,7 +71,7 @@ defmodule AngleWeb.SearchController do
       auction_status: auction_status,
       min_price: min_price,
       max_price: max_price,
-      sort: sort
+      sort: Atom.to_string(sort)
     })
     |> assign_prop(:categories, categories)
     |> assign_prop(:watchlisted_map, load_watchlisted_map(conn))
@@ -151,6 +157,12 @@ defmodule AngleWeb.SearchController do
   end
 
   defp validate_uuid(_), do: nil
+
+  defp to_sort_atom(str) when is_binary(str) do
+    String.to_existing_atom(str)
+  rescue
+    ArgumentError -> :relevance
+  end
 
   defp maybe_put(map, _key, nil), do: map
   defp maybe_put(map, key, value), do: Map.put(map, key, value)
