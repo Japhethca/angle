@@ -1925,6 +1925,70 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
+// User Typed Queries
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
+
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
+
+
+
+// Category Typed Queries
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
+
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { categories: ["id", "name", "slug"] }]>>;
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
+
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export type ListingFormCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }, { categories: ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }] }]>>;
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export const listingFormCategoryFields = ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }, { categories: ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }] }];
+
+
+
 // Review Typed Queries
 /**
  * Typed query for Review
@@ -1939,6 +2003,38 @@ export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "r
  * @typedQuery true
  */
 export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
+
+
+
+// Order Typed Queries
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
+
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
 
 
 
@@ -2064,85 +2160,6 @@ export const searchItemCardFields = ["id", "title", "slug", "description", "star
 
 
 
-// Order Typed Queries
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
-
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }]>>;
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
-
-
-
-// Category Typed Queries
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
-
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { categories: ["id", "name", "slug"] }]>>;
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
-
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export type ListingFormCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }, { categories: ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }] }]>>;
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export const listingFormCategoryFields = ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }, { categories: ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }] }];
-
-
-
 // Bid Typed Queries
 /**
  * Typed query for Bid
@@ -2172,23 +2189,6 @@ export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount
  * @typedQuery true
  */
 export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
-
-
-
-// User Typed Queries
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
-
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
 
 
 
