@@ -1,10 +1,11 @@
 import { AuthLink } from "@/features/auth";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { Section } from "@/components/layouts";
 
 export function SellCtaSection() {
   return (
-    <section className="bg-surface-muted px-4 py-10 lg:px-10 lg:py-16">
+    <Section fullBleed background="accent" className="py-10 lg:py-16">
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-8 lg:flex-row lg:gap-16">
         {/* Copy side */}
         <div className="flex-1 text-center lg:text-left">
@@ -39,6 +40,6 @@ export function SellCtaSection() {
           </div>
         </div>
       </div>
-    </section>
+    </Section>
   );
 }
