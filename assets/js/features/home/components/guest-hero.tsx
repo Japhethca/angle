@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export function GuestHero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 dark:from-primary-800 dark:via-primary-900 dark:to-primary-950">
+    <section className="relative overflow-hidden bg-gradient-to-br from-primary-600 to-primary-1000">
       {/* Decorative background pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute left-1/4 top-1/4 size-64 rounded-full bg-primary-400 blur-3xl" />
@@ -21,7 +21,7 @@ export function GuestHero() {
         <div className="mt-8 flex items-center justify-center gap-4">
           <Button
             size="lg"
-            className="rounded-full bg-white px-8 text-primary-900 hover:bg-white/90"
+            className="rounded-full bg-white px-8 text-primary-1000 shadow-lg transition-all hover:bg-gray-50 hover:shadow-xl"
             asChild
           >
             <Link href="/auth/register">Sign Up Free</Link>
@@ -29,7 +29,7 @@ export function GuestHero() {
           <Button
             variant="outline"
             size="lg"
-            className="rounded-full border-white/30 px-8 text-white hover:bg-white/10"
+            className="rounded-full border-2 border-white bg-transparent px-8 text-white shadow-md transition-all hover:bg-white/20"
             asChild
           >
             <Link href="#search-section">Browse Items</Link>
