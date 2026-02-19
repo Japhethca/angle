@@ -3,7 +3,7 @@ import { listItems, homepageItemCardFields, buildCSRFHeaders } from "@/ash_rpc";
 import type { HomepageItemCard } from "@/ash_rpc";
 import { useAshQuery } from "@/hooks/use-ash-query";
 import { ItemCard } from "@/features/items";
-import { Section } from "@/shared/components/section";
+import { Section } from "@/components/layouts";
 
 type Item = HomepageItemCard[number];
 
