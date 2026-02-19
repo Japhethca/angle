@@ -3,6 +3,9 @@ defmodule Angle.Recommendations do
     otp_app: :angle,
     extensions: [AshAdmin.Domain]
 
+  require Ash.Query
+  alias Angle.Recommendations.{Cache, RecommendedItem, ItemSimilarity}
+
   admin do
     show? true
   end
@@ -11,5 +14,71 @@ defmodule Angle.Recommendations do
     resource Angle.Recommendations.UserInterest
     resource Angle.Recommendations.ItemSimilarity
     resource Angle.Recommendations.RecommendedItem
+  end
+
+  # Public API for serving recommendations
+
+  @doc """
+  Get homepage recommendations for a user.
+  Falls back to popular items if no personalized recommendations exist.
+  """
+  def get_homepage_recommendations(user_id, opts \\ []) do
+    limit = Keyword.get(opts, :limit, 20)
+
+    personalized =
+      RecommendedItem
+      |> Ash.Query.for_read(:by_user, %{user_id: user_id, limit: limit})
+      |> Ash.Query.load(:item)
+      |> Ash.read!()
+      |> Enum.map(& &1.item)
+
+    if Enum.empty?(personalized) do
+      get_popular_items(limit: limit)
+    else
+      personalized
+    end
+  end
+
+  @doc """
+  Get similar items for an item.
+  Tries ETS cache first, falls back to database.
+  """
+  def get_similar_items(item_id, opts \\ []) do
+    limit = Keyword.get(opts, :limit, 8)
+
+    case Cache.get_similar_items(item_id) do
+      {:ok, cached_items} ->
+        Enum.take(cached_items, limit)
+
+      {:error, :not_found} ->
+        # Cache miss - read from database
+        ItemSimilarity
+        |> Ash.Query.for_read(:by_source_item, %{source_item_id: item_id, limit: limit})
+        |> Ash.Query.load(:similar_item)
+        |> Ash.read!()
+        |> Enum.map(& &1.similar_item)
+    end
+  end
+
+  @doc """
+  Get popular items fallback.
+  Tries ETS cache first, falls back to database query.
+  """
+  def get_popular_items(opts \\ []) do
+    limit = Keyword.get(opts, :limit, 20)
+
+    case Cache.get_popular_items() do
+      {:ok, cached_items} ->
+        Enum.take(cached_items, limit)
+
+      {:error, :not_found} ->
+        # Cache miss - query database
+        Angle.Inventory.Item
+        |> Ash.Query.filter(publication_status == :published)
+        |> Ash.Query.load([:bid_count, :watcher_count])
+        |> Ash.Query.sort([{:bid_count, :desc}, {:watcher_count, :desc}])
+        |> Ash.Query.limit(limit)
+        |> Ash.read!()
+    end
   end
 end
