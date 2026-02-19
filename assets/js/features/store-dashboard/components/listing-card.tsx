@@ -1,36 +1,13 @@
+import { Link } from "@inertiajs/react";
 import { Gavel } from "lucide-react";
-import { cn } from "@/lib/utils";
 import type { SellerDashboardCard } from "@/ash_rpc";
 import { ResponsiveImage } from "@/components/image-upload";
 import type { ImageData } from "@/lib/image-url";
 import { ListingActionsMenu } from "./listing-actions-menu";
+import { StatusBadge } from "./status-badge";
 import { formatCurrency } from "../utils";
 
 type Item = SellerDashboardCard[number] & { coverImage?: ImageData | null };
-
-type StatusKey = "active" | "ended" | "sold" | "draft" | "pending" | "scheduled" | "paused" | "cancelled";
-
-function StatusBadge({ status }: { status: string | null | undefined }) {
-  const key = (status || "draft") as StatusKey;
-  const config: Record<StatusKey, { label: string; className: string }> = {
-    active: { label: "Active", className: "bg-feedback-success-muted text-feedback-success" },
-    ended: { label: "Ended", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
-    sold: { label: "Sold", className: "bg-feedback-success-muted text-feedback-success" },
-    draft: { label: "Draft", className: "bg-surface-secondary text-content-tertiary" },
-    pending: { label: "Pending", className: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" },
-    scheduled: { label: "Scheduled", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
-    paused: { label: "Paused", className: "bg-surface-secondary text-content-tertiary" },
-    cancelled: { label: "Cancelled", className: "bg-surface-secondary text-content-tertiary" },
-  };
-
-  const { label, className } = config[key] || config.draft;
-
-  return (
-    <span className={cn("inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium", className)}>
-      {label}
-    </span>
-  );
-}
 
 interface ListingCardProps {
   item: Item;
@@ -51,9 +28,14 @@ export function ListingCard({ item }: ListingCardProps) {
         </div>
         <div className="flex min-w-0 flex-1 items-start justify-between">
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-sm font-medium text-content">
+            <Link
+              href={item.publicationStatus === "draft"
+                ? `/store/listings/${item.id}/preview`
+                : `/items/${item.slug || item.id}`}
+              className="block truncate text-sm font-medium text-content hover:text-primary-600 hover:underline"
+            >
               {item.title}
-            </h3>
+            </Link>
             <p className="mt-1 text-sm text-content-secondary">
               Highest bid: {formatCurrency(item.currentPrice || item.startingPrice)}
             </p>
@@ -65,7 +47,7 @@ export function ListingCard({ item }: ListingCardProps) {
         </div>
       </div>
       <div className="mt-3">
-        <StatusBadge status={item.auctionStatus} />
+        <StatusBadge publicationStatus={item.publicationStatus} auctionStatus={item.auctionStatus} />
       </div>
     </div>
   );

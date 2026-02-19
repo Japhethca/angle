@@ -156,7 +156,11 @@ defmodule AngleWeb.StoreDashboardController do
     offset = (page - 1) * per_page
 
     input =
-      %{status_filter: status, sort_field: sort, sort_dir: dir}
+      %{
+        status_filter: String.to_existing_atom(status),
+        sort_field: String.to_existing_atom(sort),
+        sort_dir: String.to_existing_atom(dir)
+      }
       |> then(fn m -> if search, do: Map.put(m, :query, search), else: m end)
 
     params = %{
@@ -176,20 +180,17 @@ defmodule AngleWeb.StoreDashboardController do
     end
   end
 
-  # Stats are computed from up to 1000 items in memory (unfiltered).
-  # For sellers with more items, consider a dedicated aggregate query.
+  # TODO: Replace in-memory aggregation with DB-level aggregates for high-volume sellers
   defp load_seller_stats(conn) do
-    params = %{
-      page: %{limit: 1000, offset: 0, count: false}
-    }
+    user = conn.assigns.current_user
 
-    items =
-      case AshTypescript.Rpc.run_typed_query(:angle, :seller_dashboard_card, params, conn) do
-        %{"success" => true, "data" => data} -> extract_results(data)
-        _ -> []
-      end
+    case Angle.Inventory.my_listings_stats(actor: user, load: [:bid_count, :watcher_count]) do
+      {:ok, items} ->
+        compute_stats_from_resources(items)
 
-    compute_stats(items)
+      _ ->
+        %{"total_views" => 0, "total_watches" => 0, "total_bids" => 0, "total_amount" => "0"}
+    end
   end
 
   defp load_seller_orders(conn) do
@@ -233,12 +234,18 @@ defmodule AngleWeb.StoreDashboardController do
     AngleWeb.ImageHelpers.load_owner_thumbnail_url(:store_logo, profile_id)
   end
 
-  defp compute_stats(items) do
+  defp compute_stats_from_resources(items) do
     %{
-      "total_views" => sum_field(items, "viewCount"),
-      "total_watches" => sum_field(items, "watcherCount"),
-      "total_bids" => sum_field(items, "bidCount"),
-      "total_amount" => sum_decimal_field(items, "currentPrice")
+      "total_views" => Enum.reduce(items, 0, fn item, acc -> acc + (item.view_count || 0) end),
+      "total_watches" =>
+        Enum.reduce(items, 0, fn item, acc -> acc + (item.watcher_count || 0) end),
+      "total_bids" => Enum.reduce(items, 0, fn item, acc -> acc + (item.bid_count || 0) end),
+      "total_amount" =>
+        items
+        |> Enum.reduce(Decimal.new(0), fn item, acc ->
+          if item.current_price, do: Decimal.add(acc, item.current_price), else: acc
+        end)
+        |> Decimal.to_string()
     }
   end
 
@@ -256,12 +263,6 @@ defmodule AngleWeb.StoreDashboardController do
       |> sum_decimal_field("amount")
 
     %{"balance" => paid_total, "pending" => pending_total}
-  end
-
-  defp sum_field(items, field) do
-    Enum.reduce(items, 0, fn item, acc ->
-      acc + (item[field] || 0)
-    end)
   end
 
   defp sum_decimal_field(items, field) do

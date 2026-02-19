@@ -189,6 +189,7 @@ defmodule Angle.Inventory do
     resource Angle.Inventory.Item do
       define :get_item, action: :read, get_by: [:id]
       define :destroy_item, action: :destroy
+      define :my_listings_stats, action: :my_listings_stats
     end
 
     resource Angle.Inventory.ItemActivity
