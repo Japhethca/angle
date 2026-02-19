@@ -116,7 +116,8 @@ config :angle,
     Angle.Inventory,
     Angle.Accounts,
     Angle.Payments,
-    Angle.Media
+    Angle.Media,
+    Angle.Recommendations
   ]
 
 # Configures the endpoint
