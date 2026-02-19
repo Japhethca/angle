@@ -106,13 +106,13 @@ defmodule Angle.Recommendations.Scoring.InterestScorer do
     require Ash.Query
 
     Angle.Bidding.Bid
-    |> Ash.Query.filter(user_id == ^user_id and inserted_at > ^since)
+    |> Ash.Query.filter(user_id == ^user_id and bid_time > ^since)
     |> Ash.Query.load(:item)
-    |> Ash.read!()
+    |> Ash.read!(authorize?: false)
     |> Enum.map(fn bid ->
       %{
         category_id: bid.item.category_id,
-        timestamp: bid.inserted_at
+        timestamp: bid.bid_time
       }
     end)
   end
@@ -123,7 +123,7 @@ defmodule Angle.Recommendations.Scoring.InterestScorer do
     Angle.Inventory.WatchlistItem
     |> Ash.Query.filter(user_id == ^user_id and inserted_at > ^since)
     |> Ash.Query.load(:item)
-    |> Ash.read!()
+    |> Ash.read!(authorize?: false)
     |> Enum.map(fn watchlist_item ->
       %{
         category_id: watchlist_item.item.category_id,
