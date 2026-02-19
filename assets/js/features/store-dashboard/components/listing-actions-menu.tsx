@@ -8,6 +8,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ListingActionsMenuProps {
   id: string;
@@ -16,7 +26,7 @@ interface ListingActionsMenuProps {
 }
 
 export function ListingActionsMenu({ id, slug, publicationStatus }: ListingActionsMenuProps) {
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const isDraft = publicationStatus === "draft";
@@ -36,14 +46,9 @@ export function ListingActionsMenu({ id, slug, publicationStatus }: ListingActio
   };
 
   const handleDelete = () => {
-    if (!confirmDelete) {
-      setConfirmDelete(true);
-      return;
-    }
     if (isDeleting) return;
 
     setIsDeleting(true);
-    setConfirmDelete(false);
     router.delete(`/store/listings/${id}`, {
       preserveScroll: true,
       onFinish: () => setIsDeleting(false),
@@ -51,33 +56,54 @@ export function ListingActionsMenu({ id, slug, publicationStatus }: ListingActio
   };
 
   return (
-    <DropdownMenu onOpenChange={(open) => { if (!open) setConfirmDelete(false); }}>
-      <DropdownMenuTrigger asChild>
-        <button className="flex size-8 items-center justify-center rounded-lg text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content">
-          <MoreVertical className="size-4" />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={handleShare}>
-          <Share2 />
-          Share
-        </DropdownMenuItem>
-        {isDraft && (
-          <DropdownMenuItem onClick={handleEdit}>
-            <Pencil />
-            Edit
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="flex size-8 items-center justify-center rounded-lg text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content">
+            <MoreVertical className="size-4" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={handleShare}>
+            <Share2 />
+            Share
           </DropdownMenuItem>
-        )}
-        <DropdownMenuItem
-          onClick={handleDelete}
-          onSelect={(e) => { if (!confirmDelete) e.preventDefault(); }}
-          disabled={isDeleting}
-          className={confirmDelete ? "text-feedback-error bg-feedback-error/10" : "text-feedback-error"}
-        >
-          <Trash2 />
-          {confirmDelete ? "Confirm Delete" : "Delete"}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          {isDraft && (
+            <DropdownMenuItem onClick={handleEdit}>
+              <Pencil />
+              Edit
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuItem
+            onSelect={() => setShowDeleteDialog(true)}
+            className="text-feedback-error"
+          >
+            <Trash2 />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete listing</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the listing.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-feedback-error text-white hover:bg-feedback-error/90"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
