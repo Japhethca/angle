@@ -26,7 +26,7 @@ export function ItemCard({ item, badge, watchlistEntryId = null }: ItemCardProps
   });
 
   return (
-    <div className="w-[85vw] shrink-0 sm:w-[320px] lg:w-[432px]">
+    <div className="w-[85vw] shrink-0 sm:w-[320px] lg:w-[432px] [.grid_&]:w-auto [.grid_&]:shrink">
       <Link href={itemUrl} className="block">
         {/* Image area */}
         <div className="relative aspect-[9/10] overflow-hidden rounded-2xl bg-surface-muted lg:aspect-[9/10]">

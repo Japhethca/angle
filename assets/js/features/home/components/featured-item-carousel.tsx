@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "@inertiajs/react";
 import { ChevronLeft, ChevronRight, Gavel, Eye, Heart } from "lucide-react";
 import type { HomepageItemCard } from "@/ash_rpc";
@@ -6,7 +6,7 @@ import type { ImageData } from "@/lib/image-url";
 import { ResponsiveImage } from "@/components/image-upload";
 import { CountdownTimer } from "@/shared/components/countdown-timer";
 import { formatNaira } from "@/lib/format";
-import { useAuthGuard } from "@/features/auth";
+import { useAuthGuard, useAuth } from "@/features/auth";
 import { useWatchlistToggle } from "@/features/watchlist";
 
 type Item = HomepageItemCard[number] & { coverImage?: ImageData | null };
@@ -14,6 +14,13 @@ type Item = HomepageItemCard[number] & { coverImage?: ImageData | null };
 interface FeaturedItemCarouselProps {
   items: Item[];
   watchlistedMap?: Record<string, string>;
+}
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
 }
 
 function WatchButton({
@@ -50,6 +57,15 @@ function WatchButton({
 
 export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedItemCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (items.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentIndex(i => (i === items.length - 1 ? 0 : i + 1));
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [items.length]);
 
   if (items.length === 0) {
     return (
@@ -72,6 +88,11 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
   return (
     <section className="bg-surface-muted">
       <div className="px-4 py-8 lg:px-10 lg:py-12">
+        {user?.full_name && (
+          <h2 className="mb-6 font-heading text-2xl font-semibold text-content lg:text-[32px]">
+            {getGreeting()}, {user.full_name}
+          </h2>
+        )}
         {/* Desktop layout */}
         <div className="hidden lg:block">
           <div className="relative">
