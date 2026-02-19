@@ -30,6 +30,12 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
   @default_limit 20
   @top_categories_count 5
 
+  # Reason generation thresholds
+  @high_interest_threshold 0.7
+  @popular_watcher_threshold 5
+  @trending_watcher_threshold 10
+
+  @typedoc "A recommendation tuple: {item, score, human-readable reason}"
   @type recommendation :: {Item.t(), float(), String.t()}
 
   @doc """
@@ -60,7 +66,7 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
   end
 
   # Main recommendation generation logic
-  defp generate_recommendations(_user_id, interests, _limit) when interests == [] do
+  defp generate_recommendations(_user_id, [], _limit) do
     {:ok, []}
   end
 
@@ -94,8 +100,9 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
     |> Ash.Query.filter(category_id in ^categories)
     |> Ash.Query.filter(publication_status == :published)
     |> Ash.Query.filter(auction_status in [:active, :scheduled, :pending])
-    |> Ash.Query.filter(user_id != ^user_id)
+    |> Ash.Query.filter(created_by_id != ^user_id)
     |> Ash.Query.load([:bids, :watchlist_items, :bid_count, :watcher_count])
+    # System-level query: bypasses authorization as this runs in recommendation context
     |> Ash.read(authorize?: false)
     |> case do
       {:ok, items} ->
@@ -153,8 +160,6 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
 
   # Calculate recency boost based on auction end time and status
   defp recency_boost(item) do
-    base_boost = 0.0
-
     ending_soon_boost =
       case item.end_time do
         nil ->
@@ -163,7 +168,7 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
         end_time ->
           days_until_end = DateTime.diff(end_time, DateTime.utc_now(), :day)
 
-          if days_until_end < @recency_days_threshold do
+          if days_until_end > 0 and days_until_end < @recency_days_threshold do
             @recency_boost_value
           else
             0.0
@@ -177,7 +182,7 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
         0.0
       end
 
-    base_boost + ending_soon_boost + active_boost
+    ending_soon_boost + active_boost
   end
 
   # Apply diversity filter to ensure max N items per category
@@ -203,13 +208,13 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
     watcher_count = item.watcher_count || 0
 
     cond do
-      category_score > 0.7 and watcher_count > 5 ->
+      category_score > @high_interest_threshold and watcher_count > @popular_watcher_threshold ->
         "Popular in your favorite category"
 
-      category_score > 0.7 ->
+      category_score > @high_interest_threshold ->
         "Based on your interest in this category"
 
-      watcher_count > 10 ->
+      watcher_count > @trending_watcher_threshold ->
         "Trending item"
 
       item.auction_status == :active and item.end_time != nil ->
