@@ -9,7 +9,6 @@ defmodule AngleWeb.SearchController do
 
   def index(conn, params) do
     query = params["q"] |> to_string() |> String.trim()
-    filter_preset = validate_enum(params["filter"], ~w(ending-soon trending recommended))
     category = validate_uuid(params["category"])
     condition = validate_enum(params["condition"], ~w(new used refurbished))
     sale_type = validate_enum(params["sale_type"], ~w(auction buy_now hybrid))
@@ -21,32 +20,19 @@ defmodule AngleWeb.SearchController do
     max_price = parse_decimal(params["max_price"])
 
     # Convert sort to atom (Ash expects atoms, not strings)
-    sort =
-      case filter_preset do
-        "ending-soon" ->
-          :ending_soon
+    sort_str =
+      validate_enum(
+        params["sort"],
+        ~w(relevance price_asc price_desc newest ending_soon view_count_desc)
+      ) || "relevance"
 
-        "trending" ->
-          :view_count_desc
-
-        "recommended" ->
-          :newest
-
-        _ ->
-          sort_str =
-            validate_enum(
-              params["sort"],
-              ~w(relevance price_asc price_desc newest ending_soon view_count_desc)
-            ) || "relevance"
-
-          to_sort_atom(sort_str)
-      end
+    sort = to_sort_atom(sort_str)
 
     page = parse_positive_int(params["page"], 1)
 
-    # Support browsing with filter only (no query required)
+    # Support browsing with sort only (no query required)
     {items, total} =
-      if query == "" && filter_preset == nil do
+      if query == "" && params["sort"] == nil do
         {[], 0}
       else
         load_search_results(
@@ -65,7 +51,6 @@ defmodule AngleWeb.SearchController do
         )
       end
 
-    # Pass filter_preset to frontend
     items = ImageHelpers.attach_cover_images(items)
     categories = load_filter_categories(conn)
     total_pages = if total > 0, do: max(1, ceil(total / @per_page)), else: 0
@@ -73,7 +58,6 @@ defmodule AngleWeb.SearchController do
     conn
     |> assign_prop(:items, items)
     |> assign_prop(:query, query)
-    |> assign_prop(:filter_preset, filter_preset)
     |> assign_prop(:pagination, %{
       page: page,
       per_page: @per_page,

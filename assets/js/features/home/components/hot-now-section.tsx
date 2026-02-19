@@ -102,7 +102,7 @@ export function HotNowSection({ items, watchlistedMap = {} }: HotNowSectionProps
           Hot Now
         </h2>
         <Link
-          href="/search?filter=trending"
+          href="/search?sort=view_count_desc"
           className="text-sm font-medium text-primary-600 transition-colors hover:text-primary-700"
         >
           View All

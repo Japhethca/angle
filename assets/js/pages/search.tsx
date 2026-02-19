@@ -73,7 +73,6 @@ interface SearchPageProps {
   query: string;
   pagination: Pagination;
   filters: SearchFilters;
-  filter_preset?: string | null;
   categories: SearchCategory[];
   watchlisted_map?: Record<string, string>;
 }
@@ -83,7 +82,6 @@ export default function SearchPage({
   query,
   pagination,
   filters,
-  filter_preset = null,
   categories,
   watchlisted_map = {},
 }: SearchPageProps) {
@@ -160,13 +158,7 @@ export default function SearchPage({
 
   return (
     <>
-      <Head title={
-        filter_preset
-          ? `Browse: ${filter_preset.replace('-', ' ')}`
-          : query
-            ? `Search: ${query}`
-            : "Search"
-      } />
+      <Head title={query ? `Search: ${query}` : "Search"} />
       <div className="mx-auto max-w-7xl px-4 py-6 lg:px-10">
         {/* Search bar */}
         <form onSubmit={handleSearch} className="relative mb-6">
@@ -339,7 +331,7 @@ export default function SearchPage({
         )}
 
         {/* Results grid */}
-        {query === "" && !filter_preset ? (
+        {query === "" && !filters.sort ? (
           <div className="py-20 text-center text-content-secondary">
             <Search className="mx-auto mb-4 size-12 text-content-placeholder" />
             <p className="text-lg font-medium">Search for items</p>

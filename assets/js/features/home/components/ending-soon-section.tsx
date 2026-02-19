@@ -37,7 +37,7 @@ export function EndingSoonSection({ initialItems, watchlistedMap = {} }: EndingS
           Ending Soon
         </h2>
         <Link
-          href="/search?filter=ending-soon"
+          href="/search?sort=ending_soon"
           className="text-sm font-medium text-primary-600 transition-colors hover:text-primary-700"
         >
           View All
