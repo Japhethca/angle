@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { ChevronDown, Search, SlidersHorizontal } from 'lucide-react';
 import type { WatchlistItemCard as WatchlistItemCardType } from '@/ash_rpc';
+import { Section } from '@/components/layout/section';
 import { EmptyWatchlist, WatchlistItemCard, WatchlistCategorySidebar } from '@/features/watchlist';
 
 interface Category {
@@ -70,7 +71,7 @@ export default function Watchlist({
       <Head title="Watchlist" />
 
       {/* Desktop: sidebar + content */}
-      <div className="hidden lg:flex lg:gap-10 lg:px-10 lg:py-6">
+      <Section className="hidden lg:flex lg:gap-10 lg:py-6">
         <aside className="w-[240px] shrink-0">
           <WatchlistCategorySidebar categories={categories} activeCategory={active_category} />
         </aside>
@@ -82,7 +83,7 @@ export default function Watchlist({
 
           {itemsContent}
         </div>
-      </div>
+      </Section>
 
       {/* Mobile: content */}
       <div className="px-4 pb-6 pt-4 lg:hidden">
