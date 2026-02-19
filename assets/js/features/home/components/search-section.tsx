@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Link } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 import { Search } from "lucide-react";
 import type { HomepageCategory } from "@/ash_rpc";
 
@@ -14,7 +14,9 @@ export function SearchSection({ categories }: SearchSectionProps) {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    // Future: navigate to /search?q=query
+    if (query.trim()) {
+      router.visit(`/search?q=${encodeURIComponent(query.trim())}`);
+    }
   };
 
   const trendingCategories = categories.slice(0, 6);
