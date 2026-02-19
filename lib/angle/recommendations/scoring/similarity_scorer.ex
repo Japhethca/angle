@@ -55,10 +55,16 @@ defmodule Angle.Recommendations.Scoring.SimilarityScorer do
     price_a = item_a.current_price
     price_b = item_b.current_price
 
-    price_diff = Decimal.abs(Decimal.sub(price_a, price_b))
-    threshold = Decimal.mult(price_a, Decimal.new("0.5"))
+    # Handle nil prices (items without set prices)
+    if is_nil(price_a) or is_nil(price_b) do
+      0.0
+    else
+      price_diff = Decimal.abs(Decimal.sub(price_a, price_b))
+      threshold = Decimal.mult(price_a, Decimal.new("0.5"))
 
-    if Decimal.compare(price_diff, threshold) == :lt, do: 0.3, else: 0.0
+      # Include boundary: within 50% includes exactly 50%
+      if Decimal.compare(price_diff, threshold) in [:lt, :eq], do: 0.3, else: 0.0
+    end
   end
 
   @doc """
@@ -96,7 +102,7 @@ defmodule Angle.Recommendations.Scoring.SimilarityScorer do
       Angle.Bidding.Bid
       |> Ash.Query.filter(item_id == ^item_id)
       |> Ash.Query.select([:user_id])
-      |> Ash.read!()
+      |> Ash.read!(authorize?: false)
       |> Enum.map(& &1.user_id)
       |> MapSet.new()
 
@@ -105,7 +111,7 @@ defmodule Angle.Recommendations.Scoring.SimilarityScorer do
       Angle.Inventory.WatchlistItem
       |> Ash.Query.filter(item_id == ^item_id)
       |> Ash.Query.select([:user_id])
-      |> Ash.read!()
+      |> Ash.read!(authorize?: false)
       |> Enum.map(& &1.user_id)
       |> MapSet.new()
 
