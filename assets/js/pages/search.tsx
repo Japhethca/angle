@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Section } from "@/components/layout/section";
+import { Section } from "@/components/layouts/section";
 import type { SearchItemCard } from "@/ash_rpc";
 import type { ImageData } from "@/lib/image-url";
 

@@ -1,6 +1,6 @@
 import { Link } from "@inertiajs/react";
 import { Gavel, CircleCheck, History, Headset } from "lucide-react";
-import { Section } from "@/components/layout/section";
+import { Section } from "@/components/layouts/section";
 import { cn } from "@/lib/utils";
 
 interface BidsLayoutProps {

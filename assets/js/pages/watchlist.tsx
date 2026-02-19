@@ -1,7 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { ChevronDown, Search, SlidersHorizontal } from 'lucide-react';
 import type { WatchlistItemCard as WatchlistItemCardType } from '@/ash_rpc';
-import { Section } from '@/components/layout/section';
+import { Section } from '@/components/layouts/section';
 import { EmptyWatchlist, WatchlistItemCard, WatchlistCategorySidebar } from '@/features/watchlist';
 
 interface Category {
