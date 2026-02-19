@@ -212,6 +212,14 @@ defmodule Angle.Inventory.Item do
       pagination offset?: true, required?: false
     end
 
+    read :my_listings_stats do
+      description "Aggregate stats for all items owned by the current user"
+
+      filter expr(created_by_id == ^actor(:id))
+
+      pagination offset?: true, required?: false
+    end
+
     read :by_category do
       argument :category_ids, {:array, :uuid}, allow_nil?: false
 
