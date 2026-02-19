@@ -8,6 +8,6 @@ defmodule Angle.Recommendations do
   end
 
   resources do
-    # Resources will be added in subsequent tasks
+    resource Angle.Recommendations.UserInterest
   end
 end

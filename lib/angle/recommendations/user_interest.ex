@@ -1,0 +1,111 @@
+defmodule Angle.Recommendations.UserInterest do
+  use Ash.Resource,
+    domain: Angle.Recommendations,
+    data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer]
+
+  postgres do
+    table "user_interests"
+    repo Angle.Repo
+
+    custom_indexes do
+      index [:user_id, :interest_score]
+    end
+  end
+
+  actions do
+    defaults [:read]
+
+    create :create do
+      primary? true
+      accept [:interest_score, :last_interaction_at, :interaction_count]
+
+      argument :user_id, :uuid, allow_nil?: false
+      argument :category_id, :uuid, allow_nil?: false
+
+      change set_attribute(:user_id, arg(:user_id))
+      change set_attribute(:category_id, arg(:category_id))
+    end
+
+    update :update do
+      primary? true
+      accept [:interest_score, :last_interaction_at, :interaction_count]
+    end
+
+    destroy :destroy do
+      primary? true
+    end
+
+    read :by_user do
+      argument :user_id, :uuid, allow_nil?: false
+
+      filter expr(user_id == ^arg(:user_id))
+    end
+
+    read :top_interests do
+      argument :user_id, :uuid, allow_nil?: false
+      argument :limit, :integer, default: 5
+
+      filter expr(user_id == ^arg(:user_id))
+
+      prepare fn query, _context ->
+        query
+        |> Ash.Query.sort(interest_score: :desc)
+        |> Ash.Query.limit(Ash.Query.get_argument(query, :limit))
+      end
+    end
+  end
+
+  policies do
+    # NOTE: Permissive policy for internal background job use only
+    # TODO: Add proper authorization if exposed to users
+    policy always() do
+      authorize_if always()
+    end
+  end
+
+  attributes do
+    uuid_primary_key :id
+
+    attribute :interest_score, :float do
+      allow_nil? false
+      default 0.0
+      public? true
+      constraints min: 0.0, max: 1.0
+    end
+
+    attribute :last_interaction_at, :utc_datetime do
+      allow_nil? false
+      default &DateTime.utc_now/0
+      public? true
+    end
+
+    attribute :interaction_count, :integer do
+      allow_nil? false
+      default 0
+      public? true
+      constraints min: 0
+    end
+
+    create_timestamp :inserted_at
+    update_timestamp :updated_at
+  end
+
+  relationships do
+    belongs_to :user, Angle.Accounts.User do
+      allow_nil? false
+      attribute_writable? true
+      attribute_public? true
+    end
+
+    belongs_to :category, Angle.Catalog.Category do
+      allow_nil? false
+      attribute_writable? true
+      attribute_public? true
+    end
+  end
+
+  identities do
+    identity :unique_user_category, [:user_id, :category_id]
+  end
+end
