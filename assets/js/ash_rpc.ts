@@ -1925,20 +1925,20 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
-// User Typed Queries
+// Review Typed Queries
 /**
- * Typed query for User
+ * Typed query for Review
  *
  * @typedQuery true
  */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
+export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }]>>;
 
 /**
- * Typed query for User
+ * Typed query for Review
  *
  * @typedQuery true
  */
-export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
+export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
 
 
 
@@ -2064,55 +2064,6 @@ export const searchItemCardFields = ["id", "title", "slug", "description", "star
 
 
 
-// Review Typed Queries
-/**
- * Typed query for Review
- *
- * @typedQuery true
- */
-export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }]>>;
-
-/**
- * Typed query for Review
- *
- * @typedQuery true
- */
-export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
-
-
-
-// Bid Typed Queries
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export type ActiveBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }]>>;
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export const activeBidCardFields = ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }] satisfies ListBidsFields;
-
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }]>>;
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
-
-
-
 // Order Typed Queries
 /**
  * Typed query for Order
@@ -2189,6 +2140,55 @@ export type ListingFormCategory = Array<InferResult<CategoryResourceSchema, ["id
  * @typedQuery true
  */
 export const listingFormCategoryFields = ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }, { categories: ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }] }];
+
+
+
+// Bid Typed Queries
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export type ActiveBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }]>>;
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export const activeBidCardFields = ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }] satisfies ListBidsFields;
+
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }]>>;
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
+
+
+
+// User Typed Queries
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
+
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
 
 
 

@@ -114,12 +114,14 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
               {/* Navigation arrows */}
               <button
                 onClick={goPrev}
+                aria-label="Previous item"
                 className="absolute left-4 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-surface-emphasis shadow-md transition-colors hover:bg-surface-muted"
               >
                 <ChevronLeft className="size-5 text-content" />
               </button>
               <button
                 onClick={goNext}
+                aria-label="Next item"
                 className="absolute right-4 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-surface-emphasis shadow-md transition-colors hover:bg-surface-muted"
               >
                 <ChevronRight className="size-5 text-content" />
@@ -135,8 +137,6 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
                   </h2>
                 </Link>
                 <div className="flex items-center gap-3 text-sm text-content-tertiary">
-                  <span>Uploaded 346</span>
-                  <span>•</span>
                   <span className="font-semibold text-content">{formatNaira(price)}</span>
                 </div>
                 {activeItem.endTime && (
@@ -188,12 +188,14 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
             <div className="absolute bottom-4 right-4 flex gap-2">
               <button
                 onClick={goPrev}
+                aria-label="Previous item"
                 className="flex size-8 items-center justify-center rounded-full bg-surface/80 shadow-md backdrop-blur-sm"
               >
                 <ChevronLeft className="size-4 text-content" />
               </button>
               <button
                 onClick={goNext}
+                aria-label="Next item"
                 className="flex size-8 items-center justify-center rounded-full bg-surface/80 shadow-md backdrop-blur-sm"
               >
                 <ChevronRight className="size-4 text-content" />
@@ -244,6 +246,7 @@ export function FeaturedItemCarousel({ items, watchlistedMap = {} }: FeaturedIte
               <button
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
+                aria-label={`Go to item ${idx + 1}`}
                 className={`size-2 rounded-full transition-colors ${
                   idx === currentIndex ? 'bg-primary-600' : 'bg-surface-emphasis'
                 }`}

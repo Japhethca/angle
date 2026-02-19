@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export function GuestHero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary-900 via-primary-800 to-primary-950">
+    <section className="relative overflow-hidden bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 dark:from-primary-800 dark:via-primary-900 dark:to-primary-950">
       {/* Decorative background pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute left-1/4 top-1/4 size-64 rounded-full bg-primary-400 blur-3xl" />
