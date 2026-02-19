@@ -51,6 +51,11 @@ export function ListingActionsMenu({ id, slug, publicationStatus }: ListingActio
     setIsDeleting(true);
     router.delete(`/store/listings/${id}`, {
       preserveScroll: true,
+      onSuccess: () => setShowDeleteDialog(false),
+      onError: () => {
+        toast.error("Failed to delete listing");
+        setShowDeleteDialog(false);
+      },
       onFinish: () => setIsDeleting(false),
     });
   };
@@ -95,7 +100,10 @@ export function ListingActionsMenu({ id, slug, publicationStatus }: ListingActio
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete}
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
               disabled={isDeleting}
               className="bg-feedback-error text-white hover:bg-feedback-error/90"
             >
