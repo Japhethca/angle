@@ -180,6 +180,7 @@ defmodule AngleWeb.StoreDashboardController do
     end
   end
 
+  # TODO: Replace in-memory aggregation with DB-level aggregates for high-volume sellers
   defp load_seller_stats(conn) do
     user = conn.assigns.current_user
 
