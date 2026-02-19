@@ -24,6 +24,7 @@ const SORT_OPTIONS = [
   { value: "price_desc", label: "Price: High to Low" },
   { value: "newest", label: "Newest" },
   { value: "ending_soon", label: "Ending Soon" },
+  { value: "view_count_desc", label: "Most Popular" },
 ] as const;
 
 const CONDITION_OPTIONS = [
