@@ -47,7 +47,6 @@ defmodule Angle.Recommendations.Jobs.RefreshUserInterests do
   def perform(%Oban.Job{}) do
     Logger.info("#{@log_prefix} Starting user interests refresh")
 
-    # TODO: Refactor to use domain code interfaces (Task 11) instead of direct Ash calls
     case fetch_active_users() do
       {:ok, active_users} ->
         Logger.info("#{@log_prefix} Refreshing interests for #{length(active_users)} users")
