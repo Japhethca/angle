@@ -11,7 +11,7 @@ defmodule Angle.Recommendations.Cache do
   """
 
   # 24 hours
-  @default_ttl_seconds 86400
+  @default_ttl_seconds 86_400
 
   def init do
     # Guard against double initialization (safe for tests and reloads)

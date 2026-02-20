@@ -59,9 +59,8 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
   def generate_for_user(user_id, opts \\ []) do
     limit = Keyword.get(opts, :limit, @default_limit)
 
-    with {:ok, interests} <- InterestScorer.compute_user_interests(user_id),
-         {:ok, recommendations} <- generate_recommendations(user_id, interests, limit) do
-      {:ok, recommendations}
+    with {:ok, interests} <- InterestScorer.compute_user_interests(user_id) do
+      generate_recommendations(user_id, interests, limit)
     end
   end
 

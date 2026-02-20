@@ -36,7 +36,10 @@ defmodule Angle.Recommendations do
            authorize?: false
          ) do
       {:ok, recommended_items} ->
-        personalized = Enum.map(recommended_items, & &1.item)
+        personalized =
+          recommended_items
+          |> Enum.map(& &1.item)
+          |> Enum.map(&serialize_item/1)
 
         if Enum.empty?(personalized) do
           get_popular_items(limit: limit)
@@ -77,7 +80,9 @@ defmodule Angle.Recommendations do
                authorize?: false
              ) do
           {:ok, similarities} ->
-            Enum.map(similarities, & &1.similar_item)
+            similarities
+            |> Enum.map(& &1.similar_item)
+            |> Enum.map(&serialize_item/1)
 
           {:error, error} ->
             Logger.warning("Failed to fetch similar items for item #{item_id}: #{inspect(error)}")
@@ -141,12 +146,29 @@ defmodule Angle.Recommendations do
             all_items
             |> Enum.filter(fn item -> MapSet.member?(id_set, item.id) end)
             |> Enum.sort_by(fn item -> Enum.find_index(ids, &(&1 == item.id)) end)
+            |> Enum.map(&serialize_item/1)
 
           {:error, error} ->
             Logger.warning("Failed to hydrate items: #{inspect(error)}")
             []
         end
     end
+  end
+
+  defp serialize_item(item) do
+    %{
+      "id" => item.id,
+      "title" => item.title,
+      "description" => item.description,
+      "startingPrice" => item.starting_price,
+      "currentPrice" => item.current_price,
+      "endTime" => item.end_time,
+      "auctionStatus" => to_string(item.auction_status),
+      "publicationStatus" => to_string(item.publication_status),
+      "bidCount" => item.bid_count,
+      "watcherCount" => item.watcher_count,
+      "viewCount" => item.view_count
+    }
   end
 
   defp fallback_popular_items(limit) do
@@ -168,6 +190,7 @@ defmodule Angle.Recommendations do
           {-(item.bid_count || 0), -(item.watcher_count || 0)}
         end)
         |> Enum.take(limit)
+        |> Enum.map(&serialize_item/1)
 
       {:error, error} ->
         Logger.warning("Failed to fetch popular items: #{inspect(error)}")
