@@ -20,6 +20,7 @@ defmodule Angle.Bidding.Bid do
   alias Angle.Bidding.Bid.ValidateBidIncrement
   alias Angle.Bidding.Bid.PreventSelfBidding
   alias Angle.Bidding.Bid.AuctionMustBeActive
+  alias Angle.Bidding.Bid.ValidateWalletCommitment
   alias Angle.Bidding.Bid.CheckSoftCloseExtension
 
   graphql do
@@ -60,6 +61,7 @@ defmodule Angle.Bidding.Bid do
       change {ValidateBidIncrement, []}
       change {PreventSelfBidding, []}
       change {AuctionMustBeActive, []}
+      change {ValidateWalletCommitment, []}
 
       # After successful bid, check if auction should be extended (soft close anti-sniping)
       change {CheckSoftCloseExtension, []}

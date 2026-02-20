@@ -3,6 +3,18 @@ defmodule Angle.Bidding.Bid.CheckSoftCloseExtensionTest do
 
   require Ash.Query
 
+  import Angle.Factory
+
+  # Helper to setup a user with wallet and verification for bidding
+  defp setup_bidder(opts \\ []) do
+    balance = Keyword.get(opts, :balance, 5000)
+    user = create_user()
+    _wallet = create_wallet(user: user, balance: balance)
+    _verification = create_verification(%{user: user, phone_verified: true, id_verified: true})
+    user
+  end
+
+
   alias Angle.Bidding.Bid
   alias Angle.Inventory.Item
 
@@ -15,7 +27,7 @@ defmodule Angle.Bidding.Bid.CheckSoftCloseExtensionTest do
   describe "check_soft_close_extension/2" do
     test "extends auction when bid is within 10 minutes of end time" do
       seller = create_user()
-      buyer = create_user()
+      buyer = setup_bidder()
 
       # End time is 8 minutes in the future
       original_end = DateTime.add(DateTime.utc_now(), 8 * 60, :second)
@@ -57,7 +69,7 @@ defmodule Angle.Bidding.Bid.CheckSoftCloseExtensionTest do
 
     test "does not extend when bid is not within soft close window" do
       seller = create_user()
-      buyer = create_user()
+      buyer = setup_bidder()
 
       # End time is 15 minutes in the future
       original_end = DateTime.add(DateTime.utc_now(), 15 * 60, :second)
@@ -97,7 +109,7 @@ defmodule Angle.Bidding.Bid.CheckSoftCloseExtensionTest do
 
     test "does not extend when max extensions (2) reached" do
       seller = create_user()
-      buyer = create_user()
+      buyer = setup_bidder()
 
       # End time is 28 minutes in the future (original 8 minutes + 2 extensions of 10 minutes each)
       original_end = DateTime.add(DateTime.utc_now(), 8 * 60, :second)
@@ -142,7 +154,7 @@ defmodule Angle.Bidding.Bid.CheckSoftCloseExtensionTest do
 
     test "only extends active auctions, not scheduled" do
       seller = create_user()
-      buyer = create_user()
+      buyer = setup_bidder()
 
       # End time is 8 minutes in the future
       original_end = DateTime.add(DateTime.utc_now(), 8 * 60, :second)

@@ -3,16 +3,27 @@ defmodule Angle.Bidding.Bid.AuctionMustBeActiveTest do
 
   alias Angle.Bidding.Bid
 
+  import Angle.Factory
+
   defp publish_item(item) do
     item
     |> Ash.Changeset.for_update(:publish_item, %{}, authorize?: false)
     |> Ash.update!()
   end
 
+  # Helper to setup a user with wallet and verification for bidding
+  defp setup_bidder(opts \\ []) do
+    balance = Keyword.get(opts, :balance, 5000)
+    user = create_user()
+    _wallet = create_wallet(user: user, balance: balance)
+    _verification = create_verification(%{user: user, phone_verified: true, id_verified: true})
+    user
+  end
+
   describe "auction_must_be_active/2" do
     test "allows bids on active auctions" do
       seller = create_user()
-      buyer = create_user()
+      buyer = setup_bidder()
 
       item =
         create_item(%{
@@ -40,7 +51,7 @@ defmodule Angle.Bidding.Bid.AuctionMustBeActiveTest do
 
     test "allows bids on scheduled auctions" do
       seller = create_user()
-      buyer = create_user()
+      buyer = setup_bidder()
 
       item =
         create_item(%{
@@ -68,7 +79,7 @@ defmodule Angle.Bidding.Bid.AuctionMustBeActiveTest do
 
     test "prevents bids on ended auctions" do
       seller = create_user()
-      buyer = create_user()
+      buyer = setup_bidder()
 
       item =
         create_item(%{
@@ -97,7 +108,7 @@ defmodule Angle.Bidding.Bid.AuctionMustBeActiveTest do
 
     test "prevents bids on sold auctions" do
       seller = create_user()
-      buyer = create_user()
+      buyer = setup_bidder()
 
       item =
         create_item(%{
@@ -126,7 +137,7 @@ defmodule Angle.Bidding.Bid.AuctionMustBeActiveTest do
 
     test "prevents bids on draft items" do
       seller = create_user()
-      buyer = create_user()
+      buyer = setup_bidder()
 
       item =
         create_item(%{
