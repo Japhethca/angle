@@ -5,7 +5,7 @@ defmodule Angle.Repo.Migrations.AddPaystackSubaccountFields do
     alter table(:user_wallets) do
       add :paystack_subaccount_code, :string
       add :last_synced_at, :utc_datetime
-      add :sync_status, :string, default: "pending"
+      add :sync_status, :string, default: "pending", null: false
       add :metadata, :map, default: %{}
     end
 
