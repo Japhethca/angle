@@ -398,6 +398,46 @@ defmodule Angle.Factory do
     end
   end
 
+  @doc """
+  Creates a verification record for a user.
+
+  ## Options
+
+    * `:user` - the user record (creates one if not provided)
+    * `:phone_verified` - boolean (default false)
+    * `:id_verified` - boolean (default false)
+    * `:id_verification_status` - atom (default :not_submitted)
+
+  """
+  def create_verification(attrs \\ %{}) do
+    user = attrs[:user] || create_user()
+
+    {:ok, verification} =
+      Angle.Accounts.UserVerification
+      |> Ash.Changeset.for_create(:create, %{user_id: user.id}, authorize?: false)
+      |> Ash.create()
+
+    # Update fields if specified
+    updates =
+      %{}
+      |> maybe_put(:phone_verified, Map.get(attrs, :phone_verified))
+      |> maybe_put(
+        :phone_verified_at,
+        if(Map.get(attrs, :phone_verified), do: DateTime.utc_now())
+      )
+      |> maybe_put(:id_verified, Map.get(attrs, :id_verified))
+      |> maybe_put(:id_verified_at, if(Map.get(attrs, :id_verified), do: DateTime.utc_now()))
+      |> maybe_put(:id_verification_status, Map.get(attrs, :id_verification_status))
+
+    if updates == %{} do
+      verification
+    else
+      verification
+      |> Ecto.Changeset.change(updates)
+      |> Angle.Repo.update!()
+    end
+  end
+
   # Helpers
 
   defp unique_email do

@@ -65,6 +65,7 @@ defmodule Angle.Accounts do
       define :remove_role
     end
 
+    resource Angle.Accounts.UserVerification
     resource Angle.Accounts.UserRole
     resource Angle.Accounts.Role
     resource Angle.Accounts.Permission

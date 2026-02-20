@@ -482,6 +482,11 @@ defmodule Angle.Accounts.User do
       public? true
     end
 
+    has_one :verification, Angle.Accounts.UserVerification do
+      destination_attribute :user_id
+      public? true
+    end
+
     has_one :store_profile, Angle.Accounts.StoreProfile do
       destination_attribute :user_id
       public? true
