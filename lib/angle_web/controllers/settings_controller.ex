@@ -208,18 +208,18 @@ defmodule AngleWeb.SettingsController do
   defp wallet_data(wallet) do
     %{
       id: wallet.id,
-      balance: wallet.balance.amount,
-      total_deposited: wallet.total_deposited.amount,
-      total_withdrawn: wallet.total_withdrawn.amount
+      balance: Decimal.to_float(wallet.balance),
+      total_deposited: Decimal.to_float(wallet.total_deposited),
+      total_withdrawn: Decimal.to_float(wallet.total_withdrawn)
     }
   end
 
   defp transaction_data(transaction) do
     %{
       id: transaction.id,
-      type: transaction.type,
-      amount: transaction.amount.amount,
-      balance_after: transaction.balance_after.amount,
+      type: transaction.transaction_type,
+      amount: Decimal.to_float(transaction.amount),
+      balance_after: Decimal.to_float(transaction.balance_after),
       inserted_at: transaction.inserted_at
     }
   end

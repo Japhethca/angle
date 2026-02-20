@@ -46,7 +46,7 @@ interface Wallet {
 
 interface Transaction {
   id: string;
-  type: "deposit" | "withdrawal" | "purchase" | "sale_credit" | "refund";
+  type: "deposit" | "withdrawal" | "purchase" | "sale_credit" | "refund" | "commission";
   amount: number;
   balance_after: number;
   inserted_at: string;
@@ -102,7 +102,6 @@ export default function SettingsPayments({
           onOpenChange={setWithdrawOpen}
           currentBalance={wallet.balance}
           walletId={wallet.id}
-          onSuccess={() => window.location.reload()}
         />
       </SettingsLayout>
     </>
