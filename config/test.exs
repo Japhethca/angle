@@ -3,6 +3,7 @@ config :angle, Oban, testing: :manual
 config :angle, token_signing_secret: "fjl5L2KXe/03eyOGjgh1JbGpPFZE48Ku"
 config :bcrypt_elixir, log_rounds: 1
 config :ash, policies: [show_policy_breakdowns?: true]
+config :angle, :otp_test_mode, true
 
 # Configure your database
 #

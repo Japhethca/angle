@@ -4,6 +4,8 @@ defmodule Angle.Accounts.UserVerification do
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer]
 
+  @otp_test_mode Application.compile_env(:angle, :otp_test_mode, false)
+
   postgres do
     table "user_verifications"
     repo Angle.Repo
@@ -46,7 +48,7 @@ defmodule Angle.Accounts.UserVerification do
 
           # In test/dev: return OTP in result
           # In prod: send via SMS, don't return OTP
-          if Mix.env() == :test do
+          if @otp_test_mode do
             changeset
             |> Ash.Changeset.after_action(fn _changeset, verification ->
               {:ok, Map.put(verification, :otp_code, otp_code)}
@@ -83,7 +85,7 @@ defmodule Angle.Accounts.UserVerification do
               message: "OTP expired. Please request a new one."
             )
 
-          hash_otp(submitted_otp) != stored_hash ->
+          not Plug.Crypto.secure_compare(hash_otp(submitted_otp), stored_hash) ->
             Ash.Changeset.add_error(
               changeset,
               message: "Invalid OTP code"
@@ -187,7 +189,9 @@ defmodule Angle.Accounts.UserVerification do
 
   # Helper functions for OTP
   defp generate_otp do
-    :rand.uniform(999_999)
+    :crypto.strong_rand_bytes(4)
+    |> :binary.decode_unsigned()
+    |> rem(1_000_000)
     |> Integer.to_string()
     |> String.pad_leading(6, "0")
   end
