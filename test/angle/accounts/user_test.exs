@@ -168,4 +168,100 @@ defmodule Angle.Accounts.UserTest do
       assert is_nil(user.avg_rating)
     end
   end
+
+  describe "register_with_google" do
+    test "creates new user when email does not exist" do
+      user_info = %{
+        "sub" => "google_user_123",
+        "email" => "newuser@gmail.com",
+        "email_verified" => true,
+        "name" => "New User",
+        "picture" => "https://example.com/photo.jpg"
+      }
+
+      oauth_tokens = %{
+        "access_token" => "ya29.access_token",
+        "refresh_token" => "refresh_token_value",
+        "expires_at" => DateTime.add(DateTime.utc_now(), 3600, :second)
+      }
+
+      user =
+        Angle.Accounts.User
+        |> Ash.Changeset.for_create(:register_with_google, %{
+          user_info: user_info,
+          oauth_tokens: oauth_tokens
+        })
+        |> Ash.create!(authorize?: false)
+
+      assert user.id
+      assert to_string(user.email) == "newuser@gmail.com"
+      assert user.full_name == "New User"
+    end
+
+    test "links Google account to existing user with matching email" do
+      # Create existing user with password
+      existing_user = create_user(%{email: "existing@gmail.com", full_name: "Existing User"})
+
+      user_info = %{
+        "sub" => "google_user_456",
+        "email" => "existing@gmail.com",
+        "email_verified" => true,
+        "name" => "Google Name",
+        "picture" => "https://example.com/photo.jpg"
+      }
+
+      oauth_tokens = %{
+        "access_token" => "ya29.another_token",
+        "refresh_token" => "another_refresh_token",
+        "expires_at" => DateTime.add(DateTime.utc_now(), 3600, :second)
+      }
+
+      # This should link the account, not create a new user
+      result =
+        Angle.Accounts.User
+        |> Ash.Changeset.for_create(:register_with_google, %{
+          user_info: user_info,
+          oauth_tokens: oauth_tokens
+        })
+        |> Ash.create!(authorize?: false)
+
+      # Should return the existing user, not create a new one
+      assert result.id == existing_user.id
+      assert to_string(result.email) == "existing@gmail.com"
+      # Original full_name should be preserved
+      assert result.full_name == "Existing User"
+
+      # Verify only one user exists with this email
+      users =
+        Angle.Accounts.User
+        |> Ash.read!(authorize?: false)
+        |> Enum.filter(fn u -> to_string(u.email) == "existing@gmail.com" end)
+
+      assert length(users) == 1
+    end
+
+    test "requires email in user_info" do
+      user_info = %{
+        "sub" => "google_user_789",
+        "email_verified" => true,
+        "name" => "No Email User"
+        # Missing "email" field
+      }
+
+      oauth_tokens = %{
+        "access_token" => "ya29.token",
+        "refresh_token" => "refresh_token",
+        "expires_at" => DateTime.add(DateTime.utc_now(), 3600, :second)
+      }
+
+      assert_raise Ash.Error.Invalid, fn ->
+        Angle.Accounts.User
+        |> Ash.Changeset.for_create(:register_with_google, %{
+          user_info: user_info,
+          oauth_tokens: oauth_tokens
+        })
+        |> Ash.create!(authorize?: false)
+      end
+    end
+  end
 end
