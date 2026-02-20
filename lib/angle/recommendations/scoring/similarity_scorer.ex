@@ -8,12 +8,7 @@ defmodule Angle.Recommendations.Scoring.SimilarityScorer do
                  collaborative_signal
 
   Where collaborative_signal = min(shared_users / COLLABORATIVE_DIVISOR, COLLABORATIVE_CAP)
-
-  TODO: Refactor to use domain code interfaces per Ash patterns instead of direct Ash calls.
-  Currently queries Bid and WatchlistItem directly - should use domain functions.
   """
-
-  require Ash.Query
 
   # Scoring weights and thresholds
   @category_weight 0.5
@@ -112,56 +107,10 @@ defmodule Angle.Recommendations.Scoring.SimilarityScorer do
   end
 
   defp get_engaged_users(item_id) do
-    with {:ok, bidders_data} <-
-           Angle.Bidding.Bid
-           |> Ash.Query.filter(item_id == ^item_id)
-           |> Ash.Query.select([:user_id])
-           |> Ash.read(authorize?: false),
-         {:ok, watchers_data} <-
-           Angle.Inventory.WatchlistItem
-           |> Ash.Query.filter(item_id == ^item_id)
-           |> Ash.Query.select([:user_id])
-           |> Ash.read(authorize?: false) do
-      bidders = bidders_data |> Enum.map(& &1.user_id) |> MapSet.new()
-      watchers = watchers_data |> Enum.map(& &1.user_id) |> MapSet.new()
-
-      {:ok, MapSet.union(bidders, watchers)}
-    end
+    Angle.Recommendations.Queries.get_engaged_users(item_id)
   end
 
   defp get_engaged_users_batch(item_ids) do
-    # Batch fetch engaged users for multiple items to avoid N+1 queries
-    with {:ok, bidders_data} <-
-           Angle.Bidding.Bid
-           |> Ash.Query.filter(item_id in ^item_ids)
-           |> Ash.Query.select([:item_id, :user_id])
-           |> Ash.read(authorize?: false),
-         {:ok, watchers_data} <-
-           Angle.Inventory.WatchlistItem
-           |> Ash.Query.filter(item_id in ^item_ids)
-           |> Ash.Query.select([:item_id, :user_id])
-           |> Ash.read(authorize?: false) do
-      # Group by item_id
-      bidders_by_item =
-        bidders_data
-        |> Enum.group_by(& &1.item_id, & &1.user_id)
-        |> Map.new(fn {item_id, user_ids} -> {item_id, MapSet.new(user_ids)} end)
-
-      watchers_by_item =
-        watchers_data
-        |> Enum.group_by(& &1.item_id, & &1.user_id)
-        |> Map.new(fn {item_id, user_ids} -> {item_id, MapSet.new(user_ids)} end)
-
-      # Merge bidders and watchers for each item
-      all_users_by_item =
-        item_ids
-        |> Map.new(fn item_id ->
-          bidders = Map.get(bidders_by_item, item_id, MapSet.new())
-          watchers = Map.get(watchers_by_item, item_id, MapSet.new())
-          {item_id, MapSet.union(bidders, watchers)}
-        end)
-
-      {:ok, all_users_by_item}
-    end
+    Angle.Recommendations.Queries.get_engaged_users_batch(item_ids)
   end
 end
