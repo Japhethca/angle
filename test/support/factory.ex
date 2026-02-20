@@ -453,24 +453,61 @@ defmodule Angle.Factory do
   ## Options
 
     * `:user` - the user record (required)
+    * `:phone_verified` - whether phone is verified (defaults to true for test convenience)
+    * `:id_verified` - whether ID is verified (defaults to false)
 
   """
   def create_verification(attrs \\ %{}) do
     user = attrs[:user] || raise "create_verification requires :user"
+    phone_verified = Map.get(attrs, :phone_verified, true)
+    id_verified = Map.get(attrs, :id_verified, false)
 
     params = %{
       user_id: user.id
     }
 
-    Angle.Accounts.UserVerification
-    |> Ash.Changeset.for_create(:create, params, authorize?: false)
-    |> Ash.create!(authorize?: false)
+    verification =
+      Angle.Accounts.UserVerification
+      |> Ash.Changeset.for_create(:create, params, authorize?: false)
+      |> Ash.create!(authorize?: false)
+
+    # Set verification fields directly (these are normally set by verify actions)
+    fields = %{}
+    fields = if phone_verified, do: Map.merge(fields, %{phone_verified: true, phone_verified_at: DateTime.utc_now()}), else: fields
+    fields = if id_verified, do: Map.merge(fields, %{id_verified: true, id_verified_at: DateTime.utc_now()}), else: fields
+
+    if fields != %{} do
+      verification
+      |> Ecto.Changeset.change(fields)
+      |> Angle.Repo.update!()
+    else
+      verification
+    end
   end
 
   @doc """
   Alias for create_user/1 - for tests that use bidder terminology.
   """
   def create_bidder(attrs \\ %{}), do: create_user(attrs)
+
+  @doc """
+  Creates a verified user (with phone verification and wallet balance).
+  Useful for bidding tests where phone verification and wallet balance are required.
+
+  ## Options
+
+    * `:balance` - wallet balance (defaults to 5000 for bidding tests)
+    * All other options are passed to create_user/1
+  """
+  def create_verified_bidder(attrs \\ %{}) do
+    balance = Map.get(attrs, :balance, 5000)
+    user_attrs = Map.delete(attrs, :balance)
+
+    user = create_user(user_attrs)
+    create_verification(%{user: user})
+    create_wallet(user: user, balance: balance)
+    user
+  end
 
   @doc """
   Fetches the auto-created wallet for a user and optionally sets a balance.

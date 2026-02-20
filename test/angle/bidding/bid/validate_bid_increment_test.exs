@@ -16,7 +16,7 @@ defmodule Angle.Bidding.Bid.ValidateBidIncrementTest do
   describe "validate_bid_increment/2" do
     test "validates ₦100 increment for items <₦10k" do
       seller = create_user()
-      buyer = create_bidder()
+      buyer = create_verified_bidder()
 
       item =
         create_item(%{
@@ -64,7 +64,7 @@ defmodule Angle.Bidding.Bid.ValidateBidIncrementTest do
 
     test "validates ₦500 increment for items ₦10k-₦50k" do
       seller = create_user()
-      buyer = create_bidder()
+      buyer = create_verified_bidder()
 
       item =
         create_item(%{
@@ -112,7 +112,7 @@ defmodule Angle.Bidding.Bid.ValidateBidIncrementTest do
 
     test "validates ₦1,000 increment for items ₦50k-₦200k" do
       seller = create_user()
-      buyer = create_bidder()
+      buyer = create_verified_bidder()
 
       item =
         create_item(%{
@@ -160,7 +160,7 @@ defmodule Angle.Bidding.Bid.ValidateBidIncrementTest do
 
     test "validates ₦5,000 increment for items ≥₦200k" do
       seller = create_user()
-      buyer = create_bidder()
+      buyer = create_verified_bidder()
 
       item =
         create_item(%{

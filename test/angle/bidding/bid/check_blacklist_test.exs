@@ -12,7 +12,7 @@ defmodule Angle.Bidding.Bid.CheckBlacklistTest do
   describe "blacklist validation" do
     test "allows bid when user is not blacklisted" do
       seller = create_user()
-      buyer = create_bidder()
+      buyer = create_verified_bidder()
 
       item =
         create_item(%{
@@ -41,7 +41,7 @@ defmodule Angle.Bidding.Bid.CheckBlacklistTest do
 
     test "rejects bid when user is blacklisted by seller" do
       seller = create_user()
-      buyer = create_bidder()
+      buyer = create_verified_bidder()
 
       # Seller blacklists this buyer
       {:ok, _blacklist} =
@@ -91,7 +91,7 @@ defmodule Angle.Bidding.Bid.CheckBlacklistTest do
     test "allows bid from blacklisted user on different seller's item" do
       seller1 = create_user()
       seller2 = create_user()
-      buyer = create_bidder()
+      buyer = create_verified_bidder()
 
       # Seller1 blacklists buyer
       {:ok, _blacklist} =

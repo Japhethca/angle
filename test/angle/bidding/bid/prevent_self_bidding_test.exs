@@ -15,7 +15,7 @@ defmodule Angle.Bidding.Bid.PreventSelfBiddingTest do
   describe "prevent_self_bidding/2" do
     test "allows bidding on others' items" do
       seller = create_user()
-      buyer = create_bidder()
+      buyer = create_verified_bidder()
 
       item =
         create_item(%{
@@ -42,7 +42,7 @@ defmodule Angle.Bidding.Bid.PreventSelfBiddingTest do
     end
 
     test "prevents bidding on own items" do
-      seller = create_bidder()
+      seller = create_verified_bidder()
 
       item =
         create_item(%{

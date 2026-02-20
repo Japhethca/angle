@@ -20,7 +20,7 @@ defmodule Angle.Bidding.BidTest do
           |> Ash.update!()
         end)
 
-      bidder = create_bidder()
+      bidder = create_verified_bidder()
 
       %{seller: seller, item: item, bidder: bidder}
     end
