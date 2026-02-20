@@ -10,8 +10,15 @@ defmodule Angle.Bidding.BidTest do
       item =
         create_item(%{
           created_by_id: seller.id,
-          starting_price: Decimal.new("100.00")
+          starting_price: Decimal.new("100.00"),
+          auction_status: :active,
+          end_time: DateTime.add(DateTime.utc_now(), 24 * 60 * 60, :second)
         })
+        |> then(fn item ->
+          item
+          |> Ash.Changeset.for_update(:publish_item, %{}, authorize?: false)
+          |> Ash.update!()
+        end)
 
       bidder = create_bidder()
 

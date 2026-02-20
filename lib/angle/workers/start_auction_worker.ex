@@ -29,14 +29,16 @@ defmodule Angle.Workers.StartAuctionWorker do
       Item
       |> Ash.Query.filter(
         publication_status == :published and
-        auction_status == :scheduled and
-        start_time <= ^now
+          auction_status == :scheduled and
+          start_time <= ^now
       )
       |> Ash.read!(authorize?: false)
 
     # Start each auction
     Enum.each(items_to_start, fn item ->
-      case Ash.update(item, :start_auction, authorize?: false) do
+      case item
+           |> Ash.Changeset.for_update(:start_auction)
+           |> Ash.update(authorize?: false) do
         {:ok, _started_item} ->
           :ok
 

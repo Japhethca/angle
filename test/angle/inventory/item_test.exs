@@ -62,7 +62,10 @@ defmodule Angle.Inventory.ItemTest do
 
       assert item.auction_status == :scheduled
 
-      {:ok, started_item} = Ash.update(item, :start_auction)
+      {:ok, started_item} =
+        item
+        |> Ash.Changeset.for_update(:start_auction)
+        |> Ash.update()
 
       assert started_item.auction_status == :active
     end
@@ -78,7 +81,10 @@ defmodule Angle.Inventory.ItemTest do
           created_by_id: user.id
         })
 
-      assert {:error, _} = Ash.update(item, :start_auction)
+      assert {:error, _} =
+               item
+               |> Ash.Changeset.for_update(:start_auction)
+               |> Ash.update()
     end
   end
 
@@ -99,14 +105,12 @@ defmodule Angle.Inventory.ItemTest do
         })
 
       {:ok, extended_item} =
-        Ash.update(
-          item,
-          :extend_auction,
-          arguments: %{minutes: 10}
-        )
+        item
+        |> Ash.Changeset.for_update(:extend_auction, %{minutes: 10})
+        |> Ash.update()
 
       expected_end = DateTime.add(original_end, 10 * 60, :second)
-      assert extended_item.end_time == expected_end
+      assert DateTime.compare(extended_item.end_time, expected_end) == :eq
       assert extended_item.extension_count == 1
     end
 
@@ -124,11 +128,9 @@ defmodule Angle.Inventory.ItemTest do
         })
 
       assert {:error, _changeset} =
-               Ash.update(
-                 item,
-                 :extend_auction,
-                 arguments: %{minutes: 10}
-               )
+               item
+               |> Ash.Changeset.for_update(:extend_auction, %{minutes: 10})
+               |> Ash.update()
     end
 
     test "only extends active auctions" do
@@ -144,11 +146,9 @@ defmodule Angle.Inventory.ItemTest do
         })
 
       assert {:error, _} =
-               Ash.update(
-                 item,
-                 :extend_auction,
-                 arguments: %{minutes: 10}
-               )
+               item
+               |> Ash.Changeset.for_update(:extend_auction, %{minutes: 10})
+               |> Ash.update()
     end
   end
 end
