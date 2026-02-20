@@ -14,34 +14,7 @@ defmodule Angle.Bidding.Bid.ValidateWalletCommitmentTest do
   describe "wallet commitment validation for <₦50k items" do
     test "allows bid when user has ₦1,000+ wallet and phone verified" do
       seller = create_user()
-      buyer = create_user()
-
-      # Create wallet with sufficient balance
-      _wallet = create_wallet(user: buyer, balance: 1500)
-
-      # Create and verify phone
-      {:ok, verification} =
-        Angle.Accounts.UserVerification
-        |> Ash.Changeset.for_create(:create, %{user_id: buyer.id}, authorize?: false)
-        |> Ash.create()
-
-      {:ok, verification_with_otp} =
-        verification
-        |> Ash.Changeset.for_update(
-          :request_phone_otp,
-          %{phone_number: "+2348012345678"},
-          authorize?: false
-        )
-        |> Ash.update()
-
-      {:ok, _verified} =
-        verification_with_otp
-        |> Ash.Changeset.for_update(
-          :verify_phone_otp,
-          %{otp_code: verification_with_otp.otp_code},
-          authorize?: false
-        )
-        |> Ash.update()
+      buyer = create_bidder(balance: 1500, id_verified: false)
 
       # Create item worth ₦30,000 (<₦50k)
       item =
@@ -72,13 +45,7 @@ defmodule Angle.Bidding.Bid.ValidateWalletCommitmentTest do
 
     test "rejects bid when wallet balance < ₦1,000" do
       seller = create_user()
-      buyer = create_user()
-
-      # Create wallet with insufficient balance
-      _wallet = create_wallet(user: buyer, balance: 500)
-
-      # Phone verified
-      _verification = create_verification(%{user: buyer, phone_verified: true})
+      buyer = create_bidder(balance: 500, id_verified: false)
 
       item =
         create_item(%{
@@ -112,13 +79,7 @@ defmodule Angle.Bidding.Bid.ValidateWalletCommitmentTest do
 
     test "rejects bid when phone not verified" do
       seller = create_user()
-      buyer = create_user()
-
-      # Sufficient wallet
-      _wallet = create_wallet(user: buyer, balance: 2000)
-
-      # Phone NOT verified
-      _verification = create_verification(%{user: buyer, phone_verified: false})
+      buyer = create_bidder(balance: 2000, phone_verified: false, id_verified: false)
 
       item =
         create_item(%{
@@ -155,14 +116,7 @@ defmodule Angle.Bidding.Bid.ValidateWalletCommitmentTest do
   describe "wallet commitment validation for ≥₦50k items" do
     test "allows bid when user has ₦5,000+ wallet, phone and ID verified" do
       seller = create_user()
-      buyer = create_user()
-
-      # Sufficient wallet
-      _wallet = create_wallet(user: buyer, balance: 6000)
-
-      # Phone and ID verified
-      _verification =
-        create_verification(%{user: buyer, phone_verified: true, id_verified: true})
+      buyer = create_bidder(balance: 6000)
 
       # High-value item (₦100k)
       item =
@@ -193,14 +147,7 @@ defmodule Angle.Bidding.Bid.ValidateWalletCommitmentTest do
 
     test "rejects bid when wallet balance < ₦5,000" do
       seller = create_user()
-      buyer = create_user()
-
-      # Insufficient wallet
-      _wallet = create_wallet(user: buyer, balance: 3000)
-
-      # Phone and ID verified
-      _verification =
-        create_verification(%{user: buyer, phone_verified: true, id_verified: true})
+      buyer = create_bidder(balance: 3000)
 
       item =
         create_item(%{
@@ -234,14 +181,7 @@ defmodule Angle.Bidding.Bid.ValidateWalletCommitmentTest do
 
     test "rejects bid when ID not verified" do
       seller = create_user()
-      buyer = create_user()
-
-      # Sufficient wallet
-      _wallet = create_wallet(user: buyer, balance: 6000)
-
-      # Phone verified but ID NOT verified
-      _verification =
-        create_verification(%{user: buyer, phone_verified: true, id_verified: false})
+      buyer = create_bidder(balance: 6000, id_verified: false)
 
       item =
         create_item(%{
@@ -279,8 +219,7 @@ defmodule Angle.Bidding.Bid.ValidateWalletCommitmentTest do
       seller = create_user()
       buyer = create_user()
 
-      # No wallet created for buyer
-      # Phone verified
+      # No wallet created for buyer (but has verification)
       _verification = create_verification(%{user: buyer, phone_verified: true})
 
       item =

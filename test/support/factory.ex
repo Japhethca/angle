@@ -438,6 +438,46 @@ defmodule Angle.Factory do
     end
   end
 
+  @doc """
+  Creates a bidder user with sufficient wallet and verification for bidding.
+
+  This is a convenience function for tests that need a user ready to place bids.
+  By default, creates a user with high-tier credentials (sufficient for all items).
+
+  ## Options
+
+    * `:user` - optional existing user to upgrade (creates new if not provided)
+    * `:balance` - wallet balance in naira (default 10,000 - sufficient for high-value items)
+    * `:phone_verified` - boolean (default true)
+    * `:id_verified` - boolean (default true)
+
+  ## Examples
+
+      # High-tier bidder (default - can bid on any item)
+      bidder = create_bidder()
+
+      # Low-tier bidder (for items <₦50k)
+      bidder = create_bidder(balance: 1500, id_verified: false)
+
+      # Upgrade existing user to bidder
+      user = create_user()
+      bidder = create_bidder(user: user)
+
+  """
+  def create_bidder(opts \\ []) do
+    user = Keyword.get(opts, :user) || create_user()
+
+    # High tier defaults (sufficient for all items)
+    balance = Keyword.get(opts, :balance, 10_000)
+    phone_verified = Keyword.get(opts, :phone_verified, true)
+    id_verified = Keyword.get(opts, :id_verified, true)
+
+    create_wallet(user: user, balance: balance)
+    create_verification(%{user: user, phone_verified: phone_verified, id_verified: id_verified})
+
+    user
+  end
+
   # Helpers
 
   defp unique_email do

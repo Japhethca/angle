@@ -12,19 +12,10 @@ defmodule Angle.Bidding.Bid.PreventSelfBiddingTest do
     |> Ash.update!()
   end
 
-  # Helper to setup a user with wallet and verification for bidding
-  defp setup_bidder(opts \\ []) do
-    balance = Keyword.get(opts, :balance, 5000)
-    user = create_user()
-    _wallet = create_wallet(user: user, balance: balance)
-    _verification = create_verification(%{user: user, phone_verified: true, id_verified: true})
-    user
-  end
-
   describe "prevent_self_bidding/2" do
     test "allows bidding on others' items" do
       seller = create_user()
-      buyer = setup_bidder()
+      buyer = create_bidder()
 
       item =
         create_item(%{
@@ -51,7 +42,7 @@ defmodule Angle.Bidding.Bid.PreventSelfBiddingTest do
     end
 
     test "prevents bidding on own items" do
-      seller = setup_bidder()
+      seller = create_bidder()
 
       item =
         create_item(%{

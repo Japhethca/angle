@@ -13,7 +13,7 @@ defmodule Angle.Bidding.BidTest do
           starting_price: Decimal.new("100.00")
         })
 
-      bidder = create_user()
+      bidder = create_bidder()
 
       %{seller: seller, item: item, bidder: bidder}
     end

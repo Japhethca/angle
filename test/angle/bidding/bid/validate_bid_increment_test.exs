@@ -5,15 +5,6 @@ defmodule Angle.Bidding.Bid.ValidateBidIncrementTest do
 
   import Angle.Factory
 
-  # Helper to setup a user with wallet and verification for bidding
-  defp setup_bidder(opts \\ []) do
-    balance = Keyword.get(opts, :balance, 5000)
-    user = create_user()
-    _wallet = create_wallet(user: user, balance: balance)
-    _verification = create_verification(%{user: user, phone_verified: true, id_verified: true})
-    user
-  end
-
   require Ash.Query
 
   defp publish_item(item) do
@@ -25,7 +16,7 @@ defmodule Angle.Bidding.Bid.ValidateBidIncrementTest do
   describe "validate_bid_increment/2" do
     test "validates ₦100 increment for items <₦10k" do
       seller = create_user()
-      buyer = setup_bidder()
+      buyer = create_bidder()
 
       item =
         create_item(%{
@@ -73,7 +64,7 @@ defmodule Angle.Bidding.Bid.ValidateBidIncrementTest do
 
     test "validates ₦500 increment for items ₦10k-₦50k" do
       seller = create_user()
-      buyer = setup_bidder()
+      buyer = create_bidder()
 
       item =
         create_item(%{
@@ -121,7 +112,7 @@ defmodule Angle.Bidding.Bid.ValidateBidIncrementTest do
 
     test "validates ₦1,000 increment for items ₦50k-₦200k" do
       seller = create_user()
-      buyer = setup_bidder()
+      buyer = create_bidder()
 
       item =
         create_item(%{
@@ -169,7 +160,7 @@ defmodule Angle.Bidding.Bid.ValidateBidIncrementTest do
 
     test "validates ₦5,000 increment for items ≥₦200k" do
       seller = create_user()
-      buyer = setup_bidder()
+      buyer = create_bidder()
 
       item =
         create_item(%{

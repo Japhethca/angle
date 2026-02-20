@@ -20,18 +20,13 @@ defmodule Angle.Bidding.Bid.ValidateWalletCommitment do
   @high_tier_wallet_min Decimal.new("5000")
 
   @impl true
-  def change(changeset, _opts, context) do
-    # Only validate on create (place bid)
-    if changeset.action.type == :create do
-      validate_commitment(changeset, context)
-    else
-      changeset
-    end
+  def change(changeset, _opts, _context) do
+    validate_commitment(changeset)
   end
 
-  defp validate_commitment(changeset, context) do
-    # Get user (actor) from context struct
-    user_id = context.actor && context.actor.id
+  defp validate_commitment(changeset) do
+    # Get user_id from changeset attribute (set by action)
+    user_id = Ash.Changeset.get_attribute(changeset, :user_id)
 
     if is_nil(user_id) do
       Ash.Changeset.add_error(changeset, message: "Must be logged in to bid")
