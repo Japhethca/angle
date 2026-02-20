@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { updateDraftItem, buildCSRFHeaders } from "@/ash_rpc";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { LocationCombobox } from "@/components/forms/location-combobox";
 import { cn } from "@/lib/utils";
 import { logisticsSchema, type LogisticsData } from "../schemas/listing-form-schema";
 
@@ -27,6 +28,7 @@ export function LogisticsStep({ draftItemId, defaultValues, onNext }: LogisticsS
     handleSubmit,
     watch,
     setValue,
+    formState: { errors },
   } = useForm<LogisticsData>({
     resolver: zodResolver(logisticsSchema),
     defaultValues,
@@ -41,7 +43,11 @@ export function LogisticsStep({ draftItemId, defaultValues, onNext }: LogisticsS
         identity: draftItemId,
         input: {
           id: draftItemId,
-          attributes: { _deliveryPreference: data.deliveryPreference },
+          attributes: {
+            _deliveryPreference: data.deliveryPreference,
+            _state: data.location.state,
+            _lga: data.location.lga || null,
+          },
         },
         headers: buildCSRFHeaders(),
       });
@@ -97,6 +103,20 @@ export function LogisticsStep({ draftItemId, defaultValues, onNext }: LogisticsS
             </label>
           ))}
         </div>
+      </div>
+
+      <div className="space-y-3">
+        <Label className="text-base font-medium">
+          Where is the item located? <span className="text-destructive">*</span>
+        </Label>
+        <LocationCombobox
+          value={watch("location")}
+          onChange={(val) => setValue("location", val)}
+          error={errors.location?.state?.message}
+        />
+        <p className="text-xs text-content-tertiary">
+          Buyers need to know the item's location for delivery/pickup planning
+        </p>
       </div>
 
       <Button
