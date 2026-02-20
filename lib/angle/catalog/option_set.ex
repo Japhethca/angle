@@ -67,6 +67,13 @@ defmodule Angle.Catalog.OptionSet do
       prepare build(load: [:option_set_values, :parent])
     end
 
+    read :read_with_descendants do
+      description "Read option set with its values, children, and children's values loaded"
+      argument :slug, :string, allow_nil?: false
+      filter expr(slug == ^arg(:slug))
+      prepare build(load: [:option_set_values, children: [:option_set_values]])
+    end
+
     create :create_with_values do
       description "Create an option set with its values"
       accept [:name, :slug, :description, :parent_id]
