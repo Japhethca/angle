@@ -13,14 +13,24 @@ defmodule Angle.Payments.Workers.SyncSubaccountBalance do
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"wallet_id" => wallet_id}}) do
-    wallet = Ash.get!(UserWallet, wallet_id, authorize?: false)
+    case Ash.get(UserWallet, wallet_id, authorize?: false) do
+      {:ok, wallet} ->
+        case wallet.paystack_subaccount_code do
+          nil ->
+            # Cancel job instead of error to prevent unnecessary retries
+            {:cancel, :no_subaccount}
 
-    case wallet.paystack_subaccount_code do
-      nil ->
-        {:error, :no_subaccount}
+          subaccount_code ->
+            sync_balance(wallet, subaccount_code)
+        end
 
-      subaccount_code ->
-        sync_balance(wallet, subaccount_code)
+      {:error, %Ash.Error.Query.NotFound{}} ->
+        # Wallet was deleted, cancel the job
+        {:cancel, :wallet_not_found}
+
+      {:error, error} ->
+        # Other errors should be retried
+        {:error, error}
     end
   end
 

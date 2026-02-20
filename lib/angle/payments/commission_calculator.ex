@@ -32,7 +32,10 @@ defmodule Angle.Payments.CommissionCalculator do
   """
   def calculate_commission(amount) when is_struct(amount, Decimal) do
     rate = commission_rate(amount)
-    Decimal.mult(amount, rate)
+
+    amount
+    |> Decimal.mult(rate)
+    |> Decimal.round(2)
   end
 
   @doc """

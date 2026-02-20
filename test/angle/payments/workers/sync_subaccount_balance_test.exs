@@ -67,14 +67,24 @@ defmodule Angle.Payments.Workers.SyncSubaccountBalanceTest do
         |> Ash.Changeset.for_update(:set_subaccount_code, %{paystack_subaccount_code: nil})
         |> Ash.update()
 
-      # Perform job without subaccount code
-      assert {:error, :no_subaccount} =
+      # Perform job without subaccount code - should cancel instead of error
+      assert {:cancel, :no_subaccount} =
                perform_job(SyncSubaccountBalance, %{"wallet_id" => wallet.id})
     end
 
     test "handles API errors gracefully" do
       # Configure error mock for this test
+      original_client = Application.get_env(:angle, :paystack_client)
       Application.put_env(:angle, :paystack_client, ErrorPaystackMock)
+
+      # Ensure cleanup happens even if test fails
+      on_exit(fn ->
+        Application.put_env(
+          :angle,
+          :paystack_client,
+          original_client || Angle.Payments.PaystackMock
+        )
+      end)
 
       user = create_user()
 
@@ -100,9 +110,6 @@ defmodule Angle.Payments.Workers.SyncSubaccountBalanceTest do
 
       assert updated_wallet.sync_status == :error
       assert updated_wallet.metadata["last_error"] == "Connection timeout"
-
-      # Restore default mock
-      Application.put_env(:angle, :paystack_client, Angle.Payments.PaystackMock)
     end
   end
 end

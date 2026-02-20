@@ -1,5 +1,6 @@
 defmodule Angle.Payments.Paystack.CreateSubaccountTest do
-  use Angle.DataCase, async: true
+  # Cannot use async: true because this test mutates global Application config
+  use Angle.DataCase
 
   alias Angle.Payments.Paystack
 

@@ -154,6 +154,9 @@ defmodule Angle.Payments.UserWallet do
 
     update :set_subaccount_code do
       accept [:paystack_subaccount_code]
+
+      validate match(:paystack_subaccount_code, ~r/^ACCT_[a-zA-Z0-9]+$/),
+        message: "must be a valid Paystack subaccount code (format: ACCT_xxxxx)"
     end
 
     read :check_minimum_balance do
@@ -201,7 +204,11 @@ defmodule Angle.Payments.UserWallet do
 
     policy action([:sync_balance, :mark_sync_error, :set_subaccount_code]) do
       # System-level actions for syncing with Paystack
-      authorize_if always()
+      # These actions are NOT exposed via RPC/API and are only callable from:
+      # - Background workers (Oban jobs running as system)
+      # - Registration hooks (internal after_action callbacks)
+      # Defense in depth: require authorize?: false to be explicitly passed
+      forbid_if always()
     end
 
     policy action_type(:destroy) do

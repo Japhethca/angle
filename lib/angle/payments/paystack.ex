@@ -156,9 +156,11 @@ defmodule Angle.Payments.Paystack do
     case get("/subaccount/#{subaccount_code}") do
       {:ok, %{"status" => true, "data" => data}} ->
         # Extract balance from subaccount data
+        # Convert to string first to handle floats, integers, or strings from API
         balance =
           data
           |> Map.get("settlement_schedule_balance", 0)
+          |> to_string()
           |> Decimal.new()
 
         {:ok, balance}

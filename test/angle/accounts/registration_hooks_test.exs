@@ -6,6 +6,29 @@ defmodule Angle.Accounts.RegistrationHooksTest do
   alias Angle.Accounts.User
   alias Angle.Payments.UserWallet
 
+  # Mock that returns errors for testing failure scenarios
+  defmodule ErrorPaystackMock do
+    @behaviour Angle.Payments.PaystackBehaviour
+
+    @impl true
+    def initialize_transaction(_email, _amount, _opts), do: {:ok, %{}}
+    @impl true
+    def verify_transaction(_ref), do: {:ok, %{}}
+    @impl true
+    def list_banks, do: {:ok, []}
+    @impl true
+    def resolve_account(_acc, _bank), do: {:ok, %{}}
+    @impl true
+    def create_transfer_recipient(_name, _acc, _bank), do: {:ok, %{}}
+    @impl true
+    def get_subaccount_balance(_code), do: {:ok, Decimal.new(0)}
+
+    @impl true
+    def create_subaccount(_params) do
+      {:error, "API temporarily unavailable"}
+    end
+  end
+
   describe "create_wallet_and_subaccount/2" do
     test "creates wallet and Paystack subaccount after user registration" do
       # Create user (simulating registration)
@@ -31,32 +54,9 @@ defmodule Angle.Accounts.RegistrationHooksTest do
     end
 
     test "handles Paystack API failures gracefully" do
-      # Configure mock to return errors
-      defmodule ErrorPaystackMock do
-        @behaviour Angle.Payments.PaystackBehaviour
-
-        @impl true
-        def initialize_transaction(_email, _amount, _opts), do: {:ok, %{}}
-        @impl true
-        def verify_transaction(_ref), do: {:ok, %{}}
-        @impl true
-        def list_banks, do: {:ok, []}
-        @impl true
-        def resolve_account(_acc, _bank), do: {:ok, %{}}
-        @impl true
-        def create_transfer_recipient(_name, _acc, _bank), do: {:ok, %{}}
-        @impl true
-        def get_subaccount_balance(_code), do: {:ok, Decimal.new(0)}
-
-        @impl true
-        def create_subaccount(_params) do
-          {:error, "API temporarily unavailable"}
-        end
-      end
-
-      # Temporarily override the paystack client
+      # Temporarily override the paystack client with error mock
       original_client = Application.get_env(:angle, :paystack_client)
-      Application.put_env(:angle, :paystack_client, ErrorPaystackMock)
+      Application.put_env(:angle, :paystack_client, __MODULE__.ErrorPaystackMock)
 
       try do
         {:ok, user} =

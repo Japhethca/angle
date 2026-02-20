@@ -92,6 +92,9 @@ defmodule Angle.Accounts.User do
                  {:error, _} -> {:ok, user}
                end
              end)
+
+      # Create wallet for new users (gracefully handles existing wallets on subsequent sign-ins)
+      change after_action(&Angle.Accounts.RegistrationHooks.create_wallet_and_subaccount/3)
     end
 
     read :get_by_subject do

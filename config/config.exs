@@ -54,7 +54,9 @@ config :angle, Oban,
        # Update popular items cache every hour
        {"0 * * * *", Angle.Recommendations.Jobs.GeneratePopularItems},
        # Recompute item similarities every 12 hours (at midnight and noon)
-       {"0 */12 * * *", Angle.Recommendations.Jobs.ComputeItemSimilarities}
+       {"0 */12 * * *", Angle.Recommendations.Jobs.ComputeItemSimilarities},
+       # Sync wallet balances from Paystack every 5 minutes
+       {"*/5 * * * *", Angle.Payments.Workers.ScheduleWalletSyncs}
      ]}
   ]
 

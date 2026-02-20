@@ -10,39 +10,19 @@ defmodule Angle.Accounts.RegistrationHooks do
   Called automatically after user registration.
   """
   def create_wallet_and_subaccount(_changeset, user, _context) do
-    # Create wallet first
-    {:ok, wallet} =
-      UserWallet
-      |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-      |> Ash.create()
+    require Logger
 
-    # Attempt to create Paystack subaccount
-    case create_paystack_subaccount(user) do
-      {:ok, subaccount_code} ->
-        # Update wallet with subaccount code
-        wallet
-        |> Ash.Changeset.for_update(
-          :set_subaccount_code,
-          %{paystack_subaccount_code: subaccount_code},
-          authorize?: false
-        )
-        |> Ash.update()
-
+    # Create wallet only - Paystack subaccount will be created later when user adds payout method
+    # This avoids sending placeholder/invalid bank details to Paystack API
+    case UserWallet
+         |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
+         |> Ash.create() do
+      {:ok, _wallet} ->
         {:ok, user}
 
       {:error, reason} ->
-        # Mark wallet with error, but don't fail registration
-        wallet
-        |> Ash.Changeset.for_update(
-          :mark_sync_error,
-          %{metadata: %{last_error: reason}},
-          authorize?: false
-        )
-        |> Ash.update()
-
-        # TODO: Schedule retry via background job (will be implemented in future task)
-        # schedule_subaccount_retry(wallet.id)
-
+        Logger.error("Failed to create wallet for user #{user.id}: #{inspect(reason)}")
+        # Registration should still succeed even if wallet creation fails
         {:ok, user}
     end
   end
