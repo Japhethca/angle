@@ -3,7 +3,8 @@ defmodule Angle.Payments.WalletTransaction do
     otp_app: :angle,
     domain: Angle.Payments,
     data_layer: AshPostgres.DataLayer,
-    authorizers: [Ash.Policy.Authorizer]
+    authorizers: [Ash.Policy.Authorizer],
+    extensions: [AshTypescript.Resource]
 
   postgres do
     table "wallet_transactions"
@@ -12,6 +13,10 @@ defmodule Angle.Payments.WalletTransaction do
     custom_indexes do
       index [:wallet_id]
     end
+  end
+
+  typescript do
+    type_name "WalletTransaction"
   end
 
   actions do

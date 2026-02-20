@@ -3,11 +3,16 @@ defmodule Angle.Payments.UserWallet do
     otp_app: :angle,
     domain: Angle.Payments,
     data_layer: AshPostgres.DataLayer,
-    authorizers: [Ash.Policy.Authorizer]
+    authorizers: [Ash.Policy.Authorizer],
+    extensions: [AshTypescript.Resource]
 
   postgres do
     table "user_wallets"
     repo Angle.Repo
+  end
+
+  typescript do
+    type_name "UserWallet"
   end
 
   actions do

@@ -1,6 +1,19 @@
 defmodule Angle.Payments do
   use Ash.Domain,
-    otp_app: :angle
+    otp_app: :angle,
+    extensions: [AshTypescript.Rpc]
+
+  typescript_rpc do
+    resource Angle.Payments.UserWallet do
+      rpc_action :deposit_to_wallet, :deposit
+      rpc_action :withdraw_from_wallet, :withdraw
+      rpc_action :get_wallet, :read
+    end
+
+    resource Angle.Payments.WalletTransaction do
+      rpc_action :list_transactions, :read
+    end
+  end
 
   resources do
     resource Angle.Payments.UserWallet do
