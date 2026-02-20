@@ -96,7 +96,7 @@ defmodule Angle.Recommendations.Jobs.ComputeItemSimilarities do
   defp fetch_active_items do
     # Fetch published items only
     case Item
-         |> Ash.Query.filter(status == :published)
+         |> Ash.Query.filter(publication_status == :published)
          |> Ash.Query.load(:category_id)
          |> Ash.read(authorize?: false) do
       {:ok, items} -> {:ok, items}
