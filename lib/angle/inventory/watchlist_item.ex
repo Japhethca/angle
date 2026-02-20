@@ -42,6 +42,14 @@ defmodule Angle.Inventory.WatchlistItem do
       filter expr(user_id == ^arg(:user_id) and inserted_at > ^arg(:since))
     end
 
+    read :by_item_ids do
+      description "List watchlist entries for multiple items (for recommendation scoring)"
+
+      argument :item_ids, {:array, :uuid}, allow_nil?: false
+
+      filter expr(item_id in ^arg(:item_ids))
+    end
+
     read :read do
       primary? true
     end
@@ -64,6 +72,11 @@ defmodule Angle.Inventory.WatchlistItem do
       # Background jobs will bypass authorization
       # Human access should check if they're requesting their own data
       authorize_if expr(user_id == ^actor(:id))
+    end
+
+    policy action(:by_item_ids) do
+      # Background jobs for recommendation engine
+      authorize_if always()
     end
 
     policy action(:read) do

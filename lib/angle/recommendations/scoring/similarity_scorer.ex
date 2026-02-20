@@ -107,10 +107,77 @@ defmodule Angle.Recommendations.Scoring.SimilarityScorer do
   end
 
   defp get_engaged_users(item_id) do
-    Angle.Recommendations.Queries.get_engaged_users(item_id)
+    with {:ok, bidders} <- get_single_item_bidders(item_id),
+         {:ok, watchers} <- get_single_item_watchers(item_id) do
+      {:ok, MapSet.union(bidders, watchers)}
+    end
   end
 
   defp get_engaged_users_batch(item_ids) do
-    Angle.Recommendations.Queries.get_engaged_users_batch(item_ids)
+    with {:ok, bidders_map} <- get_batch_bidders(item_ids),
+         {:ok, watchers_map} <- get_batch_watchers(item_ids) do
+      engaged_map = merge_engaged_users(bidders_map, watchers_map, item_ids)
+      {:ok, engaged_map}
+    end
+  end
+
+  defp get_single_item_bidders(item_id) do
+    case Angle.Bidding.list_bids_by_item_ids([item_id], authorize?: false) do
+      {:ok, bids} ->
+        user_ids = Enum.map(bids, & &1.user_id) |> MapSet.new()
+        {:ok, user_ids}
+
+      error ->
+        error
+    end
+  end
+
+  defp get_single_item_watchers(item_id) do
+    case Angle.Inventory.list_watchlist_by_item_ids([item_id], authorize?: false) do
+      {:ok, items} ->
+        user_ids = Enum.map(items, & &1.user_id) |> MapSet.new()
+        {:ok, user_ids}
+
+      error ->
+        error
+    end
+  end
+
+  defp get_batch_bidders(item_ids) do
+    case Angle.Bidding.list_bids_by_item_ids(item_ids, authorize?: false) do
+      {:ok, bids} ->
+        grouped =
+          bids
+          |> Enum.group_by(& &1.item_id, & &1.user_id)
+          |> Map.new(fn {item_id, user_ids} -> {item_id, MapSet.new(user_ids)} end)
+
+        {:ok, grouped}
+
+      error ->
+        error
+    end
+  end
+
+  defp get_batch_watchers(item_ids) do
+    case Angle.Inventory.list_watchlist_by_item_ids(item_ids, authorize?: false) do
+      {:ok, items} ->
+        grouped =
+          items
+          |> Enum.group_by(& &1.item_id, & &1.user_id)
+          |> Map.new(fn {item_id, user_ids} -> {item_id, MapSet.new(user_ids)} end)
+
+        {:ok, grouped}
+
+      error ->
+        error
+    end
+  end
+
+  defp merge_engaged_users(bidders_map, watchers_map, item_ids) do
+    Map.new(item_ids, fn item_id ->
+      bidders = Map.get(bidders_map, item_id, MapSet.new())
+      watchers = Map.get(watchers_map, item_id, MapSet.new())
+      {item_id, MapSet.union(bidders, watchers)}
+    end)
   end
 end

@@ -161,6 +161,7 @@ defmodule Angle.Bidding do
   resources do
     resource Angle.Bidding.Bid do
       define :list_user_bids_since, action: :by_user_since, args: [:user_id, :since]
+      define :list_bids_by_item_ids, action: :by_item_ids, args: [:item_ids]
     end
 
     resource Angle.Bidding.Order do

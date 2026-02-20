@@ -100,7 +100,12 @@ defmodule Angle.Recommendations.Scoring.InterestScorer do
   end
 
   defp get_user_bids(user_id, since) do
-    case Angle.Recommendations.Queries.get_user_bids(user_id, since) do
+    case Angle.Bidding.list_user_bids_since(
+           user_id,
+           since,
+           authorize?: false,
+           load: [item: [:category_id]]
+         ) do
       {:ok, bids} ->
         items =
           bids
@@ -120,7 +125,12 @@ defmodule Angle.Recommendations.Scoring.InterestScorer do
   end
 
   defp get_user_watchlist(user_id, since) do
-    case Angle.Recommendations.Queries.get_user_watchlist(user_id, since) do
+    case Angle.Inventory.list_user_watchlist_since(
+           user_id,
+           since,
+           authorize?: false,
+           load: [item: [:category_id]]
+         ) do
       {:ok, watchlist_items} ->
         items =
           watchlist_items

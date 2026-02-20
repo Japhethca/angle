@@ -65,6 +65,14 @@ defmodule Angle.Bidding.Bid do
 
       filter expr(user_id == ^arg(:user_id) and bid_time > ^arg(:since))
     end
+
+    read :by_item_ids do
+      description "List bids for multiple items (for recommendation scoring)"
+
+      argument :item_ids, {:array, :uuid}, allow_nil?: false
+
+      filter expr(item_id in ^arg(:item_ids))
+    end
   end
 
   policies do
@@ -76,6 +84,11 @@ defmodule Angle.Bidding.Bid do
     # by_user_since action for recommendation engine - background jobs bypass authorization
     policy action(:by_user_since) do
       authorize_if expr(user_id == ^actor(:id))
+    end
+
+    # by_item_ids action for recommendation engine - background jobs bypass authorization
+    policy action(:by_item_ids) do
+      authorize_if always()
     end
 
     # Creating bids - requires place_bids permission

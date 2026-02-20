@@ -198,6 +198,7 @@ defmodule Angle.Inventory do
     resource Angle.Inventory.WatchlistItem do
       define :list_watchlist_by_user, action: :by_user
       define :list_user_watchlist_since, action: :by_user_since, args: [:user_id, :since]
+      define :list_watchlist_by_item_ids, action: :by_item_ids, args: [:item_ids]
     end
   end
 end
