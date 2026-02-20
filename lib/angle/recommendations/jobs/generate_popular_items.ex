@@ -44,9 +44,11 @@ defmodule Angle.Recommendations.Jobs.GeneratePopularItems do
       |> Ash.Query.limit(@popular_items_limit)
       |> Ash.read!(authorize?: false)
 
-    Cache.put_popular_items(popular_items)
+    # Store only IDs in cache (not full structs) for consistency
+    popular_item_ids = Enum.map(popular_items, & &1.id)
+    Cache.put_popular_items(popular_item_ids)
 
-    Logger.info("#{@log_prefix} Cached #{length(popular_items)} popular items")
+    Logger.info("#{@log_prefix} Cached #{length(popular_item_ids)} popular item IDs")
     :ok
   end
 end

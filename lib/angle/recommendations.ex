@@ -56,7 +56,8 @@ defmodule Angle.Recommendations do
 
   @doc """
   Get similar items for an item.
-  Tries ETS cache first, falls back to database.
+  Tries ETS cache first (stores IDs only), hydrates to full items.
+  Falls back to database on cache miss.
 
   Always returns a list of items (may be empty on error).
   """
@@ -64,8 +65,9 @@ defmodule Angle.Recommendations do
     limit = Keyword.get(opts, :limit, 8)
 
     case Cache.get_similar_items(item_id) do
-      {:ok, cached_items} ->
-        Enum.take(cached_items, limit)
+      {:ok, cached_item_ids} ->
+        # Cache hit: hydrate IDs to full items
+        hydrate_items(cached_item_ids, limit)
 
       {:error, :not_found} ->
         # Cache miss - read from database
@@ -83,12 +85,17 @@ defmodule Angle.Recommendations do
 
             []
         end
+
+      {:error, :stale} ->
+        # Stale cache: will be handled in future task
+        []
     end
   end
 
   @doc """
   Get popular items fallback.
-  Tries ETS cache first, falls back to database query.
+  Tries ETS cache first (stores IDs only), hydrates to full items.
+  Falls back to database query on cache miss.
 
   Always returns a list of items (may be empty on error).
   """
@@ -96,24 +103,58 @@ defmodule Angle.Recommendations do
     limit = Keyword.get(opts, :limit, 20)
 
     case Cache.get_popular_items() do
-      {:ok, cached_items} ->
-        Enum.take(cached_items, limit)
+      {:ok, cached_item_ids} ->
+        # Cache hit: hydrate IDs to full items
+        hydrate_items(cached_item_ids, limit)
 
       {:error, :not_found} ->
-        # Cache miss - query database
+        # Cache miss: query directly
+        fallback_popular_items(limit)
+
+      {:error, :stale} ->
+        # Stale cache: will be handled in future task
+        fallback_popular_items(limit)
+    end
+  end
+
+  # Private helpers
+
+  defp hydrate_items(item_ids, limit) do
+    item_ids
+    |> Enum.take(limit)
+    |> case do
+      [] ->
+        []
+
+      ids ->
         case Angle.Inventory.Item
-             |> Ash.Query.filter(expr(publication_status == :published))
-             |> Ash.Query.load([:bid_count, :watcher_count])
-             |> Ash.Query.sort([{:bid_count, :desc}, {:watcher_count, :desc}])
-             |> Ash.Query.limit(limit)
+             |> Ash.Query.filter(id in ^ids)
+             |> Ash.Query.filter(publication_status == :published)
              |> Ash.read(authorize?: false) do
           {:ok, items} ->
             items
 
           {:error, error} ->
-            Logger.warning("Failed to fetch popular items: #{inspect(error)}")
+            Logger.warning("Failed to hydrate items: #{inspect(error)}")
             []
         end
+    end
+  end
+
+  defp fallback_popular_items(limit) do
+    case Angle.Inventory.Item
+         |> Ash.Query.filter(publication_status == :published)
+         |> Ash.Query.filter(auction_status in [:active, :scheduled])
+         |> Ash.Query.load([:bid_count, :watcher_count])
+         |> Ash.Query.sort([{:bid_count, :desc}, {:watcher_count, :desc}])
+         |> Ash.Query.limit(limit)
+         |> Ash.read(authorize?: false) do
+      {:ok, items} ->
+        items
+
+      {:error, error} ->
+        Logger.warning("Failed to fetch popular items: #{inspect(error)}")
+        []
     end
   end
 end
