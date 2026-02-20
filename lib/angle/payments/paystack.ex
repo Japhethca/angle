@@ -142,6 +142,35 @@ defmodule Angle.Payments.Paystack do
     end
   end
 
+  @doc """
+  Fetches the current balance of a Paystack subaccount.
+
+  ## Parameters
+  - `subaccount_code`: The subaccount code (e.g., "ACCT_abc123xyz")
+
+  ## Returns
+  - `{:ok, balance}` as Decimal on success
+  - `{:error, reason}` on failure
+  """
+  def get_subaccount_balance(subaccount_code) do
+    case get("/subaccount/#{subaccount_code}") do
+      {:ok, %{"status" => true, "data" => data}} ->
+        # Extract balance from subaccount data
+        balance =
+          data
+          |> Map.get("settlement_schedule_balance", 0)
+          |> Decimal.new()
+
+        {:ok, balance}
+
+      {:ok, %{"status" => false, "message" => message}} ->
+        {:error, message}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
   # Private helpers
 
   defp post(path, body) do

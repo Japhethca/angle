@@ -66,4 +66,9 @@ defmodule Angle.Payments.PaystackMock do
        "percentage_charge" => 0
      }}
   end
+
+  @impl true
+  def get_subaccount_balance(_subaccount_code) do
+    {:ok, Decimal.new("75000.50")}
+  end
 end

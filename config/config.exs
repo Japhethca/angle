@@ -39,7 +39,7 @@ config :ash_oban, pro?: false
 config :angle, Oban,
   engine: Oban.Engines.Basic,
   notifier: Oban.Notifiers.Postgres,
-  queues: [default: 10],
+  queues: [default: 10, wallet_sync: 5],
   repo: Angle.Repo,
   plugins: [{Oban.Plugins.Cron, []}]
 
