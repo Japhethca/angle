@@ -12,12 +12,7 @@ defmodule Angle.Recommendations.Scoring.InterestScorer do
     - 8-30 days: 0.7x
     - 31-90 days: 0.4x
     - 90+ days: 0.1x
-
-  TODO: Refactor to use domain code interfaces per Ash patterns instead of direct Ash calls.
-  Currently queries Bid and WatchlistItem directly - should use domain functions.
   """
-
-  require Ash.Query
 
   @doc """
   Compute interest scores for a user across all categories they've engaged with.
@@ -105,10 +100,7 @@ defmodule Angle.Recommendations.Scoring.InterestScorer do
   end
 
   defp get_user_bids(user_id, since) do
-    case Angle.Bidding.Bid
-         |> Ash.Query.filter(user_id == ^user_id and bid_time > ^since)
-         |> Ash.Query.load(item: [:category_id])
-         |> Ash.read(authorize?: false) do
+    case Angle.Recommendations.Queries.get_user_bids(user_id, since) do
       {:ok, bids} ->
         items =
           bids
@@ -128,10 +120,7 @@ defmodule Angle.Recommendations.Scoring.InterestScorer do
   end
 
   defp get_user_watchlist(user_id, since) do
-    case Angle.Inventory.WatchlistItem
-         |> Ash.Query.filter(user_id == ^user_id and inserted_at > ^since)
-         |> Ash.Query.load(item: [:category_id])
-         |> Ash.read(authorize?: false) do
+    case Angle.Recommendations.Queries.get_user_watchlist(user_id, since) do
       {:ok, watchlist_items} ->
         items =
           watchlist_items
