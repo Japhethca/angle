@@ -45,7 +45,17 @@ config :angle, Oban,
     recommendations_slow: 3
   ],
   repo: Angle.Repo,
-  plugins: [{Oban.Plugins.Cron, []}]
+  plugins: [
+    {Oban.Plugins.Cron,
+     crontab: [
+       # Refresh user interest profiles every hour
+       {"0 * * * *", Angle.Recommendations.Jobs.RefreshUserInterests},
+       # Update popular items cache every hour
+       {"0 * * * *", Angle.Recommendations.Jobs.GeneratePopularItems},
+       # Recompute item similarities every 12 hours (at midnight and noon)
+       {"0 */12 * * *", Angle.Recommendations.Jobs.ComputeItemSimilarities}
+     ]}
+  ]
 
 config :mime,
   extensions: %{"json" => "application/vnd.api+json"},
