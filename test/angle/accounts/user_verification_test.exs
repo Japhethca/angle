@@ -59,4 +59,34 @@ defmodule Angle.Accounts.UserVerificationTest do
       assert found.id == verification.id
     end
   end
+
+  describe "authorization" do
+    test "requires admin permission to create verification" do
+      user = create_user()
+
+      # Should fail without admin permission
+      assert {:error, %Ash.Error.Forbidden{}} =
+               UserVerification
+               |> Ash.Changeset.for_create(:create, %{user_id: user.id},
+                 actor: user,
+                 authorize?: true
+               )
+               |> Ash.create()
+    end
+
+    test "requires admin permission to destroy verification" do
+      user = create_user()
+
+      {:ok, verification} =
+        UserVerification
+        |> Ash.Changeset.for_create(:create, %{user_id: user.id}, authorize?: false)
+        |> Ash.create()
+
+      # Should fail without admin permission
+      assert {:error, %Ash.Error.Forbidden{}} =
+               verification
+               |> Ash.Changeset.for_destroy(:destroy, %{}, actor: user, authorize?: true)
+               |> Ash.destroy()
+    end
+  end
 end

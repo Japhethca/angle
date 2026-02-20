@@ -27,18 +27,13 @@ defmodule Angle.Accounts.UserVerification do
     end
 
     policy action_type([:create, :update, :destroy]) do
-      # Only system or admins can modify
-      authorize_if always()
+      # Only admins can modify verification records
+      authorize_if {Angle.Accounts.Checks.HasPermission, permission: "admin"}
     end
   end
 
   attributes do
     uuid_primary_key :id
-
-    attribute :user_id, :uuid do
-      allow_nil? false
-      public? true
-    end
 
     # Phone verification
     attribute :phone_verified, :boolean do
@@ -84,6 +79,9 @@ defmodule Angle.Accounts.UserVerification do
     belongs_to :user, Angle.Accounts.User do
       allow_nil? false
       public? true
+      attribute_writable? true
+      # TODO: Add ON DELETE CASCADE to foreign key constraint in a future migration
+      # to prevent orphaned verification records when a user is deleted
     end
   end
 
