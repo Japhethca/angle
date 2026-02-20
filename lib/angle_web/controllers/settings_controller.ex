@@ -249,6 +249,7 @@ defmodule AngleWeb.SettingsController do
     %{
       id: verification.id,
       phone_verified: verification.phone_verified,
+      phone_verified_at: verification.phone_verified_at,
       phone_number: verification.phone_number,
       id_document_url: verification.id_document_url,
       id_verified: verification.id_verified,
