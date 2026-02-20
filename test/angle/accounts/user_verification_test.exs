@@ -271,4 +271,128 @@ defmodule Angle.Accounts.UserVerificationTest do
              end)
     end
   end
+
+  describe "submit_id_document action" do
+    test "submits ID document URL and sets status to pending" do
+      user = create_user()
+
+      {:ok, verification} =
+        UserVerification
+        |> Ash.Changeset.for_create(:create, %{user_id: user.id}, authorize?: false)
+        |> Ash.create()
+
+      document_url = "https://s3.amazonaws.com/angle-uploads/id_#{user.id}.jpg"
+
+      assert {:ok, updated} =
+               verification
+               |> Ash.Changeset.for_update(
+                 :submit_id_document,
+                 %{id_document_url: document_url},
+                 authorize?: false
+               )
+               |> Ash.update()
+
+      assert updated.id_document_url == document_url
+      assert updated.id_verification_status == :pending
+      assert updated.id_verified == false
+    end
+
+    test "prevents resubmission if already approved" do
+      user = create_user()
+
+      {:ok, verification} =
+        UserVerification
+        |> Ash.Changeset.for_create(:create, %{user_id: user.id}, authorize?: false)
+        |> Ash.create()
+
+      # Manually approve
+      verification =
+        verification
+        |> Ecto.Changeset.change(%{
+          id_verification_status: :approved,
+          id_verified: true,
+          id_verified_at: DateTime.utc_now()
+        })
+        |> Angle.Repo.update!()
+
+      # Try to resubmit
+      assert {:error, error} =
+               verification
+               |> Ash.Changeset.for_update(
+                 :submit_id_document,
+                 %{id_document_url: "https://s3.amazonaws.com/new.jpg"},
+                 authorize?: false
+               )
+               |> Ash.update()
+
+      assert error.errors
+             |> Enum.any?(fn err ->
+               String.contains?(err.message, "already approved")
+             end)
+    end
+  end
+
+  describe "approve_id action" do
+    test "admin approves ID and marks user as verified" do
+      user = create_user()
+
+      {:ok, verification} =
+        UserVerification
+        |> Ash.Changeset.for_create(:create, %{user_id: user.id}, authorize?: false)
+        |> Ash.create()
+
+      {:ok, verification} =
+        verification
+        |> Ash.Changeset.for_update(
+          :submit_id_document,
+          %{id_document_url: "https://s3.amazonaws.com/id.jpg"},
+          authorize?: false
+        )
+        |> Ash.update()
+
+      assert {:ok, approved} =
+               verification
+               |> Ash.Changeset.for_update(:approve_id, %{}, authorize?: false)
+               |> Ash.update()
+
+      assert approved.id_verification_status == :approved
+      assert approved.id_verified == true
+      assert not is_nil(approved.id_verified_at)
+    end
+  end
+
+  describe "reject_id action" do
+    test "admin rejects ID with reason" do
+      user = create_user()
+
+      {:ok, verification} =
+        UserVerification
+        |> Ash.Changeset.for_create(:create, %{user_id: user.id}, authorize?: false)
+        |> Ash.create()
+
+      {:ok, verification} =
+        verification
+        |> Ash.Changeset.for_update(
+          :submit_id_document,
+          %{id_document_url: "https://s3.amazonaws.com/id.jpg"},
+          authorize?: false
+        )
+        |> Ash.update()
+
+      reason = "Document is blurry, please upload a clearer image"
+
+      assert {:ok, rejected} =
+               verification
+               |> Ash.Changeset.for_update(
+                 :reject_id,
+                 %{reason: reason},
+                 authorize?: false
+               )
+               |> Ash.update()
+
+      assert rejected.id_verification_status == :rejected
+      assert rejected.id_verified == false
+      assert rejected.id_rejection_reason == reason
+    end
+  end
 end

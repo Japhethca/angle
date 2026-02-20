@@ -102,6 +102,55 @@ defmodule Angle.Accounts.UserVerification do
         end
       end
     end
+
+    update :submit_id_document do
+      require_atomic? false
+      argument :id_document_url, :string, allow_nil?: false
+
+      change fn changeset, _context ->
+        document_url = Ash.Changeset.get_argument(changeset, :id_document_url)
+        current_status = Ash.Changeset.get_attribute(changeset, :id_verification_status)
+
+        # Prevent resubmission if already approved
+        if current_status == :approved do
+          Ash.Changeset.add_error(
+            changeset,
+            message: "ID already approved, cannot resubmit"
+          )
+        else
+          changeset
+          |> Ash.Changeset.force_change_attribute(:id_document_url, document_url)
+          |> Ash.Changeset.force_change_attribute(:id_verification_status, :pending)
+          |> Ash.Changeset.force_change_attribute(:id_rejection_reason, nil)
+        end
+      end
+    end
+
+    update :approve_id do
+      require_atomic? false
+
+      change fn changeset, _context ->
+        changeset
+        |> Ash.Changeset.force_change_attribute(:id_verification_status, :approved)
+        |> Ash.Changeset.force_change_attribute(:id_verified, true)
+        |> Ash.Changeset.force_change_attribute(:id_verified_at, DateTime.utc_now())
+        |> Ash.Changeset.force_change_attribute(:id_rejection_reason, nil)
+      end
+    end
+
+    update :reject_id do
+      require_atomic? false
+      argument :reason, :string, allow_nil?: false
+
+      change fn changeset, _context ->
+        reason = Ash.Changeset.get_argument(changeset, :reason)
+
+        changeset
+        |> Ash.Changeset.force_change_attribute(:id_verification_status, :rejected)
+        |> Ash.Changeset.force_change_attribute(:id_verified, false)
+        |> Ash.Changeset.force_change_attribute(:id_rejection_reason, reason)
+      end
+    end
   end
 
   policies do
