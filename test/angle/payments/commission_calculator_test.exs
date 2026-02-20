@@ -30,7 +30,8 @@ defmodule Angle.Payments.CommissionCalculatorTest do
       amount = Decimal.new("199999.99")
       commission = CommissionCalculator.calculate_commission(amount)
 
-      assert Decimal.eq?(commission, Decimal.new("11999.9994"))
+      # Commission is rounded to 2 decimal places for financial precision
+      assert Decimal.eq?(commission, Decimal.new("12000.00"))
     end
 
     test "returns 5% for amounts greater than or equal to ₦200k" do

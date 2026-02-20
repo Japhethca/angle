@@ -11,54 +11,41 @@ defmodule Angle.Accounts.RegistrationHooks do
   """
   def create_wallet_and_subaccount(_changeset, user, _context) do
     require Logger
+    require Ash.Query
 
-    # Create wallet only - Paystack subaccount will be created later when user adds payout method
-    # This avoids sending placeholder/invalid bank details to Paystack API
-    case UserWallet
-         |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-         |> Ash.create() do
+    # Check if wallet already exists (e.g., when linking Google account to existing user)
+    existing_wallet =
+      UserWallet
+      |> Ash.Query.filter(user_id == ^user.id)
+      |> Ash.read_one(authorize?: false)
+
+    case existing_wallet do
+      {:ok, nil} ->
+        # No wallet exists, create one
+        # Paystack subaccount will be created later when user adds payout method
+        case UserWallet
+             |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
+             |> Ash.create() do
+          {:ok, _wallet} ->
+            {:ok, user}
+
+          {:error, reason} ->
+            Logger.error("Failed to create wallet for user #{user.id}: #{inspect(reason)}")
+            # Registration should still succeed even if wallet creation fails
+            {:ok, user}
+        end
+
       {:ok, _wallet} ->
+        # Wallet already exists (e.g., Google sign-in for existing user)
         {:ok, user}
 
       {:error, reason} ->
-        Logger.error("Failed to create wallet for user #{user.id}: #{inspect(reason)}")
-        # Registration should still succeed even if wallet creation fails
+        Logger.error(
+          "Failed to check for existing wallet for user #{user.id}: #{inspect(reason)}"
+        )
+
+        # Continue with registration even if wallet check fails
         {:ok, user}
     end
   end
-
-  defp create_paystack_subaccount(user) do
-    # Get the configured Paystack client (defaults to real client, mock in tests)
-    client = Application.get_env(:angle, :paystack_client, Angle.Payments.Paystack)
-
-    # Use user's full name as business name
-    # In production, this should use store_name from StoreProfile if available
-    params = %{
-      business_name: user.full_name,
-      # These will be filled in later when user adds payout method
-      # For now, use placeholder bank details
-      settlement_bank: "999",
-      # Paystack test bank
-      account_number: "0000000000"
-    }
-
-    case client.create_subaccount(params) do
-      {:ok, %{"subaccount_code" => code}} when is_binary(code) ->
-        {:ok, code}
-
-      {:ok, _other} ->
-        {:error, "Subaccount creation succeeded but no subaccount_code was returned"}
-
-      {:error, reason} ->
-        {:error, reason}
-    end
-  end
-
-  # This will be implemented in a future task
-  # defp schedule_subaccount_retry(wallet_id) do
-  #   # Schedule retry in 1 minute
-  #   %{wallet_id: wallet_id}
-  #   |> Angle.Payments.Workers.RetrySubaccountCreation.new(schedule_in: 60)
-  #   |> Oban.insert()
-  # end
 end

@@ -473,8 +473,16 @@ defmodule Angle.Factory do
 
     # Set verification fields directly (these are normally set by verify actions)
     fields = %{}
-    fields = if phone_verified, do: Map.merge(fields, %{phone_verified: true, phone_verified_at: DateTime.utc_now()}), else: fields
-    fields = if id_verified, do: Map.merge(fields, %{id_verified: true, id_verified_at: DateTime.utc_now()}), else: fields
+
+    fields =
+      if phone_verified,
+        do: Map.merge(fields, %{phone_verified: true, phone_verified_at: DateTime.utc_now()}),
+        else: fields
+
+    fields =
+      if id_verified,
+        do: Map.merge(fields, %{id_verified: true, id_verified_at: DateTime.utc_now()}),
+        else: fields
 
     if fields != %{} do
       verification
@@ -497,14 +505,28 @@ defmodule Angle.Factory do
   ## Options
 
     * `:balance` - wallet balance (defaults to 5000 for bidding tests)
+    * `:id_verified` - whether to add ID verification (defaults to false)
     * All other options are passed to create_user/1
   """
   def create_verified_bidder(attrs \\ %{}) do
     balance = Map.get(attrs, :balance, 5000)
-    user_attrs = Map.delete(attrs, :balance)
+    phone_verified = Map.get(attrs, :phone_verified, true)
+    id_verified = Map.get(attrs, :id_verified, false)
+
+    user_attrs =
+      attrs
+      |> Map.delete(:balance)
+      |> Map.delete(:phone_verified)
+      |> Map.delete(:id_verified)
 
     user = create_user(user_attrs)
-    create_verification(%{user: user})
+
+    create_verification(%{
+      user: user,
+      phone_verified: phone_verified,
+      id_verified: id_verified
+    })
+
     create_wallet(user: user, balance: balance)
     user
   end
@@ -533,11 +555,13 @@ defmodule Angle.Factory do
       |> Ash.Query.filter(user_id == ^user.id)
       |> Ash.read_one!(authorize?: false)
 
-    # If balance is provided, update the wallet
+    # If balance is provided, use deposit action to properly track total_deposited
     if balance do
+      amount = Decimal.new(to_string(balance))
+
       wallet
-      |> Ecto.Changeset.change(%{balance: Decimal.new(to_string(balance))})
-      |> Angle.Repo.update!()
+      |> Ash.Changeset.for_update(:deposit, %{amount: amount}, authorize?: false)
+      |> Ash.update!()
     else
       wallet
     end

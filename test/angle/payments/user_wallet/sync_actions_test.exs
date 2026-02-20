@@ -18,7 +18,7 @@ defmodule Angle.Payments.UserWallet.SyncActionsTest do
 
       {:ok, updated_wallet} =
         wallet
-        |> Ash.Changeset.for_update(:sync_balance, %{balance: new_balance})
+        |> Ash.Changeset.for_update(:sync_balance, %{balance: new_balance}, authorize?: false)
         |> Ash.update()
 
       assert Decimal.eq?(updated_wallet.balance, new_balance)
@@ -43,7 +43,9 @@ defmodule Angle.Payments.UserWallet.SyncActionsTest do
 
       {:ok, updated_wallet} =
         wallet
-        |> Ash.Changeset.for_update(:mark_sync_error, %{metadata: error_details})
+        |> Ash.Changeset.for_update(:mark_sync_error, %{metadata: error_details},
+          authorize?: false
+        )
         |> Ash.update()
 
       assert updated_wallet.sync_status == :error
@@ -65,9 +67,13 @@ defmodule Angle.Payments.UserWallet.SyncActionsTest do
 
       {:ok, updated_wallet} =
         wallet
-        |> Ash.Changeset.for_update(:set_subaccount_code, %{
-          paystack_subaccount_code: subaccount_code
-        })
+        |> Ash.Changeset.for_update(
+          :set_subaccount_code,
+          %{
+            paystack_subaccount_code: subaccount_code
+          },
+          authorize?: false
+        )
         |> Ash.update()
 
       assert updated_wallet.paystack_subaccount_code == subaccount_code
@@ -93,17 +99,25 @@ defmodule Angle.Payments.UserWallet.SyncActionsTest do
       # First wallet gets the code
       {:ok, _} =
         wallet1
-        |> Ash.Changeset.for_update(:set_subaccount_code, %{
-          paystack_subaccount_code: subaccount_code
-        })
+        |> Ash.Changeset.for_update(
+          :set_subaccount_code,
+          %{
+            paystack_subaccount_code: subaccount_code
+          },
+          authorize?: false
+        )
         |> Ash.update()
 
       # Second wallet should fail with duplicate constraint
       assert {:error, %Ash.Error.Invalid{}} =
                wallet2
-               |> Ash.Changeset.for_update(:set_subaccount_code, %{
-                 paystack_subaccount_code: subaccount_code
-               })
+               |> Ash.Changeset.for_update(
+                 :set_subaccount_code,
+                 %{
+                   paystack_subaccount_code: subaccount_code
+                 },
+                 authorize?: false
+               )
                |> Ash.update()
     end
   end

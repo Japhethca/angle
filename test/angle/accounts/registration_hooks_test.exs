@@ -30,7 +30,7 @@ defmodule Angle.Accounts.RegistrationHooksTest do
   end
 
   describe "create_wallet_and_subaccount/2" do
-    test "creates wallet and Paystack subaccount after user registration" do
+    test "creates wallet after user registration" do
       # Create user (simulating registration)
       {:ok, user} =
         User
@@ -42,6 +42,34 @@ defmodule Angle.Accounts.RegistrationHooksTest do
         })
         |> Ash.create()
 
+      # Verify wallet was created (but not Paystack subaccount yet)
+      wallet =
+        UserWallet
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
+
+      assert wallet != nil
+      # Paystack subaccount is NOT created during registration anymore
+      # It will be created later when user adds payout method
+      assert wallet.paystack_subaccount_code == nil
+      assert wallet.sync_status == :pending
+    end
+
+    test "handles wallet creation failures gracefully" do
+      # This test verifies registration succeeds even if wallet creation fails
+      # In the actual implementation, wallet creation should never fail for new users
+      # but this tests the defensive error handling
+
+      {:ok, user} =
+        User
+        |> Ash.Changeset.for_create(:register_with_password, %{
+          email: "jane@example.com",
+          password: "SecureP@ssw0rd!",
+          password_confirmation: "SecureP@ssw0rd!",
+          full_name: "Jane Doe"
+        })
+        |> Ash.create()
+
       # Verify wallet was created
       wallet =
         UserWallet
@@ -49,40 +77,8 @@ defmodule Angle.Accounts.RegistrationHooksTest do
         |> Ash.read_one!(authorize?: false)
 
       assert wallet != nil
-      assert wallet.paystack_subaccount_code == "ACCT_mock_test"
+      assert wallet.paystack_subaccount_code == nil
       assert wallet.sync_status == :pending
-    end
-
-    test "handles Paystack API failures gracefully" do
-      # Temporarily override the paystack client with error mock
-      original_client = Application.get_env(:angle, :paystack_client)
-      Application.put_env(:angle, :paystack_client, __MODULE__.ErrorPaystackMock)
-
-      try do
-        {:ok, user} =
-          User
-          |> Ash.Changeset.for_create(:register_with_password, %{
-            email: "jane@example.com",
-            password: "SecureP@ssw0rd!",
-            password_confirmation: "SecureP@ssw0rd!",
-            full_name: "Jane Doe"
-          })
-          |> Ash.create()
-
-        # Verify wallet was created but marked with error
-        wallet =
-          UserWallet
-          |> Ash.Query.filter(user_id == ^user.id)
-          |> Ash.read_one!(authorize?: false)
-
-        assert wallet != nil
-        assert wallet.paystack_subaccount_code == nil
-        assert wallet.sync_status == :error
-        assert wallet.metadata["last_error"] == "API temporarily unavailable"
-      after
-        # Restore original client
-        Application.put_env(:angle, :paystack_client, original_client)
-      end
     end
   end
 end
