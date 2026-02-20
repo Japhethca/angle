@@ -34,12 +34,18 @@ defmodule Angle.Secrets do
         _opts,
         _context
       ) do
-    {:ok,
-     Application.get_env(
-       :angle,
-       :google_oauth_redirect_uri,
-       "http://localhost:4000/auth/user/google/callback"
-     )}
+    case System.get_env("GOOGLE_OAUTH_REDIRECT_URI") do
+      nil ->
+        {:ok,
+         Application.get_env(
+           :angle,
+           :google_oauth_redirect_uri,
+           "http://localhost:4000/auth/user/google/callback"
+         )}
+
+      redirect_uri ->
+        {:ok, redirect_uri}
+    end
   end
 
   defp get_env(key) do
