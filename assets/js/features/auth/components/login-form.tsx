@@ -158,7 +158,7 @@ export function LoginForm() {
           type="button"
           variant="outline"
           className="w-full rounded-full h-12"
-          onClick={() => router.visit("/auth/google")}
+          onClick={() => router.visit("/auth/user/google")}
         >
           <GoogleIcon className="mr-2" />
           Continue with Google
