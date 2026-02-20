@@ -2,7 +2,7 @@ defmodule Angle.Payments.Paystack do
   @moduledoc "Paystack API client using Req for direct HTTP calls."
   @behaviour Angle.Payments.PaystackBehaviour
 
-  @base_url "https://api.paystack.co"
+  @default_base_url "https://api.paystack.co"
 
   @doc "Initialize a transaction for card tokenization. Amount in kobo."
   def initialize_transaction(email, amount_kobo, opts \\ []) do
@@ -109,10 +109,43 @@ defmodule Angle.Payments.Paystack do
     end
   end
 
+  @doc """
+  Creates a Paystack subaccount for a user.
+
+  ## Parameters
+  - `params`: Map with keys:
+    - `business_name`: User's store name or full name
+    - `settlement_bank`: Bank code (from list_banks)
+    - `account_number`: User's bank account number
+
+  ## Returns
+  - `{:ok, data}` with subaccount_code on success
+  - `{:error, reason}` on failure
+  """
+  def create_subaccount(params) do
+    body = %{
+      business_name: params[:business_name] || params["business_name"],
+      settlement_bank: params[:settlement_bank] || params["settlement_bank"],
+      account_number: params[:account_number] || params["account_number"],
+      percentage_charge: 0
+    }
+
+    case post("/subaccount", body) do
+      {:ok, %{"status" => true, "data" => data}} ->
+        {:ok, data}
+
+      {:ok, %{"status" => false, "message" => message}} ->
+        {:error, message}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
   # Private helpers
 
   defp post(path, body) do
-    url = @base_url <> path
+    url = base_url() <> path
 
     case Req.post(url, json: body, headers: headers()) do
       {:ok, %Req.Response{status: status, body: body}} when status in 200..299 ->
@@ -127,7 +160,7 @@ defmodule Angle.Payments.Paystack do
   end
 
   defp get(path, params \\ []) do
-    url = @base_url <> path
+    url = base_url() <> path
 
     case Req.get(url, params: params, headers: headers()) do
       {:ok, %Req.Response{status: status, body: body}} when status in 200..299 ->
@@ -143,6 +176,10 @@ defmodule Angle.Payments.Paystack do
 
   defp headers do
     [{"authorization", "Bearer #{secret_key()}"}]
+  end
+
+  defp base_url do
+    Application.get_env(:angle, :paystack_base_url, @default_base_url)
   end
 
   defp secret_key do
