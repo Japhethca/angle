@@ -5,6 +5,21 @@ defmodule Angle.Payments.Workers.SyncSubaccountBalanceTest do
   alias Angle.Payments.Workers.SyncSubaccountBalance
   alias Angle.Payments.UserWallet
 
+  defmodule ErrorPaystackMock do
+    @behaviour Angle.Payments.PaystackBehaviour
+
+    def initialize_transaction(_email, _amount, _opts \\ []), do: {:ok, %{}}
+    def verify_transaction(_reference), do: {:ok, %{}}
+    def list_banks, do: {:ok, []}
+    def resolve_account(_account_number, _bank_code), do: {:ok, %{}}
+    def create_transfer_recipient(_name, _account_number, _bank_code), do: {:ok, %{}}
+    def create_subaccount(_params), do: {:ok, %{}}
+
+    def get_subaccount_balance(_subaccount_code) do
+      {:error, "Connection timeout"}
+    end
+  end
+
   describe "perform/1" do
     test "syncs balance from Paystack API" do
       user = create_user()
@@ -46,6 +61,38 @@ defmodule Angle.Payments.Workers.SyncSubaccountBalanceTest do
       # Perform job without setting subaccount code
       assert {:error, :no_subaccount} =
                perform_job(SyncSubaccountBalance, %{"wallet_id" => wallet.id})
+    end
+
+    test "handles API errors gracefully" do
+      # Configure error mock for this test
+      Application.put_env(:angle, :paystack_client, ErrorPaystackMock)
+
+      user = create_user()
+
+      {:ok, wallet} =
+        UserWallet
+        |> Ash.Changeset.for_create(:create, %{}, actor: user)
+        |> Ash.create()
+
+      {:ok, wallet} =
+        wallet
+        |> Ash.Changeset.for_update(:set_subaccount_code, %{
+          paystack_subaccount_code: "ACCT_test123"
+        })
+        |> Ash.update()
+
+      # Perform job
+      assert {:error, "Connection timeout"} =
+               perform_job(SyncSubaccountBalance, %{"wallet_id" => wallet.id})
+
+      # Verify wallet was marked with error
+      updated_wallet = Ash.get!(UserWallet, wallet.id, authorize?: false)
+
+      assert updated_wallet.sync_status == :error
+      assert updated_wallet.metadata["last_error"] == "Connection timeout"
+
+      # Restore default mock
+      Application.put_env(:angle, :paystack_client, Angle.Payments.PaystackMock)
     end
   end
 end
