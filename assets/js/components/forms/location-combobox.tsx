@@ -65,9 +65,11 @@ export function LocationCombobox({
   );
 
   const flattenedOptions = useMemo<LocationOption[]>(() => {
-    if (!optionSetData?.optionSetValues) return [];
+    // RPC returns an array - access first element
+    const optionSet = optionSetData?.[0];
+    if (!optionSet?.optionSetValues) return [];
 
-    const states: LocationOption[] = optionSetData.optionSetValues.map(
+    const states: LocationOption[] = optionSet.optionSetValues.map(
       (state) => ({
         value: state.value,
         label: state.label,
@@ -76,10 +78,10 @@ export function LocationCombobox({
     );
 
     const lgas: LocationOption[] =
-      optionSetData.children?.flatMap((child) =>
+      optionSet.children?.flatMap((child) =>
         child.optionSetValues.map((lga) => ({
           value: `${lga.parentValue}|${lga.value}`,
-          label: `${lga.value}`,
+          label: `${lga.parentValue} → ${lga.label}`,
           type: "lga" as const,
           state: lga.parentValue || undefined,
         }))

@@ -111,7 +111,7 @@ export function LogisticsStep({ draftItemId, defaultValues, onNext }: LogisticsS
         </Label>
         <LocationCombobox
           value={watch("location")}
-          onChange={(val) => setValue("location", val)}
+          onChange={(val) => setValue("location", val, { shouldValidate: true })}
           error={errors.location?.state?.message}
         />
         <p className="text-xs text-content-tertiary">
