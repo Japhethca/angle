@@ -95,17 +95,18 @@ defmodule Angle.Bidding.BidTest do
         )
         |> Ash.update(authorize?: false)
 
+      # For prices <₦10k, minimum increment is ₦100, so bid must be ≥ ₦300
       assert {:ok, bid} =
                Bid
                |> Ash.Changeset.for_create(
                  :make_bid,
-                 %{amount: Decimal.new("250.00"), bid_type: :manual, item_id: item.id},
+                 %{amount: Decimal.new("300.00"), bid_type: :manual, item_id: item.id},
                  actor: bidder,
                  authorize?: false
                )
                |> Ash.create(authorize?: false)
 
-      assert Decimal.equal?(bid.amount, Decimal.new("250.00"))
+      assert Decimal.equal?(bid.amount, Decimal.new("300.00"))
     end
 
     test "rejects bid equal to current price", %{
@@ -135,7 +136,7 @@ defmodule Angle.Bidding.BidTest do
         |> Enum.map(& &1.message)
 
       assert Enum.any?(error_messages, fn msg ->
-               msg =~ "must be greater than the current price"
+               msg =~ "must be at least" and msg =~ "higher than current price"
              end)
     end
 
@@ -166,7 +167,7 @@ defmodule Angle.Bidding.BidTest do
         |> Enum.map(& &1.message)
 
       assert Enum.any?(error_messages, fn msg ->
-               msg =~ "must be greater than the current price"
+               msg =~ "must be at least" and msg =~ "higher than current price"
              end)
     end
 

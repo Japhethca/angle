@@ -22,18 +22,25 @@ defmodule Angle.Bidding.Bid.ValidateBidIncrement do
       |> Ash.Query.select([:current_price, :starting_price])
       |> Ash.read_one!(authorize?: false)
 
-    current_price = item.current_price || item.starting_price
-    required_increment = calculate_increment(current_price)
-    minimum_bid = Decimal.add(current_price, required_increment)
-
-    if Decimal.compare(bid_amount, minimum_bid) == :lt do
-      Ash.Changeset.add_error(
-        changeset,
-        field: :amount,
-        message: "must be at least ₦#{format_money(required_increment)} higher than current price"
-      )
-    else
+    # Only apply increment validation if there's an existing bid
+    # For first bids, ValidateBidIsHigherThanCurrentPrice handles the >= starting_price check
+    if is_nil(item.current_price) do
       changeset
+    else
+      current_price = item.current_price
+      required_increment = calculate_increment(current_price)
+      minimum_bid = Decimal.add(current_price, required_increment)
+
+      if Decimal.compare(bid_amount, minimum_bid) == :lt do
+        Ash.Changeset.add_error(
+          changeset,
+          field: :amount,
+          message:
+            "must be at least ₦#{format_money(required_increment)} higher than current price"
+        )
+      else
+        changeset
+      end
     end
   end
 

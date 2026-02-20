@@ -78,6 +78,7 @@ defmodule Angle.Workers.EndAuctionWorkerTest do
           end_time: past_end,
           created_by_id: user.id
         })
+        |> publish_item()
 
       ended_item =
         create_item(%{
@@ -87,6 +88,7 @@ defmodule Angle.Workers.EndAuctionWorkerTest do
           end_time: past_end,
           created_by_id: user.id
         })
+        |> publish_item()
 
       assert :ok = perform_job(EndAuctionWorker, %{})
 

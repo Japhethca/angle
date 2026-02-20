@@ -38,7 +38,7 @@ defmodule Angle.Workers.EndAuctionWorkerWinnerTest do
 
     test "ends auction as :sold when there are bids and no reserve price" do
       seller = create_user()
-      buyer = create_user()
+      buyer = create_bidder()
       past_end = DateTime.add(DateTime.utc_now(), -5 * 60, :second)
 
       item =
@@ -76,7 +76,7 @@ defmodule Angle.Workers.EndAuctionWorkerWinnerTest do
 
     test "ends auction as :sold when highest bid meets reserve price" do
       seller = create_user()
-      buyer = create_user()
+      buyer = create_bidder()
       past_end = DateTime.add(DateTime.utc_now(), -5 * 60, :second)
 
       item =
@@ -113,7 +113,7 @@ defmodule Angle.Workers.EndAuctionWorkerWinnerTest do
 
     test "ends auction as :ended when highest bid does NOT meet reserve price" do
       seller = create_user()
-      buyer = create_user()
+      buyer = create_bidder()
       past_end = DateTime.add(DateTime.utc_now(), -5 * 60, :second)
 
       item =
@@ -150,9 +150,9 @@ defmodule Angle.Workers.EndAuctionWorkerWinnerTest do
 
     test "selects highest bid as winner when multiple bids exist" do
       seller = create_user()
-      buyer1 = create_user()
-      buyer2 = create_user()
-      buyer3 = create_user()
+      buyer1 = create_bidder()
+      buyer2 = create_bidder()
+      buyer3 = create_bidder()
       past_end = DateTime.add(DateTime.utc_now(), -5 * 60, :second)
 
       item =
@@ -206,7 +206,7 @@ defmodule Angle.Workers.EndAuctionWorkerWinnerTest do
 
     test "handles edge case of bid exactly equal to reserve price" do
       seller = create_user()
-      buyer = create_user()
+      buyer = create_bidder()
       past_end = DateTime.add(DateTime.utc_now(), -5 * 60, :second)
 
       item =
