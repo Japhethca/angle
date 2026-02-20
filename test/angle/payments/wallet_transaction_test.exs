@@ -9,10 +9,11 @@ defmodule Angle.Payments.WalletTransactionTest do
     test "creates deposit transaction with all required fields" do
       user = create_user()
 
-      {:ok, wallet} =
+      # Wallet is automatically created by registration hook
+      wallet =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
 
       assert {:ok, transaction} =
                WalletTransaction
@@ -41,10 +42,11 @@ defmodule Angle.Payments.WalletTransactionTest do
     test "creates withdrawal transaction" do
       user = create_user()
 
-      {:ok, wallet} =
+      # Wallet is automatically created by registration hook
+      wallet =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
 
       assert {:ok, transaction} =
                WalletTransaction
@@ -71,10 +73,11 @@ defmodule Angle.Payments.WalletTransactionTest do
     test "creates refund transaction with metadata" do
       user = create_user()
 
-      {:ok, wallet} =
+      # Wallet is automatically created by registration hook
+      wallet =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
 
       metadata = %{original_bid_id: "bid_123", reason: "auction cancelled"}
 
@@ -105,10 +108,11 @@ defmodule Angle.Payments.WalletTransactionTest do
     test "creates purchase transaction" do
       user = create_user()
 
-      {:ok, wallet} =
+      # Wallet is automatically created by registration hook
+      wallet =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
 
       assert {:ok, transaction} =
                WalletTransaction
@@ -133,10 +137,11 @@ defmodule Angle.Payments.WalletTransactionTest do
     test "creates sale_credit transaction" do
       user = create_user()
 
-      {:ok, wallet} =
+      # Wallet is automatically created by registration hook
+      wallet =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
 
       assert {:ok, transaction} =
                WalletTransaction
@@ -161,10 +166,11 @@ defmodule Angle.Payments.WalletTransactionTest do
     test "creates commission transaction" do
       user = create_user()
 
-      {:ok, wallet} =
+      # Wallet is automatically created by registration hook
+      wallet =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
 
       assert {:ok, transaction} =
                WalletTransaction
@@ -191,10 +197,11 @@ defmodule Angle.Payments.WalletTransactionTest do
     test "reads transactions by wallet_id" do
       user = create_user()
 
-      {:ok, wallet} =
+      # Wallet is automatically created by registration hook
+      wallet =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
 
       {:ok, _tx1} =
         WalletTransaction
@@ -241,10 +248,11 @@ defmodule Angle.Payments.WalletTransactionTest do
     test "rejects negative amount" do
       user = create_user()
 
-      {:ok, wallet} =
+      # Wallet is automatically created by registration hook
+      wallet =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
 
       assert {:error, error} =
                WalletTransaction
@@ -271,10 +279,11 @@ defmodule Angle.Payments.WalletTransactionTest do
     test "rejects zero amount" do
       user = create_user()
 
-      {:ok, wallet} =
+      # Wallet is automatically created by registration hook
+      wallet =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
 
       assert {:error, error} =
                WalletTransaction
@@ -301,10 +310,11 @@ defmodule Angle.Payments.WalletTransactionTest do
     test "rejects incorrect balance arithmetic for deposit" do
       user = create_user()
 
-      {:ok, wallet} =
+      # Wallet is automatically created by registration hook
+      wallet =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
 
       assert {:error, error} =
                WalletTransaction
@@ -332,10 +342,11 @@ defmodule Angle.Payments.WalletTransactionTest do
     test "rejects incorrect balance arithmetic for withdrawal" do
       user = create_user()
 
-      {:ok, wallet} =
+      # Wallet is automatically created by registration hook
+      wallet =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
 
       assert {:error, error} =
                WalletTransaction

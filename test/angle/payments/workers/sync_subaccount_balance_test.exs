@@ -2,6 +2,7 @@ defmodule Angle.Payments.Workers.SyncSubaccountBalanceTest do
   use Angle.DataCase
   use Oban.Testing, repo: Angle.Repo
 
+  require Ash.Query
   alias Angle.Payments.Workers.SyncSubaccountBalance
   alias Angle.Payments.UserWallet
 
@@ -24,10 +25,11 @@ defmodule Angle.Payments.Workers.SyncSubaccountBalanceTest do
     test "syncs balance from Paystack API" do
       user = create_user()
 
-      {:ok, wallet} =
+      # Wallet is automatically created by registration hook
+      wallet =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
 
       # Set subaccount code
       {:ok, wallet} =
@@ -53,12 +55,19 @@ defmodule Angle.Payments.Workers.SyncSubaccountBalanceTest do
     test "skips wallets without subaccount code" do
       user = create_user()
 
-      {:ok, wallet} =
+      # Wallet is automatically created by registration hook
+      wallet =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
 
-      # Perform job without setting subaccount code
+      # Clear the subaccount code to test the skip logic
+      {:ok, wallet} =
+        wallet
+        |> Ash.Changeset.for_update(:set_subaccount_code, %{paystack_subaccount_code: nil})
+        |> Ash.update()
+
+      # Perform job without subaccount code
       assert {:error, :no_subaccount} =
                perform_job(SyncSubaccountBalance, %{"wallet_id" => wallet.id})
     end
@@ -69,10 +78,11 @@ defmodule Angle.Payments.Workers.SyncSubaccountBalanceTest do
 
       user = create_user()
 
-      {:ok, wallet} =
+      # Wallet is automatically created by registration hook
+      wallet =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
 
       {:ok, wallet} =
         wallet
