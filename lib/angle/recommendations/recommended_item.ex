@@ -24,7 +24,7 @@ defmodule Angle.Recommendations.RecommendedItem do
     domain Angle.Recommendations
     define :create_recommendation, action: :create
     define :get_user_recommendations, action: :by_user
-    define :get_by_user, action: :by_user
+    define :get_by_user, action: :by_user, args: [:user_id, {:optional, :limit}]
     define :find_stale_recommendations, action: :stale_recommendations
   end
 

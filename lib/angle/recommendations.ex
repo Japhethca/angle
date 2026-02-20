@@ -4,7 +4,8 @@ defmodule Angle.Recommendations do
     extensions: [AshAdmin.Domain]
 
   require Ash.Query
-  alias Angle.Recommendations.{Cache, RecommendedItem, ItemSimilarity}
+  import Ash.Expr
+  alias Angle.Recommendations.Cache
 
   admin do
     show? true
@@ -17,7 +18,6 @@ defmodule Angle.Recommendations do
   end
 
   # Public API for serving recommendations
-  # TODO: Refactor to use code interfaces per Ash patterns instead of direct Ash calls
 
   require Logger
 
@@ -30,10 +30,12 @@ defmodule Angle.Recommendations do
   def get_homepage_recommendations(user_id, opts \\ []) do
     limit = Keyword.get(opts, :limit, 20)
 
-    case RecommendedItem
-         |> Ash.Query.for_read(:by_user, %{user_id: user_id, limit: limit})
-         |> Ash.Query.load(:item)
-         |> Ash.read(authorize?: false) do
+    case Angle.Recommendations.RecommendedItem.get_by_user(
+           user_id,
+           limit,
+           load: [:item],
+           authorize?: false
+         ) do
       {:ok, recommended_items} ->
         personalized = Enum.map(recommended_items, & &1.item)
 
@@ -67,10 +69,12 @@ defmodule Angle.Recommendations do
 
       {:error, :not_found} ->
         # Cache miss - read from database
-        case ItemSimilarity
-             |> Ash.Query.for_read(:by_source_item, %{source_item_id: item_id, limit: limit})
-             |> Ash.Query.load(:similar_item)
-             |> Ash.read(authorize?: false) do
+        case Angle.Recommendations.ItemSimilarity.find_similar_items(
+               item_id,
+               limit,
+               load: [:similar_item],
+               authorize?: false
+             ) do
           {:ok, similarities} ->
             Enum.map(similarities, & &1.similar_item)
 
@@ -98,7 +102,7 @@ defmodule Angle.Recommendations do
       {:error, :not_found} ->
         # Cache miss - query database
         case Angle.Inventory.Item
-             |> Ash.Query.filter(publication_status == :published)
+             |> Ash.Query.filter(expr(publication_status == :published))
              |> Ash.Query.load([:bid_count, :watcher_count])
              |> Ash.Query.sort([{:bid_count, :desc}, {:watcher_count, :desc}])
              |> Ash.Query.limit(limit)

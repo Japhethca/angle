@@ -27,7 +27,10 @@ defmodule Angle.Recommendations.ItemSimilarity do
   code_interface do
     domain Angle.Recommendations
     define :create_similarity, action: :create
-    define :find_similar_items, action: :by_source_item
+
+    define :find_similar_items,
+      action: :by_source_item,
+      args: [:source_item_id, {:optional, :limit}]
   end
 
   actions do
