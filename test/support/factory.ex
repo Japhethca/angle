@@ -366,6 +366,38 @@ defmodule Angle.Factory do
     |> Ash.create!()
   end
 
+  @doc """
+  Creates a wallet for a user with optional initial balance.
+
+  If `:user` is not provided, a new user will be created.
+  If `:balance` is provided, deposits that amount into the wallet.
+
+  ## Options
+
+    * `:user` - the user record (creates one if not provided)
+    * `:balance` - optional initial balance (deposits this amount if provided)
+
+  """
+  def create_wallet(opts \\ []) do
+    user = Keyword.get_lazy(opts, :user, fn -> create_user() end)
+
+    wallet =
+      Angle.Payments.UserWallet
+      |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
+      |> Ash.create!()
+
+    # If balance is provided, deposit it
+    case Keyword.get(opts, :balance) do
+      nil ->
+        wallet
+
+      balance ->
+        wallet
+        |> Ash.Changeset.for_update(:deposit, %{amount: balance}, authorize?: false)
+        |> Ash.update!()
+    end
+  end
+
   # Helpers
 
   defp unique_email do

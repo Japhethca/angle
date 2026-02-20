@@ -496,6 +496,11 @@ defmodule Angle.Accounts.User do
       destination_attribute :seller_id
       public? true
     end
+
+    has_one :wallet, Angle.Payments.UserWallet do
+      destination_attribute :user_id
+      public? true
+    end
   end
 
   calculations do
