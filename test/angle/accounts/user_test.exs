@@ -171,6 +171,9 @@ defmodule Angle.Accounts.UserTest do
 
   describe "register_with_google" do
     test "creates new user when email does not exist" do
+      # Create the bidder role first
+      create_role(%{name: "bidder"})
+
       user_info = %{
         "sub" => "google_user_123",
         "email" => "newuser@gmail.com",
@@ -196,6 +199,11 @@ defmodule Angle.Accounts.UserTest do
       assert user.id
       assert to_string(user.email) == "newuser@gmail.com"
       assert user.full_name == "New User"
+
+      # Verify bidder role was assigned
+      user_with_roles = Ash.load!(user, :roles, authorize?: false)
+      role_names = Enum.map(user_with_roles.roles, & &1.name)
+      assert "bidder" in role_names
     end
 
     test "links Google account to existing user with matching email" do
@@ -254,7 +262,7 @@ defmodule Angle.Accounts.UserTest do
         "expires_at" => DateTime.add(DateTime.utc_now(), 3600, :second)
       }
 
-      assert_raise Ash.Error.Invalid, fn ->
+      assert_raise Ash.Error.Invalid, ~r/email/i, fn ->
         Angle.Accounts.User
         |> Ash.Changeset.for_create(:register_with_google, %{
           user_info: user_info,
