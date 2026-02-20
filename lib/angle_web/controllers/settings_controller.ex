@@ -18,9 +18,15 @@ defmodule AngleWeb.SettingsController do
 
     avatar_images = Enum.map(avatar_images, &ImageHelpers.serialize_image/1)
 
+    verification =
+      Angle.Accounts.UserVerification
+      |> Ash.Query.filter(user_id == ^user.id)
+      |> Ash.read_one(actor: user, authorize?: true)
+
     conn
     |> assign_prop(:user, user_profile_data(conn))
     |> assign_prop(:avatar_images, avatar_images)
+    |> assign_prop(:verification, verification_data(verification))
     |> render_inertia("settings/account")
   end
 
@@ -222,6 +228,19 @@ defmodule AngleWeb.SettingsController do
       amount: Decimal.to_float(transaction.amount),
       balance_after: Decimal.to_float(transaction.balance_after),
       inserted_at: transaction.inserted_at
+    }
+  end
+
+  defp verification_data(nil), do: nil
+
+  defp verification_data(verification) do
+    %{
+      id: verification.id,
+      phone_verified: verification.phone_verified,
+      phone_number: verification.phone_number,
+      id_uploaded: verification.id_uploaded,
+      id_verified: verification.id_verified,
+      id_type: verification.id_type
     }
   end
 end
