@@ -24,6 +24,14 @@ defmodule Angle.Recommendations.UserInterest do
     end
   end
 
+  code_interface do
+    domain Angle.Recommendations
+    define :create_interest, action: :create
+    define :upsert_interest, action: :upsert
+    define :get_by_user, action: :by_user
+    define :get_top_interests, action: :top_interests
+  end
+
   actions do
     defaults [:read]
 
