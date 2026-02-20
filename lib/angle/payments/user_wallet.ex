@@ -181,22 +181,6 @@ defmodule Angle.Payments.UserWallet do
     end
   end
 
-  validations do
-    validate fn changeset, _context ->
-      case Ash.Changeset.get_attribute(changeset, :sync_status) do
-        status when status in ["pending", "synced", "error"] ->
-          :ok
-
-        nil ->
-          :ok
-
-        status ->
-          {:error,
-           field: :sync_status, message: "must be one of: pending, synced, error, got: #{status}"}
-      end
-    end
-  end
-
   attributes do
     uuid_primary_key :id
 
@@ -231,10 +215,11 @@ defmodule Angle.Payments.UserWallet do
       public? true
     end
 
-    attribute :sync_status, :string do
+    attribute :sync_status, :atom do
       allow_nil? false
       public? true
-      default "pending"
+      default :pending
+      constraints one_of: [:pending, :synced, :error]
     end
 
     attribute :metadata, :map do
