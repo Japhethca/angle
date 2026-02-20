@@ -44,6 +44,11 @@ defmodule Angle.Accounts do
     resource Angle.Accounts.StoreProfile do
       rpc_action :upsert_store_profile, :upsert
     end
+
+    resource Angle.Accounts.UserVerification do
+      rpc_action :request_phone_otp, :request_phone_otp
+      rpc_action :verify_phone_otp, :verify_phone_otp
+    end
   end
 
   resources do
@@ -66,6 +71,8 @@ defmodule Angle.Accounts do
     end
 
     resource Angle.Accounts.UserVerification do
+      define :request_phone_otp, action: :request_phone_otp, args: [:phone_number]
+      define :verify_phone_otp, action: :verify_phone_otp, args: [:otp_code]
       define :submit_id_document, action: :submit_id_document, args: [:id_document_url]
       define :approve_id_document, action: :approve_id
       define :reject_id_document, action: :reject_id, args: [:reason]

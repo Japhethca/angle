@@ -1,6 +1,7 @@
 defmodule AngleWeb.SettingsController do
   use AngleWeb, :controller
 
+  require Ash.Query
   alias AngleWeb.ImageHelpers
 
   def index(conn, _params) do

@@ -2,13 +2,18 @@ defmodule Angle.Accounts.UserVerification do
   use Ash.Resource,
     domain: Angle.Accounts,
     data_layer: AshPostgres.DataLayer,
-    authorizers: [Ash.Policy.Authorizer]
+    authorizers: [Ash.Policy.Authorizer],
+    extensions: [AshTypescript.Resource]
 
   @otp_test_mode Application.compile_env(:angle, :otp_test_mode, false)
 
   postgres do
     table "user_verifications"
     repo Angle.Repo
+  end
+
+  typescript do
+    type_name "UserVerification"
   end
 
   actions do

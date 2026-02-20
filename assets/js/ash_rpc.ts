@@ -306,6 +306,7 @@ export type UserResourceSchema = {
   reviewCount: number;
   avgRating: number;
   notificationPreferences: { __type: "Relationship"; __resource: AngleAccountsNotificationPreferencesResourceSchema | null; };
+  verification: { __type: "Relationship"; __resource: UserVerificationResourceSchema | null; };
   storeProfile: { __type: "Relationship"; __resource: StoreProfileResourceSchema | null; };
   items: { __type: "Relationship"; __array: true; __resource: ItemResourceSchema; };
   receivedReviews: { __type: "Relationship"; __array: true; __resource: ReviewResourceSchema; };
@@ -357,6 +358,41 @@ export type StoreProfileAttributesOnlySchema = {
   location: string | null;
   address: string | null;
   deliveryPreference: string | null;
+  userId: UUID;
+};
+
+
+// UserVerification Schema
+export type UserVerificationResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "phoneVerified" | "phoneVerifiedAt" | "phoneNumber" | "idVerified" | "idDocumentUrl" | "idVerifiedAt" | "idVerificationStatus" | "idRejectionReason" | "userId";
+  id: UUID;
+  phoneVerified: boolean;
+  phoneVerifiedAt: UtcDateTimeUsec | null;
+  phoneNumber: string | null;
+  idVerified: boolean;
+  idDocumentUrl: string | null;
+  idVerifiedAt: UtcDateTimeUsec | null;
+  idVerificationStatus: "not_submitted" | "pending" | "approved" | "rejected";
+  idRejectionReason: string | null;
+  userId: UUID;
+  user: { __type: "Relationship"; __resource: UserResourceSchema; };
+};
+
+
+
+export type UserVerificationAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "phoneVerified" | "phoneVerifiedAt" | "phoneNumber" | "idVerified" | "idDocumentUrl" | "idVerifiedAt" | "idVerificationStatus" | "idRejectionReason" | "userId";
+  id: UUID;
+  phoneVerified: boolean;
+  phoneVerifiedAt: UtcDateTimeUsec | null;
+  phoneNumber: string | null;
+  idVerified: boolean;
+  idDocumentUrl: string | null;
+  idVerifiedAt: UtcDateTimeUsec | null;
+  idVerificationStatus: "not_submitted" | "pending" | "approved" | "rejected";
+  idRejectionReason: string | null;
   userId: UUID;
 };
 
@@ -1220,6 +1256,8 @@ export type UserFilterInput = {
     in?: Array<number>;
   };
 
+  verification?: UserVerificationFilterInput;
+
   storeProfile?: StoreProfileFilterInput;
 
   items?: ItemFilterInput;
@@ -1271,6 +1309,81 @@ export type StoreProfileFilterInput = {
   };
 
   deliveryPreference?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  userId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+
+  user?: UserFilterInput;
+
+};
+export type UserVerificationFilterInput = {
+  and?: Array<UserVerificationFilterInput>;
+  or?: Array<UserVerificationFilterInput>;
+  not?: Array<UserVerificationFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  phoneVerified?: {
+    eq?: boolean;
+    notEq?: boolean;
+  };
+
+  phoneVerifiedAt?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+  phoneNumber?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  idVerified?: {
+    eq?: boolean;
+    notEq?: boolean;
+  };
+
+  idDocumentUrl?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  idVerifiedAt?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+  idVerificationStatus?: {
+    eq?: "not_submitted" | "pending" | "approved" | "rejected";
+    notEq?: "not_submitted" | "pending" | "approved" | "rejected";
+    in?: Array<"not_submitted" | "pending" | "approved" | "rejected">;
+  };
+
+  idRejectionReason?: {
     eq?: string;
     notEq?: string;
     in?: Array<string>;
@@ -2128,50 +2241,20 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
-// Category Typed Queries
+// Review Typed Queries
 /**
- * Typed query for Category
+ * Typed query for Review
  *
  * @typedQuery true
  */
-export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
+export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }]>>;
 
 /**
- * Typed query for Category
+ * Typed query for Review
  *
  * @typedQuery true
  */
-export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
-
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { categories: ["id", "name", "slug"] }]>>;
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
-
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export type ListingFormCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }, { categories: ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }] }]>>;
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export const listingFormCategoryFields = ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }, { categories: ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }] }];
+export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
 
 
 
@@ -2204,55 +2287,6 @@ export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "s
  * @typedQuery true
  */
 export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
-
-
-
-// Bid Typed Queries
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export type ActiveBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }]>>;
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export const activeBidCardFields = ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }] satisfies ListBidsFields;
-
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }]>>;
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
-
-
-
-// User Typed Queries
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
-
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
 
 
 
@@ -2378,20 +2412,99 @@ export const searchItemCardFields = ["id", "title", "slug", "description", "star
 
 
 
-// Review Typed Queries
+// Category Typed Queries
 /**
- * Typed query for Review
+ * Typed query for Category
  *
  * @typedQuery true
  */
-export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }]>>;
+export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
 
 /**
- * Typed query for Review
+ * Typed query for Category
  *
  * @typedQuery true
  */
-export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
+export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
+
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { categories: ["id", "name", "slug"] }]>>;
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
+
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export type ListingFormCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }, { categories: ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }] }]>>;
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export const listingFormCategoryFields = ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }, { categories: ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }] }];
+
+
+
+// Bid Typed Queries
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export type ActiveBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }]>>;
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export const activeBidCardFields = ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }] satisfies ListBidsFields;
+
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }]>>;
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
+
+
+
+// User Typed Queries
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
+
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
 
 
 
@@ -4566,6 +4679,158 @@ export async function validateUpsertStoreProfile(
   const payload = {
     action: "upsert_store_profile",
     ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type RequestPhoneOtpInput = {
+  phoneNumber: string;
+};
+
+export type RequestPhoneOtpFields = UnifiedFieldSelection<UserVerificationResourceSchema>[];
+
+export type InferRequestPhoneOtpResult<
+  Fields extends RequestPhoneOtpFields | undefined,
+> = InferResult<UserVerificationResourceSchema, Fields>;
+
+export type RequestPhoneOtpResult<Fields extends RequestPhoneOtpFields | undefined = undefined> = | { success: true; data: InferRequestPhoneOtpResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Update an existing UserVerification
+ *
+ * @ashActionType :update
+ */
+export async function requestPhoneOtp<Fields extends RequestPhoneOtpFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  input: RequestPhoneOtpInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<RequestPhoneOtpResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "request_phone_otp",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<RequestPhoneOtpResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Update an existing UserVerification
+ *
+ * @ashActionType :update
+ * @validation true
+ */
+export async function validateRequestPhoneOtp(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  input: RequestPhoneOtpInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "request_phone_otp",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type VerifyPhoneOtpInput = {
+  otpCode: string;
+};
+
+export type VerifyPhoneOtpFields = UnifiedFieldSelection<UserVerificationResourceSchema>[];
+
+export type InferVerifyPhoneOtpResult<
+  Fields extends VerifyPhoneOtpFields | undefined,
+> = InferResult<UserVerificationResourceSchema, Fields>;
+
+export type VerifyPhoneOtpResult<Fields extends VerifyPhoneOtpFields | undefined = undefined> = | { success: true; data: InferVerifyPhoneOtpResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Update an existing UserVerification
+ *
+ * @ashActionType :update
+ */
+export async function verifyPhoneOtp<Fields extends VerifyPhoneOtpFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  input: VerifyPhoneOtpInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<VerifyPhoneOtpResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "verify_phone_otp",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<VerifyPhoneOtpResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Update an existing UserVerification
+ *
+ * @ashActionType :update
+ * @validation true
+ */
+export async function validateVerifyPhoneOtp(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  input: VerifyPhoneOtpInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "verify_phone_otp",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
     input: config.input
   };
 
