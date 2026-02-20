@@ -72,10 +72,19 @@ defmodule Angle.Recommendations.RecommendedItem do
   end
 
   policies do
-    # NOTE: Permissive policy for internal background job use only
-    # TODO: Add proper authorization if exposed to users
-    policy always() do
-      authorize_if always()
+    # Users can read their own recommendations
+    policy action_type(:read) do
+      authorize_if expr(user_id == ^actor(:id))
+    end
+
+    # Admin bypass
+    bypass action_type([:create, :update, :destroy]) do
+      authorize_if {Angle.Accounts.Checks.HasPermission, permission: "manage_recommendations"}
+    end
+
+    # Default deny write operations (background jobs use authorize?: false)
+    policy action_type([:create, :update, :destroy]) do
+      forbid_if always()
     end
   end
 
