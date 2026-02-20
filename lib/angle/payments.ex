@@ -6,6 +6,13 @@ defmodule Angle.Payments do
     resource Angle.Payments.UserWallet do
       define :create_wallet, action: :create
       define :get_wallet, action: :read, get_by: [:user_id]
+      define :deposit_to_wallet, action: :deposit, args: [:amount]
+      define :withdraw_from_wallet, action: :withdraw, args: [:amount]
+
+      define :check_wallet_balance,
+        action: :check_minimum_balance,
+        args: [:required_amount],
+        get_by: [:id]
     end
 
     resource Angle.Payments.WalletTransaction do

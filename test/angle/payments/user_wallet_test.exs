@@ -130,17 +130,7 @@ defmodule Angle.Payments.UserWalletTest do
   describe "withdraw" do
     test "decreases balance and increases total_withdrawn" do
       user = create_user()
-
-      {:ok, wallet} =
-        UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-        |> Ash.create()
-
-      # Deposit first
-      {:ok, wallet} =
-        wallet
-        |> Ash.Changeset.for_update(:deposit, %{amount: Decimal.new("100.00")}, authorize?: false)
-        |> Ash.update()
+      wallet = create_wallet(user: user, balance: Decimal.new("100.00"))
 
       # Then withdraw
       {:ok, updated_wallet} =
@@ -167,17 +157,7 @@ defmodule Angle.Payments.UserWalletTest do
 
     test "rejects withdrawal when insufficient balance" do
       user = create_user()
-
-      {:ok, wallet} =
-        UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-        |> Ash.create()
-
-      # Deposit 50
-      {:ok, wallet} =
-        wallet
-        |> Ash.Changeset.for_update(:deposit, %{amount: Decimal.new("50.00")}, authorize?: false)
-        |> Ash.update()
+      wallet = create_wallet(user: user, balance: Decimal.new("50.00"))
 
       # Try to withdraw 100 (more than balance)
       result =
@@ -212,52 +192,30 @@ defmodule Angle.Payments.UserWalletTest do
   describe "check_minimum_balance" do
     test "passes when balance is sufficient" do
       user = create_user()
-
-      {:ok, wallet} =
-        UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-        |> Ash.create()
-
-      # Deposit 100
-      {:ok, wallet} =
-        wallet
-        |> Ash.Changeset.for_update(:deposit, %{amount: Decimal.new("100.00")}, authorize?: false)
-        |> Ash.update()
+      wallet = create_wallet(user: user, balance: Decimal.new("100.00"))
 
       # Check for 50 (should pass)
-      {:ok, _wallet} =
-        wallet
-        |> Ash.Changeset.for_update(
-          :check_minimum_balance,
-          %{required_amount: Decimal.new("50.00")},
-          authorize?: false
-        )
-        |> Ash.update()
+      {:ok, [_wallet]} =
+        UserWallet
+        |> Ash.Query.filter(id == ^wallet.id)
+        |> Ash.Query.for_read(:check_minimum_balance, %{
+          required_amount: Decimal.new("50.00")
+        })
+        |> Ash.read(authorize?: false)
     end
 
     test "fails when balance is insufficient" do
       user = create_user()
-
-      {:ok, wallet} =
-        UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-        |> Ash.create()
-
-      # Deposit 30
-      {:ok, wallet} =
-        wallet
-        |> Ash.Changeset.for_update(:deposit, %{amount: Decimal.new("30.00")}, authorize?: false)
-        |> Ash.update()
+      wallet = create_wallet(user: user, balance: Decimal.new("30.00"))
 
       # Check for 50 (should fail)
       result =
-        wallet
-        |> Ash.Changeset.for_update(
-          :check_minimum_balance,
-          %{required_amount: Decimal.new("50.00")},
-          authorize?: false
-        )
-        |> Ash.update()
+        UserWallet
+        |> Ash.Query.filter(id == ^wallet.id)
+        |> Ash.Query.for_read(:check_minimum_balance, %{
+          required_amount: Decimal.new("50.00")
+        })
+        |> Ash.read(authorize?: false)
 
       assert {:error, _error} = result
     end

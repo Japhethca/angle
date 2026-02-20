@@ -18,6 +18,9 @@ defmodule Angle.Payments.UserWallet do
       change set_attribute(:user_id, actor(:id))
     end
 
+    # TODO: Race condition - concurrent deposits/withdrawals can corrupt balance.
+    # Should use atomic updates: `atomic_update :balance, expr(balance + ^arg(:amount))`
+    # See: https://hexdocs.pm/ash/Ash.Resource.Change.Builtins.html#atomic_update/2
     update :deposit do
       require_atomic? false
 
@@ -47,18 +50,7 @@ defmodule Angle.Payments.UserWallet do
                amount = Ash.Changeset.get_argument(changeset, :amount)
                balance_before = changeset.data.balance
 
-               Angle.Payments.WalletTransaction
-               |> Ash.Changeset.for_create(:create, %{
-                 wallet_id: wallet.id,
-                 amount: amount,
-                 transaction_type: :deposit,
-                 balance_before: balance_before,
-                 balance_after: wallet.balance,
-                 reference: "DEP_#{Ash.UUID.generate()}"
-               })
-               |> Ash.create!(authorize?: false)
-
-               {:ok, wallet}
+               create_transaction_record(wallet, :deposit, amount, balance_before)
              end)
     end
 
@@ -74,6 +66,8 @@ defmodule Angle.Payments.UserWallet do
         message: "amount must be positive"
 
       # Validate sufficient balance
+      # Note: This reads from changeset.data which is correct for validation.
+      # Will be refactored when atomic updates are implemented.
       validate fn changeset, _context ->
         amount = Ash.Changeset.get_argument(changeset, :amount)
         wallet = changeset.data
@@ -105,40 +99,34 @@ defmodule Angle.Payments.UserWallet do
                amount = Ash.Changeset.get_argument(changeset, :amount)
                balance_before = changeset.data.balance
 
-               Angle.Payments.WalletTransaction
-               |> Ash.Changeset.for_create(:create, %{
-                 wallet_id: wallet.id,
-                 amount: amount,
-                 transaction_type: :withdrawal,
-                 balance_before: balance_before,
-                 balance_after: wallet.balance,
-                 reference: "WTH_#{Ash.UUID.generate()}"
-               })
-               |> Ash.create!(authorize?: false)
-
-               {:ok, wallet}
+               create_transaction_record(wallet, :withdrawal, amount, balance_before)
              end)
     end
 
-    update :check_minimum_balance do
+    read :check_minimum_balance do
       # Read-only validation - doesn't modify wallet
-      require_atomic? false
-
       argument :required_amount, :decimal do
         allow_nil? false
         constraints precision: 15, scale: 2
       end
 
-      validate fn changeset, _context ->
-        required = Ash.Changeset.get_argument(changeset, :required_amount)
-        wallet = changeset.data
+      # Return error if balance is insufficient
+      prepare fn query, context ->
+        case Ash.Query.get_argument(query, :required_amount) do
+          nil ->
+            query
 
-        if Decimal.compare(wallet.balance, required) in [:gt, :eq] do
-          :ok
-        else
-          {:error,
-           field: :balance,
-           message: "insufficient balance (available: #{wallet.balance}, required: #{required})"}
+          required ->
+            Ash.Query.after_action(query, fn _query, [wallet] ->
+              if Decimal.compare(wallet.balance, required) in [:gt, :eq] do
+                {:ok, [wallet]}
+              else
+                {:error,
+                 field: :balance,
+                 message:
+                   "insufficient balance (available: #{wallet.balance}, required: #{required})"}
+              end
+            end)
         end
       end
     end
@@ -152,6 +140,10 @@ defmodule Angle.Payments.UserWallet do
     policy action_type(:create) do
       # Only system can create wallets (will be called from registration flow)
       authorize_if always()
+    end
+
+    policy action([:deposit, :withdraw, :check_minimum_balance]) do
+      authorize_if expr(user_id == ^actor(:id))
     end
 
     policy action_type(:destroy) do
@@ -197,4 +189,24 @@ defmodule Angle.Payments.UserWallet do
   identities do
     identity :unique_user_wallet, [:user_id]
   end
+
+  # Private helper for creating transaction records
+  defp create_transaction_record(wallet, transaction_type, amount, balance_before) do
+    case Angle.Payments.WalletTransaction
+         |> Ash.Changeset.for_create(:create, %{
+           wallet_id: wallet.id,
+           amount: amount,
+           transaction_type: transaction_type,
+           balance_before: balance_before,
+           balance_after: wallet.balance,
+           reference: generate_reference(transaction_type)
+         })
+         |> Ash.create(authorize?: false) do
+      {:ok, _transaction} -> {:ok, wallet}
+      {:error, error} -> {:error, error}
+    end
+  end
+
+  defp generate_reference(:deposit), do: "DEP_#{Ash.UUID.generate()}"
+  defp generate_reference(:withdrawal), do: "WTH_#{Ash.UUID.generate()}"
 end
