@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { router } from "@inertiajs/react";
 import {
   Dialog,
@@ -20,6 +20,7 @@ import {
 import { useAshMutation } from "@/hooks/use-ash-query";
 import { withdrawFromWallet, buildCSRFHeaders } from "@/ash_rpc";
 import { toast } from "sonner";
+import { formatNaira } from "@/lib/format";
 
 interface WithdrawDialogProps {
   open: boolean;
@@ -28,6 +29,8 @@ interface WithdrawDialogProps {
   walletId: string;
   onSuccess?: () => void;
 }
+
+const MIN_WITHDRAWAL = 100; // Minimum ₦100
 
 export function WithdrawDialog({
   open,
@@ -41,13 +44,23 @@ export function WithdrawDialog({
   const [accountNumber, setAccountNumber] = useState("");
   const [accountName, setAccountName] = useState("");
 
+  // Reset form when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setAmount("");
+      setBankName("");
+      setAccountNumber("");
+      setAccountName("");
+    }
+  }, [open]);
+
   const withdrawMutation = useAshMutation(
-    async (input: { amount: number; bank_details: { bank_name: string; account_number: string; account_name: string } }) => {
+    async (input: { amount: number; bankDetails: { bankName: string; accountNumber: string; accountName: string } }) => {
       return withdrawFromWallet({
         identity: walletId,
         input: {
           amount: input.amount.toString(),
-          bank_details: input.bank_details,
+          bankDetails: input.bankDetails,
         },
         fields: ["id", "balance", "totalWithdrawn"],
         headers: buildCSRFHeaders(),
@@ -74,9 +87,14 @@ export function WithdrawDialog({
       return;
     }
 
+    if (amountNum < MIN_WITHDRAWAL) {
+      toast.error(`Minimum withdrawal amount is ${formatNaira(MIN_WITHDRAWAL)}`);
+      return;
+    }
+
     if (amountNum > currentBalance) {
       toast.error(
-        `Insufficient balance (available: ₦${currentBalance.toLocaleString()})`
+        `Insufficient balance (available: ${formatNaira(currentBalance)})`
       );
       return;
     }
@@ -86,12 +104,17 @@ export function WithdrawDialog({
       return;
     }
 
+    if (!/^\d{10}$/.test(accountNumber)) {
+      toast.error("Account number must be exactly 10 digits");
+      return;
+    }
+
     withdrawMutation.mutate({
       amount: amountNum,
-      bank_details: {
-        bank_name: bankName,
-        account_number: accountNumber,
-        account_name: accountName,
+      bankDetails: {
+        bankName: bankName,
+        accountNumber: accountNumber,
+        accountName: accountName,
       },
     });
   };
@@ -102,7 +125,7 @@ export function WithdrawDialog({
         <DialogHeader>
           <DialogTitle>Withdraw from Wallet</DialogTitle>
           <DialogDescription>
-            Available balance: ₦{currentBalance.toLocaleString()}
+            Available balance: {formatNaira(currentBalance)}
           </DialogDescription>
         </DialogHeader>
 
@@ -144,7 +167,7 @@ export function WithdrawDialog({
               maxLength={10}
               placeholder="0123456789"
               value={accountNumber}
-              onChange={(e) => setAccountNumber(e.target.value)}
+              onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
             />
           </div>
 

@@ -67,6 +67,16 @@ defmodule Angle.Payments.UserWallet do
         constraints precision: 15, scale: 2
       end
 
+      argument :bank_details, :map do
+        allow_nil? false
+
+        constraints fields: [
+                      bank_name: [type: :string, allow_nil?: false],
+                      account_number: [type: :string, allow_nil?: false],
+                      account_name: [type: :string, allow_nil?: false]
+                    ]
+      end
+
       validate compare(:amount, greater_than: 0),
         message: "amount must be positive"
 
@@ -102,9 +112,16 @@ defmodule Angle.Payments.UserWallet do
       # Create transaction record after wallet update
       change after_action(fn changeset, wallet, _context ->
                amount = Ash.Changeset.get_argument(changeset, :amount)
+               bank_details = Ash.Changeset.get_argument(changeset, :bank_details)
                balance_before = changeset.data.balance
 
-               create_transaction_record(wallet, :withdrawal, amount, balance_before)
+               create_transaction_record(
+                 wallet,
+                 :withdrawal,
+                 amount,
+                 balance_before,
+                 bank_details
+               )
              end)
     end
 
@@ -196,7 +213,22 @@ defmodule Angle.Payments.UserWallet do
   end
 
   # Private helper for creating transaction records
-  defp create_transaction_record(wallet, transaction_type, amount, balance_before) do
+  defp create_transaction_record(
+         wallet,
+         transaction_type,
+         amount,
+         balance_before,
+         bank_details \\ nil
+       ) do
+    metadata =
+      case transaction_type do
+        :withdrawal when not is_nil(bank_details) ->
+          %{bank_details: bank_details, status: "pending"}
+
+        _ ->
+          %{}
+      end
+
     case Angle.Payments.WalletTransaction
          |> Ash.Changeset.for_create(:create, %{
            wallet_id: wallet.id,
@@ -204,7 +236,8 @@ defmodule Angle.Payments.UserWallet do
            transaction_type: transaction_type,
            balance_before: balance_before,
            balance_after: wallet.balance,
-           reference: generate_reference(transaction_type)
+           reference: generate_reference(transaction_type),
+           metadata: metadata
          })
          |> Ash.create(authorize?: false) do
       {:ok, _transaction} -> {:ok, wallet}
