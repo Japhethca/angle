@@ -18,7 +18,7 @@ defmodule AngleWeb.SettingsController do
 
     avatar_images = Enum.map(avatar_images, &ImageHelpers.serialize_image/1)
 
-    verification =
+    {:ok, verification} =
       Angle.Accounts.UserVerification
       |> Ash.Query.filter(user_id == ^user.id)
       |> Ash.read_one(actor: user, authorize?: true)
@@ -238,9 +238,9 @@ defmodule AngleWeb.SettingsController do
       id: verification.id,
       phone_verified: verification.phone_verified,
       phone_number: verification.phone_number,
-      id_uploaded: verification.id_uploaded,
+      id_document_url: verification.id_document_url,
       id_verified: verification.id_verified,
-      id_type: verification.id_type
+      id_verification_status: verification.id_verification_status
     }
   end
 end

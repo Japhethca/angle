@@ -135,7 +135,18 @@ defmodule Angle.Payments.UserWalletTest do
       # Then withdraw
       {:ok, updated_wallet} =
         wallet
-        |> Ash.Changeset.for_update(:withdraw, %{amount: Decimal.new("30.00")}, authorize?: false)
+        |> Ash.Changeset.for_update(
+          :withdraw,
+          %{
+            amount: Decimal.new("30.00"),
+            bank_details: %{
+              bank_name: "Test Bank",
+              account_number: "1234567890",
+              account_name: "Test User"
+            }
+          },
+          authorize?: false
+        )
         |> Ash.update()
 
       assert Decimal.equal?(updated_wallet.balance, Decimal.new("70.00"))
@@ -162,7 +173,16 @@ defmodule Angle.Payments.UserWalletTest do
       # Try to withdraw 100 (more than balance)
       result =
         wallet
-        |> Ash.Changeset.for_update(:withdraw, %{amount: Decimal.new("100.00")},
+        |> Ash.Changeset.for_update(
+          :withdraw,
+          %{
+            amount: Decimal.new("100.00"),
+            bank_details: %{
+              bank_name: "Test Bank",
+              account_number: "1234567890",
+              account_name: "Test User"
+            }
+          },
           authorize?: false
         )
         |> Ash.update()
@@ -180,7 +200,16 @@ defmodule Angle.Payments.UserWalletTest do
 
       result =
         wallet
-        |> Ash.Changeset.for_update(:withdraw, %{amount: Decimal.new("-10.00")},
+        |> Ash.Changeset.for_update(
+          :withdraw,
+          %{
+            amount: Decimal.new("-10.00"),
+            bank_details: %{
+              bank_name: "Test Bank",
+              account_number: "1234567890",
+              account_name: "Test User"
+            }
+          },
           authorize?: false
         )
         |> Ash.update()
