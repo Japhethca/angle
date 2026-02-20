@@ -38,18 +38,18 @@ defmodule AngleWeb.SettingsController do
     {:ok, payout_methods} = Angle.Payments.list_payout_methods(actor: user)
     payout_methods = Enum.map(payout_methods, &payout_method_data/1)
 
-    # Load wallet and transactions
+    # Load wallet and transactions with proper authorization
     wallet =
       Angle.Payments.UserWallet
       |> Ash.Query.filter(user_id == ^user.id)
-      |> Ash.read_one!()
+      |> Ash.read_one!(actor: user, authorize?: true)
 
     transactions =
       Angle.Payments.WalletTransaction
       |> Ash.Query.filter(wallet_id == ^wallet.id)
       |> Ash.Query.sort(inserted_at: :desc)
       |> Ash.Query.limit(50)
-      |> Ash.read!()
+      |> Ash.read!(actor: user, authorize?: true)
 
     conn
     |> assign_prop(:user, user_payments_data(conn))
