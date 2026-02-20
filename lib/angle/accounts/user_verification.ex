@@ -129,6 +129,9 @@ defmodule Angle.Accounts.UserVerification do
     update :approve_id do
       require_atomic? false
 
+      validate attribute_equals(:id_verification_status, :pending),
+        message: "can only approve pending ID documents"
+
       change fn changeset, _context ->
         changeset
         |> Ash.Changeset.force_change_attribute(:id_verification_status, :approved)
@@ -141,6 +144,9 @@ defmodule Angle.Accounts.UserVerification do
     update :reject_id do
       require_atomic? false
       argument :reason, :string, allow_nil?: false
+
+      validate attribute_equals(:id_verification_status, :pending),
+        message: "can only reject pending ID documents"
 
       change fn changeset, _context ->
         reason = Ash.Changeset.get_argument(changeset, :reason)

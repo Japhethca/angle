@@ -65,7 +65,12 @@ defmodule Angle.Accounts do
       define :remove_role
     end
 
-    resource Angle.Accounts.UserVerification
+    resource Angle.Accounts.UserVerification do
+      define :submit_id_document, action: :submit_id_document, args: [:id_document_url]
+      define :approve_id_document, action: :approve_id
+      define :reject_id_document, action: :reject_id, args: [:reason]
+    end
+
     resource Angle.Accounts.UserRole
     resource Angle.Accounts.Role
     resource Angle.Accounts.Permission

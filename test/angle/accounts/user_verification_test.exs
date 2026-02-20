@@ -330,6 +330,49 @@ defmodule Angle.Accounts.UserVerificationTest do
                String.contains?(err.message, "already approved")
              end)
     end
+
+    test "allows resubmission after rejection" do
+      user = create_user()
+
+      {:ok, verification} =
+        UserVerification
+        |> Ash.Changeset.for_create(:create, %{user_id: user.id}, authorize?: false)
+        |> Ash.create()
+
+      # Submit document
+      {:ok, verification} =
+        verification
+        |> Ash.Changeset.for_update(
+          :submit_id_document,
+          %{id_document_url: "https://s3.amazonaws.com/id_original.jpg"},
+          authorize?: false
+        )
+        |> Ash.update()
+
+      # Reject it
+      {:ok, verification} =
+        verification
+        |> Ash.Changeset.for_update(
+          :reject_id,
+          %{reason: "Blurry image"},
+          authorize?: false
+        )
+        |> Ash.update()
+
+      # Resubmit new document
+      assert {:ok, resubmitted} =
+               verification
+               |> Ash.Changeset.for_update(
+                 :submit_id_document,
+                 %{id_document_url: "https://s3.amazonaws.com/id_new.jpg"},
+                 authorize?: false
+               )
+               |> Ash.update()
+
+      assert resubmitted.id_document_url == "https://s3.amazonaws.com/id_new.jpg"
+      assert resubmitted.id_verification_status == :pending
+      assert is_nil(resubmitted.id_rejection_reason)
+    end
   end
 
   describe "approve_id action" do
