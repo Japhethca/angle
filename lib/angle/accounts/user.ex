@@ -226,6 +226,9 @@ defmodule Angle.Accounts.User do
                end
              end)
 
+      # Create wallet and Paystack subaccount after registration
+      change after_action(&Angle.Accounts.RegistrationHooks.create_wallet_and_subaccount/3)
+
       metadata :token, :string do
         description "A JWT that can be used to authenticate the user."
         allow_nil? false
