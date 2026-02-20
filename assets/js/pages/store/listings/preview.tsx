@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Head, router } from "@inertiajs/react";
-import { Pencil } from "lucide-react";
+import { MapPin, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import type { ItemDetail } from "@/ash_rpc";
 import { updateDraftItem, publishItem, buildCSRFHeaders } from "@/ash_rpc";
@@ -114,6 +114,18 @@ export default function PreviewPage({ item, images }: PreviewPageProps) {
           <p className="text-sm text-content-tertiary">
             Duration: {duration.label}
           </p>
+
+          {/* Location */}
+          {attrs._state && (
+            <div className="flex items-center gap-2 text-sm text-content-secondary">
+              <MapPin className="size-4" />
+              <span>
+                {attrs._lga
+                  ? `${attrs._state}, ${attrs._lga}`
+                  : attrs._state}
+              </span>
+            </div>
+          )}
 
           {/* Price */}
           {price && (
