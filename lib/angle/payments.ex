@@ -3,6 +3,16 @@ defmodule Angle.Payments do
     otp_app: :angle
 
   resources do
+    resource Angle.Payments.UserWallet do
+      define :create_wallet, action: :create
+      define :get_wallet, action: :read, get_by: [:user_id]
+    end
+
+    resource Angle.Payments.WalletTransaction do
+      define :create_transaction, action: :create
+      define :list_transactions, action: :read
+    end
+
     resource Angle.Payments.PaymentMethod do
       define :get_payment_method, action: :read, get_by: [:id]
       define :list_payment_methods, action: :list_by_user
