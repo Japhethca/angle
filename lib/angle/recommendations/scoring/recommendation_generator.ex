@@ -6,9 +6,6 @@ defmodule Angle.Recommendations.Scoring.RecommendationGenerator do
   - Category match (60%)
   - Popularity (20%)
   - Recency (20%)
-
-  TODO: Refactor to use domain code interfaces per Ash patterns instead of direct Ash calls.
-  Currently queries Item directly - should use domain functions.
   """
 
   require Ash.Query
