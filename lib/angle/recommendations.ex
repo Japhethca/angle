@@ -4,7 +4,6 @@ defmodule Angle.Recommendations do
     extensions: [AshAdmin.Domain]
 
   require Ash.Query
-  import Ash.Expr
   alias Angle.Recommendations.Cache
 
   admin do
