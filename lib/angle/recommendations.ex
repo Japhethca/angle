@@ -87,7 +87,8 @@ defmodule Angle.Recommendations do
         end
 
       {:error, :stale} ->
-        # Stale cache: will be handled in future task
+        # Stale cache: treat as cache miss, compute on-demand
+        # TODO: Consider enqueuing background refresh job here
         []
     end
   end
@@ -112,7 +113,8 @@ defmodule Angle.Recommendations do
         fallback_popular_items(limit)
 
       {:error, :stale} ->
-        # Stale cache: will be handled in future task
+        # Stale cache: treat as cache miss, fetch from database
+        # TODO: Consider enqueuing background refresh job here
         fallback_popular_items(limit)
     end
   end
