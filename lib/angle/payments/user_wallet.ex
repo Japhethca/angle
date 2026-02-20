@@ -132,6 +132,30 @@ defmodule Angle.Payments.UserWallet do
              end)
     end
 
+    update :sync_balance do
+      require_atomic? false
+      accept [:balance]
+
+      change fn changeset, _context ->
+        changeset
+        |> Ash.Changeset.change_attribute(:last_synced_at, DateTime.utc_now())
+        |> Ash.Changeset.change_attribute(:sync_status, :synced)
+      end
+    end
+
+    update :mark_sync_error do
+      require_atomic? false
+      accept [:metadata]
+
+      change fn changeset, _context ->
+        Ash.Changeset.change_attribute(changeset, :sync_status, :error)
+      end
+    end
+
+    update :set_subaccount_code do
+      accept [:paystack_subaccount_code]
+    end
+
     read :check_minimum_balance do
       # Read-only validation - doesn't modify wallet
       argument :required_amount, :decimal do
@@ -173,6 +197,11 @@ defmodule Angle.Payments.UserWallet do
 
     policy action([:deposit, :withdraw, :check_minimum_balance]) do
       authorize_if expr(user_id == ^actor(:id))
+    end
+
+    policy action([:sync_balance, :mark_sync_error, :set_subaccount_code]) do
+      # System-level actions for syncing with Paystack
+      authorize_if always()
     end
 
     policy action_type(:destroy) do
@@ -240,6 +269,10 @@ defmodule Angle.Payments.UserWallet do
 
   identities do
     identity :unique_user_wallet, [:user_id]
+
+    identity :unique_paystack_subaccount, [:paystack_subaccount_code] do
+      eager_check_with Angle.Payments
+    end
   end
 
   # Private helper for creating transaction records
