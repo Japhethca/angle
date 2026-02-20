@@ -172,5 +172,7 @@ defmodule Angle.Bidding do
     resource Angle.Bidding.Review do
       define :list_reviews_by_order_ids, action: :by_order_ids, args: [:order_ids]
     end
+
+    resource Angle.Bidding.SellerBlacklist
   end
 end
