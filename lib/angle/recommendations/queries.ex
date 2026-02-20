@@ -5,6 +5,11 @@ defmodule Angle.Recommendations.Queries do
   Encapsulates cross-domain interactions and complex queries
   used by scoring modules. Centralizes all direct Ash calls
   that cross domain boundaries.
+
+  TODO: Refactor to use code interfaces per Ash patterns. Currently makes direct
+  Ash calls to Bidding.Bid and Inventory.WatchlistItem - these should be replaced
+  with code interfaces defined in their respective domains (e.g.,
+  Angle.Bidding.list_user_bids_since/2, Angle.Inventory.list_user_watchlist_since/2).
   """
 
   require Ash.Query
