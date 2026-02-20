@@ -356,6 +356,93 @@ defmodule Angle.Factory do
     |> Ash.create!()
   end
 
+  @doc """
+  Creates a user interest record.
+
+  ## Options
+
+    * `:user_id` - the UUID of the user (creates one if not provided)
+    * `:category_id` - the UUID of the category (creates one if not provided)
+    * `:interest_score` - defaults to 0.5
+    * `:last_interaction_at` - defaults to current time
+    * `:interaction_count` - defaults to 1
+
+  """
+  def create_interest(attrs \\ %{}) do
+    user_id = Map.get_lazy(attrs, :user_id, fn -> create_user().id end)
+    category_id = Map.get_lazy(attrs, :category_id, fn -> create_category().id end)
+
+    params = %{
+      user_id: user_id,
+      category_id: category_id,
+      interest_score: Map.get(attrs, :interest_score, 0.5),
+      last_interaction_at: Map.get(attrs, :last_interaction_at, DateTime.utc_now()),
+      interaction_count: Map.get(attrs, :interaction_count, 1)
+    }
+
+    Angle.Recommendations.UserInterest
+    |> Ash.Changeset.for_create(:create, params, authorize?: false)
+    |> Ash.create!(authorize?: false)
+  end
+
+  @doc """
+  Creates an item similarity record.
+
+  ## Options
+
+    * `:source_item_id` - the UUID of the source item (creates one if not provided)
+    * `:similar_item_id` - the UUID of the similar item (creates one if not provided)
+    * `:similarity_score` - defaults to 0.8
+    * `:reason` - defaults to :same_category
+
+  """
+  def create_similarity(attrs \\ %{}) do
+    source_item_id = Map.get_lazy(attrs, :source_item_id, fn -> create_item().id end)
+    similar_item_id = Map.get_lazy(attrs, :similar_item_id, fn -> create_item().id end)
+
+    params = %{
+      source_item_id: source_item_id,
+      similar_item_id: similar_item_id,
+      similarity_score: Map.get(attrs, :similarity_score, 0.8),
+      reason: Map.get(attrs, :reason, :same_category)
+    }
+
+    Angle.Recommendations.ItemSimilarity
+    |> Ash.Changeset.for_create(:create, params, authorize?: false)
+    |> Ash.create!(authorize?: false)
+  end
+
+  @doc """
+  Creates a recommended item record.
+
+  ## Options
+
+    * `:user_id` - the UUID of the user (creates one if not provided)
+    * `:item_id` - the UUID of the item (creates one if not provided)
+    * `:recommendation_score` - defaults to 0.9
+    * `:recommendation_reason` - defaults to "Based on your interests"
+    * `:rank` - defaults to 1
+    * `:generated_at` - defaults to current time
+
+  """
+  def create_recommendation(attrs \\ %{}) do
+    user_id = Map.get_lazy(attrs, :user_id, fn -> create_user().id end)
+    item_id = Map.get_lazy(attrs, :item_id, fn -> create_item().id end)
+
+    params = %{
+      user_id: user_id,
+      item_id: item_id,
+      recommendation_score: Map.get(attrs, :recommendation_score, 0.9),
+      recommendation_reason: Map.get(attrs, :recommendation_reason, "Based on your interests"),
+      rank: Map.get(attrs, :rank, 1),
+      generated_at: Map.get(attrs, :generated_at, DateTime.utc_now())
+    }
+
+    Angle.Recommendations.RecommendedItem
+    |> Ash.Changeset.for_create(:create, params, authorize?: false)
+    |> Ash.create!(authorize?: false)
+  end
+
   # Helpers
 
   defp unique_email do
