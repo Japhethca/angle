@@ -22,7 +22,15 @@ defmodule Angle.Accounts.User do
         confirm_on_update? false
         require_interaction? true
         confirmed_at_field :confirmed_at
-        auto_confirm_actions [:sign_in_with_magic_link, :password_reset_with_password]
+        # Disable hijacking prevention to allow OAuth account linking
+        prevent_hijacking? false
+
+        auto_confirm_actions [
+          :sign_in_with_magic_link,
+          :password_reset_with_password,
+          :register_with_google
+        ]
+
         sender Angle.Accounts.User.Senders.SendNewUserConfirmationEmail
       end
     end
@@ -70,19 +78,12 @@ defmodule Angle.Accounts.User do
       argument :oauth_tokens, :map, allow_nil?: false
       upsert? true
       upsert_identity :unique_email
+      # Don't update any fields on upsert to preserve existing user data
       upsert_fields []
 
       change AshAuthentication.GenerateTokenChange
       change AshAuthentication.Strategy.OAuth2.IdentityChange
-
-      change fn changeset, _ctx ->
-        user_info = Ash.Changeset.get_argument(changeset, :user_info)
-
-        changeset
-        |> Ash.Changeset.change_attribute(:email, Map.get(user_info, "email"))
-        |> Ash.Changeset.change_attribute(:full_name, Map.get(user_info, "name"))
-        |> Ash.Changeset.change_attribute(:confirmed_at, DateTime.utc_now())
-      end
+      change Angle.Accounts.User.Changes.LinkOrCreateOAuthAccount
 
       # Auto-assign default "bidder" role after registration
       change after_action(fn _changeset, user, _context ->

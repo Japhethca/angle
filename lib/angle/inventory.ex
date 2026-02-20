@@ -190,12 +190,15 @@ defmodule Angle.Inventory do
       define :get_item, action: :read, get_by: [:id]
       define :destroy_item, action: :destroy
       define :my_listings_stats, action: :my_listings_stats
+      define :list_published_items, action: :list_published
     end
 
     resource Angle.Inventory.ItemActivity
 
     resource Angle.Inventory.WatchlistItem do
       define :list_watchlist_by_user, action: :by_user
+      define :list_user_watchlist_since, action: :by_user_since, args: [:user_id, :since]
+      define :list_watchlist_by_item_ids, action: :by_item_ids, args: [:item_ids]
     end
   end
 end

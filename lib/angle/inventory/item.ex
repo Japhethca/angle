@@ -263,6 +263,47 @@ defmodule Angle.Inventory.Item do
       pagination offset?: true, required?: false
     end
 
+    read :list_published do
+      description "List all published items (for recommendation engine)"
+
+      argument :auction_statuses, {:array, :atom} do
+        description "Optional: filter by auction status"
+        constraints items: [one_of: [:active, :scheduled, :pending, :ended, :sold, :cancelled]]
+      end
+
+      argument :sort_by, :atom do
+        description "Optional: sort field (e.g., :bid_count, :watcher_count)"
+        constraints one_of: [:bid_count, :watcher_count, :view_count, :inserted_at]
+      end
+
+      argument :sort_order, :atom do
+        description "Optional: sort order"
+        default :desc
+        constraints one_of: [:asc, :desc]
+      end
+
+      filter expr(publication_status == :published)
+
+      prepare fn query, _context ->
+        query =
+          case Ash.Query.get_argument(query, :auction_statuses) do
+            nil -> query
+            statuses -> Ash.Query.filter(query, auction_status in ^statuses)
+          end
+
+        case Ash.Query.get_argument(query, :sort_by) do
+          nil ->
+            query
+
+          sort_field ->
+            sort_order = Ash.Query.get_argument(query, :sort_order)
+            Ash.Query.sort(query, [{sort_field, sort_order}])
+        end
+      end
+
+      pagination offset?: true, required?: false
+    end
+
     read :by_category do
       argument :category_ids, {:array, :uuid}, allow_nil?: false
 

@@ -20,7 +20,13 @@ defmodule AngleWeb.AuthPlug do
     |> Phoenix.Controller.redirect(to: redirect_to)
   end
 
-  def handle_failure(conn, _activity, _reason) do
+  def handle_failure(conn, activity, reason) do
+    require Logger
+
+    Logger.error(
+      "OAuth authentication failed - Activity: #{inspect(activity)}, Reason: #{inspect(reason)}"
+    )
+
     conn
     |> Phoenix.Controller.put_flash(:error, "Authentication failed. Please try again.")
     |> Phoenix.Controller.redirect(to: "/auth/login")

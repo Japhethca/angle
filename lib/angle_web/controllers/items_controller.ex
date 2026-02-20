@@ -84,20 +84,10 @@ defmodule AngleWeb.ItemsController do
 
   defp load_seller(_conn, _user_id), do: nil
 
-  defp load_similar_items(conn, current_item_id, category_id)
-       when is_binary(current_item_id) and is_binary(category_id) do
-    filter =
-      Map.merge(@published_filter, %{
-        category_id: %{eq: category_id},
-        id: %{notEq: current_item_id}
-      })
-
-    params = %{filter: filter, page: %{limit: 6}}
-
-    case AshTypescript.Rpc.run_typed_query(:angle, :homepage_item_card, params, conn) do
-      %{"success" => true, "data" => data} -> extract_results(data)
-      _ -> []
-    end
+  defp load_similar_items(_conn, current_item_id, _category_id) when is_binary(current_item_id) do
+    # Use recommendation engine for intelligent similar items
+    # Falls back to empty list if cache is empty
+    Angle.Recommendations.get_similar_items(current_item_id, limit: 6)
   end
 
   defp load_similar_items(_conn, _current_item_id, _category_id), do: []

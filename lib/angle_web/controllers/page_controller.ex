@@ -13,9 +13,7 @@ defmodule AngleWeb.PageController do
       run_item_query(conn, @published_filter, nil, %{limit: 5})
       |> ImageHelpers.attach_cover_images()
 
-    recommended_items =
-      run_item_query(conn, @published_filter, nil, %{limit: 8})
-      |> ImageHelpers.attach_cover_images()
+    recommended_items = load_recommended_items(conn)
 
     ending_soon_items =
       run_item_query(conn, @published_filter, "++end_time", %{limit: 8})
@@ -59,5 +57,19 @@ defmodule AngleWeb.PageController do
       %{"success" => true, "data" => data} -> extract_results(data)
       _ -> []
     end
+  end
+
+  defp load_recommended_items(conn) do
+    items =
+      if Map.has_key?(conn.assigns, :current_user) and conn.assigns.current_user do
+        # Authenticated users: personalized recommendations based on interests
+        user_id = conn.assigns.current_user.id
+        Angle.Recommendations.get_homepage_recommendations(user_id, limit: 8)
+      else
+        # Guest users: popular items based on bids/watchers
+        Angle.Recommendations.get_popular_items(limit: 8)
+      end
+
+    ImageHelpers.attach_cover_images(items)
   end
 end

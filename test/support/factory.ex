@@ -117,22 +117,12 @@ defmodule Angle.Factory do
         title: Map.get(attrs, :title, "Item #{System.unique_integer([:positive])}"),
         description: Map.get(attrs, :description, "Test item description"),
         starting_price: Map.get(attrs, :starting_price, Decimal.new("10.00")),
-        created_by_id: created_by_id,
-        # Default end_time to 7 days in future for all items
-        end_time:
-          Map.get(attrs, :end_time, DateTime.add(DateTime.utc_now(), 7 * 24 * 60 * 60, :second))
+        created_by_id: created_by_id
       }
       |> maybe_put(:category_id, Map.get(attrs, :category_id))
       |> maybe_put(:slug, Map.get(attrs, :slug))
       |> maybe_put(:condition, Map.get(attrs, :condition))
       |> maybe_put(:sale_type, Map.get(attrs, :sale_type))
-      |> maybe_put(:auction_status, Map.get(attrs, :auction_status))
-      |> maybe_put(:publication_status, Map.get(attrs, :publication_status))
-      |> maybe_put(:start_time, Map.get(attrs, :start_time))
-      |> maybe_put(:current_price, Map.get(attrs, :current_price))
-      |> maybe_put(:reserve_price, Map.get(attrs, :reserve_price))
-      |> maybe_put(:extension_count, Map.get(attrs, :extension_count))
-      |> maybe_put(:original_end_time, Map.get(attrs, :original_end_time))
 
     Ash.create!(Angle.Inventory.Item, params, authorize?: false)
   end
@@ -367,115 +357,90 @@ defmodule Angle.Factory do
   end
 
   @doc """
-  Creates a wallet for a user with optional initial balance.
-
-  If `:user` is not provided, a new user will be created.
-  If `:balance` is provided, deposits that amount into the wallet.
+  Creates a user interest record.
 
   ## Options
 
-    * `:user` - the user record (creates one if not provided)
-    * `:balance` - optional initial balance (deposits this amount if provided)
+    * `:user_id` - the UUID of the user (creates one if not provided)
+    * `:category_id` - the UUID of the category (creates one if not provided)
+    * `:interest_score` - defaults to 0.5
+    * `:last_interaction_at` - defaults to current time
+    * `:interaction_count` - defaults to 1
 
   """
-  def create_wallet(opts \\ []) do
-    user = Keyword.get_lazy(opts, :user, fn -> create_user() end)
+  def create_interest(attrs \\ %{}) do
+    user_id = Map.get_lazy(attrs, :user_id, fn -> create_user().id end)
+    category_id = Map.get_lazy(attrs, :category_id, fn -> create_category().id end)
 
-    wallet =
-      Angle.Payments.UserWallet
-      |> Ash.Changeset.for_create(:create, %{}, actor: user, authorize?: false)
-      |> Ash.create!()
+    params = %{
+      user_id: user_id,
+      category_id: category_id,
+      interest_score: Map.get(attrs, :interest_score, 0.5),
+      last_interaction_at: Map.get(attrs, :last_interaction_at, DateTime.utc_now()),
+      interaction_count: Map.get(attrs, :interaction_count, 1)
+    }
 
-    # If balance is provided, deposit it
-    case Keyword.get(opts, :balance) do
-      nil ->
-        wallet
-
-      balance ->
-        wallet
-        |> Ash.Changeset.for_update(:deposit, %{amount: balance}, authorize?: false)
-        |> Ash.update!()
-    end
+    Angle.Recommendations.UserInterest
+    |> Ash.Changeset.for_create(:create, params, authorize?: false)
+    |> Ash.create!(authorize?: false)
   end
 
   @doc """
-  Creates a verification record for a user.
+  Creates an item similarity record.
 
   ## Options
 
-    * `:user` - the user record (creates one if not provided)
-    * `:phone_verified` - boolean (default false)
-    * `:id_verified` - boolean (default false)
-    * `:id_verification_status` - atom (default :not_submitted)
+    * `:source_item_id` - the UUID of the source item (creates one if not provided)
+    * `:similar_item_id` - the UUID of the similar item (creates one if not provided)
+    * `:similarity_score` - defaults to 0.8
+    * `:reason` - defaults to :same_category
 
   """
-  def create_verification(attrs \\ %{}) do
-    user = attrs[:user] || create_user()
+  def create_similarity(attrs \\ %{}) do
+    source_item_id = Map.get_lazy(attrs, :source_item_id, fn -> create_item().id end)
+    similar_item_id = Map.get_lazy(attrs, :similar_item_id, fn -> create_item().id end)
 
-    {:ok, verification} =
-      Angle.Accounts.UserVerification
-      |> Ash.Changeset.for_create(:create, %{user_id: user.id}, authorize?: false)
-      |> Ash.create()
+    params = %{
+      source_item_id: source_item_id,
+      similar_item_id: similar_item_id,
+      similarity_score: Map.get(attrs, :similarity_score, 0.8),
+      reason: Map.get(attrs, :reason, :same_category)
+    }
 
-    # Update fields if specified
-    updates =
-      %{}
-      |> maybe_put(:phone_verified, Map.get(attrs, :phone_verified))
-      |> maybe_put(
-        :phone_verified_at,
-        if(Map.get(attrs, :phone_verified), do: DateTime.utc_now())
-      )
-      |> maybe_put(:id_verified, Map.get(attrs, :id_verified))
-      |> maybe_put(:id_verified_at, if(Map.get(attrs, :id_verified), do: DateTime.utc_now()))
-      |> maybe_put(:id_verification_status, Map.get(attrs, :id_verification_status))
-
-    if updates == %{} do
-      verification
-    else
-      verification
-      |> Ecto.Changeset.change(updates)
-      |> Angle.Repo.update!()
-    end
+    Angle.Recommendations.ItemSimilarity
+    |> Ash.Changeset.for_create(:create, params, authorize?: false)
+    |> Ash.create!(authorize?: false)
   end
 
   @doc """
-  Creates a bidder user with sufficient wallet and verification for bidding.
-
-  This is a convenience function for tests that need a user ready to place bids.
-  By default, creates a user with high-tier credentials (sufficient for all items).
+  Creates a recommended item record.
 
   ## Options
 
-    * `:user` - optional existing user to upgrade (creates new if not provided)
-    * `:balance` - wallet balance in naira (default 10,000 - sufficient for high-value items)
-    * `:phone_verified` - boolean (default true)
-    * `:id_verified` - boolean (default true)
-
-  ## Examples
-
-      # High-tier bidder (default - can bid on any item)
-      bidder = create_bidder()
-
-      # Low-tier bidder (for items <₦50k)
-      bidder = create_bidder(balance: 1500, id_verified: false)
-
-      # Upgrade existing user to bidder
-      user = create_user()
-      bidder = create_bidder(user: user)
+    * `:user_id` - the UUID of the user (creates one if not provided)
+    * `:item_id` - the UUID of the item (creates one if not provided)
+    * `:recommendation_score` - defaults to 0.9
+    * `:recommendation_reason` - defaults to "Based on your interests"
+    * `:rank` - defaults to 1
+    * `:generated_at` - defaults to current time
 
   """
-  def create_bidder(opts \\ []) do
-    user = Keyword.get(opts, :user) || create_user()
+  def create_recommendation(attrs \\ %{}) do
+    user_id = Map.get_lazy(attrs, :user_id, fn -> create_user().id end)
+    item_id = Map.get_lazy(attrs, :item_id, fn -> create_item().id end)
 
-    # High tier defaults (sufficient for all items)
-    balance = Keyword.get(opts, :balance, 10_000)
-    phone_verified = Keyword.get(opts, :phone_verified, true)
-    id_verified = Keyword.get(opts, :id_verified, true)
+    params = %{
+      user_id: user_id,
+      item_id: item_id,
+      recommendation_score: Map.get(attrs, :recommendation_score, 0.9),
+      recommendation_reason: Map.get(attrs, :recommendation_reason, "Based on your interests"),
+      rank: Map.get(attrs, :rank, 1),
+      generated_at: Map.get(attrs, :generated_at, DateTime.utc_now())
+    }
 
-    create_wallet(user: user, balance: balance)
-    create_verification(%{user: user, phone_verified: phone_verified, id_verified: id_verified})
-
-    user
+    Angle.Recommendations.RecommendedItem
+    |> Ash.Changeset.for_create(:create, params, authorize?: false)
+    |> Ash.create!(authorize?: false)
   end
 
   # Helpers
