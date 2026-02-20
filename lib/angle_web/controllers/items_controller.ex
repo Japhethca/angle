@@ -24,10 +24,15 @@ defmodule AngleWeb.ItemsController do
           |> Map.put("user", seller)
           |> Map.put("images", images)
 
+        # Load wallet data for authenticated users
+        wallet_data = load_wallet_data(conn)
+
         conn
         |> assign_prop(:item, item)
         |> assign_prop(:similar_items, similar_items)
         |> assign_prop(:watchlist_entry_id, load_watchlist_entry_id(conn, item["id"]))
+        |> assign_prop(:wallet_id, wallet_data[:wallet_id])
+        |> assign_prop(:wallet_balance, wallet_data[:wallet_balance])
         |> render_inertia("items/show")
 
       :not_found ->
@@ -108,6 +113,27 @@ defmodule AngleWeb.ItemsController do
     case Ecto.UUID.cast(string) do
       {:ok, _} -> true
       :error -> false
+    end
+  end
+
+  defp load_wallet_data(conn) do
+    user = conn.assigns[:current_user]
+
+    if is_nil(user) do
+      %{wallet_id: nil, wallet_balance: nil}
+    else
+      case Angle.Payments.UserWallet
+           |> Ash.Query.filter(user_id == ^user.id)
+           |> Ash.read_one(authorize?: false) do
+        {:ok, wallet} when not is_nil(wallet) ->
+          %{
+            wallet_id: wallet.id,
+            wallet_balance: Decimal.to_float(wallet.balance)
+          }
+
+        _ ->
+          %{wallet_id: nil, wallet_balance: nil}
+      end
     end
   end
 end

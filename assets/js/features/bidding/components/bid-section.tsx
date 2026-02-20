@@ -8,6 +8,7 @@ import { formatNaira } from "@/lib/format";
 import { router } from "@inertiajs/react";
 import { toast } from "sonner";
 import { ConfirmBidDialog } from "./confirm-bid-dialog";
+import { RequirementModal } from "./requirement-modal";
 
 interface BidSectionProps {
   itemId: string;
@@ -20,6 +21,8 @@ interface BidSectionProps {
   onToggleWatch?: () => void;
   isWatchPending?: boolean;
   coverImage?: ImageData | null;
+  walletId?: string;
+  walletBalance?: number;
 }
 
 const QUICK_ADD_AMOUNTS = [1000, 5000, 10000];
@@ -35,12 +38,16 @@ export function BidSection({
   onToggleWatch,
   isWatchPending = false,
   coverImage,
+  walletId,
+  walletBalance,
 }: BidSectionProps) {
   const { authenticated } = useAuth();
   const increment = bidIncrement ? parseFloat(bidIncrement) : 1000;
   const basePrice = currentPrice ? parseFloat(currentPrice) : parseFloat(startingPrice);
   const [bidAmount, setBidAmount] = useState(basePrice + increment);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [requirementOpen, setRequirementOpen] = useState(false);
+  const [requirementError, setRequirementError] = useState("");
 
   const { mutate: placeBid, isPending } = useAshMutation(
     (amount: number) =>
@@ -60,7 +67,22 @@ export function BidSection({
         router.reload();
       },
       onError: error => {
-        toast.error(error.message || 'Failed to place bid');
+        const errorMsg = error.message || 'Failed to place bid';
+
+        // Check if this is a requirement error
+        const isRequirementError =
+          errorMsg.includes('wallet') ||
+          errorMsg.includes('phone') ||
+          errorMsg.includes('ID verification') ||
+          errorMsg.includes('verify');
+
+        if (isRequirementError) {
+          setConfirmOpen(false);
+          setRequirementError(errorMsg);
+          setRequirementOpen(true);
+        } else {
+          toast.error(errorMsg);
+        }
       },
     }
   );
@@ -179,6 +201,14 @@ export function BidSection({
         itemTitle={itemTitle}
         bidAmount={formatNaira(bidAmount)}
         coverImage={coverImage}
+      />
+
+      <RequirementModal
+        open={requirementOpen}
+        onOpenChange={setRequirementOpen}
+        errorMessage={requirementError}
+        walletId={walletId}
+        currentBalance={walletBalance}
       />
     </div>
   );

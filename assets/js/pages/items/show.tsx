@@ -24,9 +24,17 @@ interface ShowProps {
   item: ItemDetail[number] & { user: Seller | null; images?: ImageData[] };
   similar_items: HomepageItemCard;
   watchlist_entry_id: string | null;
+  wallet_id?: string | null;
+  wallet_balance?: number | null;
 }
 
-export default function Show({ item, similar_items = [], watchlist_entry_id = null }: ShowProps) {
+export default function Show({
+  item,
+  similar_items = [],
+  watchlist_entry_id = null,
+  wallet_id,
+  wallet_balance,
+}: ShowProps) {
   const price = item.currentPrice || item.startingPrice;
   const itemImages = item.images || [];
   const itemCoverImage = getCoverImage(itemImages);
@@ -107,6 +115,8 @@ export default function Show({ item, similar_items = [], watchlist_entry_id = nu
             onToggleWatch={toggleWatch}
             isWatchPending={isWatchPending}
             coverImage={itemCoverImage}
+            walletId={wallet_id || undefined}
+            walletBalance={wallet_balance || undefined}
           />
         }
         contentSections={
