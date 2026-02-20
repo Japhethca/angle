@@ -49,10 +49,10 @@ defmodule Angle.Bidding.Bid.CheckBlacklistTest do
         |> Ash.Changeset.for_create(
           :create,
           %{
-            seller_id: seller.id,
             blocked_user_id: buyer.id,
             reason: "Previous non-payment"
           },
+          actor: seller,
           authorize?: false
         )
         |> Ash.create()
@@ -99,10 +99,10 @@ defmodule Angle.Bidding.Bid.CheckBlacklistTest do
         |> Ash.Changeset.for_create(
           :create,
           %{
-            seller_id: seller1.id,
             blocked_user_id: buyer.id,
             reason: "Test"
           },
+          actor: seller1,
           authorize?: false
         )
         |> Ash.create()

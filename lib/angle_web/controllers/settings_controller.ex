@@ -45,11 +45,23 @@ defmodule AngleWeb.SettingsController do
     {:ok, payout_methods} = Angle.Payments.list_payout_methods(actor: user)
     payout_methods = Enum.map(payout_methods, &payout_method_data/1)
 
-    # Load wallet and transactions with proper authorization
+    # Load wallet with safe read_one (returns {:ok, nil} if not found)
     wallet =
-      Angle.Payments.UserWallet
-      |> Ash.Query.filter(user_id == ^user.id)
-      |> Ash.read_one!(actor: user, authorize?: true)
+      case Angle.Payments.UserWallet
+           |> Ash.Query.filter(user_id == ^user.id)
+           |> Ash.read_one(actor: user, authorize?: true) do
+        {:ok, nil} ->
+          # Create wallet if it doesn't exist
+          {:ok, wallet} =
+            Angle.Payments.UserWallet
+            |> Ash.Changeset.for_create(:create, %{}, actor: user)
+            |> Ash.create(authorize?: false)
+
+          wallet
+
+        {:ok, wallet} ->
+          wallet
+      end
 
     transactions =
       Angle.Payments.WalletTransaction

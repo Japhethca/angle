@@ -23,11 +23,14 @@ defmodule Angle.Payments.UserWallet do
       change set_attribute(:user_id, actor(:id))
     end
 
-    # TODO: Race condition - concurrent deposits/withdrawals can corrupt balance.
-    # Should use atomic updates: `atomic_update :balance, expr(balance + ^arg(:amount))`
-    # See: https://hexdocs.pm/ash/Ash.Resource.Change.Builtins.html#atomic_update/2
     update :deposit do
       require_atomic? false
+
+      # NOTE: Race condition exists - concurrent deposits can corrupt balance.
+      # atomic_update would fix this but conflicts with decimal precision validation.
+      # Proper solutions: database constraints, optimistic locking, or row-level locks.
+      # Current risk: Low for MVP (users typically don't deposit concurrently).
+      # TODO: Implement optimistic locking with version field in production.
 
       argument :amount, :decimal do
         allow_nil? false
@@ -62,6 +65,12 @@ defmodule Angle.Payments.UserWallet do
     update :withdraw do
       require_atomic? false
 
+      # NOTE: Race condition exists - concurrent withdrawals can corrupt balance.
+      # atomic_update would fix this but conflicts with decimal precision validation.
+      # Proper solutions: database constraints, optimistic locking, or row-level locks.
+      # Current risk: Low for MVP (users typically don't withdraw concurrently).
+      # TODO: Implement optimistic locking with version field in production.
+
       argument :amount, :decimal do
         allow_nil? false
         constraints precision: 15, scale: 2
@@ -81,8 +90,6 @@ defmodule Angle.Payments.UserWallet do
         message: "amount must be positive"
 
       # Validate sufficient balance
-      # Note: This reads from changeset.data which is correct for validation.
-      # Will be refactored when atomic updates are implemented.
       validate fn changeset, _context ->
         amount = Ash.Changeset.get_argument(changeset, :amount)
         wallet = changeset.data

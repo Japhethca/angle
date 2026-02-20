@@ -18,7 +18,9 @@ defmodule Angle.Bidding.SellerBlacklist do
     defaults [:read, :destroy]
 
     create :create do
-      accept [:seller_id, :blocked_user_id, :reason]
+      accept [:blocked_user_id, :reason]
+      # Set seller_id from actor to prevent authorization bypass
+      change set_attribute(:seller_id, actor(:id))
     end
   end
 

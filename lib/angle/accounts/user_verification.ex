@@ -41,7 +41,7 @@ defmodule Angle.Accounts.UserVerification do
         else
           # Generate 6-digit OTP
           otp_code = generate_otp()
-          otp_hash = hash_otp(otp_code)
+          otp_hash = hash_otp(otp_code, phone_number)
           expires_at = DateTime.add(DateTime.utc_now(), 5 * 60, :second)
 
           changeset =
@@ -50,6 +50,7 @@ defmodule Angle.Accounts.UserVerification do
             |> Ash.Changeset.force_change_attribute(:otp_hash, otp_hash)
             |> Ash.Changeset.force_change_attribute(:otp_expires_at, expires_at)
             |> Ash.Changeset.force_change_attribute(:otp_requested_at, DateTime.utc_now())
+            |> Ash.Changeset.force_change_attribute(:otp_attempts, 0)
 
           # In test/dev: return OTP in result
           # In prod: send via SMS, don't return OTP
@@ -76,6 +77,8 @@ defmodule Angle.Accounts.UserVerification do
         submitted_otp = Ash.Changeset.get_argument(changeset, :otp_code)
         stored_hash = Ash.Changeset.get_attribute(changeset, :otp_hash)
         expires_at = Ash.Changeset.get_attribute(changeset, :otp_expires_at)
+        phone_number = Ash.Changeset.get_attribute(changeset, :phone_number)
+        attempts = Ash.Changeset.get_attribute(changeset, :otp_attempts) || 0
 
         cond do
           is_nil(stored_hash) or is_nil(expires_at) ->
@@ -84,16 +87,25 @@ defmodule Angle.Accounts.UserVerification do
               message: "No OTP requested. Please request an OTP first."
             )
 
+          # Brute-force protection: max 5 attempts
+          attempts >= 5 ->
+            Ash.Changeset.add_error(
+              changeset,
+              message: "Too many attempts. Please request a new OTP."
+            )
+
           DateTime.compare(DateTime.utc_now(), expires_at) == :gt ->
             Ash.Changeset.add_error(
               changeset,
               message: "OTP expired. Please request a new one."
             )
 
-          not Plug.Crypto.secure_compare(hash_otp(submitted_otp), stored_hash) ->
-            Ash.Changeset.add_error(
-              changeset,
-              message: "Invalid OTP code"
+          not Plug.Crypto.secure_compare(hash_otp(submitted_otp, phone_number), stored_hash) ->
+            # Increment attempt counter on failure
+            changeset
+            |> Ash.Changeset.force_change_attribute(:otp_attempts, attempts + 1)
+            |> Ash.Changeset.add_error(
+              message: "Invalid OTP code. #{5 - attempts - 1} attempts remaining."
             )
 
           true ->
@@ -104,6 +116,7 @@ defmodule Angle.Accounts.UserVerification do
             # Clear OTP data
             |> Ash.Changeset.force_change_attribute(:otp_hash, nil)
             |> Ash.Changeset.force_change_attribute(:otp_expires_at, nil)
+            |> Ash.Changeset.force_change_attribute(:otp_attempts, 0)
         end
       end
     end
@@ -173,8 +186,18 @@ defmodule Angle.Accounts.UserVerification do
       authorize_if {Angle.Accounts.Checks.HasPermission, permission: "admin"}
     end
 
-    policy action_type([:create, :update, :destroy]) do
-      # Only admins can modify verification records
+    policy action([:request_phone_otp, :verify_phone_otp, :submit_id_document]) do
+      # Users can verify their own account
+      authorize_if expr(user_id == ^actor(:id))
+    end
+
+    policy action([:approve_id, :reject_id]) do
+      # Only admins can approve/reject ID documents
+      authorize_if {Angle.Accounts.Checks.HasPermission, permission: "admin"}
+    end
+
+    policy action_type([:create, :destroy]) do
+      # Only admins can create/destroy verification records
       authorize_if {Angle.Accounts.Checks.HasPermission, permission: "admin"}
     end
   end
@@ -203,6 +226,11 @@ defmodule Angle.Accounts.UserVerification do
     attribute :otp_expires_at, :utc_datetime_usec
 
     attribute :otp_requested_at, :utc_datetime_usec
+
+    attribute :otp_attempts, :integer do
+      allow_nil? false
+      default 0
+    end
 
     # ID verification
     attribute :id_verified, :boolean do
@@ -256,8 +284,13 @@ defmodule Angle.Accounts.UserVerification do
     |> String.pad_leading(6, "0")
   end
 
-  defp hash_otp(otp_code) do
-    :crypto.hash(:sha256, otp_code)
+  defp hash_otp(otp_code, phone_number) do
+    # Use phone number as salt + application secret for additional security
+    # HMAC-SHA256 provides proper cryptographic hashing with salt
+    secret = Application.get_env(:angle, :otp_secret_key_base) || "angle_otp_secret"
+    salt = "#{secret}:#{phone_number}"
+
+    :crypto.mac(:hmac, :sha256, salt, otp_code)
     |> Base.encode16(case: :lower)
   end
 end

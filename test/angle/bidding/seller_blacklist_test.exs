@@ -15,10 +15,10 @@ defmodule Angle.Bidding.SellerBlacklistTest do
                |> Ash.Changeset.for_create(
                  :create,
                  %{
-                   seller_id: seller.id,
                    blocked_user_id: blocked_user.id,
                    reason: "Non-payment on previous auction"
                  },
+                 actor: seller,
                  authorize?: false
                )
                |> Ash.create()
@@ -37,10 +37,10 @@ defmodule Angle.Bidding.SellerBlacklistTest do
         |> Ash.Changeset.for_create(
           :create,
           %{
-            seller_id: seller.id,
             blocked_user_id: blocked_user.id,
             reason: "First reason"
           },
+          actor: seller,
           authorize?: false
         )
         |> Ash.create()
@@ -50,10 +50,10 @@ defmodule Angle.Bidding.SellerBlacklistTest do
                |> Ash.Changeset.for_create(
                  :create,
                  %{
-                   seller_id: seller.id,
                    blocked_user_id: blocked_user.id,
                    reason: "Second reason"
                  },
+                 actor: seller,
                  authorize?: false
                )
                |> Ash.create()
@@ -76,7 +76,8 @@ defmodule Angle.Bidding.SellerBlacklistTest do
         SellerBlacklist
         |> Ash.Changeset.for_create(
           :create,
-          %{seller_id: seller.id, blocked_user_id: user1.id, reason: "Reason 1"},
+          %{blocked_user_id: user1.id, reason: "Reason 1"},
+          actor: seller,
           authorize?: false
         )
         |> Ash.create()
@@ -85,7 +86,8 @@ defmodule Angle.Bidding.SellerBlacklistTest do
         SellerBlacklist
         |> Ash.Changeset.for_create(
           :create,
-          %{seller_id: seller.id, blocked_user_id: user2.id, reason: "Reason 2"},
+          %{blocked_user_id: user2.id, reason: "Reason 2"},
+          actor: seller,
           authorize?: false
         )
         |> Ash.create()
@@ -113,10 +115,10 @@ defmodule Angle.Bidding.SellerBlacklistTest do
         |> Ash.Changeset.for_create(
           :create,
           %{
-            seller_id: seller.id,
             blocked_user_id: blocked_user.id,
             reason: "Test"
           },
+          actor: seller,
           authorize?: false
         )
         |> Ash.create()
