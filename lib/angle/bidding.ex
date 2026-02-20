@@ -69,6 +69,27 @@ defmodule Angle.Bidding do
           }
         ]
       end
+
+      # Analytics page: bids on a seller's item with user details
+      typed_query :item_analytics_bid, :read do
+        ts_result_type_name "ItemAnalyticsBid"
+        ts_fields_const_name "itemAnalyticsBidFields"
+
+        fields [
+          :id,
+          :amount,
+          :bid_time,
+          :bid_type,
+          :item_id,
+          %{
+            user: [
+              :id,
+              :username,
+              :full_name
+            ]
+          }
+        ]
+      end
     end
 
     resource Angle.Bidding.Order do
@@ -148,6 +169,31 @@ defmodule Angle.Bidding do
           :inserted_at,
           %{
             reviewer: [
+              :id,
+              :username,
+              :full_name
+            ]
+          }
+        ]
+      end
+    end
+
+    resource Angle.Bidding.SellerBlacklist do
+      rpc_action :create_blacklist, :create
+      rpc_action :list_blacklist, :read
+
+      typed_query :seller_blacklist_card, :read do
+        ts_result_type_name "SellerBlacklistCard"
+        ts_fields_const_name "sellerBlacklistCardFields"
+
+        fields [
+          :id,
+          :seller_id,
+          :blocked_user_id,
+          :reason,
+          :inserted_at,
+          %{
+            blocked_user: [
               :id,
               :username,
               :full_name

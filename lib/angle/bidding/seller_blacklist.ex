@@ -2,11 +2,16 @@ defmodule Angle.Bidding.SellerBlacklist do
   use Ash.Resource,
     domain: Angle.Bidding,
     data_layer: AshPostgres.DataLayer,
-    authorizers: [Ash.Policy.Authorizer]
+    authorizers: [Ash.Policy.Authorizer],
+    extensions: [AshTypescript.Resource]
 
   postgres do
     table "seller_blacklists"
     repo Angle.Repo
+  end
+
+  typescript do
+    type_name "SellerBlacklist"
   end
 
   actions do
@@ -52,7 +57,13 @@ defmodule Angle.Bidding.SellerBlacklist do
       public? true
     end
 
-    timestamps()
+    create_timestamp :inserted_at do
+      public? true
+    end
+
+    update_timestamp :updated_at do
+      public? true
+    end
   end
 
   relationships do

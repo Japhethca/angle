@@ -122,9 +122,7 @@ defmodule AngleWeb.ItemsController do
     if is_nil(user) do
       %{wallet_id: nil, wallet_balance: nil}
     else
-      case Angle.Payments.UserWallet
-           |> Ash.Query.filter(user_id == ^user.id)
-           |> Ash.read_one(authorize?: false) do
+      case Angle.Payments.get_wallet(user.id, authorize?: false) do
         {:ok, wallet} when not is_nil(wallet) ->
           %{
             wallet_id: wallet.id,

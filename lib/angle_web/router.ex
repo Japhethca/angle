@@ -115,6 +115,7 @@ defmodule AngleWeb.Router do
     get "/store/listings/new", StoreDashboardController, :new
     get "/store/listings/:id/preview", StoreDashboardController, :preview
     get "/store/listings/:id/edit", StoreDashboardController, :edit
+    get "/store/listings/:id/analytics", StoreAnalyticsController, :show
     delete "/store/listings/:id", StoreDashboardController, :delete_item
     get "/store/payments", StoreDashboardController, :payments
     get "/store/profile", StoreDashboardController, :profile
