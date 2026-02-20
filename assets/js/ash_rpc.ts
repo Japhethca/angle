@@ -1925,145 +1925,6 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
-// Item Typed Queries
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export type HomepageItemCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", { category: ["id", "name", "slug"] }]>>;
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export const homepageItemCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", { category: ["id", "name", "slug"] }] satisfies ListItemsFields;
-
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export type CategoryItemCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", "bidCount", { category: ["id", "name", "slug"] }]>>;
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export const categoryItemCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", "bidCount", { category: ["id", "name", "slug"] }];
-
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export type SellerItemCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", "bidCount", { category: ["id", "name", "slug"] }]>>;
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export const sellerItemCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", "bidCount", { category: ["id", "name", "slug"] }];
-
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export type ItemDetail = Array<InferResult<ItemResourceSchema, ["id", "title", "description", "slug", "startingPrice", "currentPrice", "reservePrice", "bidIncrement", "buyNowPrice", "endTime", "startTime", "auctionStatus", "publicationStatus", "condition", "saleType", "auctionFormat", "viewCount", "location", "attributes", "lotNumber", "createdById", "bidCount", { category: ["id", "name", "slug"] }]>>;
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export const itemDetailFields = ["id", "title", "description", "slug", "startingPrice", "currentPrice", "reservePrice", "bidIncrement", "buyNowPrice", "endTime", "startTime", "auctionStatus", "publicationStatus", "condition", "saleType", "auctionFormat", "viewCount", "location", "attributes", "lotNumber", "createdById", "bidCount", { category: ["id", "name", "slug"] }] satisfies ListItemsFields;
-
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export type WatchlistItemCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "bidCount", "watcherCount", { category: ["id", "name", "slug"] }, { user: ["id", "fullName"] }]>>;
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export const watchlistItemCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "bidCount", "watcherCount", { category: ["id", "name", "slug"] }, { user: ["id", "fullName"] }];
-
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export type UserWatchlistId = Array<InferResult<ItemResourceSchema, ["id"]>>;
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export const userWatchlistIdFields = ["id"];
-
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export type SellerDashboardCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "publicationStatus", "condition", "saleType", "viewCount", "bidCount", "watcherCount", { category: ["id", "name"] }]>>;
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export const sellerDashboardCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "publicationStatus", "condition", "saleType", "viewCount", "bidCount", "watcherCount", { category: ["id", "name"] }] satisfies ListMyListingsFields;
-
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export type SearchItemCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "description", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "location", "viewCount", "bidCount", { category: ["id", "name", "slug"] }]>>;
-
-/**
- * Typed query for Item
- *
- * @typedQuery true
- */
-export const searchItemCardFields = ["id", "title", "slug", "description", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "location", "viewCount", "bidCount", { category: ["id", "name", "slug"] }];
-
-
-
-// Review Typed Queries
-/**
- * Typed query for Review
- *
- * @typedQuery true
- */
-export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }]>>;
-
-/**
- * Typed query for Review
- *
- * @typedQuery true
- */
-export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
-
-
-
 // User Typed Queries
 /**
  * Typed query for User
@@ -2189,6 +2050,145 @@ export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount
  * @typedQuery true
  */
 export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
+
+
+
+// Review Typed Queries
+/**
+ * Typed query for Review
+ *
+ * @typedQuery true
+ */
+export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }]>>;
+
+/**
+ * Typed query for Review
+ *
+ * @typedQuery true
+ */
+export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
+
+
+
+// Item Typed Queries
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export type HomepageItemCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", { category: ["id", "name", "slug"] }]>>;
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export const homepageItemCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", { category: ["id", "name", "slug"] }] satisfies ListItemsFields;
+
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export type CategoryItemCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", "bidCount", { category: ["id", "name", "slug"] }]>>;
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export const categoryItemCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", "bidCount", { category: ["id", "name", "slug"] }];
+
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export type SellerItemCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", "bidCount", { category: ["id", "name", "slug"] }]>>;
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export const sellerItemCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "viewCount", "bidCount", { category: ["id", "name", "slug"] }];
+
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export type ItemDetail = Array<InferResult<ItemResourceSchema, ["id", "title", "description", "slug", "startingPrice", "currentPrice", "reservePrice", "bidIncrement", "buyNowPrice", "endTime", "startTime", "auctionStatus", "publicationStatus", "condition", "saleType", "auctionFormat", "viewCount", "location", "attributes", "lotNumber", "createdById", "bidCount", { category: ["id", "name", "slug"] }]>>;
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export const itemDetailFields = ["id", "title", "description", "slug", "startingPrice", "currentPrice", "reservePrice", "bidIncrement", "buyNowPrice", "endTime", "startTime", "auctionStatus", "publicationStatus", "condition", "saleType", "auctionFormat", "viewCount", "location", "attributes", "lotNumber", "createdById", "bidCount", { category: ["id", "name", "slug"] }] satisfies ListItemsFields;
+
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export type WatchlistItemCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "bidCount", "watcherCount", { category: ["id", "name", "slug"] }, { user: ["id", "fullName"] }]>>;
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export const watchlistItemCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "bidCount", "watcherCount", { category: ["id", "name", "slug"] }, { user: ["id", "fullName"] }];
+
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export type UserWatchlistId = Array<InferResult<ItemResourceSchema, ["id"]>>;
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export const userWatchlistIdFields = ["id"];
+
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export type SellerDashboardCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "publicationStatus", "condition", "saleType", "viewCount", "bidCount", "watcherCount", { category: ["id", "name"] }]>>;
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export const sellerDashboardCardFields = ["id", "title", "slug", "startingPrice", "currentPrice", "endTime", "auctionStatus", "publicationStatus", "condition", "saleType", "viewCount", "bidCount", "watcherCount", { category: ["id", "name"] }] satisfies ListMyListingsFields;
+
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export type SearchItemCard = Array<InferResult<ItemResourceSchema, ["id", "title", "slug", "description", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "location", "viewCount", "bidCount", { category: ["id", "name", "slug"] }]>>;
+
+/**
+ * Typed query for Item
+ *
+ * @typedQuery true
+ */
+export const searchItemCardFields = ["id", "title", "slug", "description", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "location", "viewCount", "bidCount", { category: ["id", "name", "slug"] }];
 
 
 

@@ -27,7 +27,6 @@ defmodule Angle.Recommendations.Jobs.ComputeItemSimilarities do
 
   alias Angle.Recommendations.Scoring.SimilarityScorer
   alias Angle.Recommendations.{Cache, ItemSimilarity}
-  alias Angle.Inventory.Item
   require Ash.Query
   require Logger
 
@@ -94,11 +93,11 @@ defmodule Angle.Recommendations.Jobs.ComputeItemSimilarities do
   # Private helpers
 
   defp fetch_active_items do
-    # Fetch published items only
-    case Item
-         |> Ash.Query.filter(publication_status == :published)
-         |> Ash.Query.load(:category_id)
-         |> Ash.read(authorize?: false) do
+    # Use Inventory code interface for published items
+    case Angle.Inventory.list_published_items(
+           authorize?: false,
+           load: [:category_id]
+         ) do
       {:ok, items} -> {:ok, items}
       {:error, reason} -> {:error, reason}
     end
@@ -112,12 +111,10 @@ defmodule Angle.Recommendations.Jobs.ComputeItemSimilarities do
   end
 
   defp fetch_item_by_id(item_id) do
-    case Item
-         |> Ash.Query.filter(id == ^item_id)
-         |> Ash.Query.load(:category_id)
-         |> Ash.read_one(authorize?: false) do
-      {:ok, nil} -> {:error, :not_found}
+    # Use Inventory code interface for getting item by ID
+    case Angle.Inventory.get_item(item_id, authorize?: false, load: [:category_id]) do
       {:ok, item} -> {:ok, item}
+      {:error, %Ash.Error.Query.NotFound{}} -> {:error, :not_found}
       {:error, reason} -> {:error, reason}
     end
   end

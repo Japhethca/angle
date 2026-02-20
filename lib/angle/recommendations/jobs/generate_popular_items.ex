@@ -22,7 +22,6 @@ defmodule Angle.Recommendations.Jobs.GeneratePopularItems do
     unique: [period: :timer.hours(1)]
 
   alias Angle.Recommendations.Cache
-  require Ash.Query
   require Logger
 
   @popular_items_limit 50
@@ -32,20 +31,29 @@ defmodule Angle.Recommendations.Jobs.GeneratePopularItems do
   def perform(%Oban.Job{}) do
     Logger.info("#{@log_prefix} Generating popular items")
 
-    popular_items =
-      Angle.Inventory.Item
-      |> Ash.Query.filter(publication_status == :published)
-      |> Ash.Query.filter(auction_status in [:active, :scheduled])
-      |> Ash.Query.load([:bid_count, :watcher_count])
-      |> Ash.Query.sort([
-        {:bid_count, :desc},
-        {:watcher_count, :desc}
-      ])
-      |> Ash.Query.limit(@popular_items_limit)
-      |> Ash.read!(authorize?: false)
+    # Use Inventory code interface for published items with auction status filter
+    {:ok, %Ash.Page.Offset{results: popular_items}} =
+      Angle.Inventory.list_published_items(
+        %{
+          auction_statuses: [:active, :scheduled],
+          sort_by: :bid_count,
+          sort_order: :desc
+        },
+        authorize?: false,
+        load: [:bid_count, :watcher_count],
+        page: [limit: @popular_items_limit * 2]
+      )
+
+    # Secondary sort by watcher_count and take top N
+    popular_item_ids =
+      popular_items
+      |> Enum.sort_by(fn item ->
+        {-(item.bid_count || 0), -(item.watcher_count || 0)}
+      end)
+      |> Enum.take(@popular_items_limit)
+      |> Enum.map(& &1.id)
 
     # Store only IDs in cache (not full structs) for consistency
-    popular_item_ids = Enum.map(popular_items, & &1.id)
     Cache.put_popular_items(popular_item_ids)
 
     Logger.info("#{@log_prefix} Cached #{length(popular_item_ids)} popular item IDs")

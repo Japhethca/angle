@@ -33,6 +33,15 @@ defmodule Angle.Inventory.WatchlistItem do
       filter expr(user_id == ^actor(:id))
     end
 
+    read :by_user_since do
+      description "List watchlist items for a user added after a specific timestamp"
+
+      argument :user_id, :uuid, allow_nil?: false
+      argument :since, :utc_datetime, allow_nil?: false
+
+      filter expr(user_id == ^arg(:user_id) and inserted_at > ^arg(:since))
+    end
+
     read :read do
       primary? true
     end
@@ -49,6 +58,12 @@ defmodule Angle.Inventory.WatchlistItem do
 
     policy action(:by_user) do
       authorize_if actor_present()
+    end
+
+    policy action(:by_user_since) do
+      # Background jobs will bypass authorization
+      # Human access should check if they're requesting their own data
+      authorize_if expr(user_id == ^actor(:id))
     end
 
     policy action(:read) do

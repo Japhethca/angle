@@ -3,35 +3,40 @@ defmodule Angle.Recommendations.Queries do
   Query helpers for recommendations domain.
 
   Encapsulates cross-domain interactions and complex queries
-  used by scoring modules. Centralizes all direct Ash calls
-  that cross domain boundaries.
+  used by scoring modules. Uses code interfaces for cross-domain
+  calls following Ash Framework patterns.
 
-  TODO: Refactor to use code interfaces per Ash patterns. Currently makes direct
-  Ash calls to Bidding.Bid and Inventory.WatchlistItem - these should be replaced
-  with code interfaces defined in their respective domains (e.g.,
-  Angle.Bidding.list_user_bids_since/2, Angle.Inventory.list_user_watchlist_since/2).
+  Note: Batch queries for similarity scoring (get_engaged_users_batch) still use
+  direct Ash queries as they require specific filtering/grouping that isn't exposed
+  via domain interfaces. These could be refactored if needed.
   """
 
   require Ash.Query
 
   @doc """
   Get user's bids within a time window, with item and category loaded.
+  Uses Bidding domain code interface.
   """
   def get_user_bids(user_id, since) do
-    Angle.Bidding.Bid
-    |> Ash.Query.filter(user_id == ^user_id and bid_time > ^since)
-    |> Ash.Query.load(item: [:category_id])
-    |> Ash.read(authorize?: false)
+    Angle.Bidding.list_user_bids_since(
+      user_id,
+      since,
+      authorize?: false,
+      load: [item: [:category_id]]
+    )
   end
 
   @doc """
   Get user's watchlist items within a time window, with item and category loaded.
+  Uses Inventory domain code interface.
   """
   def get_user_watchlist(user_id, since) do
-    Angle.Inventory.WatchlistItem
-    |> Ash.Query.filter(user_id == ^user_id and inserted_at > ^since)
-    |> Ash.Query.load(item: [:category_id])
-    |> Ash.read(authorize?: false)
+    Angle.Inventory.list_user_watchlist_since(
+      user_id,
+      since,
+      authorize?: false,
+      load: [item: [:category_id]]
+    )
   end
 
   @doc """

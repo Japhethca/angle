@@ -128,12 +128,19 @@ defmodule Angle.Recommendations do
         []
 
       ids ->
-        case Angle.Inventory.Item
-             |> Ash.Query.filter(id in ^ids)
-             |> Ash.Query.filter(publication_status == :published)
-             |> Ash.read(authorize?: false) do
-          {:ok, items} ->
-            items
+        # Use Inventory code interface to hydrate IDs to full items
+        # The published filter acts as a security check
+        case Angle.Inventory.list_published_items(
+               authorize?: false,
+               load: [:bid_count, :watcher_count]
+             ) do
+          {:ok, all_items} ->
+            # Filter to only requested IDs and preserve order
+            id_set = MapSet.new(ids)
+
+            all_items
+            |> Enum.filter(fn item -> MapSet.member?(id_set, item.id) end)
+            |> Enum.sort_by(fn item -> Enum.find_index(ids, &(&1 == item.id)) end)
 
           {:error, error} ->
             Logger.warning("Failed to hydrate items: #{inspect(error)}")
@@ -143,15 +150,24 @@ defmodule Angle.Recommendations do
   end
 
   defp fallback_popular_items(limit) do
-    case Angle.Inventory.Item
-         |> Ash.Query.filter(publication_status == :published)
-         |> Ash.Query.filter(auction_status in [:active, :scheduled])
-         |> Ash.Query.load([:bid_count, :watcher_count])
-         |> Ash.Query.sort([{:bid_count, :desc}, {:watcher_count, :desc}])
-         |> Ash.Query.limit(limit)
-         |> Ash.read(authorize?: false) do
-      {:ok, items} ->
+    # Use Inventory code interface for popular items fallback
+    case Angle.Inventory.list_published_items(
+           %{
+             auction_statuses: [:active, :scheduled],
+             sort_by: :bid_count,
+             sort_order: :desc
+           },
+           authorize?: false,
+           load: [:bid_count, :watcher_count],
+           page: [limit: limit * 2]
+         ) do
+      {:ok, %Ash.Page.Offset{results: items}} ->
+        # Secondary sort by watcher_count (same as GeneratePopularItems job)
         items
+        |> Enum.sort_by(fn item ->
+          {-(item.bid_count || 0), -(item.watcher_count || 0)}
+        end)
+        |> Enum.take(limit)
 
       {:error, error} ->
         Logger.warning("Failed to fetch popular items: #{inspect(error)}")
