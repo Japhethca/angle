@@ -71,10 +71,19 @@ defmodule Angle.Recommendations.ItemSimilarity do
   end
 
   policies do
-    # NOTE: Permissive policy for internal background job use only
-    # TODO: Add proper authorization if exposed to users
-    policy always() do
+    # Anyone can read similar items (public feature)
+    policy action_type(:read) do
       authorize_if always()
+    end
+
+    # Admin bypass
+    bypass action_type([:create, :update, :destroy]) do
+      authorize_if {Angle.Accounts.Checks.HasPermission, permission: "manage_recommendations"}
+    end
+
+    # Default deny write operations (background jobs use authorize?: false)
+    policy action_type([:create, :update, :destroy]) do
+      forbid_if always()
     end
   end
 
