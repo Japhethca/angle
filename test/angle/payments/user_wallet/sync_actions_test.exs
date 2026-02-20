@@ -1,16 +1,18 @@
 defmodule Angle.Payments.UserWallet.SyncActionsTest do
   use Angle.DataCase, async: true
 
+  require Ash.Query
   alias Angle.Payments.UserWallet
 
   describe "sync_balance action" do
     test "updates balance, last_synced_at, and sync_status" do
       user = create_user()
 
-      {:ok, wallet} =
+      # Wallet is automatically created by registration hook
+      wallet =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
 
       new_balance = Decimal.new("50000")
 
@@ -31,10 +33,11 @@ defmodule Angle.Payments.UserWallet.SyncActionsTest do
     test "marks sync_status as error and stores error details" do
       user = create_user()
 
-      {:ok, wallet} =
+      # Wallet is automatically created by registration hook
+      wallet =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
 
       error_details = %{last_error: "Connection timeout"}
 
@@ -52,10 +55,11 @@ defmodule Angle.Payments.UserWallet.SyncActionsTest do
     test "sets paystack_subaccount_code" do
       user = create_user()
 
-      {:ok, wallet} =
+      # Wallet is automatically created by registration hook
+      wallet =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read_one!(authorize?: false)
 
       subaccount_code = "ACCT_abc123xyz"
 
@@ -73,15 +77,16 @@ defmodule Angle.Payments.UserWallet.SyncActionsTest do
       user1 = create_user()
       user2 = create_user()
 
-      {:ok, wallet1} =
+      # Wallets are automatically created by registration hook
+      wallet1 =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user1)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user1.id)
+        |> Ash.read_one!(authorize?: false)
 
-      {:ok, wallet2} =
+      wallet2 =
         UserWallet
-        |> Ash.Changeset.for_create(:create, %{}, actor: user2)
-        |> Ash.create()
+        |> Ash.Query.filter(user_id == ^user2.id)
+        |> Ash.read_one!(authorize?: false)
 
       subaccount_code = "ACCT_duplicate"
 

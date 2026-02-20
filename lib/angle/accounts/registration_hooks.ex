@@ -63,8 +63,11 @@ defmodule Angle.Accounts.RegistrationHooks do
     }
 
     case client.create_subaccount(params) do
-      {:ok, %{"subaccount_code" => code}} ->
+      {:ok, %{"subaccount_code" => code}} when is_binary(code) ->
         {:ok, code}
+
+      {:ok, _other} ->
+        {:error, "Subaccount creation succeeded but no subaccount_code was returned"}
 
       {:error, reason} ->
         {:error, reason}

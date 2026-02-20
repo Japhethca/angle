@@ -123,6 +123,10 @@ defmodule Angle.Factory do
       |> maybe_put(:slug, Map.get(attrs, :slug))
       |> maybe_put(:condition, Map.get(attrs, :condition))
       |> maybe_put(:sale_type, Map.get(attrs, :sale_type))
+      |> maybe_put(:auction_status, Map.get(attrs, :auction_status))
+      |> maybe_put(:end_time, Map.get(attrs, :end_time))
+      |> maybe_put(:original_end_time, Map.get(attrs, :original_end_time))
+      |> maybe_put(:extension_count, Map.get(attrs, :extension_count))
 
     Ash.create!(Angle.Inventory.Item, params, authorize?: false)
   end
@@ -441,6 +445,65 @@ defmodule Angle.Factory do
     Angle.Recommendations.RecommendedItem
     |> Ash.Changeset.for_create(:create, params, authorize?: false)
     |> Ash.create!(authorize?: false)
+  end
+
+  @doc """
+  Creates a user verification record.
+
+  ## Options
+
+    * `:user` - the user record (required)
+
+  """
+  def create_verification(attrs \\ %{}) do
+    user = attrs[:user] || raise "create_verification requires :user"
+
+    params = %{
+      user_id: user.id
+    }
+
+    Angle.Accounts.UserVerification
+    |> Ash.Changeset.for_create(:create, params, authorize?: false)
+    |> Ash.create!(authorize?: false)
+  end
+
+  @doc """
+  Alias for create_user/1 - for tests that use bidder terminology.
+  """
+  def create_bidder(attrs \\ %{}), do: create_user(attrs)
+
+  @doc """
+  Fetches the auto-created wallet for a user and optionally sets a balance.
+
+  Wallets are automatically created during user registration, so this function
+  retrieves the existing wallet instead of creating a new one.
+
+  ## Options
+
+    * `:user` - the user record (required)
+    * `:balance` - optional balance to set (defaults to existing balance)
+
+  """
+  def create_wallet(opts \\ []) do
+    user = Keyword.get(opts, :user) || raise "create_wallet requires :user"
+    balance = Keyword.get(opts, :balance)
+
+    require Ash.Query
+
+    # Wallet is automatically created by registration hook
+    wallet =
+      Angle.Payments.UserWallet
+      |> Ash.Query.filter(user_id == ^user.id)
+      |> Ash.read_one!(authorize?: false)
+
+    # If balance is provided, update the wallet
+    if balance do
+      wallet
+      |> Ecto.Changeset.change(%{balance: Decimal.new(to_string(balance))})
+      |> Angle.Repo.update!()
+    else
+      wallet
+    end
   end
 
   # Helpers
