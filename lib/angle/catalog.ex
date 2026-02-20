@@ -45,6 +45,7 @@ defmodule Angle.Catalog do
 
     resource Angle.Catalog.OptionSet do
       rpc_action :list_option_sets, :read_with_values
+      rpc_action :read_option_set_with_descendants, :read_with_descendants
     end
 
     resource Angle.Catalog.OptionSetValue do
