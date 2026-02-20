@@ -14,11 +14,13 @@ import { useAshMutation } from "@/hooks/use-ash-query";
 import { depositToWallet, buildCSRFHeaders } from "@/ash_rpc";
 import { formatNaira } from "@/lib/format";
 import { toast } from "sonner";
+import { router } from "@inertiajs/react";
 
 interface DepositDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   suggestedAmount?: number;
+  walletId: string;
 }
 
 const PRESET_AMOUNTS = [1000, 5000, 10000];
@@ -29,6 +31,7 @@ export function DepositDialog({
   open,
   onOpenChange,
   suggestedAmount,
+  walletId,
 }: DepositDialogProps) {
   const [amount, setAmount] = useState(suggestedAmount || PRESET_AMOUNTS[0]);
   const [customAmount, setCustomAmount] = useState("");
@@ -55,6 +58,7 @@ export function DepositDialog({
   const depositMutation = useAshMutation(
     async (depositAmount: number) => {
       return depositToWallet({
+        identity: walletId,
         input: { amount: depositAmount.toString() },
         fields: ["id", "balance", "totalDeposited"],
         headers: buildCSRFHeaders(),
@@ -64,8 +68,7 @@ export function DepositDialog({
       onSuccess: () => {
         toast.success("Deposit successful! Your wallet has been updated.");
         onOpenChange(false);
-        // Reload page to reflect new wallet balance
-        window.location.reload();
+        router.reload();
       },
       onError: (error) => {
         toast.error(error.message || "Failed to process deposit");
