@@ -38,10 +38,25 @@ defmodule AngleWeb.SettingsController do
     {:ok, payout_methods} = Angle.Payments.list_payout_methods(actor: user)
     payout_methods = Enum.map(payout_methods, &payout_method_data/1)
 
+    # Load wallet and transactions
+    wallet =
+      Angle.Payments.UserWallet
+      |> Ash.Query.filter(user_id == ^user.id)
+      |> Ash.read_one!()
+
+    transactions =
+      Angle.Payments.WalletTransaction
+      |> Ash.Query.filter(wallet_id == ^wallet.id)
+      |> Ash.Query.sort(inserted_at: :desc)
+      |> Ash.Query.limit(50)
+      |> Ash.read!()
+
     conn
     |> assign_prop(:user, user_payments_data(conn))
     |> assign_prop(:payment_methods, payment_methods)
     |> assign_prop(:payout_methods, payout_methods)
+    |> assign_prop(:wallet, wallet_data(wallet))
+    |> assign_prop(:transactions, Enum.map(transactions, &transaction_data/1))
     |> render_inertia("settings/payments")
   end
 
@@ -189,4 +204,23 @@ defmodule AngleWeb.SettingsController do
   end
 
   defp mask_account_number(number), do: number
+
+  defp wallet_data(wallet) do
+    %{
+      id: wallet.id,
+      balance: wallet.balance.amount,
+      total_deposited: wallet.total_deposited.amount,
+      total_withdrawn: wallet.total_withdrawn.amount
+    }
+  end
+
+  defp transaction_data(transaction) do
+    %{
+      id: transaction.id,
+      type: transaction.type,
+      amount: transaction.amount.amount,
+      balance_after: transaction.balance_after.amount,
+      inserted_at: transaction.inserted_at
+    }
+  end
 end
