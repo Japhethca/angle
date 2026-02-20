@@ -12,7 +12,7 @@ defmodule AngleWeb.ImageHelpers do
   def attach_cover_images([]), do: []
 
   def attach_cover_images(items) when is_list(items) do
-    item_ids = Enum.map(items, fn item -> item["id"] end)
+    item_ids = Enum.map(items, &get_item_id/1)
 
     {:ok, images} = Angle.Media.list_cover_images(item_ids, authorize?: false)
 
@@ -22,7 +22,12 @@ defmodule AngleWeb.ImageHelpers do
       end)
 
     Enum.map(items, fn item ->
-      Map.put(item, "coverImage", Map.get(cover_images, item["id"]))
+      item_id = get_item_id(item)
+
+      case item do
+        %{__struct__: _} -> Map.put(item, :cover_image, Map.get(cover_images, item_id))
+        %{} -> Map.put(item, "coverImage", Map.get(cover_images, item_id))
+      end
     end)
   end
 
@@ -112,5 +117,15 @@ defmodule AngleWeb.ImageHelpers do
       "width" => img.width,
       "height" => img.height
     }
+  end
+
+  # Private helper to extract item ID from structs or maps with string/atom keys
+  defp get_item_id(item) do
+    cond do
+      is_struct(item) -> item.id
+      is_map_key(item, "id") -> item["id"]
+      is_map_key(item, :id) -> item[:id]
+      true -> nil
+    end
   end
 end
