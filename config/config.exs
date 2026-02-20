@@ -39,9 +39,23 @@ config :ash_oban, pro?: false
 config :angle, Oban,
   engine: Oban.Engines.Basic,
   notifier: Oban.Notifiers.Postgres,
-  queues: [default: 10],
+  queues: [
+    default: 10,
+    recommendations: 10,
+    recommendations_slow: 3
+  ],
   repo: Angle.Repo,
-  plugins: [{Oban.Plugins.Cron, []}]
+  plugins: [
+    {Oban.Plugins.Cron,
+     crontab: [
+       # Refresh user interest profiles every hour
+       {"0 * * * *", Angle.Recommendations.Jobs.RefreshUserInterests},
+       # Update popular items cache every hour
+       {"0 * * * *", Angle.Recommendations.Jobs.GeneratePopularItems},
+       # Recompute item similarities every 12 hours (at midnight and noon)
+       {"0 */12 * * *", Angle.Recommendations.Jobs.ComputeItemSimilarities}
+     ]}
+  ]
 
 config :mime,
   extensions: %{"json" => "application/vnd.api+json"},
@@ -116,7 +130,8 @@ config :angle,
     Angle.Inventory,
     Angle.Accounts,
     Angle.Payments,
-    Angle.Media
+    Angle.Media,
+    Angle.Recommendations
   ]
 
 # Configures the endpoint

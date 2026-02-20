@@ -1925,23 +1925,6 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
-// User Typed Queries
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
-
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
-
-
-
 // Item Typed Queries
 /**
  * Typed query for Item
@@ -2064,20 +2047,20 @@ export const searchItemCardFields = ["id", "title", "slug", "description", "star
 
 
 
-// Review Typed Queries
+// User Typed Queries
 /**
- * Typed query for Review
+ * Typed query for User
  *
  * @typedQuery true
  */
-export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }]>>;
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
 
 /**
- * Typed query for Review
+ * Typed query for User
  *
  * @typedQuery true
  */
-export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
+export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
 
 
 
@@ -2110,38 +2093,6 @@ export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount
  * @typedQuery true
  */
 export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
-
-
-
-// Order Typed Queries
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
-
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }]>>;
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
 
 
 
@@ -2189,6 +2140,55 @@ export type ListingFormCategory = Array<InferResult<CategoryResourceSchema, ["id
  * @typedQuery true
  */
 export const listingFormCategoryFields = ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }, { categories: ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }] }];
+
+
+
+// Order Typed Queries
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
+
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
+
+
+
+// Review Typed Queries
+/**
+ * Typed query for Review
+ *
+ * @typedQuery true
+ */
+export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }]>>;
+
+/**
+ * Typed query for Review
+ *
+ * @typedQuery true
+ */
+export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
 
 
 

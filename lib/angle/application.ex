@@ -7,6 +7,9 @@ defmodule Angle.Application do
 
   @impl true
   def start(_type, _args) do
+    # Initialize recommendation caches
+    Angle.Recommendations.Cache.init()
+
     children = [
       AngleWeb.Telemetry,
       Angle.Repo,

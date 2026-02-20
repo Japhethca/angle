@@ -56,12 +56,39 @@ defmodule Angle.Bidding.Bid do
 
       change {ValidateBidIsHigherThanCurrentPrice, []}
     end
+
+    read :by_user_since do
+      description "List bids for a user placed after a specific timestamp"
+
+      argument :user_id, :uuid, allow_nil?: false
+      argument :since, :utc_datetime, allow_nil?: false
+
+      filter expr(user_id == ^arg(:user_id) and bid_time > ^arg(:since))
+    end
+
+    read :by_item_ids do
+      description "List bids for multiple items (for recommendation scoring)"
+
+      argument :item_ids, {:array, :uuid}, allow_nil?: false
+
+      filter expr(item_id in ^arg(:item_ids))
+    end
   end
 
   policies do
     # Reading bids - requires view_bids permission
     policy action_type(:read) do
       authorize_if {Angle.Accounts.Checks.HasPermission, permission: "view_bids"}
+    end
+
+    # by_user_since action for recommendation engine - background jobs bypass authorization
+    policy action(:by_user_since) do
+      authorize_if expr(user_id == ^actor(:id))
+    end
+
+    # by_item_ids action for recommendation engine - background jobs bypass authorization
+    policy action(:by_item_ids) do
+      authorize_if always()
     end
 
     # Creating bids - requires place_bids permission
