@@ -52,6 +52,10 @@ export default function EditPage({
           | "meetup"
           | "buyer_arranges"
           | "seller_arranges") || "buyer_arranges",
+      location: {
+        state: attrs._state || "",
+        lga: attrs._lga || "",
+      },
     },
     uploadedImages: images.map((img, i) => ({
       id: img.id,

@@ -33,6 +33,10 @@ export const auctionInfoSchema = z.object({
 
 export const logisticsSchema = z.object({
   deliveryPreference: z.enum(["meetup", "buyer_arranges", "seller_arranges"]),
+  location: z.object({
+    state: z.string().min(1, "State is required"),
+    lga: z.string().optional(),
+  }),
 });
 
 export type BasicDetailsData = z.infer<typeof basicDetailsSchema>;
@@ -82,6 +86,7 @@ export const initialFormState: ListingFormState = {
   },
   logistics: {
     deliveryPreference: "buyer_arranges",
+    location: { state: "", lga: "" },
   },
   selectedImages: [],
   uploadedImages: [],
