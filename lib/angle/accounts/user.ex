@@ -85,12 +85,13 @@ defmodule Angle.Accounts.User do
       change AshAuthentication.Strategy.OAuth2.IdentityChange
       change Angle.Accounts.User.Changes.LinkOrCreateOAuthAccount
 
-      # Auto-assign default "bidder" role after registration
+      # Auto-assign "seller" and "user" roles after registration
       change after_action(fn _changeset, user, _context ->
-               case Angle.Accounts.assign_role(user, %{role_name: "bidder"}, authorize?: false) do
-                 {:ok, _} -> {:ok, user}
-                 {:error, _} -> {:ok, user}
-               end
+               Enum.each(["seller", "user"], fn role_name ->
+                 Angle.Accounts.assign_role(user, %{role_name: role_name}, authorize?: false)
+               end)
+
+               {:ok, user}
              end)
     end
 
@@ -219,12 +220,13 @@ defmodule Angle.Accounts.User do
       # validates that the password matches the confirmation
       validate AshAuthentication.Strategy.Password.PasswordConfirmationValidation
 
-      # Auto-assign default "bidder" role after registration
+      # Auto-assign "seller" and "user" roles after registration
       change after_action(fn _changeset, user, _context ->
-               case Angle.Accounts.assign_role(user, %{role_name: "bidder"}, authorize?: false) do
-                 {:ok, _} -> {:ok, user}
-                 {:error, _} -> {:ok, user}
-               end
+               Enum.each(["seller", "user"], fn role_name ->
+                 Angle.Accounts.assign_role(user, %{role_name: role_name}, authorize?: false)
+               end)
+
+               {:ok, user}
              end)
 
       metadata :token, :string do

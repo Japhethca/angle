@@ -171,8 +171,9 @@ defmodule Angle.Accounts.UserTest do
 
   describe "register_with_google" do
     test "creates new user when email does not exist" do
-      # Create the bidder role first
-      create_role(%{name: "bidder"})
+      # Create the roles that get auto-assigned on registration
+      create_role(%{name: "seller"})
+      create_role(%{name: "user"})
 
       user_info = %{
         "sub" => "google_user_123",
@@ -200,10 +201,11 @@ defmodule Angle.Accounts.UserTest do
       assert to_string(user.email) == "newuser@gmail.com"
       assert user.full_name == "New User"
 
-      # Verify bidder role was assigned
+      # Verify seller and user roles were assigned
       user_with_roles = Ash.load!(user, :roles, authorize?: false)
       role_names = Enum.map(user_with_roles.roles, & &1.name)
-      assert "bidder" in role_names
+      assert "seller" in role_names
+      assert "user" in role_names
     end
 
     test "links Google account to existing user with matching email" do
