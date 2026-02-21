@@ -158,8 +158,22 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "8A556331792D140E8E3B4A353EC2FEA9F57AE27998176AAEED56A75A002C84FA",
+  "hash": "46779864FE7E3618771091386AFEE12078A1E255705A7424F75FB10081791784",
   "identities": [
+    {
+      "all_tenants?": false,
+      "base_filter": null,
+      "index_name": "user_wallets_unique_paystack_subaccount_index",
+      "keys": [
+        {
+          "type": "atom",
+          "value": "paystack_subaccount_code"
+        }
+      ],
+      "name": "unique_paystack_subaccount",
+      "nils_distinct?": true,
+      "where": null
+    },
     {
       "all_tenants?": false,
       "base_filter": null,

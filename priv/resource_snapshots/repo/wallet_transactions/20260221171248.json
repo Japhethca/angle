@@ -14,90 +14,18 @@
     },
     {
       "allow_nil?": false,
-      "default": "false",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "phone_verified",
-      "type": "boolean"
-    },
-    {
-      "allow_nil?": true,
       "default": "nil",
       "generated?": false,
-      "precision": null,
+      "precision": 15,
       "primary_key?": false,
       "references": null,
-      "scale": null,
+      "scale": 2,
       "size": null,
-      "source": "phone_verified_at",
-      "type": "utc_datetime_usec"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "phone_number",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "otp_hash",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "otp_expires_at",
-      "type": "utc_datetime_usec"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "otp_requested_at",
-      "type": "utc_datetime_usec"
+      "source": "amount",
+      "type": "decimal"
     },
     {
       "allow_nil?": false,
-      "default": "false",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "id_verified",
-      "type": "boolean"
-    },
-    {
-      "allow_nil?": true,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -105,35 +33,35 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "id_document_url",
+      "source": "transaction_type",
       "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "id_verified_at",
-      "type": "utc_datetime_usec"
     },
     {
       "allow_nil?": false,
-      "default": "\"not_submitted\"",
+      "default": "nil",
       "generated?": false,
-      "precision": null,
+      "precision": 15,
       "primary_key?": false,
       "references": null,
-      "scale": null,
+      "scale": 2,
       "size": null,
-      "source": "id_verification_status",
-      "type": "text"
+      "source": "balance_before",
+      "type": "decimal"
     },
     {
-      "allow_nil?": true,
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": 15,
+      "primary_key?": false,
+      "references": null,
+      "scale": 2,
+      "size": null,
+      "source": "balance_after",
+      "type": "decimal"
+    },
+    {
+      "allow_nil?": false,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -141,8 +69,20 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "id_rejection_reason",
+      "source": "reference",
       "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "%{}",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "metadata",
+      "type": "map"
     },
     {
       "allow_nil?": false,
@@ -187,42 +127,50 @@
           "global": null,
           "strategy": null
         },
-        "name": "user_verifications_user_id_fkey",
+        "name": "wallet_transactions_wallet_id_fkey",
         "on_delete": null,
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "users"
+        "table": "user_wallets"
       },
       "scale": null,
       "size": null,
-      "source": "user_id",
+      "source": "wallet_id",
       "type": "uuid"
     }
   ],
   "base_filter": null,
   "check_constraints": [],
   "create_table_options": null,
-  "custom_indexes": [],
-  "custom_statements": [],
-  "has_create_action": true,
-  "hash": "116921871B9AB599D80675D18D00B673DBD2281605A3A83E2E54AE0B194B1AE2",
-  "identities": [
+  "custom_indexes": [
     {
       "all_tenants?": false,
-      "base_filter": null,
-      "index_name": "user_verifications_unique_user_verification_index",
-      "keys": [
+      "concurrently": false,
+      "error_fields": [
+        "wallet_id"
+      ],
+      "fields": [
         {
           "type": "atom",
-          "value": "user_id"
+          "value": "wallet_id"
         }
       ],
-      "name": "unique_user_verification",
-      "nils_distinct?": true,
+      "include": null,
+      "message": null,
+      "name": null,
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": false,
+      "using": null,
       "where": null
     }
   ],
+  "custom_statements": [],
+  "has_create_action": true,
+  "hash": "FE30CB110B41C874339ECA6D7E8FBB957C6568027F9FD2D951FEF3921ED4202C",
+  "identities": [],
   "multitenancy": {
     "attribute": null,
     "global": null,
@@ -230,5 +178,5 @@
   },
   "repo": "Elixir.Angle.Repo",
   "schema": null,
-  "table": "user_verifications"
+  "table": "wallet_transactions"
 }

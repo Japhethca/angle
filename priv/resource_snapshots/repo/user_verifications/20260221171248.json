@@ -14,18 +14,18 @@
     },
     {
       "allow_nil?": false,
-      "default": "nil",
+      "default": "false",
       "generated?": false,
-      "precision": 15,
+      "precision": null,
       "primary_key?": false,
       "references": null,
-      "scale": 2,
+      "scale": null,
       "size": null,
-      "source": "amount",
-      "type": "decimal"
+      "source": "phone_verified",
+      "type": "boolean"
     },
     {
-      "allow_nil?": false,
+      "allow_nil?": true,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -33,35 +33,11 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "transaction_type",
-      "type": "text"
+      "source": "phone_verified_at",
+      "type": "utc_datetime_usec"
     },
     {
-      "allow_nil?": false,
-      "default": "nil",
-      "generated?": false,
-      "precision": 15,
-      "primary_key?": false,
-      "references": null,
-      "scale": 2,
-      "size": null,
-      "source": "balance_before",
-      "type": "decimal"
-    },
-    {
-      "allow_nil?": false,
-      "default": "nil",
-      "generated?": false,
-      "precision": 15,
-      "primary_key?": false,
-      "references": null,
-      "scale": 2,
-      "size": null,
-      "source": "balance_after",
-      "type": "decimal"
-    },
-    {
-      "allow_nil?": false,
+      "allow_nil?": true,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -69,20 +45,116 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "reference",
+      "source": "phone_number",
       "type": "text"
     },
     {
       "allow_nil?": true,
-      "default": "%{}",
+      "default": "nil",
       "generated?": false,
       "precision": null,
       "primary_key?": false,
       "references": null,
       "scale": null,
       "size": null,
-      "source": "metadata",
-      "type": "map"
+      "source": "otp_hash",
+      "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "otp_expires_at",
+      "type": "utc_datetime_usec"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "otp_requested_at",
+      "type": "utc_datetime_usec"
+    },
+    {
+      "allow_nil?": false,
+      "default": "0",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "otp_attempts",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": false,
+      "default": "false",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "id_verified",
+      "type": "boolean"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "id_document_url",
+      "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "id_verified_at",
+      "type": "utc_datetime_usec"
+    },
+    {
+      "allow_nil?": false,
+      "default": "\"not_submitted\"",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "id_verification_status",
+      "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "id_rejection_reason",
+      "type": "text"
     },
     {
       "allow_nil?": false,
@@ -127,50 +199,42 @@
           "global": null,
           "strategy": null
         },
-        "name": "wallet_transactions_wallet_id_fkey",
+        "name": "user_verifications_user_id_fkey",
         "on_delete": null,
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "user_wallets"
+        "table": "users"
       },
       "scale": null,
       "size": null,
-      "source": "wallet_id",
+      "source": "user_id",
       "type": "uuid"
     }
   ],
   "base_filter": null,
   "check_constraints": [],
   "create_table_options": null,
-  "custom_indexes": [
+  "custom_indexes": [],
+  "custom_statements": [],
+  "has_create_action": true,
+  "hash": "5836A83EBD9023947EB6CB594B92E6EE6126E5045D298B610E4756EB8B34162C",
+  "identities": [
     {
       "all_tenants?": false,
-      "concurrently": false,
-      "error_fields": [
-        "wallet_id"
-      ],
-      "fields": [
+      "base_filter": null,
+      "index_name": "user_verifications_unique_user_verification_index",
+      "keys": [
         {
           "type": "atom",
-          "value": "wallet_id"
+          "value": "user_id"
         }
       ],
-      "include": null,
-      "message": null,
-      "name": null,
-      "nulls_distinct": true,
-      "prefix": null,
-      "table": null,
-      "unique": false,
-      "using": null,
+      "name": "unique_user_verification",
+      "nils_distinct?": true,
       "where": null
     }
   ],
-  "custom_statements": [],
-  "has_create_action": true,
-  "hash": "51CA6ABC961B35108CF5A1D9C47CC35644DA89048E61CB45A3AF75AC3BC061BA",
-  "identities": [],
   "multitenancy": {
     "attribute": null,
     "global": null,
@@ -178,5 +242,5 @@
   },
   "repo": "Elixir.Angle.Repo",
   "schema": null,
-  "table": "wallet_transactions"
+  "table": "user_verifications"
 }

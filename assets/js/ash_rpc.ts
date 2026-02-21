@@ -7,6 +7,7 @@
 
 export type Decimal = string;
 export type UUID = string;
+export type UtcDateTime = string;
 export type UtcDateTimeUsec = string;
 
 // Bid Schema
@@ -108,6 +109,34 @@ export type ReviewAttributesOnlySchema = {
 };
 
 
+// SellerBlacklist Schema
+export type SellerBlacklistResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "sellerId" | "blockedUserId" | "reason" | "insertedAt" | "updatedAt";
+  id: UUID;
+  sellerId: UUID;
+  blockedUserId: UUID;
+  reason: string | null;
+  insertedAt: UtcDateTimeUsec;
+  updatedAt: UtcDateTimeUsec;
+  seller: { __type: "Relationship"; __resource: UserResourceSchema; };
+  blockedUser: { __type: "Relationship"; __resource: UserResourceSchema; };
+};
+
+
+
+export type SellerBlacklistAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "sellerId" | "blockedUserId" | "reason" | "insertedAt" | "updatedAt";
+  id: UUID;
+  sellerId: UUID;
+  blockedUserId: UUID;
+  reason: string | null;
+  insertedAt: UtcDateTimeUsec;
+  updatedAt: UtcDateTimeUsec;
+};
+
+
 // Category Schema
 export type CategoryResourceSchema = {
   __type: "Resource";
@@ -204,7 +233,7 @@ export type OptionSetValueAttributesOnlySchema = {
 // Item Schema
 export type ItemResourceSchema = {
   __type: "Resource";
-  __primitiveFields: "id" | "title" | "description" | "startingPrice" | "reservePrice" | "currentPrice" | "bidIncrement" | "slug" | "startTime" | "endTime" | "categoryId" | "lotNumber" | "publicationStatus" | "auctionStatus" | "condition" | "location" | "attributes" | "saleType" | "auctionFormat" | "buyNowPrice" | "viewCount" | "createdById" | "bidCount" | "watcherCount";
+  __primitiveFields: "id" | "title" | "description" | "startingPrice" | "reservePrice" | "currentPrice" | "bidIncrement" | "slug" | "startTime" | "endTime" | "categoryId" | "lotNumber" | "publicationStatus" | "auctionStatus" | "condition" | "location" | "attributes" | "saleType" | "auctionFormat" | "buyNowPrice" | "viewCount" | "createdById" | "extensionCount" | "originalEndTime" | "bidCount" | "watcherCount";
   id: UUID;
   title: string;
   description: string | null;
@@ -227,6 +256,8 @@ export type ItemResourceSchema = {
   buyNowPrice: Decimal | null;
   viewCount: number | null;
   createdById: UUID | null;
+  extensionCount: number | null;
+  originalEndTime: UtcDateTimeUsec | null;
   bidCount: number;
   watcherCount: number;
   user: { __type: "Relationship"; __resource: UserResourceSchema | null; };
@@ -237,7 +268,7 @@ export type ItemResourceSchema = {
 
 export type ItemAttributesOnlySchema = {
   __type: "Resource";
-  __primitiveFields: "id" | "title" | "description" | "startingPrice" | "reservePrice" | "currentPrice" | "bidIncrement" | "slug" | "startTime" | "endTime" | "categoryId" | "lotNumber" | "publicationStatus" | "auctionStatus" | "condition" | "location" | "attributes" | "saleType" | "auctionFormat" | "buyNowPrice" | "viewCount" | "createdById";
+  __primitiveFields: "id" | "title" | "description" | "startingPrice" | "reservePrice" | "currentPrice" | "bidIncrement" | "slug" | "startTime" | "endTime" | "categoryId" | "lotNumber" | "publicationStatus" | "auctionStatus" | "condition" | "location" | "attributes" | "saleType" | "auctionFormat" | "buyNowPrice" | "viewCount" | "createdById" | "extensionCount" | "originalEndTime";
   id: UUID;
   title: string;
   description: string | null;
@@ -260,6 +291,8 @@ export type ItemAttributesOnlySchema = {
   buyNowPrice: Decimal | null;
   viewCount: number | null;
   createdById: UUID | null;
+  extensionCount: number | null;
+  originalEndTime: UtcDateTimeUsec | null;
 };
 
 
@@ -302,9 +335,11 @@ export type UserResourceSchema = {
   reviewCount: number;
   avgRating: number;
   notificationPreferences: { __type: "Relationship"; __resource: AngleAccountsNotificationPreferencesResourceSchema | null; };
+  verification: { __type: "Relationship"; __resource: UserVerificationResourceSchema | null; };
   storeProfile: { __type: "Relationship"; __resource: StoreProfileResourceSchema | null; };
   items: { __type: "Relationship"; __array: true; __resource: ItemResourceSchema; };
   receivedReviews: { __type: "Relationship"; __array: true; __resource: ReviewResourceSchema; };
+  wallet: { __type: "Relationship"; __resource: UserWalletResourceSchema | null; };
 };
 
 
@@ -353,6 +388,105 @@ export type StoreProfileAttributesOnlySchema = {
   address: string | null;
   deliveryPreference: string | null;
   userId: UUID;
+};
+
+
+// UserVerification Schema
+export type UserVerificationResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "phoneVerified" | "phoneVerifiedAt" | "phoneNumber" | "idVerified" | "idDocumentUrl" | "idVerifiedAt" | "idVerificationStatus" | "idRejectionReason" | "userId";
+  id: UUID;
+  phoneVerified: boolean;
+  phoneVerifiedAt: UtcDateTimeUsec | null;
+  phoneNumber: string | null;
+  idVerified: boolean;
+  idDocumentUrl: string | null;
+  idVerifiedAt: UtcDateTimeUsec | null;
+  idVerificationStatus: "not_submitted" | "pending" | "approved" | "rejected";
+  idRejectionReason: string | null;
+  userId: UUID;
+  user: { __type: "Relationship"; __resource: UserResourceSchema; };
+};
+
+
+
+export type UserVerificationAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "phoneVerified" | "phoneVerifiedAt" | "phoneNumber" | "idVerified" | "idDocumentUrl" | "idVerifiedAt" | "idVerificationStatus" | "idRejectionReason" | "userId";
+  id: UUID;
+  phoneVerified: boolean;
+  phoneVerifiedAt: UtcDateTimeUsec | null;
+  phoneNumber: string | null;
+  idVerified: boolean;
+  idDocumentUrl: string | null;
+  idVerifiedAt: UtcDateTimeUsec | null;
+  idVerificationStatus: "not_submitted" | "pending" | "approved" | "rejected";
+  idRejectionReason: string | null;
+  userId: UUID;
+};
+
+
+// UserWallet Schema
+export type UserWalletResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "balance" | "totalDeposited" | "totalWithdrawn" | "paystackSubaccountCode" | "lastSyncedAt" | "syncStatus" | "metadata" | "userId";
+  id: UUID;
+  balance: Decimal;
+  totalDeposited: Decimal;
+  totalWithdrawn: Decimal;
+  paystackSubaccountCode: string | null;
+  lastSyncedAt: UtcDateTime | null;
+  syncStatus: "pending" | "synced" | "error";
+  metadata: Record<string, any>;
+  userId: UUID;
+  user: { __type: "Relationship"; __resource: UserResourceSchema; };
+};
+
+
+
+export type UserWalletAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "balance" | "totalDeposited" | "totalWithdrawn" | "paystackSubaccountCode" | "lastSyncedAt" | "syncStatus" | "metadata" | "userId";
+  id: UUID;
+  balance: Decimal;
+  totalDeposited: Decimal;
+  totalWithdrawn: Decimal;
+  paystackSubaccountCode: string | null;
+  lastSyncedAt: UtcDateTime | null;
+  syncStatus: "pending" | "synced" | "error";
+  metadata: Record<string, any>;
+  userId: UUID;
+};
+
+
+// WalletTransaction Schema
+export type WalletTransactionResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "amount" | "transactionType" | "balanceBefore" | "balanceAfter" | "reference" | "metadata" | "walletId";
+  id: UUID;
+  amount: Decimal;
+  transactionType: "deposit" | "withdrawal" | "purchase" | "sale_credit" | "refund" | "commission";
+  balanceBefore: Decimal;
+  balanceAfter: Decimal;
+  reference: string;
+  metadata: Record<string, any> | null;
+  walletId: UUID;
+  wallet: { __type: "Relationship"; __resource: UserWalletResourceSchema; };
+};
+
+
+
+export type WalletTransactionAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "amount" | "transactionType" | "balanceBefore" | "balanceAfter" | "reference" | "metadata" | "walletId";
+  id: UUID;
+  amount: Decimal;
+  transactionType: "deposit" | "withdrawal" | "purchase" | "sale_credit" | "refund" | "commission";
+  balanceBefore: Decimal;
+  balanceAfter: Decimal;
+  reference: string;
+  metadata: Record<string, any> | null;
+  walletId: UUID;
 };
 
 
@@ -656,6 +790,61 @@ export type ReviewFilterInput = {
   reviewer?: UserFilterInput;
 
   seller?: UserFilterInput;
+
+};
+export type SellerBlacklistFilterInput = {
+  and?: Array<SellerBlacklistFilterInput>;
+  or?: Array<SellerBlacklistFilterInput>;
+  not?: Array<SellerBlacklistFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  sellerId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  blockedUserId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  reason?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  insertedAt?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+  updatedAt?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+
+  seller?: UserFilterInput;
+
+  blockedUser?: UserFilterInput;
 
 };
 export type CategoryFilterInput = {
@@ -997,6 +1186,26 @@ export type ItemFilterInput = {
     in?: Array<UUID>;
   };
 
+  extensionCount?: {
+    eq?: number;
+    notEq?: number;
+    greaterThan?: number;
+    greaterThanOrEqual?: number;
+    lessThan?: number;
+    lessThanOrEqual?: number;
+    in?: Array<number>;
+  };
+
+  originalEndTime?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
   bidCount?: {
     eq?: number;
     notEq?: number;
@@ -1139,11 +1348,15 @@ export type UserFilterInput = {
     in?: Array<number>;
   };
 
+  verification?: UserVerificationFilterInput;
+
   storeProfile?: StoreProfileFilterInput;
 
   items?: ItemFilterInput;
 
   receivedReviews?: ReviewFilterInput;
+
+  wallet?: UserWalletFilterInput;
 
 };
 export type StoreProfileFilterInput = {
@@ -1201,6 +1414,229 @@ export type StoreProfileFilterInput = {
 
 
   user?: UserFilterInput;
+
+};
+export type UserVerificationFilterInput = {
+  and?: Array<UserVerificationFilterInput>;
+  or?: Array<UserVerificationFilterInput>;
+  not?: Array<UserVerificationFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  phoneVerified?: {
+    eq?: boolean;
+    notEq?: boolean;
+  };
+
+  phoneVerifiedAt?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+  phoneNumber?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  idVerified?: {
+    eq?: boolean;
+    notEq?: boolean;
+  };
+
+  idDocumentUrl?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  idVerifiedAt?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+  idVerificationStatus?: {
+    eq?: "not_submitted" | "pending" | "approved" | "rejected";
+    notEq?: "not_submitted" | "pending" | "approved" | "rejected";
+    in?: Array<"not_submitted" | "pending" | "approved" | "rejected">;
+  };
+
+  idRejectionReason?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  userId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+
+  user?: UserFilterInput;
+
+};
+export type UserWalletFilterInput = {
+  and?: Array<UserWalletFilterInput>;
+  or?: Array<UserWalletFilterInput>;
+  not?: Array<UserWalletFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  balance?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  totalDeposited?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  totalWithdrawn?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  paystackSubaccountCode?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  lastSyncedAt?: {
+    eq?: UtcDateTime;
+    notEq?: UtcDateTime;
+    greaterThan?: UtcDateTime;
+    greaterThanOrEqual?: UtcDateTime;
+    lessThan?: UtcDateTime;
+    lessThanOrEqual?: UtcDateTime;
+    in?: Array<UtcDateTime>;
+  };
+
+  syncStatus?: {
+    eq?: "pending" | "synced" | "error";
+    notEq?: "pending" | "synced" | "error";
+    in?: Array<"pending" | "synced" | "error">;
+  };
+
+  metadata?: {
+    eq?: Record<string, any>;
+    notEq?: Record<string, any>;
+    in?: Array<Record<string, any>>;
+  };
+
+  userId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+
+  user?: UserFilterInput;
+
+};
+export type WalletTransactionFilterInput = {
+  and?: Array<WalletTransactionFilterInput>;
+  or?: Array<WalletTransactionFilterInput>;
+  not?: Array<WalletTransactionFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  amount?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  transactionType?: {
+    eq?: "deposit" | "withdrawal" | "purchase" | "sale_credit" | "refund" | "commission";
+    notEq?: "deposit" | "withdrawal" | "purchase" | "sale_credit" | "refund" | "commission";
+    in?: Array<"deposit" | "withdrawal" | "purchase" | "sale_credit" | "refund" | "commission">;
+  };
+
+  balanceBefore?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  balanceAfter?: {
+    eq?: Decimal;
+    notEq?: Decimal;
+    greaterThan?: Decimal;
+    greaterThanOrEqual?: Decimal;
+    lessThan?: Decimal;
+    lessThanOrEqual?: Decimal;
+    in?: Array<Decimal>;
+  };
+
+  reference?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  metadata?: {
+    eq?: Record<string, any>;
+    notEq?: Record<string, any>;
+    in?: Array<Record<string, any>>;
+  };
+
+  walletId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+
+  wallet?: UserWalletFilterInput;
 
 };
 export type AngleCatalogCategoryFieldFilterInput = {
@@ -1925,6 +2361,85 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
+// Bid Typed Queries
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export type ActiveBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }]>>;
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export const activeBidCardFields = ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }] satisfies ListBidsFields;
+
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }]>>;
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
+
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export type ItemAnalyticsBid = Array<InferResult<BidResourceSchema, ["id", "amount", "bidTime", "bidType", "itemId", { user: ["id", "username", "fullName"] }]>>;
+
+/**
+ * Typed query for Bid
+ *
+ * @typedQuery true
+ */
+export const itemAnalyticsBidFields = ["id", "amount", "bidTime", "bidType", "itemId", { user: ["id", "username", "fullName"] }] satisfies ListBidsFields;
+
+
+
+// Order Typed Queries
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
+
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
+
+
+
 // Item Typed Queries
 /**
  * Typed query for Item
@@ -2047,20 +2562,20 @@ export const searchItemCardFields = ["id", "title", "slug", "description", "star
 
 
 
-// User Typed Queries
+// SellerBlacklist Typed Queries
 /**
- * Typed query for User
+ * Typed query for SellerBlacklist
  *
  * @typedQuery true
  */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
+export type SellerBlacklistCard = Array<InferResult<SellerBlacklistResourceSchema, ["id", "sellerId", "blockedUserId", "reason", "insertedAt", { blockedUser: ["id", "username", "fullName"] }]>>;
 
 /**
- * Typed query for User
+ * Typed query for SellerBlacklist
  *
  * @typedQuery true
  */
-export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
+export const sellerBlacklistCardFields = ["id", "sellerId", "blockedUserId", "reason", "insertedAt", { blockedUser: ["id", "username", "fullName"] }] satisfies ListBlacklistFields;
 
 
 
@@ -2111,70 +2626,6 @@ export const listingFormCategoryFields = ["id", "name", "slug", { attributeSchem
 
 
 
-// Bid Typed Queries
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export type ActiveBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }]>>;
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export const activeBidCardFields = ["id", "amount", "bidType", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "currentPrice", "startingPrice", "endTime", "auctionStatus", "bidCount", "watcherCount"] }] satisfies ListBidsFields;
-
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export type HistoryBidCard = Array<InferResult<BidResourceSchema, ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }]>>;
-
-/**
- * Typed query for Bid
- *
- * @typedQuery true
- */
-export const historyBidCardFields = ["id", "amount", "bidTime", "itemId", "userId", { item: ["id", "title", "slug", "auctionStatus", "createdById", { user: ["id", "username", "fullName"] }] }] satisfies ListBidsFields;
-
-
-
-// Order Typed Queries
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
-
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }]>>;
-
-/**
- * Typed query for Order
- *
- * @typedQuery true
- */
-export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
-
-
-
 // Review Typed Queries
 /**
  * Typed query for Review
@@ -2189,6 +2640,23 @@ export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "r
  * @typedQuery true
  */
 export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
+
+
+
+// User Typed Queries
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
+
+/**
+ * Typed query for User
+ *
+ * @typedQuery true
+ */
+export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
 
 
 
@@ -3066,6 +3534,180 @@ export async function validateGetReviewForOrder(
     action: "get_review_for_order",
     ...(config.tenant !== undefined && { tenant: config.tenant }),
     input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type CreateBlacklistInput = {
+  blockedUserId: UUID;
+  reason?: string | null;
+};
+
+export type CreateBlacklistFields = UnifiedFieldSelection<SellerBlacklistResourceSchema>[];
+
+export type InferCreateBlacklistResult<
+  Fields extends CreateBlacklistFields | undefined,
+> = InferResult<SellerBlacklistResourceSchema, Fields>;
+
+export type CreateBlacklistResult<Fields extends CreateBlacklistFields | undefined = undefined> = | { success: true; data: InferCreateBlacklistResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Create a new SellerBlacklist
+ *
+ * @ashActionType :create
+ */
+export async function createBlacklist<Fields extends CreateBlacklistFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  input: CreateBlacklistInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<CreateBlacklistResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "create_blacklist",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<CreateBlacklistResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Create a new SellerBlacklist
+ *
+ * @ashActionType :create
+ * @validation true
+ */
+export async function validateCreateBlacklist(
+  config: {
+  tenant?: string;
+  input: CreateBlacklistInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "create_blacklist",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type ListBlacklistFields = UnifiedFieldSelection<SellerBlacklistResourceSchema>[];
+
+
+export type InferListBlacklistResult<
+  Fields extends ListBlacklistFields | undefined,
+  Page extends ListBlacklistConfig["page"] = undefined
+> = ConditionalPaginatedResultMixed<Page, Array<InferResult<SellerBlacklistResourceSchema, Fields>>, {
+  results: Array<InferResult<SellerBlacklistResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+  count?: number | null;
+  type: "offset";
+}, {
+  results: Array<InferResult<SellerBlacklistResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  after: string | null;
+  before: string | null;
+  previousPage: string;
+  nextPage: string;
+  count?: number | null;
+  type: "keyset";
+}>;
+
+export type ListBlacklistConfig = {
+  tenant?: string;
+  fields: ListBlacklistFields;
+  filter?: SellerBlacklistFilterInput;
+  sort?: string;
+  page?: (
+    {
+      limit?: number;
+      offset?: number;
+      count?: boolean;
+    } | {
+      limit?: number;
+      after?: string;
+      before?: string;
+    }
+  );
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
+
+export type ListBlacklistResult<Fields extends ListBlacklistFields, Page extends ListBlacklistConfig["page"] = undefined> = | { success: true; data: InferListBlacklistResult<Fields, Page>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read SellerBlacklist records
+ *
+ * @ashActionType :read
+ */
+export async function listBlacklist<Fields extends ListBlacklistFields, Config extends ListBlacklistConfig = ListBlacklistConfig>(
+  config: Config & { fields: Fields }
+): Promise<ListBlacklistResult<Fields, Config["page"]>> {
+  const payload = {
+    action: "list_blacklist",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort }),
+    ...(config.page && { page: config.page })
+  };
+
+  return executeActionRpcRequest<ListBlacklistResult<Fields, Config["page"]>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read SellerBlacklist records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateListBlacklist(
+  config: {
+  tenant?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "list_blacklist",
+    ...(config.tenant !== undefined && { tenant: config.tenant })
   };
 
   return executeValidationRpcRequest<ValidationResult>(
@@ -4364,6 +5006,513 @@ export async function validateUpsertStoreProfile(
     action: "upsert_store_profile",
     ...(config.tenant !== undefined && { tenant: config.tenant }),
     input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type RequestPhoneOtpInput = {
+  phoneNumber: string;
+};
+
+export type RequestPhoneOtpFields = UnifiedFieldSelection<UserVerificationResourceSchema>[];
+
+export type InferRequestPhoneOtpResult<
+  Fields extends RequestPhoneOtpFields | undefined,
+> = InferResult<UserVerificationResourceSchema, Fields>;
+
+export type RequestPhoneOtpResult<Fields extends RequestPhoneOtpFields | undefined = undefined> = | { success: true; data: InferRequestPhoneOtpResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Update an existing UserVerification
+ *
+ * @ashActionType :update
+ */
+export async function requestPhoneOtp<Fields extends RequestPhoneOtpFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  input: RequestPhoneOtpInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<RequestPhoneOtpResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "request_phone_otp",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<RequestPhoneOtpResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Update an existing UserVerification
+ *
+ * @ashActionType :update
+ * @validation true
+ */
+export async function validateRequestPhoneOtp(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  input: RequestPhoneOtpInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "request_phone_otp",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type VerifyPhoneOtpInput = {
+  otpCode: string;
+};
+
+export type VerifyPhoneOtpFields = UnifiedFieldSelection<UserVerificationResourceSchema>[];
+
+export type InferVerifyPhoneOtpResult<
+  Fields extends VerifyPhoneOtpFields | undefined,
+> = InferResult<UserVerificationResourceSchema, Fields>;
+
+export type VerifyPhoneOtpResult<Fields extends VerifyPhoneOtpFields | undefined = undefined> = | { success: true; data: InferVerifyPhoneOtpResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Update an existing UserVerification
+ *
+ * @ashActionType :update
+ */
+export async function verifyPhoneOtp<Fields extends VerifyPhoneOtpFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  input: VerifyPhoneOtpInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<VerifyPhoneOtpResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "verify_phone_otp",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<VerifyPhoneOtpResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Update an existing UserVerification
+ *
+ * @ashActionType :update
+ * @validation true
+ */
+export async function validateVerifyPhoneOtp(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  input: VerifyPhoneOtpInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "verify_phone_otp",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type DepositToWalletInput = {
+  amount: Decimal;
+};
+
+export type DepositToWalletFields = UnifiedFieldSelection<UserWalletResourceSchema>[];
+
+export type InferDepositToWalletResult<
+  Fields extends DepositToWalletFields | undefined,
+> = InferResult<UserWalletResourceSchema, Fields>;
+
+export type DepositToWalletResult<Fields extends DepositToWalletFields | undefined = undefined> = | { success: true; data: InferDepositToWalletResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Update an existing UserWallet
+ *
+ * @ashActionType :update
+ */
+export async function depositToWallet<Fields extends DepositToWalletFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  input: DepositToWalletInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<DepositToWalletResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "deposit_to_wallet",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<DepositToWalletResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Update an existing UserWallet
+ *
+ * @ashActionType :update
+ * @validation true
+ */
+export async function validateDepositToWallet(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  input: DepositToWalletInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "deposit_to_wallet",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type WithdrawFromWalletInput = {
+  amount: Decimal;
+  bankDetails: {bankName: string, accountNumber: string, accountName: string};
+};
+
+export type WithdrawFromWalletFields = UnifiedFieldSelection<UserWalletResourceSchema>[];
+
+export type InferWithdrawFromWalletResult<
+  Fields extends WithdrawFromWalletFields | undefined,
+> = InferResult<UserWalletResourceSchema, Fields>;
+
+export type WithdrawFromWalletResult<Fields extends WithdrawFromWalletFields | undefined = undefined> = | { success: true; data: InferWithdrawFromWalletResult<Fields>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Update an existing UserWallet
+ *
+ * @ashActionType :update
+ */
+export async function withdrawFromWallet<Fields extends WithdrawFromWalletFields | undefined = undefined>(
+  config: {
+  tenant?: string;
+  identity: UUID;
+  input: WithdrawFromWalletInput;
+  fields?: Fields;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<WithdrawFromWalletResult<Fields extends undefined ? [] : Fields>> {
+  const payload = {
+    action: "withdraw_from_wallet",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input,
+    ...(config.fields !== undefined && { fields: config.fields })
+  };
+
+  return executeActionRpcRequest<WithdrawFromWalletResult<Fields extends undefined ? [] : Fields>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Update an existing UserWallet
+ *
+ * @ashActionType :update
+ * @validation true
+ */
+export async function validateWithdrawFromWallet(
+  config: {
+  tenant?: string;
+  identity: UUID | string;
+  input: WithdrawFromWalletInput;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "withdraw_from_wallet",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    identity: config.identity,
+    input: config.input
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type GetWalletFields = UnifiedFieldSelection<UserWalletResourceSchema>[];
+
+
+export type InferGetWalletResult<
+  Fields extends GetWalletFields | undefined,
+  Page extends GetWalletConfig["page"] = undefined
+> = ConditionalPaginatedResultMixed<Page, Array<InferResult<UserWalletResourceSchema, Fields>>, {
+  results: Array<InferResult<UserWalletResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+  count?: number | null;
+  type: "offset";
+}, {
+  results: Array<InferResult<UserWalletResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  after: string | null;
+  before: string | null;
+  previousPage: string;
+  nextPage: string;
+  count?: number | null;
+  type: "keyset";
+}>;
+
+export type GetWalletConfig = {
+  tenant?: string;
+  fields: GetWalletFields;
+  filter?: UserWalletFilterInput;
+  sort?: string;
+  page?: (
+    {
+      limit?: number;
+      offset?: number;
+      count?: boolean;
+    } | {
+      limit?: number;
+      after?: string;
+      before?: string;
+    }
+  );
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
+
+export type GetWalletResult<Fields extends GetWalletFields, Page extends GetWalletConfig["page"] = undefined> = | { success: true; data: InferGetWalletResult<Fields, Page>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read UserWallet records
+ *
+ * @ashActionType :read
+ */
+export async function getWallet<Fields extends GetWalletFields, Config extends GetWalletConfig = GetWalletConfig>(
+  config: Config & { fields: Fields }
+): Promise<GetWalletResult<Fields, Config["page"]>> {
+  const payload = {
+    action: "get_wallet",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort }),
+    ...(config.page && { page: config.page })
+  };
+
+  return executeActionRpcRequest<GetWalletResult<Fields, Config["page"]>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read UserWallet records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateGetWallet(
+  config: {
+  tenant?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "get_wallet",
+    ...(config.tenant !== undefined && { tenant: config.tenant })
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
+
+
+export type ListTransactionsFields = UnifiedFieldSelection<WalletTransactionResourceSchema>[];
+
+
+export type InferListTransactionsResult<
+  Fields extends ListTransactionsFields | undefined,
+  Page extends ListTransactionsConfig["page"] = undefined
+> = ConditionalPaginatedResultMixed<Page, Array<InferResult<WalletTransactionResourceSchema, Fields>>, {
+  results: Array<InferResult<WalletTransactionResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+  count?: number | null;
+  type: "offset";
+}, {
+  results: Array<InferResult<WalletTransactionResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  after: string | null;
+  before: string | null;
+  previousPage: string;
+  nextPage: string;
+  count?: number | null;
+  type: "keyset";
+}>;
+
+export type ListTransactionsConfig = {
+  tenant?: string;
+  fields: ListTransactionsFields;
+  filter?: WalletTransactionFilterInput;
+  sort?: string;
+  page?: (
+    {
+      limit?: number;
+      offset?: number;
+      count?: boolean;
+    } | {
+      limit?: number;
+      after?: string;
+      before?: string;
+    }
+  );
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
+
+export type ListTransactionsResult<Fields extends ListTransactionsFields, Page extends ListTransactionsConfig["page"] = undefined> = | { success: true; data: InferListTransactionsResult<Fields, Page>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read WalletTransaction records
+ *
+ * @ashActionType :read
+ */
+export async function listTransactions<Fields extends ListTransactionsFields, Config extends ListTransactionsConfig = ListTransactionsConfig>(
+  config: Config & { fields: Fields }
+): Promise<ListTransactionsResult<Fields, Config["page"]>> {
+  const payload = {
+    action: "list_transactions",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort }),
+    ...(config.page && { page: config.page })
+  };
+
+  return executeActionRpcRequest<ListTransactionsResult<Fields, Config["page"]>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read WalletTransaction records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateListTransactions(
+  config: {
+  tenant?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "list_transactions",
+    ...(config.tenant !== undefined && { tenant: config.tenant })
   };
 
   return executeValidationRpcRequest<ValidationResult>(
