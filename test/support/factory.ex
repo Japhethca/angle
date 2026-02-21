@@ -123,6 +123,10 @@ defmodule Angle.Factory do
       |> maybe_put(:slug, Map.get(attrs, :slug))
       |> maybe_put(:condition, Map.get(attrs, :condition))
       |> maybe_put(:sale_type, Map.get(attrs, :sale_type))
+      |> maybe_put(:auction_status, Map.get(attrs, :auction_status))
+      |> maybe_put(:end_time, Map.get(attrs, :end_time))
+      |> maybe_put(:original_end_time, Map.get(attrs, :original_end_time))
+      |> maybe_put(:extension_count, Map.get(attrs, :extension_count))
 
     Ash.create!(Angle.Inventory.Item, params, authorize?: false)
   end
@@ -441,6 +445,126 @@ defmodule Angle.Factory do
     Angle.Recommendations.RecommendedItem
     |> Ash.Changeset.for_create(:create, params, authorize?: false)
     |> Ash.create!(authorize?: false)
+  end
+
+  @doc """
+  Creates a user verification record.
+
+  ## Options
+
+    * `:user` - the user record (required)
+    * `:phone_verified` - whether phone is verified (defaults to true for test convenience)
+    * `:id_verified` - whether ID is verified (defaults to false)
+
+  """
+  def create_verification(attrs \\ %{}) do
+    user = attrs[:user] || raise "create_verification requires :user"
+    phone_verified = Map.get(attrs, :phone_verified, true)
+    id_verified = Map.get(attrs, :id_verified, false)
+
+    params = %{
+      user_id: user.id
+    }
+
+    verification =
+      Angle.Accounts.UserVerification
+      |> Ash.Changeset.for_create(:create, params, authorize?: false)
+      |> Ash.create!(authorize?: false)
+
+    # Set verification fields directly (these are normally set by verify actions)
+    fields = %{}
+
+    fields =
+      if phone_verified,
+        do: Map.merge(fields, %{phone_verified: true, phone_verified_at: DateTime.utc_now()}),
+        else: fields
+
+    fields =
+      if id_verified,
+        do: Map.merge(fields, %{id_verified: true, id_verified_at: DateTime.utc_now()}),
+        else: fields
+
+    if fields != %{} do
+      verification
+      |> Ecto.Changeset.change(fields)
+      |> Angle.Repo.update!()
+    else
+      verification
+    end
+  end
+
+  @doc """
+  Alias for create_user/1 - for tests that use bidder terminology.
+  """
+  def create_bidder(attrs \\ %{}), do: create_user(attrs)
+
+  @doc """
+  Creates a verified user (with phone verification and wallet balance).
+  Useful for bidding tests where phone verification and wallet balance are required.
+
+  ## Options
+
+    * `:balance` - wallet balance (defaults to 5000 for bidding tests)
+    * `:id_verified` - whether to add ID verification (defaults to false)
+    * All other options are passed to create_user/1
+  """
+  def create_verified_bidder(attrs \\ %{}) do
+    balance = Map.get(attrs, :balance, 5000)
+    phone_verified = Map.get(attrs, :phone_verified, true)
+    id_verified = Map.get(attrs, :id_verified, false)
+
+    user_attrs =
+      attrs
+      |> Map.delete(:balance)
+      |> Map.delete(:phone_verified)
+      |> Map.delete(:id_verified)
+
+    user = create_user(user_attrs)
+
+    create_verification(%{
+      user: user,
+      phone_verified: phone_verified,
+      id_verified: id_verified
+    })
+
+    create_wallet(user: user, balance: balance)
+    user
+  end
+
+  @doc """
+  Fetches the auto-created wallet for a user and optionally sets a balance.
+
+  Wallets are automatically created during user registration, so this function
+  retrieves the existing wallet instead of creating a new one.
+
+  ## Options
+
+    * `:user` - the user record (required)
+    * `:balance` - optional balance to set (defaults to existing balance)
+
+  """
+  def create_wallet(opts \\ []) do
+    user = Keyword.get(opts, :user) || raise "create_wallet requires :user"
+    balance = Keyword.get(opts, :balance)
+
+    require Ash.Query
+
+    # Wallet is automatically created by registration hook
+    wallet =
+      Angle.Payments.UserWallet
+      |> Ash.Query.filter(user_id == ^user.id)
+      |> Ash.read_one!(authorize?: false)
+
+    # If balance is provided, use deposit action to properly track total_deposited
+    if balance do
+      amount = Decimal.new(to_string(balance))
+
+      wallet
+      |> Ash.Changeset.for_update(:deposit, %{amount: amount}, authorize?: false)
+      |> Ash.update!()
+    else
+      wallet
+    end
   end
 
   # Helpers

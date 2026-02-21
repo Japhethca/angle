@@ -32,6 +32,9 @@ defmodule AngleWeb.SettingsControllerTest do
           location: "Lagos, Nigeria"
         })
 
+      # Create verification record for the user
+      create_verification(%{user: user})
+
       conn =
         conn
         |> init_test_session(%{current_user_id: user.id})
@@ -138,6 +141,8 @@ defmodule AngleWeb.SettingsControllerTest do
     test "renders payments page for authenticated user", %{conn: conn} do
       user = create_user(%{email: "payments@example.com"})
 
+      # Wallet is automatically created by registration hook
+
       conn =
         conn
         |> init_test_session(%{current_user_id: user.id})
@@ -149,6 +154,9 @@ defmodule AngleWeb.SettingsControllerTest do
 
     test "renders payments page with existing payment and payout methods", %{conn: conn} do
       user = create_user(%{email: "payments_data@example.com"})
+
+      # Wallet is automatically created by registration hook
+
       create_payment_method(%{user: user, card_type: "visa", last_four: "9876", bank: "GTBank"})
       create_payout_method(%{user: user, bank_name: "Kuda Bank", account_name: "Payments User"})
 
@@ -167,6 +175,8 @@ defmodule AngleWeb.SettingsControllerTest do
 
     test "renders payments page with empty payment methods", %{conn: conn} do
       user = create_user(%{email: "empty_payments@example.com"})
+
+      # Wallet is automatically created by registration hook
 
       conn =
         conn

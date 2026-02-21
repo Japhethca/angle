@@ -69,6 +69,27 @@ defmodule Angle.Bidding do
           }
         ]
       end
+
+      # Analytics page: bids on a seller's item with user details
+      typed_query :item_analytics_bid, :read do
+        ts_result_type_name "ItemAnalyticsBid"
+        ts_fields_const_name "itemAnalyticsBidFields"
+
+        fields [
+          :id,
+          :amount,
+          :bid_time,
+          :bid_type,
+          :item_id,
+          %{
+            user: [
+              :id,
+              :username,
+              :full_name
+            ]
+          }
+        ]
+      end
     end
 
     resource Angle.Bidding.Order do
@@ -160,6 +181,7 @@ defmodule Angle.Bidding do
 
   resources do
     resource Angle.Bidding.Bid do
+      define :make_bid, action: :make_bid
       define :list_user_bids_since, action: :by_user_since, args: [:user_id, :since]
       define :list_bids_by_item_ids, action: :by_item_ids, args: [:item_ids]
     end

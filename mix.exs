@@ -79,6 +79,7 @@ defmodule Angle.MixProject do
        depth: 1},
       {:swoosh, "~> 1.21"},
       {:req, "~> 0.5"},
+      {:bypass, "~> 2.1", only: :test},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 1.0"},

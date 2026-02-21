@@ -1,6 +1,7 @@
 defmodule AngleWeb.SettingsController do
   use AngleWeb, :controller
 
+  require Ash.Query
   alias AngleWeb.ImageHelpers
 
   def index(conn, _params) do
@@ -17,9 +18,15 @@ defmodule AngleWeb.SettingsController do
 
     avatar_images = Enum.map(avatar_images, &ImageHelpers.serialize_image/1)
 
+    {:ok, verification} =
+      Angle.Accounts.UserVerification
+      |> Ash.Query.filter(user_id == ^user.id)
+      |> Ash.read_one(actor: user, authorize?: true)
+
     conn
     |> assign_prop(:user, user_profile_data(conn))
     |> assign_prop(:avatar_images, avatar_images)
+    |> assign_prop(:verification, verification_data(verification))
     |> render_inertia("settings/account")
   end
 
@@ -38,10 +45,37 @@ defmodule AngleWeb.SettingsController do
     {:ok, payout_methods} = Angle.Payments.list_payout_methods(actor: user)
     payout_methods = Enum.map(payout_methods, &payout_method_data/1)
 
+    # Load wallet with safe read_one (returns {:ok, nil} if not found)
+    wallet =
+      case Angle.Payments.UserWallet
+           |> Ash.Query.filter(user_id == ^user.id)
+           |> Ash.read_one(actor: user, authorize?: true) do
+        {:ok, nil} ->
+          # Create wallet if it doesn't exist
+          {:ok, wallet} =
+            Angle.Payments.UserWallet
+            |> Ash.Changeset.for_create(:create, %{}, actor: user)
+            |> Ash.create(authorize?: false)
+
+          wallet
+
+        {:ok, wallet} ->
+          wallet
+      end
+
+    transactions =
+      Angle.Payments.WalletTransaction
+      |> Ash.Query.filter(wallet_id == ^wallet.id)
+      |> Ash.Query.sort(inserted_at: :desc)
+      |> Ash.Query.limit(50)
+      |> Ash.read!(actor: user, authorize?: true)
+
     conn
     |> assign_prop(:user, user_payments_data(conn))
     |> assign_prop(:payment_methods, payment_methods)
     |> assign_prop(:payout_methods, payout_methods)
+    |> assign_prop(:wallet, wallet_data(wallet))
+    |> assign_prop(:transactions, Enum.map(transactions, &transaction_data/1))
     |> render_inertia("settings/payments")
   end
 
@@ -189,4 +223,37 @@ defmodule AngleWeb.SettingsController do
   end
 
   defp mask_account_number(number), do: number
+
+  defp wallet_data(wallet) do
+    %{
+      id: wallet.id,
+      balance: Decimal.to_float(wallet.balance),
+      total_deposited: Decimal.to_float(wallet.total_deposited),
+      total_withdrawn: Decimal.to_float(wallet.total_withdrawn)
+    }
+  end
+
+  defp transaction_data(transaction) do
+    %{
+      id: transaction.id,
+      type: transaction.transaction_type,
+      amount: Decimal.to_float(transaction.amount),
+      balance_after: Decimal.to_float(transaction.balance_after),
+      inserted_at: transaction.inserted_at
+    }
+  end
+
+  defp verification_data(nil), do: nil
+
+  defp verification_data(verification) do
+    %{
+      id: verification.id,
+      phone_verified: verification.phone_verified,
+      phone_verified_at: verification.phone_verified_at,
+      phone_number: verification.phone_number,
+      id_document_url: verification.id_document_url,
+      id_verified: verification.id_verified,
+      id_verification_status: verification.id_verification_status
+    }
+  end
 end

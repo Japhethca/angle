@@ -54,4 +54,21 @@ defmodule Angle.Payments.PaystackMock do
   def create_transfer_recipient(_name, _account_number, _bank_code) do
     {:ok, %{recipient_code: "RCP_mock_test"}}
   end
+
+  @impl true
+  def create_subaccount(_params) do
+    {:ok,
+     %{
+       "subaccount_code" => "ACCT_mock_test",
+       "business_name" => "Test Business",
+       "settlement_bank" => "044",
+       "account_number" => "1234567890",
+       "percentage_charge" => 0
+     }}
+  end
+
+  @impl true
+  def get_subaccount_balance(_subaccount_code) do
+    {:ok, Decimal.new("75000.50")}
+  end
 end

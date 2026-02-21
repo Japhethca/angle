@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { router } from "@inertiajs/react";
-import { MoreVertical, Share2, Pencil, Trash2 } from "lucide-react";
+import { MoreVertical, Share2, Pencil, Trash2, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -45,6 +45,10 @@ export function ListingActionsMenu({ id, slug, publicationStatus }: ListingActio
     router.visit(`/store/listings/${id}/edit`);
   };
 
+  const handleAnalytics = () => {
+    router.visit(`/store/listings/${id}/analytics`);
+  };
+
   const handleDelete = () => {
     if (isDeleting) return;
 
@@ -69,6 +73,12 @@ export function ListingActionsMenu({ id, slug, publicationStatus }: ListingActio
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          {!isDraft && (
+            <DropdownMenuItem onClick={handleAnalytics}>
+              <BarChart3 />
+              Analytics
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={handleShare}>
             <Share2 />
             Share

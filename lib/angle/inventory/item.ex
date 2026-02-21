@@ -124,6 +124,49 @@ defmodule Angle.Inventory.Item do
       end
     end
 
+    update :start_auction do
+      description "Start a scheduled auction (transition to active)"
+      require_atomic? false
+
+      validate attribute_equals(:auction_status, :scheduled),
+        message: "can only start scheduled auctions"
+
+      change set_attribute(:auction_status, :active)
+    end
+
+    update :extend_auction do
+      description "Extend auction end time (soft close anti-sniping)"
+      require_atomic? false
+
+      argument :minutes, :integer, allow_nil?: false
+
+      validate attribute_equals(:auction_status, :active),
+        message: "can only extend active auctions"
+
+      validate compare(:extension_count, less_than: 2),
+        message: "maximum extensions reached"
+
+      change fn changeset, _context ->
+        minutes = Ash.Changeset.get_argument(changeset, :minutes)
+        current_end = Ash.Changeset.get_attribute(changeset, :end_time)
+        current_count = Ash.Changeset.get_attribute(changeset, :extension_count) || 0
+        original_end = Ash.Changeset.get_attribute(changeset, :original_end_time)
+        new_end = DateTime.add(current_end, minutes * 60, :second)
+
+        changeset =
+          changeset
+          |> Ash.Changeset.force_change_attribute(:end_time, new_end)
+          |> Ash.Changeset.force_change_attribute(:extension_count, current_count + 1)
+
+        # Store the original end_time on first extension
+        if is_nil(original_end) do
+          Ash.Changeset.force_change_attribute(changeset, :original_end_time, current_end)
+        else
+          changeset
+        end
+      end
+    end
+
     update :end_auction do
       description "End an auction, setting the final auction status"
 
@@ -407,6 +450,16 @@ defmodule Angle.Inventory.Item do
       authorize_if {Angle.Accounts.Checks.HasPermission, permission: "publish_items"}
     end
 
+    # Start auction - system action called by worker, always authorized
+    policy action(:start_auction) do
+      authorize_if always()
+    end
+
+    # Extend auction - system action called by soft close logic, always authorized
+    policy action(:extend_auction) do
+      authorize_if always()
+    end
+
     # End auction - system action called by worker, always authorized
     policy action(:end_auction) do
       authorize_if always()
@@ -519,6 +572,16 @@ defmodule Angle.Inventory.Item do
     end
 
     attribute :created_by_id, :uuid do
+      public? true
+    end
+
+    attribute :extension_count, :integer do
+      default 0
+      generated? true
+      public? true
+    end
+
+    attribute :original_end_time, :utc_datetime_usec do
       public? true
     end
 

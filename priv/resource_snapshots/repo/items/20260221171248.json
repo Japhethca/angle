@@ -303,6 +303,30 @@
       "type": "uuid"
     },
     {
+      "allow_nil?": true,
+      "default": "0",
+      "generated?": true,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "extension_count",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "original_end_time",
+      "type": "utc_datetime_usec"
+    },
+    {
       "allow_nil?": false,
       "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
       "generated?": false,
@@ -370,7 +394,7 @@
   ],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "CB411584E015FF0E8933C5CC284BB39A07300E63A9A8B9E774B7F0731110F705",
+  "hash": "7C3C08D8C96D13E9A42510D70D9BE95E77B9C325FDB4C4FA66DD181C621E6275",
   "identities": [
     {
       "all_tenants?": false,

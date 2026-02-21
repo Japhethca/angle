@@ -92,6 +92,9 @@ defmodule Angle.Accounts.User do
                  {:error, _} -> {:ok, user}
                end
              end)
+
+      # Create wallet for new users (gracefully handles existing wallets on subsequent sign-ins)
+      change after_action(&Angle.Accounts.RegistrationHooks.create_wallet_and_subaccount/3)
     end
 
     read :get_by_subject do
@@ -226,6 +229,9 @@ defmodule Angle.Accounts.User do
                  {:error, _} -> {:ok, user}
                end
              end)
+
+      # Create wallet and Paystack subaccount after registration
+      change after_action(&Angle.Accounts.RegistrationHooks.create_wallet_and_subaccount/3)
 
       metadata :token, :string do
         description "A JWT that can be used to authenticate the user."
@@ -483,6 +489,11 @@ defmodule Angle.Accounts.User do
       public? true
     end
 
+    has_one :verification, Angle.Accounts.UserVerification do
+      destination_attribute :user_id
+      public? true
+    end
+
     has_one :store_profile, Angle.Accounts.StoreProfile do
       destination_attribute :user_id
       public? true
@@ -495,6 +506,11 @@ defmodule Angle.Accounts.User do
 
     has_many :received_reviews, Angle.Bidding.Review do
       destination_attribute :seller_id
+      public? true
+    end
+
+    has_one :wallet, Angle.Payments.UserWallet do
+      destination_attribute :user_id
       public? true
     end
   end
