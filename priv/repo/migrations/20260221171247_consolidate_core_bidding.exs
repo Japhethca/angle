@@ -114,42 +114,6 @@ defmodule Angle.Repo.Migrations.ConsolidateCoreBidding do
              name: "user_verifications_unique_user_verification_index"
            )
 
-    create table(:seller_blacklists, primary_key: false) do
-      add :id, :uuid, null: false, default: fragment("gen_random_uuid()"), primary_key: true
-
-      add :seller_id,
-          references(:users,
-            column: :id,
-            name: "seller_blacklists_seller_id_fkey",
-            type: :uuid,
-            prefix: "public"
-          ),
-          null: false
-
-      add :blocked_user_id,
-          references(:users,
-            column: :id,
-            name: "seller_blacklists_blocked_user_id_fkey",
-            type: :uuid,
-            prefix: "public"
-          ),
-          null: false
-
-      add :reason, :text
-
-      add :inserted_at, :utc_datetime_usec,
-        null: false,
-        default: fragment("(now() AT TIME ZONE 'utc')")
-
-      add :updated_at, :utc_datetime_usec,
-        null: false,
-        default: fragment("(now() AT TIME ZONE 'utc')")
-    end
-
-    create unique_index(:seller_blacklists, [:seller_id, :blocked_user_id],
-             name: "seller_blacklists_unique_seller_blocked_user_index"
-           )
-
     alter table(:items) do
       add :extension_count, :bigint, default: 0
       add :original_end_time, :utc_datetime_usec
@@ -161,16 +125,6 @@ defmodule Angle.Repo.Migrations.ConsolidateCoreBidding do
       remove :original_end_time
       remove :extension_count
     end
-
-    drop_if_exists unique_index(:seller_blacklists, [:seller_id, :blocked_user_id],
-                     name: "seller_blacklists_unique_seller_blocked_user_index"
-                   )
-
-    drop constraint(:seller_blacklists, "seller_blacklists_seller_id_fkey")
-
-    drop constraint(:seller_blacklists, "seller_blacklists_blocked_user_id_fkey")
-
-    drop table(:seller_blacklists)
 
     drop_if_exists unique_index(:user_verifications, [:user_id],
                      name: "user_verifications_unique_user_verification_index"

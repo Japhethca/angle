@@ -109,34 +109,6 @@ export type ReviewAttributesOnlySchema = {
 };
 
 
-// SellerBlacklist Schema
-export type SellerBlacklistResourceSchema = {
-  __type: "Resource";
-  __primitiveFields: "id" | "sellerId" | "blockedUserId" | "reason" | "insertedAt" | "updatedAt";
-  id: UUID;
-  sellerId: UUID;
-  blockedUserId: UUID;
-  reason: string | null;
-  insertedAt: UtcDateTimeUsec;
-  updatedAt: UtcDateTimeUsec;
-  seller: { __type: "Relationship"; __resource: UserResourceSchema; };
-  blockedUser: { __type: "Relationship"; __resource: UserResourceSchema; };
-};
-
-
-
-export type SellerBlacklistAttributesOnlySchema = {
-  __type: "Resource";
-  __primitiveFields: "id" | "sellerId" | "blockedUserId" | "reason" | "insertedAt" | "updatedAt";
-  id: UUID;
-  sellerId: UUID;
-  blockedUserId: UUID;
-  reason: string | null;
-  insertedAt: UtcDateTimeUsec;
-  updatedAt: UtcDateTimeUsec;
-};
-
-
 // Category Schema
 export type CategoryResourceSchema = {
   __type: "Resource";
@@ -790,61 +762,6 @@ export type ReviewFilterInput = {
   reviewer?: UserFilterInput;
 
   seller?: UserFilterInput;
-
-};
-export type SellerBlacklistFilterInput = {
-  and?: Array<SellerBlacklistFilterInput>;
-  or?: Array<SellerBlacklistFilterInput>;
-  not?: Array<SellerBlacklistFilterInput>;
-
-  id?: {
-    eq?: UUID;
-    notEq?: UUID;
-    in?: Array<UUID>;
-  };
-
-  sellerId?: {
-    eq?: UUID;
-    notEq?: UUID;
-    in?: Array<UUID>;
-  };
-
-  blockedUserId?: {
-    eq?: UUID;
-    notEq?: UUID;
-    in?: Array<UUID>;
-  };
-
-  reason?: {
-    eq?: string;
-    notEq?: string;
-    in?: Array<string>;
-  };
-
-  insertedAt?: {
-    eq?: UtcDateTimeUsec;
-    notEq?: UtcDateTimeUsec;
-    greaterThan?: UtcDateTimeUsec;
-    greaterThanOrEqual?: UtcDateTimeUsec;
-    lessThan?: UtcDateTimeUsec;
-    lessThanOrEqual?: UtcDateTimeUsec;
-    in?: Array<UtcDateTimeUsec>;
-  };
-
-  updatedAt?: {
-    eq?: UtcDateTimeUsec;
-    notEq?: UtcDateTimeUsec;
-    greaterThan?: UtcDateTimeUsec;
-    greaterThanOrEqual?: UtcDateTimeUsec;
-    lessThan?: UtcDateTimeUsec;
-    lessThanOrEqual?: UtcDateTimeUsec;
-    in?: Array<UtcDateTimeUsec>;
-  };
-
-
-  seller?: UserFilterInput;
-
-  blockedUser?: UserFilterInput;
 
 };
 export type CategoryFilterInput = {
@@ -2361,6 +2278,85 @@ export async function executeValidationRpcRequest<T>(
 // Use these types and field constants for server-side rendering and data fetching.
 // The field constants can be used with the corresponding RPC actions for client-side refetching.
 
+// Order Typed Queries
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
+
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }]>>;
+
+/**
+ * Typed query for Order
+ *
+ * @typedQuery true
+ */
+export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
+
+
+
+// Category Typed Queries
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
+
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { categories: ["id", "name", "slug"] }]>>;
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
+
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export type ListingFormCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }, { categories: ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }] }]>>;
+
+/**
+ * Typed query for Category
+ *
+ * @typedQuery true
+ */
+export const listingFormCategoryFields = ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }, { categories: ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }] }];
+
+
+
 // Bid Typed Queries
 /**
  * Typed query for Bid
@@ -2408,35 +2404,37 @@ export const itemAnalyticsBidFields = ["id", "amount", "bidTime", "bidType", "it
 
 
 
-// Order Typed Queries
+// Review Typed Queries
 /**
- * Typed query for Order
+ * Typed query for Review
  *
  * @typedQuery true
  */
-export type WonOrderCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }]>>;
+export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }]>>;
 
 /**
- * Typed query for Order
+ * Typed query for Review
  *
  * @typedQuery true
  */
-export const wonOrderCardFields = ["id", "status", "amount", "paymentReference", "paidAt", "dispatchedAt", "completedAt", "createdAt", { item: ["id", "title", "slug"] }, { seller: ["id", "username", "fullName", "whatsappNumber"] }] satisfies ListOrdersFields;
+export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
 
 
+
+// User Typed Queries
 /**
- * Typed query for Order
+ * Typed query for User
  *
  * @typedQuery true
  */
-export type SellerPaymentCard = Array<InferResult<OrderResourceSchema, ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }]>>;
+export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
 
 /**
- * Typed query for Order
+ * Typed query for User
  *
  * @typedQuery true
  */
-export const sellerPaymentCardFields = ["id", "status", "amount", "paymentReference", "createdAt", { item: ["id", "title"] }] satisfies ListSellerOrdersFields;
+export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
 
 
 
@@ -2559,104 +2557,6 @@ export type SearchItemCard = Array<InferResult<ItemResourceSchema, ["id", "title
  * @typedQuery true
  */
 export const searchItemCardFields = ["id", "title", "slug", "description", "startingPrice", "currentPrice", "endTime", "auctionStatus", "condition", "saleType", "location", "viewCount", "bidCount", { category: ["id", "name", "slug"] }];
-
-
-
-// SellerBlacklist Typed Queries
-/**
- * Typed query for SellerBlacklist
- *
- * @typedQuery true
- */
-export type SellerBlacklistCard = Array<InferResult<SellerBlacklistResourceSchema, ["id", "sellerId", "blockedUserId", "reason", "insertedAt", { blockedUser: ["id", "username", "fullName"] }]>>;
-
-/**
- * Typed query for SellerBlacklist
- *
- * @typedQuery true
- */
-export const sellerBlacklistCardFields = ["id", "sellerId", "blockedUserId", "reason", "insertedAt", { blockedUser: ["id", "username", "fullName"] }] satisfies ListBlacklistFields;
-
-
-
-// Category Typed Queries
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export type HomepageCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", "imageUrl"]>>;
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export const homepageCategoryFields = ["id", "name", "slug", "imageUrl"] satisfies ListCategoriesFields;
-
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export type NavCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { categories: ["id", "name", "slug"] }]>>;
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export const navCategoryFields = ["id", "name", "slug", { categories: ["id", "name", "slug"] }];
-
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export type ListingFormCategory = Array<InferResult<CategoryResourceSchema, ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }, { categories: ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }] }]>>;
-
-/**
- * Typed query for Category
- *
- * @typedQuery true
- */
-export const listingFormCategoryFields = ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }, { categories: ["id", "name", "slug", { attributeSchema: ["name", "type", "required", "description", "optionSetSlug", "options"] }] }];
-
-
-
-// Review Typed Queries
-/**
- * Typed query for Review
- *
- * @typedQuery true
- */
-export type SellerReviewCard = Array<InferResult<ReviewResourceSchema, ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }]>>;
-
-/**
- * Typed query for Review
- *
- * @typedQuery true
- */
-export const sellerReviewCardFields = ["id", "rating", "comment", "insertedAt", { reviewer: ["id", "username", "fullName"] }] satisfies ListReviewsBySellerFields;
-
-
-
-// User Typed Queries
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export type SellerProfile = Array<InferResult<UserResourceSchema, ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }]>>;
-
-/**
- * Typed query for User
- *
- * @typedQuery true
- */
-export const sellerProfileFields = ["id", "username", "fullName", "location", "phoneNumber", "whatsappNumber", "createdAt", "publishedItemCount", "avgRating", "reviewCount", { storeProfile: ["storeName", "location", "contactPhone", "whatsappLink", "deliveryPreference"] }];
 
 
 
@@ -3534,180 +3434,6 @@ export async function validateGetReviewForOrder(
     action: "get_review_for_order",
     ...(config.tenant !== undefined && { tenant: config.tenant }),
     input: config.input
-  };
-
-  return executeValidationRpcRequest<ValidationResult>(
-    payload,
-    config
-  );
-}
-
-
-export type CreateBlacklistInput = {
-  blockedUserId: UUID;
-  reason?: string | null;
-};
-
-export type CreateBlacklistFields = UnifiedFieldSelection<SellerBlacklistResourceSchema>[];
-
-export type InferCreateBlacklistResult<
-  Fields extends CreateBlacklistFields | undefined,
-> = InferResult<SellerBlacklistResourceSchema, Fields>;
-
-export type CreateBlacklistResult<Fields extends CreateBlacklistFields | undefined = undefined> = | { success: true; data: InferCreateBlacklistResult<Fields>; }
-| { success: false; errors: AshRpcError[]; }
-
-;
-
-/**
- * Create a new SellerBlacklist
- *
- * @ashActionType :create
- */
-export async function createBlacklist<Fields extends CreateBlacklistFields | undefined = undefined>(
-  config: {
-  tenant?: string;
-  input: CreateBlacklistInput;
-  fields?: Fields;
-  headers?: Record<string, string>;
-  fetchOptions?: RequestInit;
-  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
-}
-): Promise<CreateBlacklistResult<Fields extends undefined ? [] : Fields>> {
-  const payload = {
-    action: "create_blacklist",
-    ...(config.tenant !== undefined && { tenant: config.tenant }),
-    input: config.input,
-    ...(config.fields !== undefined && { fields: config.fields })
-  };
-
-  return executeActionRpcRequest<CreateBlacklistResult<Fields extends undefined ? [] : Fields>>(
-    payload,
-    config
-  );
-}
-
-
-/**
- * Validate: Create a new SellerBlacklist
- *
- * @ashActionType :create
- * @validation true
- */
-export async function validateCreateBlacklist(
-  config: {
-  tenant?: string;
-  input: CreateBlacklistInput;
-  headers?: Record<string, string>;
-  fetchOptions?: RequestInit;
-  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
-}
-): Promise<ValidationResult> {
-  const payload = {
-    action: "create_blacklist",
-    ...(config.tenant !== undefined && { tenant: config.tenant }),
-    input: config.input
-  };
-
-  return executeValidationRpcRequest<ValidationResult>(
-    payload,
-    config
-  );
-}
-
-
-export type ListBlacklistFields = UnifiedFieldSelection<SellerBlacklistResourceSchema>[];
-
-
-export type InferListBlacklistResult<
-  Fields extends ListBlacklistFields | undefined,
-  Page extends ListBlacklistConfig["page"] = undefined
-> = ConditionalPaginatedResultMixed<Page, Array<InferResult<SellerBlacklistResourceSchema, Fields>>, {
-  results: Array<InferResult<SellerBlacklistResourceSchema, Fields>>;
-  hasMore: boolean;
-  limit: number;
-  offset: number;
-  count?: number | null;
-  type: "offset";
-}, {
-  results: Array<InferResult<SellerBlacklistResourceSchema, Fields>>;
-  hasMore: boolean;
-  limit: number;
-  after: string | null;
-  before: string | null;
-  previousPage: string;
-  nextPage: string;
-  count?: number | null;
-  type: "keyset";
-}>;
-
-export type ListBlacklistConfig = {
-  tenant?: string;
-  fields: ListBlacklistFields;
-  filter?: SellerBlacklistFilterInput;
-  sort?: string;
-  page?: (
-    {
-      limit?: number;
-      offset?: number;
-      count?: boolean;
-    } | {
-      limit?: number;
-      after?: string;
-      before?: string;
-    }
-  );
-  headers?: Record<string, string>;
-  fetchOptions?: RequestInit;
-  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
-};
-
-export type ListBlacklistResult<Fields extends ListBlacklistFields, Page extends ListBlacklistConfig["page"] = undefined> = | { success: true; data: InferListBlacklistResult<Fields, Page>; }
-| { success: false; errors: AshRpcError[]; }
-
-;
-
-/**
- * Read SellerBlacklist records
- *
- * @ashActionType :read
- */
-export async function listBlacklist<Fields extends ListBlacklistFields, Config extends ListBlacklistConfig = ListBlacklistConfig>(
-  config: Config & { fields: Fields }
-): Promise<ListBlacklistResult<Fields, Config["page"]>> {
-  const payload = {
-    action: "list_blacklist",
-    ...(config.tenant !== undefined && { tenant: config.tenant }),
-    ...(config.fields !== undefined && { fields: config.fields }),
-    ...(config.filter && { filter: config.filter }),
-    ...(config.sort && { sort: config.sort }),
-    ...(config.page && { page: config.page })
-  };
-
-  return executeActionRpcRequest<ListBlacklistResult<Fields, Config["page"]>>(
-    payload,
-    config
-  );
-}
-
-
-/**
- * Validate: Read SellerBlacklist records
- *
- * @ashActionType :read
- * @validation true
- */
-export async function validateListBlacklist(
-  config: {
-  tenant?: string;
-  headers?: Record<string, string>;
-  fetchOptions?: RequestInit;
-  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
-}
-): Promise<ValidationResult> {
-  const payload = {
-    action: "list_blacklist",
-    ...(config.tenant !== undefined && { tenant: config.tenant })
   };
 
   return executeValidationRpcRequest<ValidationResult>(

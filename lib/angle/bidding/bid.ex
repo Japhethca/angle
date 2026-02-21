@@ -64,7 +64,6 @@ defmodule Angle.Bidding.Bid do
       change {PreventSelfBidding, []}
       change {AuctionMustBeActive, []}
       change {ValidateWalletCommitment, []}
-      change {Angle.Bidding.Bid.CheckBlacklist, []}
 
       # After successful bid, check if auction should be extended (soft close anti-sniping)
       change {CheckSoftCloseExtension, []}
