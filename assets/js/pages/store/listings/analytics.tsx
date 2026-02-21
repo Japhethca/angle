@@ -1,9 +1,7 @@
 import { Head, Link } from "@inertiajs/react";
-import { Eye, Heart, Gavel, DollarSign, ArrowLeft, MoreVertical } from "lucide-react";
+import { Eye, Heart, Gavel, DollarSign, ArrowLeft } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -12,16 +10,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { StoreLayout } from "@/features/store-dashboard";
 import { formatNaira } from "@/lib/format";
-import { BlockBidderDialog } from "@/features/blacklist";
 import type { ItemAnalyticsBid } from "@/ash_rpc";
 
 interface Item {
@@ -49,7 +40,6 @@ interface Stats {
 interface AnalyticsPageProps {
   item: Item;
   bids: ItemAnalyticsBid;
-  blacklisted_user_ids: string[];
   stats: Stats;
 }
 
@@ -62,26 +52,8 @@ const BID_TYPE_LABELS: Record<string, string> = {
 export default function AnalyticsPage({
   item,
   bids = [],
-  blacklisted_user_ids = [],
   stats,
 }: AnalyticsPageProps) {
-  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<{
-    id: string;
-    username: string | null;
-    fullName: string | null;
-  } | null>(null);
-
-  const handleBlockUser = (user: {
-    id: string;
-    username: string | null;
-    fullName: string | null;
-  }) => {
-    setSelectedUser(user);
-    setBlockDialogOpen(true);
-  };
-
-  const isBlacklisted = (userId: string) => blacklisted_user_ids.includes(userId);
 
   return (
     <>
@@ -177,19 +149,11 @@ export default function AnalyticsPage({
                       {bids.map((bid) => {
                         const bidder = bid.user;
                         const displayName = bidder?.fullName || bidder?.username || "Anonymous";
-                        const blocked = bidder && isBlacklisted(bidder.id);
 
                         return (
                           <TableRow key={bid.id}>
                             <TableCell>
-                              <div className="flex items-center gap-2">
-                                <span>{displayName}</span>
-                                {blocked && (
-                                  <Badge variant="destructive" className="text-xs">
-                                    Blocked
-                                  </Badge>
-                                )}
-                              </div>
+                              <span>{displayName}</span>
                             </TableCell>
                             <TableCell className="font-medium">
                               {formatNaira(bid.amount)}
@@ -204,26 +168,6 @@ export default function AnalyticsPage({
                                 addSuffix: true,
                               })}
                             </TableCell>
-                            <TableCell className="text-right">
-                              {bidder && (
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon">
-                                      <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem
-                                      onClick={() => handleBlockUser(bidder)}
-                                      disabled={blocked}
-                                      className={blocked ? "opacity-50" : ""}
-                                    >
-                                      {blocked ? "Already Blocked" : "Block Bidder"}
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              )}
-                            </TableCell>
                           </TableRow>
                         );
                       })}
@@ -234,15 +178,6 @@ export default function AnalyticsPage({
             </CardContent>
           </Card>
         </div>
-
-        {/* Block Bidder Dialog */}
-        {selectedUser && (
-          <BlockBidderDialog
-            open={blockDialogOpen}
-            onOpenChange={setBlockDialogOpen}
-            user={selectedUser}
-          />
-        )}
       </StoreLayout>
     </>
   );

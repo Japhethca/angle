@@ -10,15 +10,10 @@ defmodule AngleWeb.StoreAnalyticsController do
 
     with {:ok, item} <- load_item(item_id, user.id),
          bids <- load_item_bids(conn, item_id),
-         blacklist <- load_seller_blacklist(conn),
          stats <- compute_item_stats(item) do
-      # Get blacklisted user IDs for easy lookup in frontend
-      blacklisted_user_ids = Enum.map(blacklist, & &1["blockedUserId"])
-
       conn
       |> assign_prop(:item, serialize_item(item))
       |> assign_prop(:bids, bids)
-      |> assign_prop(:blacklisted_user_ids, blacklisted_user_ids)
       |> assign_prop(:stats, stats)
       |> render_inertia("store/listings/analytics")
     else
@@ -59,17 +54,6 @@ defmodule AngleWeb.StoreAnalyticsController do
     }
 
     case AshTypescript.Rpc.run_typed_query(:angle, :item_analytics_bid, params, conn) do
-      %{"success" => true, "data" => data} -> extract_results(data)
-      _ -> []
-    end
-  end
-
-  defp load_seller_blacklist(conn) do
-    params = %{
-      page: %{limit: 1000, offset: 0, count: false}
-    }
-
-    case AshTypescript.Rpc.run_typed_query(:angle, :seller_blacklist_card, params, conn) do
       %{"success" => true, "data" => data} -> extract_results(data)
       _ -> []
     end
