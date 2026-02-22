@@ -73,10 +73,10 @@ defmodule Angle.Recommendations.Jobs.RefreshUserInterests do
   defp fetch_active_users do
     cutoff_date = DateTime.utc_now() |> DateTime.add(-@active_user_days, :day)
 
-    # Note: Using inserted_at as proxy for activity since last_sign_in_at doesn't exist yet
+    # Note: Using created_at as proxy for activity since last_sign_in_at doesn't exist yet
     # TODO: Add last_sign_in_at tracking to User resource and update auth flow
     case Angle.Accounts.User
-         |> Ash.Query.filter(inserted_at > ^cutoff_date)
+         |> Ash.Query.filter(created_at > ^cutoff_date)
          |> Ash.read(authorize?: false) do
       {:ok, users} -> {:ok, users}
       {:error, reason} -> {:error, reason}
